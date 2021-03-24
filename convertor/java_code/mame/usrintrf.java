@@ -38,11 +38,6 @@ public class usrintrf
 	#ifndef CPSMAME
 	#ifndef MMSND
 	int 		memcard_menu(struct mame_bitmap *bitmap, int);
-	extern int	mcd_action;
-	extern int	mcd_number;
-	extern int	memcard_status;
-	extern int	memcard_number;
-	extern int	memcard_manager;
 	extern struct GameDriver driver_neogeo;
 	#endif
 	#endif
@@ -53,10 +48,6 @@ public class usrintrf
 	static int game_paused = 0; /* not zero if the game is paused */
 	#endif
 	
-	extern int neogeo_memcard_load(int);
-	extern void neogeo_memcard_save(void);
-	extern void neogeo_memcard_eject(void);
-	extern int neogeo_memcard_create(int);
 	/* MARTINEZ.F 990207 Memory Card End */
 	
 	
@@ -230,16 +221,16 @@ public class usrintrf
 		0x80,0xf0,0x88,0x88,0xf0,0x80,0x80,0x80,0x50,0x00,0x88,0x88,0x88,0x78,0x08,0x70
 	};
 	
-	static const struct GfxLayout uifontlayout =
-	{
+	static const static GfxLayout uifontlayout = new GfxLayout
+	(
 		6,8,
 		256,
 		1,
-		{ 0 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
 	
 	
@@ -392,7 +383,7 @@ public class usrintrf
 	
 	struct GfxElement *builduifont(void)
 	{
-		struct GfxLayout layout = uifontlayout;
+		static GfxLayout layout = new GfxLayoutuifontlayout;
 		UINT32 tempoffset[MAX_GFX_SIZE];
 		struct GfxElement *font;
 		int temp, i;
@@ -410,12 +401,12 @@ public class usrintrf
 	
 		/* pixel double horizontally */
 		if (uirotwidth >= 420)
-		{
+		(
 			memcpy(tempoffset, layout.xoffset, sizeof(tempoffset));
 			for (i = 0; i < layout.width; i++)
 				layout.xoffset[i*2+0] = layout.xoffset[i*2+1] = tempoffset[i];
 			layout.width *= 2;
-		}
+		)
 	
 		/* pixel double vertically */
 		if (uirotheight >= 420)
@@ -489,8 +480,7 @@ public class usrintrf
 		struct rectangle bounds;
 	
 	#ifdef MESS
-		extern int skip_this_frame;
-		skip_this_frame = 0;
+			skip_this_frame = 0;
 	#endif /* MESS */
 	
 		/* construct a rectangle in rotated coordinates, then transform it */
@@ -2847,7 +2837,7 @@ public class usrintrf
 		maxcols -= 2;
 		maxrows -= 8;
 	
-		if (!buf)
+		if (buf == 0)
 		{
 			/* allocate a buffer for the text */
 			buf = malloc (bufsize);
@@ -3093,7 +3083,6 @@ public class usrintrf
 	
 	
 	#ifdef XMAME
-	extern int setrapidfire(struct mame_bitmap *bitmap, int selected);
 	#endif
 	
 	
@@ -3137,8 +3126,7 @@ public class usrintrf
 	
 	#ifdef XMAME
 		{
-			extern int rapidfire_enable;
-	
+			
 			if (rapidfire_enable != 0)
 			{
 				menu_item[menu_total] = "Rapid Fire";
@@ -3537,7 +3525,7 @@ public class usrintrf
 					}
 				}
 	
-				if (!overflow)
+				if (overflow == 0)
 				{
 					for (ch = 0; ch < MIXER_MAX_CHANNELS; ch++)
 					{
@@ -3929,7 +3917,7 @@ public class usrintrf
 	
 	void ui_show_fps_temp(double seconds)
 	{
-		if (!showfps)
+		if (showfps == 0)
 			showfpstemp = (int)(seconds * Machine->drv->frames_per_second);
 	}
 	
@@ -4022,8 +4010,7 @@ public class usrintrf
 	int handle_user_interface(struct mame_bitmap *bitmap)
 	{
 	#ifdef MESS
-		extern int mess_pause_for_ui;
-	#endif
+		#endif
 	
 		/* if the user pressed F12, save the screen to a file */
 		if (input_ui_pressed(IPT_UI_SNAPSHOT))
@@ -4052,7 +4039,7 @@ public class usrintrf
 		if (setup_selected != 0) setup_selected = setup_menu(bitmap, setup_selected);
 	
 	#ifdef MAME_DEBUG
-		if (!mame_debug)
+		if (mame_debug == 0)
 	#endif
 			if (osd_selected == 0 && input_ui_pressed(IPT_UI_ON_SCREEN_DISPLAY))
 			{
@@ -4181,7 +4168,7 @@ public class usrintrf
 				if (setup_selected != 0) setup_selected = setup_menu(bitmap, setup_selected);
 	
 	#ifdef MAME_DEBUG
-				if (!mame_debug)
+				if (mame_debug == 0)
 	#endif
 					if (osd_selected == 0 && input_ui_pressed(IPT_UI_ON_SCREEN_DISPLAY))
 					{
@@ -4281,10 +4268,9 @@ public class usrintrf
 	}
 	
 	
-	void init_user_interface(void)
+	public static InitDriverPtr init_user_interface = new InitDriverPtr() { public void handler() 
 	{
-		extern int snapno;	/* in common.c */
-	
+		
 		snapno = 0; /* reset snapshot counter */
 	
 		/* clear the input memory */
@@ -4299,7 +4285,7 @@ public class usrintrf
 		jukebox_selected = -1;
 	
 		single_step = 0;
-	}
+	} };
 	
 	int onscrd_active(void)
 	{

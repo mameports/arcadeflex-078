@@ -49,51 +49,51 @@ public class funkybee
 		}
 	}
 	
-	WRITE_HANDLER( funkybee_videoram_w )
+	public static WriteHandlerPtr funkybee_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( funkybee_colorram_w )
+	public static WriteHandlerPtr funkybee_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( funkybee_gfx_bank_w )
+	public static WriteHandlerPtr funkybee_gfx_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfx_bank != (data & 0x01))
 		{
 			gfx_bank = data & 0x01;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( funkybee_scroll_w )
+	public static WriteHandlerPtr funkybee_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, flip_screen ? -data : data);
-	}
+	} };
 	
-	WRITE_HANDLER( funkybee_flipscreen_w )
+	public static WriteHandlerPtr funkybee_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index] & 0x03;
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index)& 0x03;
 	
 		SET_TILE_INFO(gfx_bank, code, color, 0)
 	}
@@ -109,7 +109,7 @@ public class funkybee
 		bg_tilemap = tilemap_create(get_bg_tile_info, funkybee_tilemap_scan,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -122,13 +122,13 @@ public class funkybee
 		for (offs = 0x0f; offs >= 0; offs--)
 		{
 			int offs2 = offs + 0x1e00;
-			int attr = videoram[offs2];
+			int attr = videoram.read(offs2);
 			int code = (attr >> 2) | ((attr & 2) << 5);
-			int color = colorram[offs2 + 0x10];
+			int color = colorram.read(offs2 + 0x10);
 			int flipx = 0;
 			int flipy = attr & 0x01;
-			int sx = videoram[offs2 + 0x10];
-			int sy = 224 - colorram[offs2];
+			int sx = videoram.read(offs2 + 0x10);
+			int sy = 224 - colorram.read(offs2);
 	
 			if (flip_screen)
 			{
@@ -151,9 +151,9 @@ public class funkybee
 	
 		for (offs = 0x1f;offs >= 0;offs--)
 		{
-			int code = videoram[0x1c00 + offs];
-			int color = colorram[0x1f10] & 0x03;
-			int sx = videoram[0x1f10];
+			int code = videoram.read(0x1c00 + offs);
+			int color = colorram.read(0x1f10)& 0x03;
+			int sx = videoram.read(0x1f10);
 			int sy = offs * 8;
 	
 			if (flip_screen)
@@ -168,9 +168,9 @@ public class funkybee
 					sx, sy,
 					0,TRANSPARENCY_PEN,0);
 	
-			code = videoram[0x1d00 + offs];
-			color = colorram[0x1f11] & 0x03;
-			sx = videoram[0x1f11];
+			code = videoram.read(0x1d00 + offs);
+			color = colorram.read(0x1f11)& 0x03;
+			sx = videoram.read(0x1f11);
 			sy = offs * 8;
 	
 			if (flip_screen)

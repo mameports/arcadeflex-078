@@ -52,8 +52,7 @@ public class ygv608
 	static struct mame_bitmap *work_bitmap = NULL;
 	
 	#ifdef MAME_DEBUG
-	static void ShowYGV608Registers( void );
-	static void dump_block( char *name, unsigned char *block, int len );
+	static static void dump_block( char *name, unsigned char *block, int len );
 	#endif
 	
 	/* interrupt generated every 1ms second */
@@ -469,7 +468,7 @@ public class ygv608
 	
 	  // sprites are always clipped to 512x512
 	  // - regardless of the visible display dimensions
-	  static struct rectangle spriteClip = { 0, 512, 0, 512 };
+	  static rectangle spriteClip = new rectangle( 0, 512, 0, 512 );
 	
 	  PSPRITE_ATTR sa;
 	  int flipx = 0, flipy = 0;
@@ -898,9 +897,7 @@ public class ygv608
 	#endif
 	}
 	
-	static void HandleYGV608Reset( void );
-	static void HandleRomTransfers( void );
-	static void SetPreShortcuts( int reg, int data );
+	static static static void SetPreShortcuts( int reg, int data );
 	static void SetPostShortcuts( int reg );
 	
 	READ16_HANDLER( ygv608_r )

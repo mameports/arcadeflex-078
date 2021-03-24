@@ -120,95 +120,95 @@ public class realbrk
 							Billiard Academy Real Break
 	***************************************************************************/
 	
-	INPUT_PORTS_START( realbrk )
-		PORT_START	// IN0 - $c00000.w
-		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNUSED )	// BUTTON3 | IPF_PLAYER2 in test mode
-		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNUSED )	// BUTTON3 | IPF_PLAYER1 in test mode
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START1 )
+	static InputPortPtr input_ports_realbrk = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - $c00000.w
+		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 );
+		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 );
+		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_UNUSED );// BUTTON3 | IPF_PLAYER2 in test mode
+		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNUSED );// BUTTON3 | IPF_PLAYER1 in test mode
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START	// IN1 - $c00002.w
-		PORT_BIT(  0x00ff, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW,  IPT_COIN1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW,  IPT_COIN2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW,  IPT_SERVICE1 )
-		PORT_BITX( 0x0800, IP_ACTIVE_LOW,  IPT_SERVICE, "Test", KEYCODE_F1, IP_JOY_NONE )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN )	// the vblank routine wants these 2 bits high
-		PORT_BIT(  0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - $c00002.w
+		PORT_BIT(  0x00ff, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW,  IPT_COIN1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW,  IPT_COIN2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW,  IPT_SERVICE1 );
+		PORT_BITX( 0x0800, IP_ACTIVE_LOW,  IPT_SERVICE, "Test", KEYCODE_F1, IP_JOY_NONE );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN );// the vblank routine wants these 2 bits high
+		PORT_BIT(  0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - $c00004.w (DSW1)
-		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0002, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0003, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0007, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0006, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0005, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( 1C_5C ) )
-		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0018, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0038, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0030, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0028, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( 1C_5C ) )
-		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x0200, IP_ACTIVE_LOW )
+		PORT_START(); 	// IN2 - $c00004.w (DSW1)
+		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0003, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0007, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0006, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0005, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "1C_5C") );
+		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0018, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0038, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0030, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0028, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "1C_5C") );
+		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x0200, IP_ACTIVE_LOW );
 	
-		PORT_START	// IN3 - $c00004.w (DSW2)
-		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x0000, "4" )
-		PORT_DIPSETTING(      0x0001, "5" )
-		PORT_DIPSETTING(      0x0003, "6" )
-		PORT_DIPSETTING(      0x0002, "7" )
-		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0008, "Easy"    )
-		PORT_DIPSETTING(      0x000c, "Normal"  )
-		PORT_DIPSETTING(      0x0004, "Harder"  )
-		PORT_DIPSETTING(      0x0000, "Hardest" )
-		PORT_DIPNAME( 0x0030, 0x0030, "Time" )
-		PORT_DIPSETTING(      0x0000, "110" )
-		PORT_DIPSETTING(      0x0030, "120" )
-		PORT_DIPSETTING(      0x0020, "130" )
-		PORT_DIPSETTING(      0x0010, "150" )
-		PORT_DIPNAME( 0x0040, 0x0040, "? Show time in easy mode ?" )
-		PORT_DIPSETTING(      0x0000, DEF_STR( No ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x0080, 0x0080, "? Coins ?" )
-		PORT_DIPSETTING(      0x0000, "1" )
-		PORT_DIPSETTING(      0x0080, "2" )
+		PORT_START(); 	// IN3 - $c00004.w (DSW2)
+		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x0000, "4" );
+		PORT_DIPSETTING(      0x0001, "5" );
+		PORT_DIPSETTING(      0x0003, "6" );
+		PORT_DIPSETTING(      0x0002, "7" );
+		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0008, "Easy"    );
+		PORT_DIPSETTING(      0x000c, "Normal"  );
+		PORT_DIPSETTING(      0x0004, "Harder"  );
+		PORT_DIPSETTING(      0x0000, "Hardest" );
+		PORT_DIPNAME( 0x0030, 0x0030, "Time" );
+		PORT_DIPSETTING(      0x0000, "110" );
+		PORT_DIPSETTING(      0x0030, "120" );
+		PORT_DIPSETTING(      0x0020, "130" );
+		PORT_DIPSETTING(      0x0010, "150" );
+		PORT_DIPNAME( 0x0040, 0x0040, "? Show time in easy mode ?" );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "No") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x0080, 0x0080, "? Coins ?" );
+		PORT_DIPSETTING(      0x0000, "1" );
+		PORT_DIPSETTING(      0x0080, "2" );
 	
-		PORT_START	// IN4 - $c00004.w (DSW3) - Unused
-		PORT_BIT(  0xffff, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+		PORT_START(); 	// IN4 - $c00004.w (DSW3) - Unused
+		PORT_BIT(  0xffff, IP_ACTIVE_LOW,  IPT_UNKNOWN );
 	
-		PORT_START	// IN5 - $c00004.w (DSW4) - Unused
-		PORT_BIT(  0xffff, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN5 - $c00004.w (DSW4) - Unused
+		PORT_BIT(  0xffff, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -217,46 +217,46 @@ public class realbrk
 	
 	***************************************************************************/
 	
-	static struct GfxLayout layout_8x8x4 =
-	{
+	static GfxLayout layout_8x8x4 = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{	STEP4(0,1)		},
-		{	STEP4(3*4,-4),STEP4(7*4,-4)		},
-		{	STEP8(0,8*4)	},
+		new int[] {	STEP4(0,1)		},
+		new int[] {	STEP4(3*4,-4),STEP4(7*4,-4)		},
+		new int[] {	STEP8(0,8*4)	},
 		8*8*4
-	};
+	);
 	
-	static struct GfxLayout layout_16x16x4 =
-	{
+	static GfxLayout layout_16x16x4 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{	STEP4(0,1)		},
-		{	1*4,0*4,3*4,2*4,5*4,4*4,7*4,6*4,9*4,8*4,11*4,10*4,13*4,12*4,15*4,14*4 },
-		{	STEP16(0,16*4)	},
+		new int[] {	STEP4(0,1)		},
+		new int[] {	1*4,0*4,3*4,2*4,5*4,4*4,7*4,6*4,9*4,8*4,11*4,10*4,13*4,12*4,15*4,14*4 },
+		new int[] {	STEP16(0,16*4)	},
 		16*16*4
-	};
+	);
 	
-	static struct GfxLayout layout_16x16x8 =
-	{
+	static GfxLayout layout_16x16x8 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		8,
-		{	STEP8(0,1)		},
-		{	STEP16(0,8)		},
-		{	STEP16(0,16*8)	},
+		new int[] {	STEP8(0,1)		},
+		new int[] {	STEP16(0,8)		},
+		new int[] {	STEP16(0,16*8)	},
 		16*16*8
-	};
+	);
 	
-	static struct GfxDecodeInfo realbrk_gfxdecodeinfo[] =
+	static GfxDecodeInfo realbrk_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x8,		0, 0x80		},	// [0] Backgrounds
-		{ REGION_GFX2, 0, &layout_8x8x4,		0, 0x800	},	// [1] Text
-		{ REGION_GFX3, 0, &layout_16x16x8,		0, 0x80		},	// [2] Sprites (256 colors)
-		{ REGION_GFX4, 0, &layout_16x16x4,		0, 0x800	},	// [3] Sprites (16 colors)
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x8,		0, 0x80		),	// [0] Backgrounds
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_8x8x4,		0, 0x800	),	// [1] Text
+		new GfxDecodeInfo( REGION_GFX3, 0, layout_16x16x8,		0, 0x80		),	// [2] Sprites (256 colors)
+		new GfxDecodeInfo( REGION_GFX4, 0, layout_16x16x4,		0, 0x800	),	// [3] Sprites (16 colors)
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -379,32 +379,32 @@ public class realbrk
 	
 	***************************************************************************/
 	
-	ROM_START( realbrk )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )		/* TMP68301 Code */
-		ROM_LOAD16_BYTE( "52302.1r", 0x000000, 0x080000, CRC(ab0379b0) SHA1(67af6670f2b37a7d4d6e03508f291f8ffe64d4cb) )
-		ROM_LOAD16_BYTE( "52301.2r", 0x000001, 0x080000, CRC(9cc1596e) SHA1(a598f18eaac1ed6943069e9500b07b77e263f0d0) )
+	static RomLoadPtr rom_realbrk = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );	/* TMP68301 Code */
+		ROM_LOAD16_BYTE( "52302.1r", 0x000000, 0x080000, CRC(ab0379b0);SHA1(67af6670f2b37a7d4d6e03508f291f8ffe64d4cb) )
+		ROM_LOAD16_BYTE( "52301.2r", 0x000001, 0x080000, CRC(9cc1596e);SHA1(a598f18eaac1ed6943069e9500b07b77e263f0d0) )
 	
-		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Backgrounds */
-		ROM_LOAD32_WORD( "52310.9b", 0x0000000, 0x400000, CRC(07dfd9f5) SHA1(8722a98adc33f56df1e3b194ce923bc987e15cbe) )
-		ROM_LOAD32_WORD( "52311.9a", 0x0000002, 0x400000, CRC(136a93a4) SHA1(b4bd46ba6c2b367aaf362f67d8be4757f1160864) )
+		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE );/* Backgrounds */
+		ROM_LOAD32_WORD( "52310.9b", 0x0000000, 0x400000, CRC(07dfd9f5);SHA1(8722a98adc33f56df1e3b194ce923bc987e15cbe) )
+		ROM_LOAD32_WORD( "52311.9a", 0x0000002, 0x400000, CRC(136a93a4);SHA1(b4bd46ba6c2b367aaf362f67d8be4757f1160864) )
 	
-		ROM_REGION( 0x40000, REGION_GFX2, ROMREGION_DISPOSE )	/* Text Layer */
-		ROM_LOAD16_BYTE( "52305.1a", 0x000000, 0x020000, CRC(56546fb4) SHA1(5e4dc1665ca96bf24b89d92c24f5ff8420cb465e) )	// 1xxxxxxxxxxxxxxxx = 0xFF
-		ROM_LOAD16_BYTE( "52304.1b", 0x000001, 0x020000, CRC(b22b0aac) SHA1(8c62e19071a4031d0dcad621cce0ba550702659b) )	// 1xxxxxxxxxxxxxxxx = 0xFF
+		ROM_REGION( 0x40000, REGION_GFX2, ROMREGION_DISPOSE );/* Text Layer */
+		ROM_LOAD16_BYTE( "52305.1a", 0x000000, 0x020000, CRC(56546fb4);SHA1(5e4dc1665ca96bf24b89d92c24f5ff8420cb465e) )	// 1xxxxxxxxxxxxxxxx = 0xFF
+		ROM_LOAD16_BYTE( "52304.1b", 0x000001, 0x020000, CRC(b22b0aac);SHA1(8c62e19071a4031d0dcad621cce0ba550702659b) )	// 1xxxxxxxxxxxxxxxx = 0xFF
 	
-		ROM_REGION( 0xc00000, REGION_GFX3, ROMREGION_DISPOSE )	/* Sprites (256 colors) */
-		ROM_LOAD32_WORD( "52306.9f", 0x0000000, 0x400000, CRC(5ff0f666) SHA1(e3f1d9dc84fbef73af37cefd90bdf87a35f59e0e) )
-		ROM_LOAD32_WORD( "52308.9d", 0x0000002, 0x400000, CRC(20817051) SHA1(4c9a443b5d6353ce67d5b1fe716f5ac20d194ef0) )
-		ROM_LOAD32_WORD( "52307.9e", 0x0800000, 0x200000, CRC(01555191) SHA1(7751e2e16345acc638d4dff997a5b52e9171fced) )
-		ROM_LOAD32_WORD( "52309.9c", 0x0800002, 0x200000, CRC(ef4f4bd9) SHA1(3233f501002a2622ddda581167ae24b1a13ea79e) )
+		ROM_REGION( 0xc00000, REGION_GFX3, ROMREGION_DISPOSE );/* Sprites (256 colors) */
+		ROM_LOAD32_WORD( "52306.9f", 0x0000000, 0x400000, CRC(5ff0f666);SHA1(e3f1d9dc84fbef73af37cefd90bdf87a35f59e0e) )
+		ROM_LOAD32_WORD( "52308.9d", 0x0000002, 0x400000, CRC(20817051);SHA1(4c9a443b5d6353ce67d5b1fe716f5ac20d194ef0) )
+		ROM_LOAD32_WORD( "52307.9e", 0x0800000, 0x200000, CRC(01555191);SHA1(7751e2e16345acc638d4dff997a5b52e9171fced) )
+		ROM_LOAD32_WORD( "52309.9c", 0x0800002, 0x200000, CRC(ef4f4bd9);SHA1(3233f501002a2622ddda581167ae24b1a13ea79e) )
 	
-		ROM_REGION( 0x200000, REGION_GFX4, ROMREGION_DISPOSE )	/* Sprites (16 colors) */
-		ROM_LOAD( "52312.14f", 0x000000, 0x200000, CRC(2203d7c5) SHA1(0403f02b8f2bfc6cf98ff598eb9c2e3facc7ac4c) )
+		ROM_REGION( 0x200000, REGION_GFX4, ROMREGION_DISPOSE );/* Sprites (16 colors) */
+		ROM_LOAD( "52312.14f", 0x000000, 0x200000, CRC(2203d7c5);SHA1(0403f02b8f2bfc6cf98ff598eb9c2e3facc7ac4c) )
 	
-		ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY )	/* Samples */
-		ROM_LOAD( "52303.2e", 0x000000, 0x400000, CRC(d3005b1e) SHA1(3afd10cdbc3aa7605083a9fcf3c4b8276937c2c4) )
-	ROM_END
+		ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY );/* Samples */
+		ROM_LOAD( "52303.2e", 0x000000, 0x400000, CRC(d3005b1e);SHA1(3afd10cdbc3aa7605083a9fcf3c4b8276937c2c4) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1998, realbrk, 0, realbrk, realbrk, 0, ROT0, "Nakanihon", "Billiard Academy Real Break (Japan)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_realbrk	   = new GameDriver("1998"	,"realbrk"	,"realbrk.java"	,rom_realbrk,null	,machine_driver_realbrk	,input_ports_realbrk	,null	,ROT0	,	"Nakanihon", "Billiard Academy Real Break (Japan)", GAME_IMPERFECT_GRAPHICS )
 	
 }

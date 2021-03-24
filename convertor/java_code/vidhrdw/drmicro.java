@@ -30,7 +30,7 @@ public class drmicro
 		flip_screen_set(flip);
 	}
 	
-	WRITE_HANDLER( drmicro_videoram_w )
+	public static WriteHandlerPtr drmicro_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		drmicro_videoram[offset] = data;
 	
@@ -38,12 +38,12 @@ public class drmicro
 			tilemap_mark_tile_dirty(drmicro_bg2,(offset & 0x3ff));
 		else
 			tilemap_mark_tile_dirty(drmicro_bg1,(offset & 0x3ff));
-	}
+	} };
 	
-	READ_HANDLER( drmicro_videoram_r )
+	public static ReadHandlerPtr drmicro_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return drmicro_videoram[offset];
-	}
+	} };
 	
 	/****************************************************************************/
 	
@@ -103,7 +103,7 @@ public class drmicro
 		}
 	
 		for (i=0; i<Machine->drv->color_table_len; i++)
-			colortable[i] = color_prom[i] & 0x0f;
+			colortable[i] = color_prom.read(i)& 0x0f;
 	}
 	
 	VIDEO_START( drmicro)
@@ -150,7 +150,7 @@ public class drmicro
 	
 				col = (attr & 0x0f) + 0x00;
 	
-				if (!flipscreen)
+				if (flipscreen == 0)
 					y = (240-y) & 0xff;
 				else
 					x = (240-x) & 0xff;

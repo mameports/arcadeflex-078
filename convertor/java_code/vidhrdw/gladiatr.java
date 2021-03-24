@@ -27,8 +27,8 @@ public class gladiatr
 		int r,g,b;
 	
 	
-		r = (paletteram[offset] >> 0) & 0x0f;
-		g = (paletteram[offset] >> 4) & 0x0f;
+		r = (paletteram.read(offset)>> 0) & 0x0f;
+		g = (paletteram.read(offset)>> 4) & 0x0f;
 		b = (paletteram_2[offset] >> 0) & 0x0f;
 	
 		r = (r << 1) + ((paletteram_2[offset] >> 4) & 0x01);
@@ -48,36 +48,33 @@ public class gladiatr
 		palette_set_color(513,0xff,0xff,0xff);
 	}
 	
-	WRITE_HANDLER( gladiatr_paletteram_rg_w )
+	public static WriteHandlerPtr gladiatr_paletteram_rg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		update_color(offset);
-	}
+	} };
 	
-	WRITE_HANDLER( gladiatr_paletteram_b_w )
+	public static WriteHandlerPtr gladiatr_paletteram_b_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		paletteram_2[offset] = data;
 		update_color(offset);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( gladiatr_spritebank_w );
-	WRITE_HANDLER( gladiatr_spritebank_w ){
+	public static WriteHandlerPtr gladiatr_spritebank_w = new WriteHandlerPtr() {public void handler(int offset, int data){
 		sprite_bank = (data)?4:2;
-	}
+	} };
 	
-	READ_HANDLER( gladiatr_video_registers_r );
-	READ_HANDLER( gladiatr_video_registers_r ){
+	public static ReadHandlerPtr gladiatr_video_registers_r  = new ReadHandlerPtr() { public int handler(int offset){
 		switch( offset ){
 			case 0x080: return video_attributes;
 			case 0x100: return base_scroll;
 			case 0x300: return background_scroll;
 		}
 		return 0;
-	}
+	} };
 	
-	WRITE_HANDLER( gladiatr_video_registers_w );
-	WRITE_HANDLER( gladiatr_video_registers_w ){
+	public static WriteHandlerPtr gladiatr_video_registers_w = new WriteHandlerPtr() {public void handler(int offset, int data){
 		switch( offset ){
 			case 0x000: break;
 			case 0x080: video_attributes = data; break;
@@ -85,7 +82,7 @@ public class gladiatr
 			case 0x200: break;
 			case 0x300: background_scroll = data; break;
 		}
-	}
+	} };
 	
 	
 	VIDEO_START( gladiatr );
@@ -93,10 +90,10 @@ public class gladiatr
 		sprite_bank = 2;
 	
 		dirtybuffer = auto_malloc(64*32);
-		if( !dirtybuffer )
+		if (dirtybuffer == 0)
 			return 1;
 		tmpbitmap = auto_bitmap_alloc(512,256);
-		if( !tmpbitmap )
+		if (tmpbitmap == 0)
 			return 1;
 		memset(dirtybuffer,1,64*32);
 		return 0;
@@ -143,9 +140,9 @@ public class gladiatr
 				int sx = (i%64)*8;
 				int sy = (i/64)*8;
 	
-				int attributes = colorram[i];
+				int attributes = colorram.read(i);
 				int color = 0x1F - (attributes>>3);
-				int tile_number = videoram[i] + 256*(attributes&0x7) + tile_bank_select;
+				int tile_number = videoram.read(i)+ 256*(attributes&0x7) + tile_bank_select;
 	
 				drawgfx(tmpbitmap,Machine->gfx[1+(tile_number/512)],
 					tile_number%512,

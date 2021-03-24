@@ -44,17 +44,17 @@ public class spacefb
 		{
 			int bit0,bit1,bit2,r,g,b;
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			if (bit1 | bit2)
 				bit0 = 1;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
@@ -69,18 +69,18 @@ public class spacefb
 	}
 	
 	
-	WRITE_HANDLER( spacefb_video_control_w )
+	public static WriteHandlerPtr spacefb_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 0x01);
 	
 		video_control = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( spacefb_port_2_w )
+	public static WriteHandlerPtr spacefb_port_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	logerror("Port #2 = %02d\n",data);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -114,11 +114,11 @@ public class spacefb
 			int sx,sy,code,cnt,col;
 	
 	
-			sx = 255 - videoram[spriteno];
-			sy = videoram[spriteno+0x100];
+			sx = 255 - videoram.read(spriteno);
+			sy = videoram.read(spriteno+0x100);
 	
-			code = videoram[spriteno+0x200];
-			cnt  = videoram[spriteno+0x300];
+			code = videoram.read(spriteno+0x200);
+			cnt  = videoram.read(spriteno+0x300);
 	
 			col = (~cnt & 0x03) | col_bit2;
 	

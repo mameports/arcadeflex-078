@@ -131,32 +131,32 @@ public class wc90
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( wc90_bgvideoram_w )
+	public static WriteHandlerPtr wc90_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90_bgvideoram[offset] != data)
 		{
 			wc90_bgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wc90_fgvideoram_w )
+	public static WriteHandlerPtr wc90_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90_fgvideoram[offset] != data)
 		{
 			wc90_fgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wc90_txvideoram_w )
+	public static WriteHandlerPtr wc90_txvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90_txvideoram[offset] != data)
 		{
 			wc90_txvideoram[offset] = data;
 			tilemap_mark_tile_dirty(tx_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
 	
 	
@@ -372,17 +372,17 @@ public class wc90
 	
 		/* draw all visible sprites of specified priority */
 		for (offs = 0;offs < spriteram_size;offs += 16){
-			int bank = spriteram[offs+0];
+			int bank = spriteram.read(offs+0);
 	
 			if ( ( bank >> 4 ) == priority ) {
 	
 				if ( bank & 4 ) { /* visible */
-					which = ( spriteram[offs+2] >> 2 ) + ( spriteram[offs+3] << 6 );
+					which = ( spriteram.read(offs+2)>> 2 ) + ( spriteram.read(offs+3)<< 6 );
 	
-					sx = spriteram[offs + 8] + ( (spriteram[offs + 9] & 1 ) << 8 );
-					sy = spriteram[offs + 6] + ( (spriteram[offs + 7] & 1 ) << 8 );
+					sx = spriteram.read(offs + 8)+ ( (spriteram.read(offs + 9)& 1 ) << 8 );
+					sy = spriteram.read(offs + 6)+ ( (spriteram.read(offs + 7)& 1 ) << 8 );
 	
-					flags = spriteram[offs+4];
+					flags = spriteram.read(offs+4);
 					( *( drawsprites_proc[ flags & 0x0f ] ) )( bitmap,cliprect, which, sx, sy, bank, flags );
 				}
 			}

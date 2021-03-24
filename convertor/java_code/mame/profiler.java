@@ -9,7 +9,6 @@ public class profiler
 	
 	
 	/* in usrintf.c */
-	extern int uirotcharwidth, uirotcharheight;
 	
 	
 	static int use_profiler;
@@ -58,7 +57,7 @@ public class profiler
 		cycles_t curr_cycles;
 	
 	
-		if (!use_profiler)
+		if (use_profiler == 0)
 		{
 			FILO_length = 0;
 			return;
@@ -147,7 +146,7 @@ public class profiler
 		static int showdelay[PROFILER_TOTAL];
 	
 	
-		if (!use_profiler) return;
+		if (use_profiler == 0) return;
 	
 		profiler_mark(PROFILER_PROFILER);
 	

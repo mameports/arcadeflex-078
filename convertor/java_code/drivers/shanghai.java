@@ -83,7 +83,7 @@ public class shanghai
 	{
 		fifo_counter = 0;
 		HD63484_ram = auto_malloc(HD63484_RAM_SIZE);
-		if (!HD63484_ram) return 1;
+		if (HD63484_ram == 0) return 1;
 		memset(HD63484_ram,0,HD63484_RAM_SIZE);
 		return 0;
 	}
@@ -618,15 +618,15 @@ public class shanghai
 	
 	static int regno;
 	
-	static READ_HANDLER( HD63484_status_r )
+	public static ReadHandlerPtr HD63484_status_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (offset == 1) return 0xff;	/* high 8 bits - not used */
 	
 		if (activecpu_get_pc() != 0xfced6 && activecpu_get_pc() != 0xfe1d6) logerror("%05x: HD63484 status read\n",activecpu_get_pc());
 		return 0x22|4;	/* write FIFO ready + command end    + read FIFO ready */
-	}
+	} };
 	
-	static WRITE_HANDLER( HD63484_address_w )
+	public static WriteHandlerPtr HD63484_address_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char reg[2];
 	
@@ -634,9 +634,9 @@ public class shanghai
 		regno = reg[0];	/* only low 8 bits are used */
 	//if (offset == 0)
 	//	logerror("PC %05x: HD63484 select register %02x\n",activecpu_get_pc(),regno);
-	}
+	} };
 	
-	static WRITE_HANDLER( HD63484_data_w )
+	public static WriteHandlerPtr HD63484_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char dat[2];
 	
@@ -654,9 +654,9 @@ public class shanghai
 				if (regno & 0x80) regno += 2;	/* autoincrement */
 			}
 		}
-	}
+	} };
 	
-	static READ_HANDLER( HD63484_data_r )
+	public static ReadHandlerPtr HD63484_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int res;
 	
@@ -679,7 +679,7 @@ public class shanghai
 			return res & 0xff;
 		else
 			return (res >> 8) & 0xff;
-	}
+	} };
 	
 	
 	
@@ -768,228 +768,244 @@ public class shanghai
 		cpu_set_irq_line_and_vector(0,0,HOLD_LINE,0x80);
 	}
 	
-	static WRITE_HANDLER( shanghai_coin_w )
+	public static WriteHandlerPtr shanghai_coin_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(0,data & 1);
 		coin_counter_w(1,data & 2);
-	}
+	} };
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x00000, 0x03fff, MRA_RAM },
-		{ 0x80000, 0xfffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x00000, 0x03fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x80000, 0xfffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x00000, 0x03fff, MWA_RAM },
-		{ 0x80000, 0xfffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x00000, 0x03fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x80000, 0xfffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( readport )
-		{ 0x00, 0x01, HD63484_status_r },
-		{ 0x02, 0x03, HD63484_data_r },
-		{ 0x20, 0x20, YM2203_status_port_0_r },
-		{ 0x22, 0x22, YM2203_read_port_0_r },
-		{ 0x40, 0x40, input_port_0_r },
-		{ 0x44, 0x44, input_port_1_r },
-		{ 0x48, 0x48, input_port_2_r },
-	PORT_END
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x01, HD63484_status_r ),
+		new IO_ReadPort( 0x02, 0x03, HD63484_data_r ),
+		new IO_ReadPort( 0x20, 0x20, YM2203_status_port_0_r ),
+		new IO_ReadPort( 0x22, 0x22, YM2203_read_port_0_r ),
+		new IO_ReadPort( 0x40, 0x40, input_port_0_r ),
+		new IO_ReadPort( 0x44, 0x44, input_port_1_r ),
+		new IO_ReadPort( 0x48, 0x48, input_port_2_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport )
-		{ 0x00, 0x01, HD63484_address_w },
-		{ 0x02, 0x03, HD63484_data_w },
-		{ 0x20, 0x20, YM2203_control_port_0_w },
-		{ 0x22, 0x22, YM2203_write_port_0_w },
-		{ 0x4c, 0x4c, shanghai_coin_w },
-	PORT_END
-	
-	
-	static MEMORY_READ_START( shangha2_readmem )
-		{ 0x00000, 0x03fff, MRA_RAM },
-		{ 0x80000, 0xfffff, MRA_ROM },
-	MEMORY_END
-	
-	static MEMORY_WRITE_START( shangha2_writemem )
-		{ 0x00000, 0x03fff, MWA_RAM },
-		{ 0x04000, 0x041ff, paletteram_xxxxBBBBGGGGRRRR_w, &paletteram },
-		{ 0x80000, 0xfffff, MWA_ROM },
-	MEMORY_END
-	
-	static PORT_READ_START( shangha2_readport )
-		{ 0x00, 0x00, input_port_0_r },
-		{ 0x10, 0x10, input_port_1_r },
-		{ 0x20, 0x20, input_port_2_r },
-		{ 0x30, 0x31, HD63484_status_r },
-		{ 0x32, 0x33, HD63484_data_r },
-		{ 0x40, 0x40, YM2203_status_port_0_r },
-		{ 0x42, 0x42, YM2203_read_port_0_r },
-	PORT_END
-	
-	static PORT_WRITE_START( shangha2_writeport )
-		{ 0x30, 0x31, HD63484_address_w },
-		{ 0x32, 0x33, HD63484_data_w },
-		{ 0x40, 0x40, YM2203_control_port_0_w },
-		{ 0x42, 0x42, YM2203_write_port_0_w },
-		{ 0x50, 0x50, shanghai_coin_w },
-	PORT_END
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x01, HD63484_address_w ),
+		new IO_WritePort( 0x02, 0x03, HD63484_data_w ),
+		new IO_WritePort( 0x20, 0x20, YM2203_control_port_0_w ),
+		new IO_WritePort( 0x22, 0x22, YM2203_write_port_0_w ),
+		new IO_WritePort( 0x4c, 0x4c, shanghai_coin_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
+	public static Memory_ReadAddress shangha2_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x00000, 0x03fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x80000, 0xfffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( shanghai )
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	public static Memory_WriteAddress shangha2_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x00000, 0x03fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x04000, 0x041ff, paletteram_xxxxBBBBGGGGRRRR_w, paletteram ),
+		new Memory_WriteAddress( 0x80000, 0xfffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	public static IO_ReadPort shangha2_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, input_port_0_r ),
+		new IO_ReadPort( 0x10, 0x10, input_port_1_r ),
+		new IO_ReadPort( 0x20, 0x20, input_port_2_r ),
+		new IO_ReadPort( 0x30, 0x31, HD63484_status_r ),
+		new IO_ReadPort( 0x32, 0x33, HD63484_data_r ),
+		new IO_ReadPort( 0x40, 0x40, YM2203_status_port_0_r ),
+		new IO_ReadPort( 0x42, 0x42, YM2203_read_port_0_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START	/* IN2 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	public static IO_WritePort shangha2_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x30, 0x31, HD63484_address_w ),
+		new IO_WritePort( 0x32, 0x33, HD63484_data_w ),
+		new IO_WritePort( 0x40, 0x40, YM2203_control_port_0_w ),
+		new IO_WritePort( 0x42, 0x42, YM2203_write_port_0_w ),
+		new IO_WritePort( 0x50, 0x50, shanghai_coin_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START	/* DSW0 */
-		PORT_SERVICE( 0x01, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x02, 0x02, "Allow Continue" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x1c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x14, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) )
 	
-		PORT_START	/* DSW1 */
-		PORT_DIPNAME( 0x01, 0x01, "Confirmation" )
-		PORT_DIPSETTING(    0x01, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x02, 0x02, "Help" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0c, 0x08, "2 Players Move Time" )
-		PORT_DIPSETTING(    0x0c, "8" )
-		PORT_DIPSETTING(    0x08, "10" )
-		PORT_DIPSETTING(    0x04, "12" )
-		PORT_DIPSETTING(    0x00, "14" )
-		PORT_DIPNAME( 0x30, 0x20, "Bonus Time for Making Pair" )
-		PORT_DIPSETTING(    0x30, "3" )
-		PORT_DIPSETTING(    0x20, "4" )
-		PORT_DIPSETTING(    0x10, "5" )
-		PORT_DIPSETTING(    0x00, "6" )
-		PORT_DIPNAME( 0xc0, 0x40, "Start Time" )
-		PORT_DIPSETTING(    0xc0, "30" )
-		PORT_DIPSETTING(    0x80, "60" )
-		PORT_DIPSETTING(    0x40, "90" )
-		PORT_DIPSETTING(    0x00, "120" )
-	INPUT_PORTS_END
 	
-	INPUT_PORTS_START( shangha2 )
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_shanghai = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* IN2 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* IN2 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* DSW0 */
-		PORT_SERVICE( 0x01, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x06, 0x06, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x06, "Easy" )
-		PORT_DIPSETTING(    0x04, "Normal" )
-		PORT_DIPSETTING(    0x02, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x08, 0x00, "2 Players Move Time" )
-		PORT_DIPSETTING(    0x08, "8" )
-		PORT_DIPSETTING(    0x00, "10" )
-		PORT_DIPNAME( 0x30, 0x20, "Bonus Time for Making Pair" )
-		PORT_DIPSETTING(    0x30, "3" )
-		PORT_DIPSETTING(    0x20, "4" )
-		PORT_DIPSETTING(    0x10, "5" )
-		PORT_DIPSETTING(    0x00, "6" )
-		PORT_DIPNAME( 0xc0, 0x40, "Start Time" )
-		PORT_DIPSETTING(    0xc0, "30" )
-		PORT_DIPSETTING(    0x80, "60" )
-		PORT_DIPSETTING(    0x40, "90" )
-		PORT_DIPSETTING(    0x00, "120" )
+		PORT_START(); 	/* DSW0 */
+		PORT_SERVICE( 0x01, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x02, 0x02, "Allow Continue" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x1c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x14, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_4C") );
 	
-		PORT_START	/* DSW1 */
-		PORT_DIPNAME( 0x03, 0x03, "Mystery Tiles" )
-		PORT_DIPSETTING(    0x03, "0" )
-		PORT_DIPSETTING(    0x02, "4" )
-		PORT_DIPSETTING(    0x01, "6" )
-		PORT_DIPSETTING(    0x00, "8" )
-		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x1c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x14, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) )
-	INPUT_PORTS_END
+		PORT_START(); 	/* DSW1 */
+		PORT_DIPNAME( 0x01, 0x01, "Confirmation" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x02, 0x02, "Help" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0c, 0x08, "2 Players Move Time" );
+		PORT_DIPSETTING(    0x0c, "8" );
+		PORT_DIPSETTING(    0x08, "10" );
+		PORT_DIPSETTING(    0x04, "12" );
+		PORT_DIPSETTING(    0x00, "14" );
+		PORT_DIPNAME( 0x30, 0x20, "Bonus Time for Making Pair" );
+		PORT_DIPSETTING(    0x30, "3" );
+		PORT_DIPSETTING(    0x20, "4" );
+		PORT_DIPSETTING(    0x10, "5" );
+		PORT_DIPSETTING(    0x00, "6" );
+		PORT_DIPNAME( 0xc0, 0x40, "Start Time" );
+		PORT_DIPSETTING(    0xc0, "30" );
+		PORT_DIPSETTING(    0x80, "60" );
+		PORT_DIPSETTING(    0x40, "90" );
+		PORT_DIPSETTING(    0x00, "120" );
+	INPUT_PORTS_END(); }}; 
+	
+	static InputPortPtr input_ports_shangha2 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* IN2 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* DSW0 */
+		PORT_SERVICE( 0x01, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x06, 0x06, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x06, "Easy" );
+		PORT_DIPSETTING(    0x04, "Normal" );
+		PORT_DIPSETTING(    0x02, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x08, 0x00, "2 Players Move Time" );
+		PORT_DIPSETTING(    0x08, "8" );
+		PORT_DIPSETTING(    0x00, "10" );
+		PORT_DIPNAME( 0x30, 0x20, "Bonus Time for Making Pair" );
+		PORT_DIPSETTING(    0x30, "3" );
+		PORT_DIPSETTING(    0x20, "4" );
+		PORT_DIPSETTING(    0x10, "5" );
+		PORT_DIPSETTING(    0x00, "6" );
+		PORT_DIPNAME( 0xc0, 0x40, "Start Time" );
+		PORT_DIPSETTING(    0xc0, "30" );
+		PORT_DIPSETTING(    0x80, "60" );
+		PORT_DIPSETTING(    0x40, "90" );
+		PORT_DIPSETTING(    0x00, "120" );
+	
+		PORT_START(); 	/* DSW1 */
+		PORT_DIPNAME( 0x03, 0x03, "Mystery Tiles" );
+		PORT_DIPSETTING(    0x03, "0" );
+		PORT_DIPSETTING(    0x02, "4" );
+		PORT_DIPSETTING(    0x01, "6" );
+		PORT_DIPSETTING(    0x00, "8" );
+		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x1c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x14, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_4C") );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -1064,26 +1080,26 @@ public class shanghai
 	
 	***************************************************************************/
 	
-	ROM_START( shanghai )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "shg-22a.rom", 0xa0001, 0x10000, CRC(e0a085be) SHA1(e281043f97c4cd34a33eb1ec7154abbe67a9aa03) )
-		ROM_LOAD16_BYTE( "shg-21a.rom", 0xa0000, 0x10000, CRC(4ab06d32) SHA1(02667d1270b101386b947d5b9bfe64052e498041) )
-		ROM_LOAD16_BYTE( "shg-28a.rom", 0xc0001, 0x10000, CRC(983ec112) SHA1(110e120e35815d055d6108a7603e83d2d990c666) )
-		ROM_LOAD16_BYTE( "shg-27a.rom", 0xc0000, 0x10000, CRC(41af0945) SHA1(dfc4638a17f716ccc8e59f275571d6dc1093a745) )
-		ROM_LOAD16_BYTE( "shg-37b.rom", 0xe0001, 0x10000, CRC(3f192da0) SHA1(e70d5da5d702e9bf9ac6b77df62bcf51894aadcf) )
-		ROM_LOAD16_BYTE( "shg-36b.rom", 0xe0000, 0x10000, CRC(a1d6af96) SHA1(01c4c22bf03b3d260fffcbc6dfc5f2dd2bcba14a) )
-	ROM_END
+	static RomLoadPtr rom_shanghai = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "shg-22a.rom", 0xa0001, 0x10000, CRC(e0a085be);SHA1(e281043f97c4cd34a33eb1ec7154abbe67a9aa03) )
+		ROM_LOAD16_BYTE( "shg-21a.rom", 0xa0000, 0x10000, CRC(4ab06d32);SHA1(02667d1270b101386b947d5b9bfe64052e498041) )
+		ROM_LOAD16_BYTE( "shg-28a.rom", 0xc0001, 0x10000, CRC(983ec112);SHA1(110e120e35815d055d6108a7603e83d2d990c666) )
+		ROM_LOAD16_BYTE( "shg-27a.rom", 0xc0000, 0x10000, CRC(41af0945);SHA1(dfc4638a17f716ccc8e59f275571d6dc1093a745) )
+		ROM_LOAD16_BYTE( "shg-37b.rom", 0xe0001, 0x10000, CRC(3f192da0);SHA1(e70d5da5d702e9bf9ac6b77df62bcf51894aadcf) )
+		ROM_LOAD16_BYTE( "shg-36b.rom", 0xe0000, 0x10000, CRC(a1d6af96);SHA1(01c4c22bf03b3d260fffcbc6dfc5f2dd2bcba14a) )
+	ROM_END(); }}; 
 	
-	ROM_START( shangha2 )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "sht-27j", 0x80001, 0x20000, CRC(969cbf00) SHA1(350025f4e39c7d89cb72e46b52fb467e3e9056f4) )
-		ROM_LOAD16_BYTE( "sht-26j", 0x80000, 0x20000, CRC(4bf01ab4) SHA1(6928374db080212a371991ee98cd563e158907f0) )
-		ROM_LOAD16_BYTE( "sht-31j", 0xc0001, 0x20000, CRC(312e3b9d) SHA1(f15f76a087d4972aa72145eced8d1fb15329b359) )
-		ROM_LOAD16_BYTE( "sht-30j", 0xc0000, 0x20000, CRC(2861a894) SHA1(6da99d15f41e900735f8943f2710487817f98579) )
-	ROM_END
+	static RomLoadPtr rom_shangha2 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "sht-27j", 0x80001, 0x20000, CRC(969cbf00);SHA1(350025f4e39c7d89cb72e46b52fb467e3e9056f4) )
+		ROM_LOAD16_BYTE( "sht-26j", 0x80000, 0x20000, CRC(4bf01ab4);SHA1(6928374db080212a371991ee98cd563e158907f0) )
+		ROM_LOAD16_BYTE( "sht-31j", 0xc0001, 0x20000, CRC(312e3b9d);SHA1(f15f76a087d4972aa72145eced8d1fb15329b359) )
+		ROM_LOAD16_BYTE( "sht-30j", 0xc0000, 0x20000, CRC(2861a894);SHA1(6da99d15f41e900735f8943f2710487817f98579) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX(1988, shanghai, 0, shanghai, shanghai, 0, ROT0, "Sunsoft", "Shanghai (Japan)", GAME_IMPERFECT_GRAPHICS )
-	GAME( 1989, shangha2, 0, shangha2, shangha2, 0, ROT0, "Sunsoft", "Shanghai II (Japan)" )
+	public static GameDriver driver_shanghai	   = new GameDriver("1988"	,"shanghai"	,"shanghai.java"	,rom_shanghai,null	,machine_driver_shanghai	,input_ports_shanghai	,null	,ROT0	,	"Sunsoft", "Shanghai (Japan)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_shangha2	   = new GameDriver("1989"	,"shangha2"	,"shanghai.java"	,rom_shangha2,null	,machine_driver_shangha2	,input_ports_shangha2	,null	,ROT0	,	"Sunsoft", "Shanghai II (Japan)" )
 }

@@ -273,7 +273,6 @@ public class m68kH
 	/* Do whatever initialisations the core requires.  Should be called
 	 * at least once at init time.
 	 */
-	void m68k_init(void);
 	
 	/* Pulse the RESET pin on the CPU.
 	 * You *MUST* reset the CPU at least once to initialize the emulation
@@ -281,7 +280,6 @@ public class m68kH
 	 *       the CPU for the first time, the CPU will be set to
 	 *       M68K_CPU_TYPE_68000.
 	 */
-	void m68k_pulse_reset(void);
 	
 	/* execute num_cycles worth of instructions.  returns number of cycles used */
 	int m68k_execute(int num_cycles);
@@ -291,10 +289,7 @@ public class m68kH
 	 * These are useful if the 68k accesses a memory-mapped port on another device
 	 * that requires immediate processing by another CPU.
 	 */
-	int m68k_cycles_run(void);              /* Number of cycles run so far */
-	int m68k_cycles_remaining(void);        /* Number of cycles left */
 	void m68k_modify_timeslice(int cycles); /* Modify cycles left */
-	void m68k_end_timeslice(void);          /* End timeslice now */
 	
 	/* Set the IPL0-IPL2 pins on the CPU (IRQ).
 	 * A transition from < 7 to 7 will cause a non-maskable interrupt (NMI).
@@ -304,14 +299,12 @@ public class m68kH
 	
 	
 	/* Halt the CPU as if you pulsed the HALT pin. */
-	void m68k_pulse_halt(void);
 	
 	
 	/* Context switching to allow multiple CPUs */
 	
 	/* Get the size of the cpu context in bytes */
-	unsigned int m68k_context_size(void);
-	
+	unsigned 
 	/* Get a cpu context */
 	unsigned int m68k_get_context(void* dst);
 	

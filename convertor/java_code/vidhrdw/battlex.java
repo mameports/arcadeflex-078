@@ -40,35 +40,35 @@ public class battlex
 		}
 	}
 	
-	WRITE_HANDLER( battlex_palette_w )
+	public static WriteHandlerPtr battlex_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int g = ((data & 1) >> 0) * 0xff;
 		int b = ((data & 2) >> 1) * 0xff;
 		int r = ((data & 4) >> 2) * 0xff;
 	
 		palette_set_color(16*8 + offset,r,g,b);
-	}
+	} };
 	
-	WRITE_HANDLER( battlex_scroll_x_lsb_w )
+	public static WriteHandlerPtr battlex_scroll_x_lsb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		battlex_scroll_lsb = data;
-	}
+	} };
 	
-	WRITE_HANDLER( battlex_scroll_x_msb_w )
+	public static WriteHandlerPtr battlex_scroll_x_msb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		battlex_scroll_msb = data;
-	}
+	} };
 	
-	WRITE_HANDLER( battlex_videoram_w )
+	public static WriteHandlerPtr battlex_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( battlex_flipscreen_w )
+	public static WriteHandlerPtr battlex_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 4 is used, but for what? */
 	
@@ -79,12 +79,12 @@ public class battlex
 			flip_screen_set(data & 0x80);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int tile = videoram[tile_index*2] | (((videoram[tile_index*2+1] & 0x01)) << 8);
-		int color = (videoram[tile_index*2+1] & 0x0e) >> 1;
+		int tile = videoram.read(tile_index*2)| (((videoram.read(tile_index*2+1)& 0x01)) << 8);
+		int color = (videoram.read(tile_index*2+1)& 0x0e) >> 1;
 	
 		SET_TILE_INFO(0,tile,color,0)
 	}
@@ -94,7 +94,7 @@ public class battlex
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;

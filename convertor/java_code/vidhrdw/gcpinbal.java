@@ -70,7 +70,7 @@ public class gcpinbal
 	}
 	#endif
 	
-	int gcpinbal_core_vh_start (void)
+	public static VhStartPtr gcpinbal_core_vh_start = new VhStartPtr() { public int handler() 
 	{
 		int xoffs = 0;
 		int yoffs = 0;
@@ -95,7 +95,7 @@ public class gcpinbal
 		tilemap_set_scrolldy( gcpinbal_tilemap[2],-yoffs,0 );
 	
 		return 0;
-	}
+	} };
 	
 	VIDEO_START( gcpinbal )
 	{

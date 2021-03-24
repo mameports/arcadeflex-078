@@ -43,13 +43,13 @@ public class tsamurai
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int tile_number = videoram[tile_index];
+		int tile_number = videoram.read(tile_index);
 		if (textbank1 & 0x01) tile_number += 256; /* legacy */
 		if (textbank2 & 0x01) tile_number += 512; /* Mission 660 add-on */
 		SET_TILE_INFO(
 				1,
 				tile_number,
-				colorram[((tile_index&0x1f)*2)+1] & 0x1f,
+				colorram.read(((tile_index&0x1f)*2)+1)& 0x1f,
 				0)
 	}
 	
@@ -81,40 +81,40 @@ public class tsamurai
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( tsamurai_scrolly_w )
+	public static WriteHandlerPtr tsamurai_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly( background, 0, data );
-	}
+	} };
 	
-	WRITE_HANDLER( tsamurai_scrollx_w )
+	public static WriteHandlerPtr tsamurai_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx( background, 0, data );
-	}
+	} };
 	
-	WRITE_HANDLER( tsamurai_bgcolor_w )
+	public static WriteHandlerPtr tsamurai_bgcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bgcolor = data;
-	}
+	} };
 	
-	WRITE_HANDLER( tsamurai_textbank1_w )
+	public static WriteHandlerPtr tsamurai_textbank1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( textbank1!=data )
 		{
 			textbank1 = data;
 			tilemap_mark_all_tiles_dirty( foreground );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tsamurai_textbank2_w )
+	public static WriteHandlerPtr tsamurai_textbank2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( textbank2!=data )
 		{
 			textbank2 = data;
 			tilemap_mark_all_tiles_dirty( foreground );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tsamurai_bg_videoram_w )
+	public static WriteHandlerPtr tsamurai_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( tsamurai_videoram[offset]!=data )
 		{
@@ -122,20 +122,20 @@ public class tsamurai
 			offset = offset/2;
 			tilemap_mark_tile_dirty(background,offset);
 		}
-	}
-	WRITE_HANDLER( tsamurai_fg_videoram_w )
+	} };
+	public static WriteHandlerPtr tsamurai_fg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset]!=data )
+		if( videoram.read(offset)!=data )
 		{
-			videoram[offset]=data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(foreground,offset);
 		}
-	}
-	WRITE_HANDLER( tsamurai_fg_colorram_w )
+	} };
+	public static WriteHandlerPtr tsamurai_fg_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( colorram[offset]!=data )
+		if( colorram.read(offset)!=data )
 		{
-			colorram[offset]=data;
+			colorram.write(offset,data);
 			if (offset & 1)
 			{
 				int col = offset/2;
@@ -144,7 +144,7 @@ public class tsamurai
 					tilemap_mark_tile_dirty(foreground,32*row+col);
 			}
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -222,7 +222,7 @@ public class tsamurai
 		tilemap_set_scroll_cols(foreground, 32);
 		for (i = 0 ; i < 32 ; i++)
 		{
-			tilemap_set_scrolly(foreground, i, colorram[i*2]);
+			tilemap_set_scrolly(foreground, i, colorram.read(i*2));
 		}
 	/* end of column scroll code */
 	
@@ -248,19 +248,19 @@ public class tsamurai
 	
 	int vsgongf_color;
 	
-	WRITE_HANDLER( vsgongf_color_w )
+	public static WriteHandlerPtr vsgongf_color_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( vsgongf_color != data )
 		{
 			vsgongf_color = data;
 			tilemap_mark_all_tiles_dirty( foreground );
 		}
-	}
+	} };
 	
 	
 	static void get_vsgongf_tile_info(int tile_index)
 	{
-		int tile_number = videoram[tile_index];
+		int tile_number = videoram.read(tile_index);
 		int color = vsgongf_color&0x1f;
 		if( textbank1 ) tile_number += 0x100;
 		SET_TILE_INFO(
@@ -273,7 +273,7 @@ public class tsamurai
 	VIDEO_START( vsgongf )
 	{
 		foreground = tilemap_create(get_vsgongf_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32);
-		if (!foreground) return 1;
+		if (foreground == 0) return 1;
 		return 0;
 	}
 	

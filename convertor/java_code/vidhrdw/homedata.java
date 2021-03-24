@@ -345,7 +345,7 @@ public class homedata
 		for (i = 0; i < 0x8000; i++)
 		{
 			int r,g,b;
-			int color = color_prom[i*2] * 256 + color_prom[i*2+1];
+			int color = color_prom.read(i*2)* 256 + color_prom.read(i*2+1);
 			/* xxxx--------x--- red
 			 * ----xxxx-----x-- green
 			 * --------xxxx--x- blue
@@ -371,7 +371,7 @@ public class homedata
 		for (i = 0; i < 0x8000; i++)
 		{
 			int r,g,b;
-			int color = color_prom[i*2] * 256 + color_prom[i*2+1];
+			int color = color_prom.read(i*2)* 256 + color_prom.read(i*2+1);
 			/* xxxx--------x--- green
 			 * ----xxxx-----x-- red
 			 * --------xxxx--x- blue
@@ -397,7 +397,7 @@ public class homedata
 		for (i = 0; i < 0x8000; i++)
 		{
 			int r,g,b;
-			int color = color_prom[i*2] * 256 + color_prom[i*2+1];
+			int color = color_prom.read(i*2)* 256 + color_prom.read(i*2+1);
 			/* xxxxx----------- green
 			 * -----xxxxx------ red
 			 * ----------xxxxx- blue
@@ -426,8 +426,8 @@ public class homedata
 	INLINE void mrokumei_info0( int tile_index, int page, int gfxbank )
 	{
 		int addr  = tile_index * 2 + 0x2000 * page;
-		int attr  = videoram[addr];
-		int code  = videoram[addr + 1] + ((attr & 0x03) << 8) + (gfxbank << 10);
+		int attr  = videoram.read(addr);
+		int code  = videoram.read(addr + 1)+ ((attr & 0x03) << 8) + (gfxbank << 10);
 		int color = (attr >> 2) + (gfxbank << 6);
 	
 		SET_TILE_INFO( 0, code, color, homedata_flipscreen );
@@ -435,8 +435,8 @@ public class homedata
 	INLINE void mrokumei_info1( int tile_index, int page, int gfxbank )
 	{
 		int addr  = tile_index * 2 + 0x1000 + 0x2000 * page;
-		int attr  = videoram[addr];
-		int code  = videoram[addr + 1] + ((attr & 0x07) << 8) + (gfxbank << 11);
+		int attr  = videoram.read(addr);
+		int code  = videoram.read(addr + 1)+ ((attr & 0x07) << 8) + (gfxbank << 11);
 		int color = (attr >> 3) + ((gfxbank & 3) << 6);
 	
 		SET_TILE_INFO( 1, code, color, homedata_flipscreen );
@@ -451,8 +451,8 @@ public class homedata
 	INLINE void reikaids_info( int tile_index, int page, int layer, int gfxbank )
 	{
 		int addr  = tile_index * 4 + layer + 0x2000 * page;
-		int attr  = videoram[addr];
-		int code  = videoram[addr + 0x1000] + ((attr & 0x03) << 8) + (gfxbank << 10);
+		int attr  = videoram.read(addr);
+		int code  = videoram.read(addr + 0x1000)+ ((attr & 0x03) << 8) + (gfxbank << 10);
 		int color = (attr & 0x7c) >> 2;
 		int flags = homedata_flipscreen;
 	
@@ -482,8 +482,8 @@ public class homedata
 	INLINE void pteacher_info( int tile_index, int page, int layer, int gfxbank )
 	{
 		int addr  = tile_index * 2 + 0x1000 * layer + 0x2000 * page;
-		int attr  = videoram[addr];
-		int code  = videoram[addr + 1] + ((attr & 0x07) << 8) + (gfxbank << 11);
+		int attr  = videoram.read(addr);
+		int code  = videoram.read(addr + 1)+ ((attr & 0x07) << 8) + (gfxbank << 11);
 		int color = (attr >> 3) + ((gfxbank & 1) << 5);
 	
 		SET_TILE_INFO( layer, code, color, homedata_flipscreen );
@@ -498,8 +498,8 @@ public class homedata
 	INLINE void lemnangl_info( int tile_index, int page, int layer, int gfxset, int gfxbank )
 	{
 		int addr  = tile_index * 2 + 0x1000 * layer + 0x2000 * page;
-		int attr  = videoram[addr];
-		int code  = videoram[addr + 1] + ((attr & 0x07) << 8) + (gfxbank << 11);
+		int attr  = videoram.read(addr);
+		int code  = videoram.read(addr + 1)+ ((attr & 0x07) << 8) + (gfxbank << 11);
 		int color = 16 * (attr >> 3) + gfxbank;
 	
 		SET_TILE_INFO( 2*layer + gfxset, code, color, homedata_flipscreen );
@@ -600,34 +600,34 @@ public class homedata
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( mrokumei_videoram_w )
+	public static WriteHandlerPtr mrokumei_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset] != data )
+		if( videoram.read(offset)!= data )
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty( tilemap[(offset & 0x2000) >> 13][(offset & 0x1000) >> 12], (offset & 0xffe) >> 1 );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( reikaids_videoram_w )
+	public static WriteHandlerPtr reikaids_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty( tilemap[(offset & 0x2000) >> 13][offset & 3], (offset & 0xffc) >> 2 );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pteacher_videoram_w )
+	public static WriteHandlerPtr pteacher_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset] != data )
+		if( videoram.read(offset)!= data )
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty( tilemap[(offset & 0x2000) >> 13][(offset & 0x1000) >> 12], (offset & 0xffe) >> 1 );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( reikaids_gfx_bank_w )
+	public static WriteHandlerPtr reikaids_gfx_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 	//logerror( "%04x: [setbank %02x]\n",activecpu_get_pc(),data);
@@ -639,9 +639,9 @@ public class homedata
 		}
 	
 		reikaids_which ^= 1;
-	}
+	} };
 	
-	WRITE_HANDLER( pteacher_gfx_bank_w )
+	public static WriteHandlerPtr pteacher_gfx_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	//	logerror( "%04x: gfxbank:=%02x\n", activecpu_get_pc(), data );
 		if (pteacher_gfx_bank != data)
@@ -649,17 +649,17 @@ public class homedata
 			pteacher_gfx_bank = data;
 			tilemap_mark_all_tiles_dirty( ALL_TILEMAPS );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( homedata_blitter_param_w )
+	public static WriteHandlerPtr homedata_blitter_param_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	//logerror("%04x: blitter_param_w %02x\n",activecpu_get_pc(),data);
 		blitter_param[blitter_param_count] = data;
 		blitter_param_count++;
 		blitter_param_count&=3;
-	}
+	} };
 	
-	WRITE_HANDLER( mrokumei_blitter_bank_w )
+	public static WriteHandlerPtr mrokumei_blitter_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* --xxx--- layer 1 gfx bank
 		   -----x-- blitter ROM bank
@@ -670,18 +670,18 @@ public class homedata
 			tilemap_mark_all_tiles_dirty( ALL_TILEMAPS);
 	
 		blitter_bank = data;
-	}
+	} };
 	
-	WRITE_HANDLER( reikaids_blitter_bank_w )
+	public static WriteHandlerPtr reikaids_blitter_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* xxx----- priority control
 		   ----x--- target page? what's this for?
 		   ------xx blitter ROM bank
 		 */
 		blitter_bank = data;
-	}
+	} };
 	
-	WRITE_HANDLER( pteacher_blitter_bank_w )
+	public static WriteHandlerPtr pteacher_blitter_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* xxx----- blitter ROM bank
 		   -----x-- pixel clock (normal/slow)
@@ -693,25 +693,25 @@ public class homedata
 			tilemap_mark_all_tiles_dirty( ALL_TILEMAPS);
 	
 		blitter_bank = data;
-	}
+	} };
 	
-	WRITE_HANDLER( mrokumei_blitter_start_w )
+	public static WriteHandlerPtr mrokumei_blitter_start_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data & 0x80) mrokumei_handleblit(((blitter_bank & 0x04) >> 2) * 0x10000);
 	
 		/* bit 0 = bank switch; used by hourouki to access the
 		   optional service mode ROM (not available in current dump) */
-	}
+	} };
 	
-	WRITE_HANDLER( reikaids_blitter_start_w )
+	public static WriteHandlerPtr reikaids_blitter_start_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		reikaids_handleblit((blitter_bank & 3) * 0x10000);
-	}
+	} };
 	
-	WRITE_HANDLER( pteacher_blitter_start_w )
+	public static WriteHandlerPtr pteacher_blitter_start_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pteacher_handleblit((blitter_bank >> 5) * 0x10000 & (memory_region_length(REGION_USER1) - 1));
-	}
+	} };
 	
 	
 	

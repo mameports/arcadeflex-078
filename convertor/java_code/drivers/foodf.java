@@ -249,50 +249,50 @@ public class foodf
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( foodf )
-		PORT_START	/* IN0 */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER1 | IPF_REVERSE, 100, 10, 0, 255 )
+	static InputPortPtr input_ports_foodf = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER1 | IPF_REVERSE, 100, 10, 0, 255 );
 	
-		PORT_START	/* IN1 */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER2 | IPF_REVERSE | IPF_COCKTAIL, 100, 10, 0, 255 )
+		PORT_START(); 	/* IN1 */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER2 | IPF_REVERSE | IPF_COCKTAIL, 100, 10, 0, 255 );
 	
-		PORT_START	/* IN2 */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_Y | IPF_PLAYER1 | IPF_REVERSE, 100, 10, 0, 255 )
+		PORT_START(); 	/* IN2 */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_Y | IPF_PLAYER1 | IPF_REVERSE, 100, 10, 0, 255 );
 	
-		PORT_START	/* IN3 */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE | IPF_COCKTAIL, 100, 10, 0, 255 )
+		PORT_START(); 	/* IN3 */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE | IPF_COCKTAIL, 100, 10, 0, 255 );
 	
-		PORT_START	/* IN4 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+		PORT_START(); 	/* IN4 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
 	
-		PORT_START	/* SW1 */
-		PORT_DIPNAME( 0x07, 0x00, "Bonus Coins" )
-		PORT_DIPSETTING(    0x00, "None" )
-		PORT_DIPSETTING(    0x05, "1 for every 2" )
-		PORT_DIPSETTING(    0x02, "1 for every 4" )
-		PORT_DIPSETTING(    0x01, "1 for every 5" )
-		PORT_DIPSETTING(    0x06, "2 for every 4" )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Coin_A ))
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ))
-		PORT_DIPNAME( 0x30, 0x00, DEF_STR( Coin_B ))
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_4C ))
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_5C ))
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_6C ))
-		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Coinage ))
-		PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ))
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ))
-		PORT_DIPSETTING(    0x40, DEF_STR( Free_Play ))
-	INPUT_PORTS_END
+		PORT_START(); 	/* SW1 */
+		PORT_DIPNAME( 0x07, 0x00, "Bonus Coins" );
+		PORT_DIPSETTING(    0x00, "None" );
+		PORT_DIPSETTING(    0x05, "1 for every 2" );
+		PORT_DIPSETTING(    0x02, "1 for every 4" );
+		PORT_DIPSETTING(    0x01, "1 for every 5" );
+		PORT_DIPSETTING(    0x06, "2 for every 4" );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x30, 0x00, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Free_Play") );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -302,35 +302,35 @@ public class foodf
 	 *
 	 *************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		2,
-		{ 0, 4 },
-		{ 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0, 4 },
+		new int[] { 8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*16
-	};
+	);
 	
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,2),
 		2,
-		{ RGN_FRAC(1,2), 0 },
-		{ 8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+		new int[] { RGN_FRAC(1,2), 0 },
+		new int[] { 8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 		8*32
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout,   0, 64 },	/* characters 8x8 */
-		{ REGION_GFX2, 0, &spritelayout, 0, 64 },	/* sprites & playfield */
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,   0, 64 ),	/* characters 8x8 */
+		new GfxDecodeInfo( REGION_GFX2, 0, spritelayout, 0, 64 ),	/* sprites  playfield */
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -341,28 +341,28 @@ public class foodf
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( pot_r )
+	public static ReadHandlerPtr pot_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(5) >> offset) << 7;
-	}
+	} };
 	
-	static struct POKEYinterface pokey_interface =
-	{
+	static POKEYinterface pokey_interface = new POKEYinterface
+	(
 		3,
 		600000,
-		{ 33, 33, 33 },
+		new int[] { 33, 33, 33 },
 		/* The 8 pot handlers */
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
-		{ pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
+		new ReadHandlerPtr[] { pot_r, 0, 0 },
 		/* The allpot handler */
-		{ 0, 0, 0 }
-	};
+		new ReadHandlerPtr[] { 0, 0, 0 }
+	);
 	
 	
 	
@@ -407,64 +407,64 @@ public class foodf
 	 *
 	 *************************************/
 	
-	ROM_START( foodf )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for 68000 code */
-		ROM_LOAD16_BYTE( "301-8c.020",   0x000001, 0x002000, CRC(dfc3d5a8) SHA1(7abe5e9c27098bd8c93cc06f1b9e3db0744019e9) )
-		ROM_LOAD16_BYTE( "302-9c.020",   0x000000, 0x002000, CRC(ef92dc5c) SHA1(eb41291615165f549a68ebc6d4664edef1a04ac5) )
-		ROM_LOAD16_BYTE( "303-8d.020",   0x004001, 0x002000, CRC(64b93076) SHA1(efa4090d96aa0ffd4192a045f174ac5960810bca) )
-		ROM_LOAD16_BYTE( "304-9d.020",   0x004000, 0x002000, CRC(ea596480) SHA1(752aa33a8e8045650dd32ec7c7026e00d7896e0f) )
-		ROM_LOAD16_BYTE( "305-8e.020",   0x008001, 0x002000, CRC(e6cff1b1) SHA1(7c7ad2dcdff60fc092e8a825c5a6de6b506523de) )
-		ROM_LOAD16_BYTE( "306-9e.020",   0x008000, 0x002000, CRC(95159a3e) SHA1(f180126671776f62242ec9fd4a82a581c551ffce) )
-		ROM_LOAD16_BYTE( "307-8f.020",   0x00c001, 0x002000, CRC(17828dbb) SHA1(9d8e29a5e56a8a9c5db8561e4c20ff22f69b46ca) )
-		ROM_LOAD16_BYTE( "308-9f.020",   0x00c000, 0x002000, CRC(608690c9) SHA1(419020c69ce6fded0d9af44ead8ec4727468d58b) )
+	static RomLoadPtr rom_foodf = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for 68000 code */
+		ROM_LOAD16_BYTE( "301-8c.020",   0x000001, 0x002000, CRC(dfc3d5a8);SHA1(7abe5e9c27098bd8c93cc06f1b9e3db0744019e9) )
+		ROM_LOAD16_BYTE( "302-9c.020",   0x000000, 0x002000, CRC(ef92dc5c);SHA1(eb41291615165f549a68ebc6d4664edef1a04ac5) )
+		ROM_LOAD16_BYTE( "303-8d.020",   0x004001, 0x002000, CRC(64b93076);SHA1(efa4090d96aa0ffd4192a045f174ac5960810bca) )
+		ROM_LOAD16_BYTE( "304-9d.020",   0x004000, 0x002000, CRC(ea596480);SHA1(752aa33a8e8045650dd32ec7c7026e00d7896e0f) )
+		ROM_LOAD16_BYTE( "305-8e.020",   0x008001, 0x002000, CRC(e6cff1b1);SHA1(7c7ad2dcdff60fc092e8a825c5a6de6b506523de) )
+		ROM_LOAD16_BYTE( "306-9e.020",   0x008000, 0x002000, CRC(95159a3e);SHA1(f180126671776f62242ec9fd4a82a581c551ffce) )
+		ROM_LOAD16_BYTE( "307-8f.020",   0x00c001, 0x002000, CRC(17828dbb);SHA1(9d8e29a5e56a8a9c5db8561e4c20ff22f69b46ca) )
+		ROM_LOAD16_BYTE( "308-9f.020",   0x00c000, 0x002000, CRC(608690c9);SHA1(419020c69ce6fded0d9af44ead8ec4727468d58b) )
 	
-		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb) SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
+		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb);SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
 	
-		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6) SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
-		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf) SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
-	ROM_END
-	
-	
-	ROM_START( foodf2 )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for 68000 code */
-		ROM_LOAD16_BYTE( "201-8c.020",   0x000001, 0x002000, CRC(4ee52d73) SHA1(ff4ab8169a9b260bbd1f49023a30064e2f0b6686) )
-		ROM_LOAD16_BYTE( "202-9c.020",   0x000000, 0x002000, CRC(f8c4b977) SHA1(824d33baa413b2ee898c75157624ea007c92032f) )
-		ROM_LOAD16_BYTE( "203-8d.020",   0x004001, 0x002000, CRC(0e9f99a3) SHA1(37bba66957ee19e7d05fcc3e4583e909809075ed) )
-		ROM_LOAD16_BYTE( "204-9d.020",   0x004000, 0x002000, CRC(f667374c) SHA1(d7be70b56500e2071b7f8c810f7a3e2a6743c6bd) )
-		ROM_LOAD16_BYTE( "205-8e.020",   0x008001, 0x002000, CRC(1edd05b5) SHA1(cc712a11946c103eaa808c86e15676fde8610ad9) )
-		ROM_LOAD16_BYTE( "206-9e.020",   0x008000, 0x002000, CRC(bb8926b3) SHA1(95c6ba8ac6b56d1a67a47758b71712d55a959cd0) )
-		ROM_LOAD16_BYTE( "207-8f.020",   0x00c001, 0x002000, CRC(c7383902) SHA1(f76e2c95fccd0cafff9346a32e0c041c291a6696) )
-		ROM_LOAD16_BYTE( "208-9f.020",   0x00c000, 0x002000, CRC(608690c9) SHA1(419020c69ce6fded0d9af44ead8ec4727468d58b) )
-	
-		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb) SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
-	
-		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6) SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
-		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf) SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
-	ROM_END
+		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6);SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
+		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf);SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
+	ROM_END(); }}; 
 	
 	
-	ROM_START( foodfc )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for 68000 code */
-		ROM_LOAD16_BYTE( "113-8c.020",   0x000001, 0x002000, CRC(193a299f) SHA1(58bbf714eff22d8a47b174e4b121f14a8dcb4ef9) )
-		ROM_LOAD16_BYTE( "114-9c.020",   0x000000, 0x002000, CRC(33ed6bbe) SHA1(5d80fb092d2964b851e6c5982572d4ffc5078c55) )
-		ROM_LOAD16_BYTE( "115-8d.020",   0x004001, 0x002000, CRC(64b93076) SHA1(efa4090d96aa0ffd4192a045f174ac5960810bca) )
-		ROM_LOAD16_BYTE( "116-9d.020",   0x004000, 0x002000, CRC(ea596480) SHA1(752aa33a8e8045650dd32ec7c7026e00d7896e0f) )
-		ROM_LOAD16_BYTE( "117-8e.020",   0x008001, 0x002000, CRC(12a55db6) SHA1(508f02c72074a0e3300ec32c181e4f72cbc4245f) )
-		ROM_LOAD16_BYTE( "118-9e.020",   0x008000, 0x002000, CRC(e6d451d4) SHA1(03bfa932ed419572c08942ad159288b38d24d90f) )
-		ROM_LOAD16_BYTE( "119-8f.020",   0x00c001, 0x002000, CRC(455cc891) SHA1(9f7764c15dea7568326860b910686fec644c42c2) )
-		ROM_LOAD16_BYTE( "120-9f.020",   0x00c000, 0x002000, CRC(34173910) SHA1(19e6032c22d20410386516ffc1a809ae50431c65) )
+	static RomLoadPtr rom_foodf2 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for 68000 code */
+		ROM_LOAD16_BYTE( "201-8c.020",   0x000001, 0x002000, CRC(4ee52d73);SHA1(ff4ab8169a9b260bbd1f49023a30064e2f0b6686) )
+		ROM_LOAD16_BYTE( "202-9c.020",   0x000000, 0x002000, CRC(f8c4b977);SHA1(824d33baa413b2ee898c75157624ea007c92032f) )
+		ROM_LOAD16_BYTE( "203-8d.020",   0x004001, 0x002000, CRC(0e9f99a3);SHA1(37bba66957ee19e7d05fcc3e4583e909809075ed) )
+		ROM_LOAD16_BYTE( "204-9d.020",   0x004000, 0x002000, CRC(f667374c);SHA1(d7be70b56500e2071b7f8c810f7a3e2a6743c6bd) )
+		ROM_LOAD16_BYTE( "205-8e.020",   0x008001, 0x002000, CRC(1edd05b5);SHA1(cc712a11946c103eaa808c86e15676fde8610ad9) )
+		ROM_LOAD16_BYTE( "206-9e.020",   0x008000, 0x002000, CRC(bb8926b3);SHA1(95c6ba8ac6b56d1a67a47758b71712d55a959cd0) )
+		ROM_LOAD16_BYTE( "207-8f.020",   0x00c001, 0x002000, CRC(c7383902);SHA1(f76e2c95fccd0cafff9346a32e0c041c291a6696) )
+		ROM_LOAD16_BYTE( "208-9f.020",   0x00c000, 0x002000, CRC(608690c9);SHA1(419020c69ce6fded0d9af44ead8ec4727468d58b) )
 	
-		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb) SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
+		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb);SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
 	
-		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6) SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
-		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf) SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
-	ROM_END
+		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6);SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
+		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf);SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
+	ROM_END(); }}; 
+	
+	
+	static RomLoadPtr rom_foodfc = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for 68000 code */
+		ROM_LOAD16_BYTE( "113-8c.020",   0x000001, 0x002000, CRC(193a299f);SHA1(58bbf714eff22d8a47b174e4b121f14a8dcb4ef9) )
+		ROM_LOAD16_BYTE( "114-9c.020",   0x000000, 0x002000, CRC(33ed6bbe);SHA1(5d80fb092d2964b851e6c5982572d4ffc5078c55) )
+		ROM_LOAD16_BYTE( "115-8d.020",   0x004001, 0x002000, CRC(64b93076);SHA1(efa4090d96aa0ffd4192a045f174ac5960810bca) )
+		ROM_LOAD16_BYTE( "116-9d.020",   0x004000, 0x002000, CRC(ea596480);SHA1(752aa33a8e8045650dd32ec7c7026e00d7896e0f) )
+		ROM_LOAD16_BYTE( "117-8e.020",   0x008001, 0x002000, CRC(12a55db6);SHA1(508f02c72074a0e3300ec32c181e4f72cbc4245f) )
+		ROM_LOAD16_BYTE( "118-9e.020",   0x008000, 0x002000, CRC(e6d451d4);SHA1(03bfa932ed419572c08942ad159288b38d24d90f) )
+		ROM_LOAD16_BYTE( "119-8f.020",   0x00c001, 0x002000, CRC(455cc891);SHA1(9f7764c15dea7568326860b910686fec644c42c2) )
+		ROM_LOAD16_BYTE( "120-9f.020",   0x00c000, 0x002000, CRC(34173910);SHA1(19e6032c22d20410386516ffc1a809ae50431c65) )
+	
+		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "109-6lm.020",  0x000000, 0x002000, CRC(c13c90eb);SHA1(ebd2bbbdd7e184851d1ab4b5648481d966c78cc2) )
+	
+		ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "110-4d.020",   0x000000, 0x002000, CRC(8870e3d6);SHA1(702007d3d543f872b5bf5d00b49f6e05b46d6600) )
+		ROM_LOAD( "111-4e.020",   0x002000, 0x002000, CRC(84372edf);SHA1(9beef3ff3b28405c45d691adfbc233921073be47) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -474,7 +474,7 @@ public class foodf
 	 *
 	 *************************************/
 	
-	GAME( 1982, foodf,  0,     foodf, foodf, 0, ROT0, "Atari", "Food Fight (rev 3)" )
-	GAME( 1982, foodf2, foodf, foodf, foodf, 0, ROT0, "Atari", "Food Fight (rev 2)" )
-	GAME( 1982, foodfc, foodf, foodf, foodf, 0, ROT0, "Atari", "Food Fight (cocktail)" )
+	public static GameDriver driver_foodf	   = new GameDriver("1982"	,"foodf"	,"foodf.java"	,rom_foodf,null	,machine_driver_foodf	,input_ports_foodf	,null	,ROT0	,	"Atari", "Food Fight (rev 3)" )
+	public static GameDriver driver_foodf2	   = new GameDriver("1982"	,"foodf2"	,"foodf.java"	,rom_foodf2,driver_foodf	,machine_driver_foodf	,input_ports_foodf	,null	,ROT0	,	"Atari", "Food Fight (rev 2)" )
+	public static GameDriver driver_foodfc	   = new GameDriver("1982"	,"foodfc"	,"foodf.java"	,rom_foodfc,driver_foodf	,machine_driver_foodf	,input_ports_foodf	,null	,ROT0	,	"Atari", "Food Fight (cocktail)" )
 }

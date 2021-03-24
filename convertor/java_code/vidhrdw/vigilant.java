@@ -24,11 +24,11 @@ public class vigilant
 {
 	
 	
-	static struct rectangle bottomvisiblearea =
-	{
+	static rectangle bottomvisiblearea = new rectangle
+	(
 		16*8, 48*8-1,
 		6*8, 32*8-1
-	};
+	);
 	
 	unsigned char *vigilant_paletteram;
 	unsigned char *vigilant_sprite_paletteram;
@@ -107,22 +107,22 @@ public class vigilant
 	 These are used to index a color triplet of RGB.  The triplet is read
 	 from RAM, and output to R0-R4, G0-G4, and B0-B4.
 	 **************************************************************************/
-	WRITE_HANDLER( vigilant_paletteram_w )
+	public static WriteHandlerPtr vigilant_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bank,r,g,b;
 	
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		bank = offset & 0x400;
 		offset &= 0xff;
 	
-		r = (paletteram[bank + offset + 0x000] << 3) & 0xFF;
-		g = (paletteram[bank + offset + 0x100] << 3) & 0xFF;
-		b = (paletteram[bank + offset + 0x200] << 3) & 0xFF;
+		r = (paletteram.read(bank + offset + 0x000)<< 3) & 0xFF;
+		g = (paletteram.read(bank + offset + 0x100)<< 3) & 0xFF;
+		b = (paletteram.read(bank + offset + 0x200)<< 3) & 0xFF;
 	
 		palette_set_color((bank >> 2) + offset,r,g,b);
-	}
+	} };
 	
 	
 	
@@ -132,13 +132,13 @@ public class vigilant
 	 horiz_scroll_low  = HSPL, an 8-bit register
 	 horiz_scroll_high = HSPH, a 1-bit register
 	 **************************************************************************/
-	WRITE_HANDLER( vigilant_horiz_scroll_w )
+	public static WriteHandlerPtr vigilant_horiz_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset==0)
 			horiz_scroll_low = data;
 		else
 			horiz_scroll_high = (data & 0x01) * 256;
-	}
+	} };
 	
 	/***************************************************************************
 	 vigilant_rear_horiz_scroll_w
@@ -146,13 +146,13 @@ public class vigilant
 	 rear_horiz_scroll_low  = RHSPL, an 8-bit register
 	 rear_horiz_scroll_high = RHSPH, an 8-bit register but only 3 bits are saved
 	***************************************************************************/
-	WRITE_HANDLER( vigilant_rear_horiz_scroll_w )
+	public static WriteHandlerPtr vigilant_rear_horiz_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset==0)
 			rear_horiz_scroll_low = data;
 		else
 			rear_horiz_scroll_high = (data & 0x07) * 256;
-	}
+	} };
 	
 	/***************************************************************************
 	 vigilant_rear_color_w
@@ -169,11 +169,11 @@ public class vigilant
 	 palette.  However, the top four bits of the palette inputs are labelled:
 	 "RCC3", "RCC2", "V256E", "RCC0".  Methinks there's a typo.
 	 **************************************************************************/
-	WRITE_HANDLER( vigilant_rear_color_w )
+	public static WriteHandlerPtr vigilant_rear_color_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		rear_disable = data & 0x40;
 		rear_color = (data & 0x0d);
-	}
+	} };
 	
 	/***************************************************************************
 	 draw_foreground
@@ -190,9 +190,9 @@ public class vigilant
 		{
 			int sy = 8 * ((offs/2) / 64);
 			int sx = 8 * ((offs/2) % 64);
-			int attributes = videoram[offs+1];
+			int attributes = videoram.read(offs+1);
 			int color = attributes & 0x0F;
-			int tile_number = videoram[offs] | ((attributes & 0xF0) << 4);
+			int tile_number = videoram.read(offs)| ((attributes & 0xF0) << 4);
 	
 			if (priority)	 /* foreground */
 			{
@@ -263,13 +263,13 @@ public class vigilant
 		{
 			int code,color,sx,sy,flipx,flipy,h,y;
 	
-			code = spriteram[offs+4] | ((spriteram[offs+5] & 0x0f) << 8);
-			color = spriteram[offs+0] & 0x0f;
-			sx = (spriteram[offs+6] | ((spriteram[offs+7] & 0x01) << 8));
-			sy = 256+128 - (spriteram[offs+2] | ((spriteram[offs+3] & 0x01) << 8));
-			flipx = spriteram[offs+5] & 0x40;
-			flipy = spriteram[offs+5] & 0x80;
-			h = 1 << ((spriteram[offs+5] & 0x30) >> 4);
+			code = spriteram.read(offs+4)| ((spriteram.read(offs+5)& 0x0f) << 8);
+			color = spriteram.read(offs+0)& 0x0f;
+			sx = (spriteram.read(offs+6)| ((spriteram.read(offs+7)& 0x01) << 8));
+			sy = 256+128 - (spriteram.read(offs+2)| ((spriteram.read(offs+3)& 0x01) << 8));
+			flipx = spriteram.read(offs+5)& 0x40;
+			flipy = spriteram.read(offs+5)& 0x80;
+			h = 1 << ((spriteram.read(offs+5)& 0x30) >> 4);
 			sy -= 16 * h;
 	
 			for (y = 0;y < h;y++)
@@ -300,15 +300,15 @@ public class vigilant
 			int r,g,b;
 	
 	
-			r = (paletteram[0x400 + 16 * rear_color + i] << 3) & 0xFF;
-			g = (paletteram[0x500 + 16 * rear_color + i] << 3) & 0xFF;
-			b = (paletteram[0x600 + 16 * rear_color + i] << 3) & 0xFF;
+			r = (paletteram.read(0x400 + 16 * rear_color + i)<< 3) & 0xFF;
+			g = (paletteram.read(0x500 + 16 * rear_color + i)<< 3) & 0xFF;
+			b = (paletteram.read(0x600 + 16 * rear_color + i)<< 3) & 0xFF;
 	
 			palette_set_color(512 + i,r,g,b);
 	
-			r = (paletteram[0x400 + 16 * rear_color + 32 + i] << 3) & 0xFF;
-			g = (paletteram[0x500 + 16 * rear_color + 32 + i] << 3) & 0xFF;
-			b = (paletteram[0x600 + 16 * rear_color + 32 + i] << 3) & 0xFF;
+			r = (paletteram.read(0x400 + 16 * rear_color + 32 + i)<< 3) & 0xFF;
+			g = (paletteram.read(0x500 + 16 * rear_color + 32 + i)<< 3) & 0xFF;
+			b = (paletteram.read(0x600 + 16 * rear_color + 32 + i)<< 3) & 0xFF;
 	
 			palette_set_color(512 + 16 + i,r,g,b);
 		}
@@ -337,9 +337,9 @@ public class vigilant
 		{
 			int sy = 8 * ((offs/2) / 64);
 			int sx = 8 * ((offs/2) % 64);
-			int attributes = videoram[offs+1];
+			int attributes = videoram.read(offs+1);
 			int color = (attributes & 0xF0) >> 4;
-			int tile_number = videoram[offs] | ((attributes & 0x0F) << 8);
+			int tile_number = videoram.read(offs)| ((attributes & 0x0F) << 8);
 	
 			if (dirtybuffer[offs] || dirtybuffer[offs+1])
 			{

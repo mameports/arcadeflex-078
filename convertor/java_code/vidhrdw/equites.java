@@ -28,7 +28,6 @@ public class equites
 	/******************************************************************************/
 	// Imports
 	
-	extern int equites_id, equites_flip;
 	
 	/******************************************************************************/
 	// Locals
@@ -89,11 +88,11 @@ public class equites
 	
 		for (i=0; i<256; i++)
 		{
-			r = color_prom[i] & 0xf;
+			r = color_prom.read(i)& 0xf;
 			r = (r << 4) + r;
-			g = color_prom[i+0x100] & 0xf;
+			g = color_prom.read(i+0x100)& 0xf;
 			g = (g << 4) + g;
-			b = color_prom[i+0x200] & 0xf;
+			b = color_prom.read(i+0x200)& 0xf;
 			b = (b << 4) + b;
 	
 			palette_set_color(i, r, g, b);
@@ -138,11 +137,11 @@ public class equites
 	
 		for (i=0; i<0x100; i++)
 		{
-			r = color_prom[i] & 0xf;
+			r = color_prom.read(i)& 0xf;
 			r = (r << 4) + r;
-			g = color_prom[i+0x100] & 0xf;
+			g = color_prom.read(i+0x100)& 0xf;
 			g = (g << 4) + g;
-			b = color_prom[i+0x200] & 0xf;
+			b = color_prom.read(i+0x200)& 0xf;
 			b = (b << 4) + b;
 	
 			palette_set_color(i, r, g, b);
@@ -532,7 +531,7 @@ public class equites
 		for (i=0; i<0x7e; i+=2)
 		{
 			data = data_ptr[i];
-			if (!data) continue;
+			if (data == 0) continue;
 	
 			fx = data & 0x2000;
 			fy = data & 0x1000;
@@ -607,14 +606,14 @@ public class equites
 	
 	WRITE16_HANDLER(equites_bgcolor_w)
 	{
-		if (!ACCESSING_MSB) return;
+		if (ACCESSING_MSB == 0) return;
 	
 		data >>= 8;
 	
 		switch (equites_id)
 		{
 			case 0x8400:
-				if (!data) bgcolor[0] = 0;
+				if (data == 0) bgcolor[0] = 0;
 				else if (data==0x0e) bgcolor[0] = bgcolor[2];
 				else
 				{

@@ -116,7 +116,7 @@ public class gberet
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT_COLOR,8,8,64,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 0;
 	
 		tilemap_set_transparent_pen(bg_tilemap,0x10);
@@ -133,25 +133,25 @@ public class gberet
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( gberet_videoram_w )
+	public static WriteHandlerPtr gberet_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gberet_videoram[offset] != data)
 		{
 			gberet_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gberet_colorram_w )
+	public static WriteHandlerPtr gberet_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gberet_colorram[offset] != data)
 		{
 			gberet_colorram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gberet_e044_w )
+	public static WriteHandlerPtr gberet_e044_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 enables interrupts */
 		interruptenable = data & 1;
@@ -161,9 +161,9 @@ public class gberet
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	
 		/* don't know about the other bits */
-	}
+	} };
 	
-	WRITE_HANDLER( gberet_scroll_w )
+	public static WriteHandlerPtr gberet_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int scroll;
 	
@@ -171,9 +171,9 @@ public class gberet
 	
 		scroll = gberet_scrollram[offset & 0x1f] | (gberet_scrollram[offset | 0x20] << 8);
 		tilemap_set_scrollx(bg_tilemap,offset & 0x1f,scroll);
-	}
+	} };
 	
-	WRITE_HANDLER( gberetb_scroll_w )
+	public static WriteHandlerPtr gberetb_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int scroll;
 	
@@ -182,7 +182,7 @@ public class gberet
 	
 		for (offset = 6;offset < 29;offset++)
 			tilemap_set_scrollx(bg_tilemap,offset,scroll + 64-8);
-	}
+	} };
 	
 	
 	INTERRUPT_GEN( gberet_interrupt )

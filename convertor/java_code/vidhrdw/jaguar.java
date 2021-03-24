@@ -215,8 +215,7 @@ public class jaguar
 	 *************************************/
 	
 	/* from jagobj.c */
-	static int jagobj_init(void);
-	static void process_object_list(struct mame_bitmap *bitmap, const struct rectangle *cliprect);
+	static static void process_object_list(struct mame_bitmap *bitmap, const struct rectangle *cliprect);
 	
 	/* from jagblit.c */
 	static void generic_blitter(UINT32 command, UINT32 a1flags, UINT32 a2flags);
@@ -749,7 +748,7 @@ public class jaguar
 			return 1;
 	
 		pen_table = auto_malloc(65536 * sizeof(pen_t));
-		if (!pen_table)
+		if (pen_table == 0)
 			return 1;
 	
 		vi_timer = timer_alloc(vi_callback);

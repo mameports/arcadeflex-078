@@ -49,7 +49,7 @@ public class ccastles
 	  bit 0 -- inverter -- 1  kohm resistor  -- GREEN
 	
 	***************************************************************************/
-	WRITE_HANDLER( ccastles_paletteram_w )
+	public static WriteHandlerPtr ccastles_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 		int bit0,bit1,bit2;
@@ -80,7 +80,7 @@ public class ccastles
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 		palette_set_color(offset & 0x1f,r,g,b);
-	}
+	} };
 	
 	
 	
@@ -105,7 +105,7 @@ public class ccastles
 	
 	
 	
-	READ_HANDLER( ccastles_bitmode_r )
+	public static ReadHandlerPtr ccastles_bitmode_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int addr;
 	
@@ -134,15 +134,15 @@ public class ccastles
 	
 			addr -= 0xc00;
 			if (ccastles_screen_addr[0] & 0x01)
-				return ((videoram[addr] & 0x0f) << 4);
+				return ((videoram.read(addr)& 0x0f) << 4);
 			else
-				return (videoram[addr] & 0xf0);
+				return (videoram.read(addr)& 0xf0);
 		}
 	
 		return 0;
-	}
+	} };
 	
-	WRITE_HANDLER( ccastles_bitmode_w )
+	public static WriteHandlerPtr ccastles_bitmode_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int addr;
 	
@@ -160,27 +160,27 @@ public class ccastles
 			if (ccastles_screen_addr[0] & 0x01)
 			{
 				mode = (data >> 4) & 0x0f;
-				videoram[addr] = (videoram[addr] & 0xf0) | mode;
+				videoram.write(addr,(videoram[addr] & 0xf0) | mode);
 			}
 			else
 			{
 				mode = (data & 0xf0);
-				videoram[addr] = (videoram[addr] & 0x0f) | mode;
+				videoram.write(addr,(videoram[addr] & 0x0f) | mode);
 			}
 	
 			j = 2*addr;
 			x = j%256;
 			y = j/256;
-			if (!flip_screen)
+			if (flip_screen == 0)
 			{
-				plot_pixel(tmpbitmap, x  , y, Machine->pens[16 + ((videoram[addr] & 0xf0) >> 4)]);
-				plot_pixel(tmpbitmap, x+1, y, Machine->pens[16 +  (videoram[addr] & 0x0f)      ]);
+				plot_pixel(tmpbitmap, x  , y, Machine->pens[16 + ((videoram.read(addr)& 0xf0) >> 4)]);
+				plot_pixel(tmpbitmap, x+1, y, Machine->pens[16 +  (videoram.read(addr)& 0x0f)      ]);
 	
 				/* if bit 3 of the pixel is set, background has priority over sprites when */
 				/* the sprite has the priority bit set. We use a second bitmap to remember */
 				/* which pixels have priority. */
-				plot_pixel(maskbitmap, x  , y, videoram[addr] & 0x80);
-				plot_pixel(maskbitmap, x+1, y, videoram[addr] & 0x08);
+				plot_pixel(maskbitmap, x  , y, videoram.read(addr)& 0x80);
+				plot_pixel(maskbitmap, x+1, y, videoram.read(addr)& 0x08);
 			}
 			else
 			{
@@ -188,14 +188,14 @@ public class ccastles
 				x = 254-x;
 				if (y >= 0)
 				{
-					plot_pixel(tmpbitmap, x+1, y, Machine->pens[16 + ((videoram[addr] & 0xf0) >> 4)]);
-					plot_pixel(tmpbitmap, x  , y, Machine->pens[16 +  (videoram[addr] & 0x0f)      ]);
+					plot_pixel(tmpbitmap, x+1, y, Machine->pens[16 + ((videoram.read(addr)& 0xf0) >> 4)]);
+					plot_pixel(tmpbitmap, x  , y, Machine->pens[16 +  (videoram.read(addr)& 0x0f)      ]);
 	
 					/* if bit 3 of the pixel is set, background has priority over sprites when */
 					/* the sprite has the priority bit set. We use a second bitmap to remember */
 					/* which pixels have priority. */
-					plot_pixel(maskbitmap, x+1, y, videoram[addr] & 0x80);
-					plot_pixel(maskbitmap, x  , y, videoram[addr] & 0x08);
+					plot_pixel(maskbitmap, x+1, y, videoram.read(addr)& 0x80);
+					plot_pixel(maskbitmap, x  , y, videoram.read(addr)& 0x08);
 				}
 			}
 		}
@@ -218,7 +218,7 @@ public class ccastles
 				ccastles_screen_addr[1] --;
 		}
 	
-	}
+	} };
 	
 	
 	/***************************************************************************

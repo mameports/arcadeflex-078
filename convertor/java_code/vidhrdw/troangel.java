@@ -49,18 +49,18 @@ public class troangel
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[256] >> 2) & 0x01;
-			bit2 = (color_prom[256] >> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 2) & 0x01;
+			bit2 = (color_prom.read(256)>> 3) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[0] >> 3) & 0x01;
-			bit1 = (color_prom[256] >> 0) & 0x01;
-			bit2 = (color_prom[256] >> 1) & 0x01;
+			bit0 = (color_prom.read(0)>> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 0) & 0x01;
+			bit2 = (color_prom.read(256)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -112,7 +112,7 @@ public class troangel
 	
 	
 	
-	WRITE_HANDLER( troangel_flipscreen_w )
+	public static WriteHandlerPtr troangel_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* screen flip is handled both by software and hardware */
 		data ^= ~readinputport(4) & 1;
@@ -120,12 +120,12 @@ public class troangel
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
 	
 		coin_counter_w(0,data & 0x02);
 		coin_counter_w(1,data & 0x20);
-	}
+	} };
 	
 	
 	
@@ -147,8 +147,8 @@ public class troangel
 				sx = (offs/2) % 32;
 				sy = (offs/2) / 32;
 	
-				attr = videoram[offs];
-				code = videoram[offs+1] + ((attr & 0xc0) << 2);
+				attr = videoram.read(offs);
+				code = videoram.read(offs+1)+ ((attr & 0xc0) << 2);
 				flipx = attr & 0x20;
 	
 				if (flipscreen)
@@ -204,10 +204,10 @@ public class troangel
 	
 		for (offs = spriteram_size-4;offs >= 0;offs -= 4)
 		{
-			unsigned char attributes = spriteram[offs+1];
-			int sx = spriteram[offs+3];
-			int sy = ((224-spriteram[offs+0]-32)&0xff)+32;
-			int code = spriteram[offs+2];
+			unsigned char attributes = spriteram.read(offs+1);
+			int sx = spriteram.read(offs+3);
+			int sy = ((224-spriteram.read(offs+0)-32)&0xff)+32;
+			int code = spriteram.read(offs+2);
 			int color = attributes&0x1f;
 			int flipy = attributes&0x80;
 			int flipx = attributes&0x40;

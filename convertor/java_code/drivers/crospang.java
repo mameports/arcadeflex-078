@@ -79,173 +79,179 @@ public class crospang
 	
 	/* sound cpu */
 	
-	static MEMORY_READ_START( crospang_sound_readmem )
-		{ 0x0000, 0xbfff, MRA_ROM },
-		{ 0xc000, 0xc7ff, MRA_RAM },
+	public static Memory_ReadAddress crospang_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0xbfff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc000, 0xc7ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
+	
+	public static Memory_WriteAddress crospang_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xc7ff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
+	
+	public static IO_ReadPort crospang_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, soundlatch_r ),
+		new IO_ReadPort( 0x02, 0x02, OKIM6295_status_0_r ),
+		new IO_ReadPort( 0x06, 0x06, MRA_NOP  ),
 	MEMORY_END
 	
-	static MEMORY_WRITE_START( crospang_sound_writemem )
-		{ 0x0000, 0xbfff, MWA_ROM },
-		{ 0xc000, 0xc7ff, MWA_RAM },
+	public static IO_WritePort crospang_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, MWA_NOP ),
+		new IO_WritePort( 0x01, 0x01, MWA_NOP ),
+		new IO_WritePort( 0x02, 0x02, OKIM6295_data_0_w ),
 	MEMORY_END
 	
-	static PORT_READ_START( crospang_sound_readport )
-		{ 0x00, 0x00, soundlatch_r },
-		{ 0x02, 0x02, OKIM6295_status_0_r },
-		{ 0x06, 0x06, MRA_NOP  },
-	MEMORY_END
+	static InputPortPtr input_ports_crospang = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* DSW */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	 | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 0-6" );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_DIPNAME( 0x4000, 0x4000, "Unused SW 0-14" );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 );
 	
-	static PORT_WRITE_START( crospang_sound_writeport )
-		{ 0x00, 0x00, MWA_NOP },
-		{ 0x01, 0x01, MWA_NOP },
-		{ 0x02, 0x02, OKIM6295_data_0_w },
-	MEMORY_END
+		PORT_START(); 	/* DSW */
+		PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 1-0" );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 1-1" );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 1-2" );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 1-3" );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 1-4" );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 1-5" );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 1-6" );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 1-7" );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 1-10" );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0800, 0x0800, "Unused SW 1-11" );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1000, 0x1000, "Unused SW 1-12" );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x2000, 0x2000, "Unused SW 1-13" );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x4000, "Unused SW 1-14" );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x8000, 0x8000, "Unused SW 1-15" );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
 	
-	INPUT_PORTS_START( crospang )
-		PORT_START	/* DSW */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	 | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 0-6" )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_DIPNAME( 0x4000, 0x4000, "Unused SW 0-14" )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
+		PORT_START(); 	/* DSW */
+		PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 2-0" );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 2-1" );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 2-2" );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 2-3" );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 2-4" );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 2-5" );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 2-6" );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 2-7" );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0100, 0x0100, "Unknown SW 2-8" );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0200, 0x0200, "Unused SW 2-9" );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 2-10" );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0800, 0x0800, "Unused SW 2-11" );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1000, 0x1000, "Unused SW 2-12" );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x2000, 0x2000, "Unused SW 2-13" );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x4000, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x8000, 0x8000, "Unused SW 2-15" );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
-		PORT_START	/* DSW */
-		PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 1-0" )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 1-1" )
-		PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 1-2" )
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 1-3" )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 1-4" )
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 1-5" )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 1-6" )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 1-7" )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 1-10" )
-		PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0800, 0x0800, "Unused SW 1-11" )
-		PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1000, 0x1000, "Unused SW 1-12" )
-		PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x2000, 0x2000, "Unused SW 1-13" )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x4000, "Unused SW 1-14" )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x8000, 0x8000, "Unused SW 1-15" )
-		PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	
-		PORT_START	/* DSW */
-		PORT_DIPNAME( 0x0001, 0x0001, "Unknown SW 2-0" )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0002, 0x0002, "Unused SW 2-1" )
-		PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0004, 0x0004, "Unused SW 2-2" )
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0008, 0x0008, "Unused SW 2-3" )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0010, 0x0010, "Unused SW 2-4" )
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, "Unused SW 2-5" )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, "Unused SW 2-6" )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, "Unused SW 2-7" )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0100, 0x0100, "Unknown SW 2-8" )
-		PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0200, 0x0200, "Unused SW 2-9" )
-		PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0400, 0x0400, "Unused SW 2-10" )
-		PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0800, 0x0800, "Unused SW 2-11" )
-		PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1000, 0x1000, "Unused SW 2-12" )
-		PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x2000, 0x2000, "Unused SW 2-13" )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x4000, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x8000, 0x8000, "Unused SW 2-15" )
-		PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	INPUT_PORTS_END
-	
-	static struct GfxLayout layout_16x16x4a =
-	{
+	static GfxLayout layout_16x16x4a = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(0,4),RGN_FRAC(1,4),RGN_FRAC(2,4),RGN_FRAC(3,4) },
-		{ 128,129,130,131,132,133,134,135, 0,1,2,3,4,5,6,7 },
-		{ 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7, 8*8, 8*9, 8*10, 8*11, 8*12, 8*13, 8*14, 8*15 },
+		new int[] { RGN_FRAC(0,4),RGN_FRAC(1,4),RGN_FRAC(2,4),RGN_FRAC(3,4) },
+		new int[] { 128,129,130,131,132,133,134,135, 0,1,2,3,4,5,6,7 },
+		new int[] { 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7, 8*8, 8*9, 8*10, 8*11, 8*12, 8*13, 8*14, 8*15 },
 		8*32
-	};
+	);
 	
-	static struct GfxLayout layout_16x16x4 =
-	{
+	static GfxLayout layout_16x16x4 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(2,4),RGN_FRAC(0,4),RGN_FRAC(3,4),RGN_FRAC(1,4) },
-		{ 0,1,2,3,4,5,6,7, 128,129,130,131,132,133,134,135 },
-		{ 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7, 8*8, 8*9, 8*10, 8*11, 8*12, 8*13, 8*14, 8*15 },
+		new int[] { RGN_FRAC(2,4),RGN_FRAC(0,4),RGN_FRAC(3,4),RGN_FRAC(1,4) },
+		new int[] { 0,1,2,3,4,5,6,7, 128,129,130,131,132,133,134,135 },
+		new int[] { 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7, 8*8, 8*9, 8*10, 8*11, 8*12, 8*13, 8*14, 8*15 },
 		8*32
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x4a, 0x0000, 0x40 }, // [0] Sprites
-		{ REGION_GFX2, 0, &layout_16x16x4,  0x0000, 0x40 }, // [1] Tiles
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x4a, 0x0000, 0x40 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_16x16x4,  0x0000, 0x40 ), // [1] Tiles
+		new GfxDecodeInfo( -1 )
 	};
 	
 	/* todo : is this correct? */
@@ -451,27 +457,27 @@ public class crospang
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( crospang )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 ) /* 68k */
-		ROM_LOAD16_BYTE( "p1.bin", 0x00001, 0x20000, CRC(0bcbbaad) SHA1(807f07be340d7af0aad8d49461b5a7f0221ea3b7) )
-		ROM_LOAD16_BYTE( "p2.bin", 0x00000, 0x20000, CRC(0947d204) SHA1(35e7e277c51888a66d305994bf05c3f6bfc3c29e) )
+	static RomLoadPtr rom_crospang = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* 68k */
+		ROM_LOAD16_BYTE( "p1.bin", 0x00001, 0x20000, CRC(0bcbbaad);SHA1(807f07be340d7af0aad8d49461b5a7f0221ea3b7) )
+		ROM_LOAD16_BYTE( "p2.bin", 0x00000, 0x20000, CRC(0947d204);SHA1(35e7e277c51888a66d305994bf05c3f6bfc3c29e) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* z80  */
-		ROM_LOAD( "s1.bin", 0x00000, 0x10000, CRC(d61a224c) SHA1(5cd1b2d136ad58ab550c7ba135558d6c8a4cd8f6) )/* rom s1 */
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* z80  */
+		ROM_LOAD( "s1.bin", 0x00000, 0x10000, CRC(d61a224c);SHA1(5cd1b2d136ad58ab550c7ba135558d6c8a4cd8f6) )/* rom s1 */
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 ) /* samples? */
-		ROM_LOAD( "s2.bin", 0x00000, 0x20000, CRC(9f9ecd22) SHA1(631ffe14018ba39658c435b8ecb23b19a14569ee) ) /* rom s2 */  // sample rom contains oksan?
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );/* samples? */
+		ROM_LOAD( "s2.bin", 0x00000, 0x20000, CRC(9f9ecd22);SHA1(631ffe14018ba39658c435b8ecb23b19a14569ee) ) /* rom s2 */  // sample rom contains oksan?
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 ) /* sprites */
-		ROM_LOAD( "rom6.bin", 0x000000, 0x80000, CRC(9c633082) SHA1(18b8591b695ee429c9c9855d8cbba6249a4bd809) )
-		ROM_LOAD( "rom5.bin", 0x080000, 0x80000, CRC(53a34dc5) SHA1(2e5cf8093bf507e81d7447736b7727c3fd20c471) )
-		ROM_LOAD( "rom4.bin", 0x100000, 0x80000, CRC(9a91d494) SHA1(1c6280f662f1cf53f7f6defb7e215da75b573fdf) )
-		ROM_LOAD( "rom3.bin", 0x180000, 0x80000, CRC(cc6e1fce) SHA1(eb5b3ca7222f48916dc6206f987b2669fe7e7c6b) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );/* sprites */
+		ROM_LOAD( "rom6.bin", 0x000000, 0x80000, CRC(9c633082);SHA1(18b8591b695ee429c9c9855d8cbba6249a4bd809) )
+		ROM_LOAD( "rom5.bin", 0x080000, 0x80000, CRC(53a34dc5);SHA1(2e5cf8093bf507e81d7447736b7727c3fd20c471) )
+		ROM_LOAD( "rom4.bin", 0x100000, 0x80000, CRC(9a91d494);SHA1(1c6280f662f1cf53f7f6defb7e215da75b573fdf) )
+		ROM_LOAD( "rom3.bin", 0x180000, 0x80000, CRC(cc6e1fce);SHA1(eb5b3ca7222f48916dc6206f987b2669fe7e7c6b) )
 	
-		ROM_REGION( 0x80000, REGION_GFX2, 0 ) /* bg tiles */
-		ROM_LOAD( "rom1.bin", 0x00000, 0x40000, CRC(905042bb) SHA1(ed5b97e88d24e55f8fcfaaa34251582976cb2527) )
-		ROM_LOAD( "rom2.bin", 0x40000, 0x40000, CRC(bc4381e9) SHA1(af0690c253bead3448db5ec8fb258d8284646e89) )
-	ROM_END
+		ROM_REGION( 0x80000, REGION_GFX2, 0 );/* bg tiles */
+		ROM_LOAD( "rom1.bin", 0x00000, 0x40000, CRC(905042bb);SHA1(ed5b97e88d24e55f8fcfaaa34251582976cb2527) )
+		ROM_LOAD( "rom2.bin", 0x40000, 0x40000, CRC(bc4381e9);SHA1(af0690c253bead3448db5ec8fb258d8284646e89) )
+	ROM_END(); }}; 
 	
-	GAMEX( 199?, crospang, 0, crospang, crospang, 0, ROT0, "Oksan?", "Cross Pang", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND)
+	public static GameDriver driver_crospang	   = new GameDriver("199?"	,"crospang"	,"crospang.java"	,rom_crospang,null	,machine_driver_crospang	,input_ports_crospang	,null	,ROT0	,	"Oksan?", "Cross Pang", GAME_IMPERFECT_GRAPHICS | GAME_NO_SOUND)
 }

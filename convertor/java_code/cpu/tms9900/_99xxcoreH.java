@@ -235,8 +235,7 @@ public class _99xxcoreH
 	static UINT16 decipheraddrbyte(UINT16 opcode);
 	static void contextswitch(UINT16 addr);
 	
-	static void field_interrupt(void);
-	
+	static 
 	/***************************/
 	/* Mame Interface Routines */
 	/***************************/
@@ -419,8 +418,7 @@ public class _99xxcoreH
 	static int disable_interrupt_recognition = 0;
 	
 	#if (TMS99XX_MODEL == TMS9995_ID)
-	static void reset_decrementer(void);
-	#endif
+	static #endif
 	
 	#if (TMS99XX_MODEL == TMS9900_ID)
 		/*16-bit data bus, 16-bit address bus*/
@@ -762,8 +760,7 @@ public class _99xxcoreH
 					logerror("> PC %4.4x :%4.4x %4.4x : R=%4.4x %4.4x %4.4x %4.4x %4.4x %4.4x %4.4x %4.4x %4.4x %4.4x%4.4x %4.4x %4.4x %4.4x %4.4x %4.4x :T=%d\n",I.PC,I.STATUS,I.WP,I.FR[0],I.FR[1],I.FR[2],I.FR[3],I.FR[4],I.FR[5],I.FR[6],I.FR[7],I.FR[8],I.FR[9],I.FR[10],I.FR[11],I.FR[12],I.FR[13],I.FR[14],I.FR[15],TMS99XX_ICOUNT);
 						#if 0	/* useful with TI99/4a driver */
 						{
-							extern int gpl_addr;
-							logerror("> GPL pointer %4.4x\n", gpl_addr);
+													logerror("> GPL pointer %4.4x\n", gpl_addr);
 						}
 						#endif
 					#endif
@@ -834,7 +831,7 @@ public class _99xxcoreH
 				}
 				/* all TMS9900 chips I know do not honor interrupts after XOP, BLWP or MID (after any
 				  interrupt-like instruction, actually) */
-				else if (! disable_interrupt_recognition)
+				else if (disable_interrupt_recognition == 0)
 				{
 					if (level <= IMASK)
 					{	/* a maskable interrupt is honored only if its level isn't greater than IMASK */
@@ -1323,7 +1320,7 @@ public class _99xxcoreH
 		which = (which+1) % 32;
 		buffer[which][0] = '\0';
 	
-		if( !context )
+		if (context == 0)
 			r = &I;
 	
 		switch( regnum )

@@ -95,7 +95,7 @@ public class avgdvg
 	static UINT8 vector_engine;
 	static UINT8 flipword;
 	static UINT8 busy;
-	static rgb_t colorram[32];
+	static rgb_t colorram.read(32);
 	
 	static int width, height;
 	static int xcenter, ycenter;
@@ -320,7 +320,7 @@ public class avgdvg
 					total_length += dvg_vector_timer(temp);
 	
 					/* add the new point */
-					vector_add_point(currentx, currenty, colorram[1], z);
+					vector_add_point(currentx, currenty, colorram.read(1), z);
 					break;
 	
 				/* DSVEC: draw a short vector */
@@ -357,7 +357,7 @@ public class avgdvg
 					total_length += dvg_vector_timer(temp);
 	
 					/* add the new point */
-					vector_add_point(currentx, currenty, colorram[1], z);
+					vector_add_point(currentx, currenty, colorram.read(1), z);
 					break;
 	
 				/* DLABS: move to an absolute location */
@@ -412,7 +412,7 @@ public class avgdvg
 					VGLOG(("%4x", a));
 					pc = a;
 	
-					if (!pc)
+					if (pc == 0)
 						done=1;
 					break;
 	
@@ -657,7 +657,7 @@ public class avgdvg
 					if (sparkle)
 						avg_add_point_callback(currentx, currenty, sparkle_callback, z);
 					else
-						avg_add_point(currentx, currenty, colorram[color], z);
+						avg_add_point(currentx, currenty, colorram.read(color), z);
 					VGLOG(("VCTR x:%d y:%d z:%d statz:%d", x, y, z, statz));
 					break;
 	
@@ -690,7 +690,7 @@ public class avgdvg
 					if (sparkle)
 						avg_add_point_callback(currentx, currenty, sparkle_callback, z);
 					else
-						avg_add_point(currentx, currenty, colorram[color], z);
+						avg_add_point(currentx, currenty, colorram.read(color), z);
 					VGLOG(("SVEC x:%d y:%d z:%d statz:%d", x, y, z, statz));
 					break;
 	
@@ -883,7 +883,7 @@ public class avgdvg
 	}
 	
 	
-	WRITE_HANDLER( avgdvg_go_w )
+	public static WriteHandlerPtr avgdvg_go_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int total_length;
 	
@@ -916,7 +916,7 @@ public class avgdvg
 				busy = 0;
 			}
 		}
-	}
+	} };
 	
 	
 	WRITE16_HANDLER( avgdvg_go_word_w )
@@ -932,10 +932,10 @@ public class avgdvg
 	 *
 	 ************************************/
 	
-	WRITE_HANDLER( avgdvg_reset_w )
+	public static WriteHandlerPtr avgdvg_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		avgdvg_clr_busy(0);
-	}
+	} };
 	
 	
 	WRITE16_HANDLER( avgdvg_reset_word_w )
@@ -1092,7 +1092,7 @@ public class avgdvg
 	{
 		int i;
 		for (i = 0; i < 32; i++)
-			colorram[i] = MAKE_RGB(0xff, 0xff, 0xff);
+			colorram.write(i,MAKE_RGB(0xff, 0xff, 0xff));
 	}
 	
 	
@@ -1101,7 +1101,7 @@ public class avgdvg
 	{
 		int i;
 		for (i = 0; i < 32; i++)
-			colorram[i] = VECTOR_COLOR111(i);
+			colorram.write(i,VECTOR_COLOR111(i));
 	}
 	
 	
@@ -1112,7 +1112,7 @@ public class avgdvg
 	 *
 	 ************************************/
 	
-	WRITE_HANDLER( tempest_colorram_w )
+	public static WriteHandlerPtr tempest_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bit3 = (~data >> 3) & 1;
 		int bit2 = (~data >> 2) & 1;
@@ -1122,11 +1122,11 @@ public class avgdvg
 		int g = bit3 * 0xee;
 		int b = bit2 * 0xee;
 	
-		colorram[offset] = MAKE_RGB(r, g, b);
-	}
+		colorram.write(offset,MAKE_RGB(r, g, b));
+	} };
 	
 	
-	WRITE_HANDLER( mhavoc_colorram_w )
+	public static WriteHandlerPtr mhavoc_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bit3 = (~data >> 3) & 1;
 		int bit2 = (~data >> 2) & 1;
@@ -1136,8 +1136,8 @@ public class avgdvg
 		int g = bit1 * 0xee;
 		int b = bit0 * 0xee;
 	
-		colorram[offset] = MAKE_RGB(r, g, b);
-	}
+		colorram.write(offset,MAKE_RGB(r, g, b));
+	} };
 	
 	
 	WRITE16_HANDLER( quantum_colorram_w )
@@ -1152,13 +1152,13 @@ public class avgdvg
 			int g = bit1 * 0xee + bit0 * 0x11;
 			int b = bit2 * 0xee;
 	
-			colorram[offset & 0x0f] = MAKE_RGB(r, g, b);
+			colorram.write(offset & 0x0f,MAKE_RGB(r, g, b));
 		}
 	}
 	
 	
 	static rgb_t sparkle_callback(void)
 	{
-		return colorram[16 + ((rand() >> 8) & 15)];
+		return colorram.read(16 + ((rand() >> 8) & 15));
 	}
 }

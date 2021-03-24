@@ -29,34 +29,34 @@ public class zac2650
 	/* once it's workings are fully understood.                   */
 	/**************************************************************/
 	
-	WRITE_HANDLER( tinvader_videoram_w )
+	public static WriteHandlerPtr tinvader_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( zac_s2636_w )
+	public static WriteHandlerPtr zac_s2636_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (s2636ram[offset] != data)
 	    {
 			s2636ram[offset] = data;
 	        dirtychar[offset>>3] = 1;
 	    }
-	}
+	} };
 	
-	READ_HANDLER( zac_s2636_r )
+	public static ReadHandlerPtr zac_s2636_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if(offset!=0xCB) return s2636ram[offset];
 	    else return CollisionSprite;
-	}
+	} };
 	
-	READ_HANDLER( tinvader_port_0_r )
+	public static ReadHandlerPtr tinvader_port_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return input_port_0_r(0) - CollisionBackground;
-	}
+	} };
 	
 	/*****************************************/
 	/* Check for Collision between 2 sprites */
@@ -142,7 +142,7 @@ public class zac2650
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, 0, 0)
 	}
@@ -152,7 +152,7 @@ public class zac2650
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 24, 24, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		if ((spritebitmap = auto_bitmap_alloc(Machine->drv->screen_width,Machine->drv->screen_height)) == 0)

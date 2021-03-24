@@ -23,8 +23,8 @@ public class flstory
 	
 	static void get_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index*2];
-		int attr = videoram[tile_index*2+1];
+		int code = videoram.read(tile_index*2);
+		int attr = videoram.read(tile_index*2+1);
 		int tile_number = code + ((attr & 0xc0) << 2) + 0x400 + 0x800 * char_bank;
 		int flags = ((attr & 0x08) ? TILE_FLIPX : 0) | ((attr & 0x10) ? TILE_FLIPY : 0);
 	//	tile_info.priority = (attr & 0x20) >> 5;
@@ -48,29 +48,29 @@ public class flstory
 		return video_start_generic();
 	}
 	
-	WRITE_HANDLER( flstory_videoram_w )
+	public static WriteHandlerPtr flstory_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( flstory_palette_w )
+	public static WriteHandlerPtr flstory_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset & 0x100)
 			paletteram_xxxxBBBBGGGGRRRR_split2_w((offset & 0xff) + (palette_bank << 8),data);
 		else
 			paletteram_xxxxBBBBGGGGRRRR_split1_w((offset & 0xff) + (palette_bank << 8),data);
-	}
+	} };
 	
-	READ_HANDLER( flstory_palette_r )
+	public static ReadHandlerPtr flstory_palette_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (offset & 0x100)
 			return paletteram_2[ (offset & 0xff) + (palette_bank << 8) ];
 		else
 			return paletteram  [ (offset & 0xff) + (palette_bank << 8) ];
-	}
+	} };
 	
-	WRITE_HANDLER( flstory_gfxctrl_w )
+	public static WriteHandlerPtr flstory_gfxctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfxctrl == data)
 			return;
@@ -84,18 +84,18 @@ public class flstory
 	
 	//usrintf_showmessage("%04x: gfxctrl = %02x\n",activecpu_get_pc(),data);
 	
-	}
+	} };
 	
-	READ_HANDLER( flstory_scrlram_r )
+	public static ReadHandlerPtr flstory_scrlram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return flstory_scrlram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( flstory_scrlram_w )
+	public static WriteHandlerPtr flstory_scrlram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flstory_scrlram[offset] = data;
 		tilemap_set_scrolly(tilemap, offset, data );
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -111,16 +111,16 @@ public class flstory
 	
 		for (i = 0; i < 0x20; i++)
 		{
-			int pr = spriteram[spriteram_size-1 -i];
+			int pr = spriteram.read(spriteram_size-1 -i);
 			int offs = (pr & 0x1f) * 4;
 	
 			if ((pr & 0x80) == pri)
 			{
 				int code,sx,sy,flipx,flipy;
 	
-				code = spriteram[offs+2] + ((spriteram[offs+1] & 0x30) << 4);
-				sx = spriteram[offs+3];
-				sy = spriteram[offs+0];
+				code = spriteram.read(offs+2)+ ((spriteram.read(offs+1)& 0x30) << 4);
+				sx = spriteram.read(offs+3);
+				sy = spriteram.read(offs+0);
 	
 				if (flipscreen)
 				{
@@ -130,12 +130,12 @@ public class flstory
 				else
 					sy = 240 - sy - 1 ;
 	
-				flipx = ((spriteram[offs+1]&0x40)>>6)^flipscreen;
-				flipy = ((spriteram[offs+1]&0x80)>>7)^flipscreen;
+				flipx = ((spriteram.read(offs+1)&0x40)>>6)^flipscreen;
+				flipy = ((spriteram.read(offs+1)&0x80)>>7)^flipscreen;
 	
 				drawgfx(bitmap,Machine->gfx[1],
 						code,
-						spriteram[offs+1] & 0x0f,
+						spriteram.read(offs+1)& 0x0f,
 						flipx,flipy,
 						sx,sy,
 						cliprect,TRANSPARENCY_PEN,15);
@@ -143,7 +143,7 @@ public class flstory
 				if (sx > 240)
 					drawgfx(bitmap,Machine->gfx[1],
 							code,
-							spriteram[offs+1] & 0x0f,
+							spriteram.read(offs+1)& 0x0f,
 							flipx,flipy,
 							sx-256,sy,
 							cliprect,TRANSPARENCY_PEN,15);
@@ -163,7 +163,7 @@ public class flstory
 	
 		for (offs = videoram_size - 2;offs >= 0;offs -= 2)
 		{
-			if (videoram[offs + 1] & 0x20)
+			if (videoram.read(offs + 1)& 0x20)
 			{
 				int sx,sy,code;
 	
@@ -177,13 +177,13 @@ public class flstory
 					sx = 248-sx;
 					sy = 248-sy;
 				}
-				code = videoram[offs] + ((videoram[offs + 1] & 0xc0) << 2) + 0x400 + 0x800 * char_bank;
+				code = videoram.read(offs)+ ((videoram.read(offs + 1)& 0xc0) << 2) + 0x400 + 0x800 * char_bank;
 	
 				drawgfx(bitmap,Machine->gfx[0],
 					code,
-					(videoram[offs + 1] & 0x0f),
-					( ( videoram[offs + 1] & 0x08 ) >> 3 ) ^ flipscreen,
-					( ( videoram[offs + 1] & 0x10 ) >> 4 ) ^ flipscreen,
+					(videoram.read(offs + 1)& 0x0f),
+					( ( videoram.read(offs + 1)& 0x08 ) >> 3 ) ^ flipscreen,
+					( ( videoram.read(offs + 1)& 0x10 ) >> 4 ) ^ flipscreen,
 					sx,sy & 0xff,
 					cliprect,TRANSPARENCY_PEN,15);
 			}

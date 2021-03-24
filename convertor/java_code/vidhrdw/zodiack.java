@@ -20,35 +20,34 @@ public class zodiack
 	UINT8 *zodiack_bulletsram;
 	size_t zodiack_bulletsram_size;
 	
-	extern int percuss_hardware;
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( zodiack_videoram_w )
+	public static WriteHandlerPtr zodiack_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( zodiack_videoram2_w )
+	public static WriteHandlerPtr zodiack_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (zodiack_videoram2[offset] != data)
 		{
 			zodiack_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( zodiack_attributes_w )
+	public static WriteHandlerPtr zodiack_attributes_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 1) && zodiack_attributesram[offset] != data)
 		{
 			int i;
 	
-			for (i = offset / 2;i < videoram_size; i += 32)
+			for (i = offset / 2;i < videoram_size[0]; i += 32)
 			{
 				tilemap_mark_tile_dirty(bg_tilemap, i);
 				tilemap_mark_tile_dirty(fg_tilemap, i);
@@ -56,16 +55,16 @@ public class zodiack
 		}
 	
 		zodiack_attributesram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( zodiack_flipscreen_w )
+	public static WriteHandlerPtr zodiack_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (~data & 0x01))
 		{
 			flip_screen_set(~data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	PALETTE_INIT( zodiack )
 	{
@@ -138,7 +137,7 @@ public class zodiack
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 		int color = zodiack_attributesram[2 * (tile_index % 32) + 1] & 0x07;
 	
 		SET_TILE_INFO(3, code, color, 0)
@@ -149,13 +148,13 @@ public class zodiack
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -201,11 +200,11 @@ public class zodiack
 		{
 			int flipx, flipy, sx, sy, spritecode;
 	
-			sx = 240 - spriteram[offs + 3];
-			sy = 240 - spriteram[offs];
-			flipx = !(spriteram[offs + 1] & 0x40);
-			flipy = spriteram[offs + 1] & 0x80;
-			spritecode = spriteram[offs + 1] & 0x3f;
+			sx = 240 - spriteram.read(offs + 3);
+			sy = 240 - spriteram.read(offs);
+			flipx = !(spriteram.read(offs + 1)& 0x40);
+			flipy = spriteram.read(offs + 1)& 0x80;
+			spritecode = spriteram.read(offs + 1)& 0x3f;
 	
 			if (flip_screen && percuss_hardware)
 			{
@@ -215,7 +214,7 @@ public class zodiack
 	
 			drawgfx(bitmap, Machine->gfx[1],
 				spritecode,
-				spriteram[offs + 2] & 0x07,
+				spriteram.read(offs + 2)& 0x07,
 				flipx, flipy,
 				sx, sy,
 				//flip_screen[0] ? &spritevisibleareaflipx : &spritevisiblearea,TRANSPARENCY_PEN,0);

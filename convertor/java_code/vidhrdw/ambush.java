@@ -36,19 +36,19 @@ public class ambush
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -80,13 +80,13 @@ public class ambush
 			sy = (offs / 32);
 			sx = (offs % 32);
 	
-			col = colorram[((sy & 0x1c) << 3) + sx];
+			col = colorram.read(((sy & 0x1c) << 3) + sx);
 	
 			if ((col & 0x10) != priority)  continue;
 	
 			scroll = ~ambush_scrollram[sx];
 	
-			code = videoram[offs] | ((col & 0x60) << 3);
+			code = videoram.read(offs)| ((col & 0x60) << 3);
 	
 			if (flip_screen)
 			{
@@ -123,23 +123,23 @@ public class ambush
 			int code,col,sx,sy,flipx,flipy,gfx;
 	
 	
-			sy = spriteram[offs + 0];
-			sx = spriteram[offs + 3];
+			sy = spriteram.read(offs + 0);
+			sx = spriteram.read(offs + 3);
 	
 			if ( (sy == 0) ||
 				 (sy == 0xff) ||
-				((sx <  0x40) && (  spriteram[offs + 2] & 0x10)) ||
-				((sx >= 0xc0) && (!(spriteram[offs + 2] & 0x10))))  continue;  /* prevent wraparound */
+				((sx <  0x40) && (  spriteram.read(offs + 2)& 0x10)) ||
+				((sx >= 0xc0) && (!(spriteram.read(offs + 2)& 0x10))))  continue;  /* prevent wraparound */
 	
 	
-			code = (spriteram[offs + 1] & 0x3f) | ((spriteram[offs + 2] & 0x60) << 1);
+			code = (spriteram.read(offs + 1)& 0x3f) | ((spriteram.read(offs + 2)& 0x60) << 1);
 	
-			if (spriteram[offs + 2] & 0x80)
+			if (spriteram.read(offs + 2)& 0x80)
 			{
 				/* 16x16 sprites */
 				gfx = 1;
 	
-				if (!flip_screen)
+				if (flip_screen == 0)
 				{
 					sy = 240 - sy;
 				}
@@ -154,7 +154,7 @@ public class ambush
 				gfx = 0;
 				code <<= 2;
 	
-				if (!flip_screen)
+				if (flip_screen == 0)
 				{
 					sy = 248 - sy;
 				}
@@ -164,9 +164,9 @@ public class ambush
 				}
 			}
 	
-			col   = spriteram[offs + 2] & 0x0f;
-			flipx = spriteram[offs + 1] & 0x40;
-			flipy = spriteram[offs + 1] & 0x80;
+			col   = spriteram.read(offs + 2)& 0x0f;
+			flipx = spriteram.read(offs + 1)& 0x40;
+			flipy = spriteram.read(offs + 1)& 0x80;
 	
 			if (flip_screen)
 			{

@@ -14,7 +14,6 @@ public class starshp1
 {
 	
 	
-	extern int starshp1_attract;
 	
 	unsigned char* starshp1_playfield_ram;
 	unsigned char* starshp1_hpos_ram;
@@ -101,7 +100,7 @@ public class starshp1
 	}
 	
 	
-	READ_HANDLER( starshp1_rng_r )
+	public static ReadHandlerPtr starshp1_rng_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int x = cpu_gethorzbeampos();
 		int y = cpu_getscanline();
@@ -112,10 +111,10 @@ public class starshp1
 			y = Machine->drv->screen_height - 1;
 	
 		return LSFR[x + (UINT16) (512 * y)];
-	}
+	} };
 	
 	
-	WRITE_HANDLER( starshp1_ssadd_w )
+	public static WriteHandlerPtr starshp1_ssadd_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*
 		 * The range of sprite position values doesn't suffice to
@@ -128,10 +127,10 @@ public class starshp1
 	
 		starshp1_ship_voffset = ((offset & 0xf0) >> 4);
 		starshp1_ship_hoffset = ((offset & 0x0f) << 2) | (data & 3);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( starshp1_sspic_w )
+	public static WriteHandlerPtr starshp1_sspic_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*
 		 * Some mysterious game code at address $2CCE is causing
@@ -143,10 +142,10 @@ public class starshp1
 		{
 			starshp1_ship_picture = data;
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( starshp1_playfield_w )
+	public static WriteHandlerPtr starshp1_playfield_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (starshp1_mux != 0)
 		{
@@ -159,7 +158,7 @@ public class starshp1
 	
 			starshp1_playfield_ram[offset] = data;
 		}
-	}
+	} };
 	
 	
 	static void draw_starfield(struct mame_bitmap* bitmap)

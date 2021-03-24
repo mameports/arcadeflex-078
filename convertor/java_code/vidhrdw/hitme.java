@@ -39,9 +39,9 @@ public class hitme
 	
 		for (offs = 0; offs < videoram_size; offs++)
 		{
-			charcode = videoram[offs] & 0x3F;
+			charcode = videoram.read(offs)& 0x3F;
 	
-			if (videoram[offs] & 0x80) hitme_invert_count = 4;
+			if (videoram.read(offs)& 0x80) hitme_invert_count = 4;
 			if (hitme_invert_count) {
 				invert = 1;
 				hitme_invert_count--;
@@ -59,11 +59,11 @@ public class hitme
 	
 	*/
 	
-	WRITE_HANDLER( hitme_vidram_w )
+	public static WriteHandlerPtr hitme_vidram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		hitme_vidram[offset] = data;
 		tilemap_mark_tile_dirty(hitme_tilemap,offset);
-	}
+	} };
 	
 	/* Video Start / Update */
 	

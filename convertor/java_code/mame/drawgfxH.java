@@ -147,7 +147,6 @@ public class drawgfxH
 	
 	/* By default, when drawing sprites with pdrawgfx, shadows affect the sprites below them. */
 	/* Set this flag to 1 to make shadows only affect the background, leaving sprites at full brightness. */
-	extern int pdrawgfx_shadow_lowpri;
 	
 	
 	/* pointers to pixel functions.  They're set based on depth */
@@ -189,8 +188,6 @@ public class drawgfxH
 	
 	
 	/* Alpha blending functions */
-	extern int alpha_active;
-	void alpha_init(void);
 	INLINE void alpha_set_level(int level) {
 		if(level == 0)
 			level = -1;
@@ -277,7 +274,6 @@ public class drawgfxH
 			const struct rectangle *clip,int transparency,int transparent_color,int scalex,int scaley,
 			UINT32 priority_mask);
 	
-	void drawgfx_toggle_crosshair(void);
 	void draw_crosshair(struct mame_bitmap *bitmap,int x,int y,const struct rectangle *clip);
 	
 	INLINE void sect_rect(struct rectangle *dst, const struct rectangle *src)

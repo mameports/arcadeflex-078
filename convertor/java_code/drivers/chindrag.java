@@ -58,48 +58,48 @@ public class chindrag
 	MEMORY_END
 	
 	
-	static struct GfxLayout chindrag_charlayout =
+	static GfxLayout chindrag_charlayout = new GfxLayout
 	
-	{
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0,1,2,3 },
-		{ 4, 0,
+		new int[] { 0,1,2,3 },
+		new int[] { 4, 0,
 		  12,  8,
 		  20,16,
 		  28,24,},
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		8*32
-	};
+	);
 	
-	static struct GfxLayout chindrag2_charlayout =
+	static GfxLayout chindrag2_charlayout = new GfxLayout
 	
-	{
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		8,
-		{ 0,1,2,3,4,5,6,7 },
-		{ 0,8,
+		new int[] { 0,1,2,3,4,5,6,7 },
+		new int[] { 0,8,
 		  16,24,
 		  32,40,
 		  48,56 },
-		{ 0*32*2, 1*32*2, 2*32*2, 3*32*2, 4*32*2, 5*32*2, 6*32*2, 7*32*2 },
+		new int[] { 0*32*2, 1*32*2, 2*32*2, 3*32*2, 4*32*2, 5*32*2, 6*32*2, 7*32*2 },
 		8*32*2
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &chindrag_charlayout,   0, 1  },
-		{ REGION_GFX2, 0, &chindrag_charlayout,   0, 16 },
-		{ REGION_GFX1, 0, &chindrag2_charlayout,   0, 1  },
-		{ REGION_GFX2, 0, &chindrag2_charlayout,   0, 16 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, chindrag_charlayout,   0, 1  ),
+		new GfxDecodeInfo( REGION_GFX2, 0, chindrag_charlayout,   0, 16 ),
+		new GfxDecodeInfo( REGION_GFX1, 0, chindrag2_charlayout,   0, 1  ),
+		new GfxDecodeInfo( REGION_GFX2, 0, chindrag2_charlayout,   0, 16 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
-	INPUT_PORTS_START( chindrag )
-	INPUT_PORTS_END
+	static InputPortPtr input_ports_chindrag = new InputPortPtr(){ public void handler() { 
+	INPUT_PORTS_END(); }}; 
 	
 	static MACHINE_DRIVER_START( chindrag )
 		MDRV_CPU_ADD(M68000, 12000000)
@@ -157,19 +157,19 @@ public class chindrag
 	}
 	
 	
-	ROM_START( chindrag )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 Code */
+	static RomLoadPtr rom_chindrag = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );/* 68000 Code */
 		ROM_LOAD16_WORD_SWAP( "v-021j",         0x00000, 0x80000, CRC(2f87f6e4) SHA1(d43065b078fdd9605c121988ad3092dce6cf0bf1) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, 0 ) /* GFX? */
-		ROM_LOAD( "d0301",         0x00000, 0x400000, CRC(78ab45d9) SHA1(c326ee9f150d766edd6886075c94dea3691b606d) )
+		ROM_REGION( 0x400000, REGION_GFX1, 0 );/* GFX? */
+		ROM_LOAD( "d0301",         0x00000, 0x400000, CRC(78ab45d9);SHA1(c326ee9f150d766edd6886075c94dea3691b606d) )
 	
-		ROM_REGION( 0x20000, REGION_GFX2, 0 ) /* GFX? */
-		ROM_LOAD( "cg",         0x00000, 0x20000, CRC(2dda0be3) SHA1(587b7cab747d4336515c98eb3365341bb6c7e5e4) )
+		ROM_REGION( 0x20000, REGION_GFX2, 0 );/* GFX? */
+		ROM_LOAD( "cg",         0x00000, 0x20000, CRC(2dda0be3);SHA1(587b7cab747d4336515c98eb3365341bb6c7e5e4) )
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* Samples? */
-		ROM_LOAD( "sp",         0x00000, 0x40000, CRC(fde63ce1) SHA1(cc32d2cace319fe4d5d0aa96d7addb2d1def62f2) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* Samples? */
+		ROM_LOAD( "sp",         0x00000, 0x40000, CRC(fde63ce1);SHA1(cc32d2cace319fe4d5d0aa96d7addb2d1def62f2) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1994, chindrag, 0, chindrag, chindrag, chindrag, ROT0, "IGS", "China Dragon / Dragon World", GAME_NO_SOUND | GAME_NOT_WORKING )
+	public static GameDriver driver_chindrag	   = new GameDriver("1994"	,"chindrag"	,"chindrag.java"	,rom_chindrag,null	,machine_driver_chindrag	,input_ports_chindrag	,init_chindrag	,ROT0	,	"IGS", "China Dragon / Dragon World", GAME_NO_SOUND | GAME_NOT_WORKING )
 }

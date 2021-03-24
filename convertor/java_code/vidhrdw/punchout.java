@@ -39,21 +39,21 @@ public class punchout
 	
 	static int top_palette_bank,bottom_palette_bank;
 	
-	static struct rectangle topvisiblearea =
-	{
+	static rectangle topvisiblearea = new rectangle
+	(
 		0*8, 32*8-1,
 		0*8, TOP_MONITOR_ROWS*8-1
-	};
-	static struct rectangle bottomvisiblearea =
-	{
+	);
+	static rectangle bottomvisiblearea = new rectangle
+	(
 		0*8, 32*8-1,
 		TOP_MONITOR_ROWS*8, (TOP_MONITOR_ROWS+BOTTOM_MONITOR_ROWS)*8-1
-	};
-	static struct rectangle backgroundvisiblearea =
-	{
+	);
+	static rectangle backgroundvisiblearea = new rectangle
+	(
 		0*8, 64*8-1,
 		TOP_MONITOR_ROWS*8, (TOP_MONITOR_ROWS+BOTTOM_MONITOR_ROWS)*8-1
-	};
+	);
 	
 	
 	
@@ -81,20 +81,20 @@ public class punchout
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 255 - (0x10 * bit0 + 0x21 * bit1 + 0x46 * bit2 + 0x88 * bit3);
-			bit0 = (color_prom[1024] >> 0) & 0x01;
-			bit1 = (color_prom[1024] >> 1) & 0x01;
-			bit2 = (color_prom[1024] >> 2) & 0x01;
-			bit3 = (color_prom[1024] >> 3) & 0x01;
+			bit0 = (color_prom.read(1024)>> 0) & 0x01;
+			bit1 = (color_prom.read(1024)>> 1) & 0x01;
+			bit2 = (color_prom.read(1024)>> 2) & 0x01;
+			bit3 = (color_prom.read(1024)>> 3) & 0x01;
 			g = 255 - (0x10 * bit0 + 0x21 * bit1 + 0x46 * bit2 + 0x88 * bit3);
-			bit0 = (color_prom[2*1024] >> 0) & 0x01;
-			bit1 = (color_prom[2*1024] >> 1) & 0x01;
-			bit2 = (color_prom[2*1024] >> 2) & 0x01;
-			bit3 = (color_prom[2*1024] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*1024)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*1024)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*1024)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*1024)>> 3) & 0x01;
 			b = 255 - (0x10 * bit0 + 0x21 * bit1 + 0x46 * bit2 + 0x88 * bit3);
 	
 			palette_set_color(i,r,g,b);
@@ -294,7 +294,7 @@ public class punchout
 	
 	
 	
-	WRITE_HANDLER( punchout_videoram2_w )
+	public static WriteHandlerPtr punchout_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (punchout_videoram2[offset] != data)
 		{
@@ -302,9 +302,9 @@ public class punchout
 	
 			punchout_videoram2[offset] = data;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( punchout_bigsprite1ram_w )
+	public static WriteHandlerPtr punchout_bigsprite1ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (punchout_bigsprite1ram[offset] != data)
 		{
@@ -312,9 +312,9 @@ public class punchout
 	
 			punchout_bigsprite1ram[offset] = data;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( punchout_bigsprite2ram_w )
+	public static WriteHandlerPtr punchout_bigsprite2ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (punchout_bigsprite2ram[offset] != data)
 		{
@@ -322,18 +322,18 @@ public class punchout
 	
 			punchout_bigsprite2ram[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( punchout_palettebank_w )
+	public static WriteHandlerPtr punchout_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		*punchout_palettebank = data;
 	
 		if (top_palette_bank != ((data >> 1) & 0x01))
 		{
 			top_palette_bank = (data >> 1) & 0x01;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
 		if (bottom_palette_bank != ((data >> 0) & 0x01))
 		{
@@ -342,7 +342,7 @@ public class punchout
 			memset(bs1dirtybuffer,1,punchout_bigsprite1ram_size);
 			memset(bs2dirtybuffer,1,punchout_bigsprite2ram_size);
 		}
-	}
+	} };
 	
 	
 	
@@ -374,9 +374,9 @@ public class punchout
 				sy = offs/2 / 32;
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs] + 256 * (videoram[offs + 1] & 0x03),
-						((videoram[offs + 1] & 0x7c) >> 2) + 64 * top_palette_bank,
-						videoram[offs + 1] & 0x80,0,
+						videoram.read(offs)+ 256 * (videoram.read(offs + 1)& 0x03),
+						((videoram.read(offs + 1)& 0x7c) >> 2) + 64 * top_palette_bank,
+						videoram.read(offs + 1)& 0x80,0,
 						8*sx,8*sy - 16,
 						&topvisiblearea,TRANSPARENCY_NONE,0);
 			}
@@ -711,9 +711,9 @@ public class punchout
 			sy = offs/2 / 32;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					videoram[offs] + 256 * (videoram[offs + 1] & 0x07),
-					((videoram[offs + 1] & 0xf8) >> 3) + 32 * bottom_palette_bank,
-					videoram[offs + 1] & 0x80,0,
+					videoram.read(offs)+ 256 * (videoram.read(offs + 1)& 0x07),
+					((videoram.read(offs + 1)& 0xf8) >> 3) + 32 * bottom_palette_bank,
+					videoram.read(offs + 1)& 0x80,0,
 					8*sx,8*sy + 8*TOP_MONITOR_ROWS - 16,
 					&backgroundvisiblearea,TRANSPARENCY_PEN,7);
 		}

@@ -93,48 +93,48 @@ public class bankp
 		/* the bottom half of the PROM seems to be not used */
 	}
 	
-	WRITE_HANDLER( bankp_scroll_w )
+	public static WriteHandlerPtr bankp_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_x = data;
-	}
+	} };
 	
-	WRITE_HANDLER( bankp_videoram_w )
+	public static WriteHandlerPtr bankp_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bankp_colorram_w )
+	public static WriteHandlerPtr bankp_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bankp_videoram2_w )
+	public static WriteHandlerPtr bankp_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bankp_videoram2[offset] != data)
 		{
 			bankp_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bankp_colorram2_w )
+	public static WriteHandlerPtr bankp_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bankp_colorram2[offset] != data)
 		{
 			bankp_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bankp_out_w )
+	public static WriteHandlerPtr bankp_out_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0-1 are playfield priority */
 		/* TODO: understand how this works */
@@ -153,7 +153,7 @@ public class bankp
 		}
 	
 		/* bits 6-7 unknown */
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -166,9 +166,9 @@ public class bankp
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 256 * ((colorram[tile_index] & 3) >> 0);
-		int color = colorram[tile_index] >> 3;
-		int flags = (colorram[tile_index] & 0x04) ? TILE_FLIPX : 0;
+		int code = videoram.read(tile_index)+ 256 * ((colorram.read(tile_index)& 3) >> 0);
+		int color = colorram.read(tile_index)>> 3;
+		int flags = (colorram.read(tile_index)& 0x04) ? TILE_FLIPX : 0;
 	
 		SET_TILE_INFO(0, code, color, flags)
 	}
@@ -178,13 +178,13 @@ public class bankp
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT_COLOR, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT_COLOR, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(bg_tilemap, 0);

@@ -757,9 +757,7 @@ public class z180
 	
 	static data8_t z180_readcontrol(offs_t port);
 	static void z180_writecontrol(offs_t port, data8_t data);
-	static void z180_dma0(void);
-	static void z180_dma1(void);
-	
+	static static 
 	
 	
 	static data8_t z180_readcontrol(offs_t port)
@@ -2348,15 +2346,15 @@ public class z180
 		}
 	}
 	
-	READ_HANDLER( z180_internal_r )
+	public static ReadHandlerPtr z180_internal_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return Z180.io[offset & 0x3f];
-	}
+	} };
 	
-	WRITE_HANDLER( z180_internal_w )
+	public static WriteHandlerPtr z180_internal_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		z180_set_reg( Z180_CNTLA0 + (offset & 0x3f), data );
-	}
+	} };
 	
 	/****************************************************************************
 	 * Set IRQ line state
@@ -2451,7 +2449,7 @@ public class z180
 	
 		which = (which+1) % 32;
 		buffer[which][0] = '\0';
-		if( !context )
+		if (context == 0)
 			r = &Z180;
 	
 		switch( regnum )

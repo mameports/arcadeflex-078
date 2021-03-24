@@ -25,8 +25,6 @@ public class namcos1
 	#define SUB_COMPLETE 0x20
 	
 	//#define TRY_PDRAWGFX 1
-	WRITE_HANDLER( namcos1_main_update_w );
-	WRITE_HANDLER( namcos1_sub_update_w );
 	
 	struct playfield
 	{
@@ -87,7 +85,6 @@ public class namcos1
 	static unsigned priority_xlat[8] = {0,1,2,3,4,5,6,7};
 	static int update_status, idle_counter, idle_threshold;
 	static data8_t *sp_updatebuffer, *sp_backbuffer;
-	extern int namcos1_game_id;
 	
 	static void namcos1_set_flipscreen(int flip)
 	{
@@ -99,7 +96,7 @@ public class namcos1
 		int neg_y[] = {0x1e8,0x1e8,0x1e8,0x0e8};
 	
 		flipscreen = flip;
-		if(!flip)
+		if (flip == 0)
 		{
 			for ( i = 0; i < 4; i++ ) {
 				scrolloffsX[i] = pos_x[i];
@@ -116,7 +113,7 @@ public class namcos1
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? TILEMAP_FLIPX|TILEMAP_FLIPY : 0);
 	}
 	
-	static WRITE_HANDLER( namcos1_playfield_control_w )
+	public static WriteHandlerPtr namcos1_playfield_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		namcos1_playfield_control[offset] = data;
 	#if 0
@@ -144,14 +141,14 @@ public class namcos1
 				tilemap_palette_state[whichone] = 1;
 			}
 		}
-	}
+	} };
 	
-	READ_HANDLER( namcos1_videoram_r )
+	public static ReadHandlerPtr namcos1_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return namcos1_videoram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( namcos1_videoram_w )
+	public static WriteHandlerPtr namcos1_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (namcos1_videoram[offset] != data)
 		{
@@ -170,14 +167,14 @@ public class namcos1
 					tilemap_mark_tile_dirty(tilemap[layer],num);
 			}
 		}
-	}
+	} };
 	
-	READ_HANDLER( namcos1_paletteram_r )
+	public static ReadHandlerPtr namcos1_paletteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return namcos1_paletteram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( namcos1_paletteram_w )
+	public static WriteHandlerPtr namcos1_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		namcos1_paletteram[offset] = data;
 		if ((offset&0x1fff) < 0x1800)
@@ -198,7 +195,7 @@ public class namcos1
 				}
 			}
 		}
-	}
+	} };
 	
 	static void namcos1_palette_refresh(int start,int offset,int num)
 	{
@@ -233,7 +230,7 @@ public class namcos1
 	7    sprite offset y
 	8-15 unknown
 	*/
-	static WRITE_HANDLER( namcos1_displaycontrol_w )
+	public static WriteHandlerPtr namcos1_displaycontrol_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *disp_reg = &namcos1_controlram[0xff0];
 		int newflip;
@@ -283,9 +280,9 @@ public class namcos1
 			usrintf_showmessage(buf);
 		}
 	#endif
-	}
+	} };
 	
-	WRITE_HANDLER( namcos1_videocontrol_w )
+	public static WriteHandlerPtr namcos1_videocontrol_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int olddata = olddata = namcos1_controlram[offset];
 		namcos1_controlram[offset] = data;
@@ -307,7 +304,7 @@ public class namcos1
 		/* 1000-1fff control ram */
 		else
 			namcos1_playfield_control_w(offset & 0xff, data);
-	}
+	} };
 	
 	/* tilemap callback */
 	INLINE void background_get_info(int tile_index,int info_color,data8_t *info_vram)
@@ -691,7 +688,7 @@ public class namcos1
 		return 0;
 	}
 	
-	WRITE_HANDLER( namcos1_main_update_w )
+	public static WriteHandlerPtr namcos1_main_update_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		idle_counter = 0;
 	
@@ -702,15 +699,15 @@ public class namcos1
 			memcpy(sp_backbuffer, &namcos1_controlram[0x800], 0x7f0); // take a snapshot of current sprite RAM
 	
 		namcos1_draw_screen(Machine->scrbitmap, &Machine->visible_area);
-	}
+	} };
 	
-	WRITE_HANDLER( namcos1_sub_update_w )
+	public static WriteHandlerPtr namcos1_sub_update_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (update_status & SUB_COMPLETE) return;
 		update_status |= SUB_COMPLETE;
 	
 		memcpy(sp_backbuffer, &namcos1_controlram[0x800], 0x7f0); // take a snapshot of current sprite RAM
-	}
+	} };
 	
 	VIDEO_UPDATE( namcos1 )
 	{

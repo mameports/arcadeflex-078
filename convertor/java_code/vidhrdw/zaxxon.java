@@ -97,23 +97,23 @@ public class zaxxon
 			COLOR(0,i) = i;
 	}
 	
-	WRITE_HANDLER( zaxxon_videoram_w )
+	public static WriteHandlerPtr zaxxon_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( congo_colorram_w )
+	public static WriteHandlerPtr congo_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void copy_pixel(struct mame_bitmap *dst_bm, int dx, int dy,
 						   struct mame_bitmap *src_bm, int sx, int sy)
@@ -219,7 +219,7 @@ public class zaxxon
 	{
 		int sy = tile_index / 32;
 		int sx = tile_index % 32;
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 		int color = (color_codes[sx + 32 * (sy / 4)] & 0x0f) + 16 * (*zaxxon_char_color_bank & 1);
 		// not sure about the color code calculation - char_color_bank is used only in test mode
 	
@@ -234,7 +234,7 @@ public class zaxxon
 		fg_tilemap = tilemap_create(zaxxon_get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -257,7 +257,7 @@ public class zaxxon
 			if (Machine->orientation & ORIENTATION_SWAP_XY)
 			{
 				/* standard rotation - skew background horizontally */
-				if (!flip_screen)
+				if (flip_screen == 0)
 				{
 					if (zaxxon_vid_type == CONGO_VID)
 						scroll = 1023+63 - (zaxxon_background_position[0] + 256*zaxxon_background_position[1]);
@@ -294,7 +294,7 @@ public class zaxxon
 			else
 			{
 				/* skew background up one pixel every 2 horizontal pixels */
-				if (!flip_screen_y)
+				if (flip_screen_y == 0)
 				{
 					if (zaxxon_vid_type == CONGO_VID)
 						scroll = 2050 + 2*(zaxxon_background_position[0] + 256*zaxxon_background_position[1])
@@ -343,14 +343,14 @@ public class zaxxon
 	
 		for (offs = spriteram_size - 4; offs >= 0; offs -= 4)
 		{
-			if (spriteram[offs] != 0xff)
+			if (spriteram.read(offs)!= 0xff)
 			{
-				int code = spriteram[offs + 1] & 0x3f;
-				int color = spriteram[offs + 2] & 0x3f;
-				int flipx = spriteram[offs + 1] & 0x40;
-				int flipy = spriteram[offs + 1] & 0x80;
-				int sx = ((spriteram[offs + 3] + 16) & 0xff) - 32;
-				int sy = 255 - spriteram[offs] - 16;
+				int code = spriteram.read(offs + 1)& 0x3f;
+				int color = spriteram.read(offs + 2)& 0x3f;
+				int flipx = spriteram.read(offs + 1)& 0x40;
+				int flipy = spriteram.read(offs + 1)& 0x80;
+				int sx = ((spriteram.read(offs + 3)+ 16) & 0xff) - 32;
+				int sy = 255 - spriteram.read(offs)- 16;
 	
 				if (flip_screen)
 				{
@@ -377,7 +377,7 @@ public class zaxxon
 	
 	static void razmataz_get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 		int color = (color_codes[code] & 0x0f) + 16 * (*zaxxon_char_color_bank & 0x01);
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -420,7 +420,7 @@ public class zaxxon
 		fg_tilemap = tilemap_create(razmataz_get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -456,8 +456,8 @@ public class zaxxon
 	
 	static void congo_get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index];
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -470,7 +470,7 @@ public class zaxxon
 		fg_tilemap = tilemap_create(congo_get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -492,20 +492,20 @@ public class zaxxon
 		/* The number of active sprites is stored at 0xc032 */
 	
 		for (offs = 0x1e * 0x20; offs >= 0x00; offs -= 0x20)
-			sprpri[spriteram[offs + 1]] = offs;
+			sprpri[spriteram.read(offs + 1)] = offs;
 	
 		for (i = 0x1e; i >= 0; i--)
 		{
 			offs = sprpri[i];
 	
-			if (spriteram[offs + 2] != 0xff)
+			if (spriteram.read(offs + 2)!= 0xff)
 			{
-				int code = spriteram[offs + 2 + 1] & 0x7f;
-				int color = spriteram[offs + 2 + 2];
-				int flipx = spriteram[offs + 2 + 2] & 0x80;
-				int flipy = spriteram[offs + 2 + 1] & 0x80;
-				int sx = ((spriteram[offs + 2 + 3] + 16) & 0xff) - 31;
-				int sy = 255 - spriteram[offs + 2] - 15;
+				int code = spriteram.read(offs + 2 + 1)& 0x7f;
+				int color = spriteram.read(offs + 2 + 2);
+				int flipx = spriteram.read(offs + 2 + 2)& 0x80;
+				int flipy = spriteram.read(offs + 2 + 1)& 0x80;
+				int sx = ((spriteram.read(offs + 2 + 3)+ 16) & 0xff) - 31;
+				int sy = 255 - spriteram.read(offs + 2)- 15;
 	
 				if (flip_screen)
 				{
@@ -536,14 +536,14 @@ public class zaxxon
 	
 		for (offs = spriteram_size - 4; offs >= 0; offs -= 4)
 		{
-			if (spriteram[offs] != 0xff)
+			if (spriteram.read(offs)!= 0xff)
 			{
-				int code = spriteram[offs + 1] & 0x7f;
-				int color = spriteram[offs + 2] & 0x3f;
-				int flipx = spriteram[offs + 1] & 0x80;
-				int flipy = spriteram[offs + 1] & 0x80;
-				int sx = ((spriteram[offs + 3] + 16) & 0xff) - 32;
-				int sy = 255 - spriteram[offs] - 16;
+				int code = spriteram.read(offs + 1)& 0x7f;
+				int color = spriteram.read(offs + 2)& 0x3f;
+				int flipx = spriteram.read(offs + 1)& 0x80;
+				int flipy = spriteram.read(offs + 1)& 0x80;
+				int sx = ((spriteram.read(offs + 3)+ 16) & 0xff) - 32;
+				int sy = 255 - spriteram.read(offs)- 16;
 	
 				if (flip_screen)
 				{

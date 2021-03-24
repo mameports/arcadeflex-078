@@ -30,7 +30,6 @@ public class winddraw
 	//============================================================
 	
 	// from input.c
-	extern int verbose;
 	
 	
 	
@@ -88,14 +87,7 @@ public class winddraw
 	//============================================================
 	
 	static double compute_mode_score(int width, int height, int depth, int refresh);
-	static int set_resolution(void);
-	static int create_surfaces(void);
-	static int create_blit_surface(void);
-	static void set_brightness(void);
-	static int create_clipper(void);
-	static void erase_surfaces(void);
-	static void release_surfaces(void);
-	static void compute_color_masks(const DDSURFACEDESC *desc);
+	static static static static static static static static void compute_color_masks(const DDSURFACEDESC *desc);
 	static int render_to_blit(struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels, int update);
 	static int render_to_primary(struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels, int update);
 	static int blit_and_flip(LPDIRECTDRAWSURFACE target_surface, LPRECT src, LPRECT dst, int update);
@@ -390,7 +382,7 @@ public class winddraw
 		// first compute a score based on size
 	
 		// if not stretching, we need to keep minx and miny scale equal
-		if (!win_dd_hw_stretch)
+		if (win_dd_hw_stretch == 0)
 		{
 			if (effect_min_yscale > effect_min_xscale)
 				effect_min_xscale = effect_min_yscale;
@@ -403,7 +395,7 @@ public class winddraw
 		target_height = max_height * effect_min_yscale;
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_1_2)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 				target_height *= 2;
 			else
 				target_width *= 2;
@@ -412,7 +404,7 @@ public class winddraw
 			target_width *= 2, target_height *= 2;
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_2_1)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 				target_width *= 2;
 			else
 				target_height *= 2;
@@ -496,12 +488,12 @@ public class winddraw
 				}
 	
 				// force to the current width/height
-				if (!win_switch_res)
+				if (win_switch_res == 0)
 				{
 					win_gfx_width = currmode.dwWidth;
 					win_gfx_height = currmode.dwHeight;
 				}
-				if (!win_switch_bpp)
+				if (win_switch_bpp == 0)
 					win_gfx_depth = currmode.ddpfPixelFormat.DUMMYUNIONNAMEN(1).dwRGBBitCount;
 			}
 	
@@ -870,7 +862,7 @@ public class winddraw
 			result = IDirectDrawSurface_Blt(blit_surface, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &blitfx);
 	
 		// loop through enough to get all the back buffers
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 		{
 			if (back_surface)
 				for (i = 0; i < 5; i++)
@@ -1000,7 +992,7 @@ public class winddraw
 		}
 	
 		// if we don't have our surfaces, try to recreate them
-		if (!primary_surface)
+		if (primary_surface == 0)
 		{
 			release_surfaces();
 			if (create_surfaces())
@@ -1214,7 +1206,7 @@ public class winddraw
 			profiler_mark(PROFILER_IDLE);
 	
 			result = IDirectDraw_GetVerticalBlankStatus(ddraw, &is_vblank);
-			if (!is_vblank)
+			if (is_vblank == 0)
 				result = IDirectDraw_WaitForVerticalBlank(ddraw, DDWAITVB_BLOCKBEGIN, 0);
 	
 			// idle time done

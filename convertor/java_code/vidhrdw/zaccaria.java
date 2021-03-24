@@ -21,16 +21,16 @@ public class zaccaria
 	
 	static struct tilemap *bg_tilemap;
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		2*8+1, 29*8-1,
 		2*8, 30*8-1
-	};
-	static struct rectangle spritevisiblearea_flipx =
-	{
+	);
+	static rectangle spritevisiblearea_flipx = new rectangle
+	(
 		3*8+1, 30*8-1,
 		2*8, 30*8-1
-	};
+	);
 	
 	
 	
@@ -83,18 +83,18 @@ public class zaccaria
 			else
 			{
 				/* red component */
-				bit0 = (color_prom[0] >> 3) & 0x01;
-				bit1 = (color_prom[0] >> 2) & 0x01;
-				bit2 = (color_prom[0] >> 1) & 0x01;
+				bit0 = (color_prom.read(0)>> 3) & 0x01;
+				bit1 = (color_prom.read(0)>> 2) & 0x01;
+				bit2 = (color_prom.read(0)>> 1) & 0x01;
 				r = 0x46 * bit0 + 0x53 * bit1 + 0x66 * bit2;
 				/* green component */
-				bit0 = (color_prom[0] >> 0) & 0x01;
-				bit1 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
-				bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
+				bit0 = (color_prom.read(0)>> 0) & 0x01;
+				bit1 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
+				bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
 				g = 0x46 * bit0 + 0x53 * bit1 + 0x66 * bit2;
 				/* blue component */
-				bit0 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-				bit1 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
+				bit0 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+				bit1 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
 				b = 0x66 * bit0 + 0x96 * bit1;
 				palette_set_color(i,r,g,b);
 			}
@@ -160,7 +160,7 @@ public class zaccaria
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_cols(bg_tilemap,32);
@@ -176,16 +176,16 @@ public class zaccaria
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( zaccaria_videoram_w )
+	public static WriteHandlerPtr zaccaria_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (zaccaria_videoram[offset] != data)
 		{
 			zaccaria_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( zaccaria_attributes_w )
+	public static WriteHandlerPtr zaccaria_attributes_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset & 1)
 		{
@@ -201,17 +201,17 @@ public class zaccaria
 			tilemap_set_scrolly(bg_tilemap,offset / 2,data);
 	
 		zaccaria_attributesram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( zaccaria_flip_screen_x_w )
+	public static WriteHandlerPtr zaccaria_flip_screen_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_x_set(data & 1);
-	}
+	} };
 	
-	WRITE_HANDLER( zaccaria_flip_screen_y_w )
+	public static WriteHandlerPtr zaccaria_flip_screen_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_y_set(data & 1);
-	}
+	} };
 	
 	
 	
@@ -247,10 +247,10 @@ public class zaccaria
 		*/
 		for (offs = 0;offs < spriteram_2_size;offs += 4)
 		{
-			int sx = spriteram_2[offs + 3] + 1;
-			int sy = 242 - spriteram_2[offs];
-			int flipx = spriteram_2[offs + 2] & 0x40;
-			int flipy = spriteram_2[offs + 2] & 0x80;
+			int sx = spriteram_2.read(offs + 3)+ 1;
+			int sy = 242 - spriteram_2.read(offs);
+			int flipx = spriteram_2.read(offs + 2)& 0x40;
+			int flipy = spriteram_2.read(offs + 2)& 0x80;
 	
 			if (flip_screen_x)
 			{
@@ -264,8 +264,8 @@ public class zaccaria
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram_2[offs + 2] & 0x3f) + (spriteram_2[offs + 1] & 0xc0),
-					4 * (spriteram_2[offs + 1] & 0x07),
+					(spriteram_2.read(offs + 2)& 0x3f) + (spriteram_2.read(offs + 1)& 0xc0),
+					4 * (spriteram_2.read(offs + 1)& 0x07),
 					flipx,flipy,
 					sx,sy,
 					&clip,TRANSPARENCY_PEN,0);
@@ -273,10 +273,10 @@ public class zaccaria
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			int sx = spriteram[offs + 3] + 1;
-			int sy = 242 - spriteram[offs];
-			int flipx = spriteram[offs + 1] & 0x40;
-			int flipy = spriteram[offs + 1] & 0x80;
+			int sx = spriteram.read(offs + 3)+ 1;
+			int sy = 242 - spriteram.read(offs);
+			int flipx = spriteram.read(offs + 1)& 0x40;
+			int flipy = spriteram.read(offs + 1)& 0x80;
 	
 			if (flip_screen_x)
 			{
@@ -290,8 +290,8 @@ public class zaccaria
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs + 1] & 0x3f) + (spriteram[offs + 2] & 0xc0),
-					4 * (spriteram[offs + 2] & 0x07),
+					(spriteram.read(offs + 1)& 0x3f) + (spriteram.read(offs + 2)& 0xc0),
+					4 * (spriteram.read(offs + 2)& 0x07),
 					flipx,flipy,
 					sx,sy,
 					&clip,TRANSPARENCY_PEN,0);

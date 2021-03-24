@@ -28,15 +28,15 @@ public class beezer
 			{
 				for (x = Machine->visible_area.min_x; x <= Machine->visible_area.max_x; x++)
 				{
-					plot_pixel (tmpbitmap, x, y+1, Machine->pens[videoram[0x80*y+x] & 0x0f]);
-					plot_pixel (tmpbitmap, x, y, Machine->pens[(videoram[0x80*y+x] >> 4)& 0x0f]);
+					plot_pixel (tmpbitmap, x, y+1, Machine->pens[videoram.read(0x80*y+x)& 0x0f]);
+					plot_pixel (tmpbitmap, x, y, Machine->pens[(videoram.read(0x80*y+x)>> 4)& 0x0f]);
 				}
 			}
 		
 		copybitmap(bitmap,tmpbitmap,0,0,0,0,&Machine->visible_area,TRANSPARENCY_NONE,0);
 	}
 	
-	WRITE_HANDLER( beezer_map_w )
+	public static WriteHandlerPtr beezer_map_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*
 		  bit 7 -- 330  ohm resistor  -- BLUE
@@ -67,9 +67,9 @@ public class beezer
 		b = 0x5f * bit0 + 0xa0 * bit1;
 	
 		palette_set_color(offset, r, g, b);
-	}
+	} };
 	
-	WRITE_HANDLER( beezer_ram_w )
+	public static WriteHandlerPtr beezer_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x, y;
 		x = offset % 0x100;
@@ -81,12 +81,12 @@ public class beezer
 			plot_pixel (tmpbitmap, x, y, Machine->pens[(data >> 4)& 0x0f]);
 		}
 	
-		videoram[offset] = data;
-	}
+		videoram.write(offset,data);
+	} };
 	
-	READ_HANDLER( beezer_line_r )
+	public static ReadHandlerPtr beezer_line_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (scanline & 0xfe) << 1;
-	}
+	} };
 	
 }

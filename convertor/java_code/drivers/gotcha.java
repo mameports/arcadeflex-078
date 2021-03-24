@@ -96,132 +96,136 @@ public class gotcha
 	MEMORY_END
 	
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0xc001, 0xc001, YM2151_status_port_0_r },
-		{ 0xc006, 0xc006, soundlatch_r },
-		{ 0xd000, 0xd7ff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc001, 0xc001, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0xc006, 0xc006, soundlatch_r ),
+		new Memory_ReadAddress( 0xd000, 0xd7ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0xc000, 0xc000, YM2151_register_port_0_w },
-		{ 0xc001, 0xc001, YM2151_data_port_0_w },
-		{ 0xc002, 0xc003, OKIM6295_data_0_w },	// TWO addresses!
-		{ 0xd000, 0xd7ff, MWA_RAM },
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( gotcha )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_START3 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0007, "1" )
-		PORT_DIPSETTING(      0x0006, "2" )
-		PORT_DIPSETTING(      0x0005, "3" )
-		PORT_DIPSETTING(      0x0004, "4" )
-		PORT_DIPSETTING(      0x0003, "5" )
-		PORT_DIPSETTING(      0x0002, "6" )
-		PORT_DIPSETTING(      0x0001, "7" )
-		PORT_DIPSETTING(      0x0000, "8" )
-		PORT_DIPNAME( 0x0008, 0x0000, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0030, 0x0010, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x0030, "1" )
-		PORT_DIPSETTING(      0x0020, "2" )
-		PORT_DIPSETTING(      0x0010, "3" )
-		PORT_DIPSETTING(      0x0000, "4" )
-		PORT_DIPNAME( 0x00c0, 0x0080, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x00c0, "1 Coin/99 Credits" )
-		PORT_DIPNAME( 0x0100, 0x0100, "Info" )
-		PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0200, 0x0200, "Explane Type" )
-		PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0400, 0x0400, "Game Selection" )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0400, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xc000, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0xc001, 0xc001, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0xc002, 0xc003, OKIM6295_data_0_w ),	// TWO addresses!
+		new Memory_WriteAddress( 0xd000, 0xd7ff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static struct GfxLayout tilelayout =
-	{
+	static InputPortPtr input_ports_gotcha = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_START3 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0007, "1" );
+		PORT_DIPSETTING(      0x0006, "2" );
+		PORT_DIPSETTING(      0x0005, "3" );
+		PORT_DIPSETTING(      0x0004, "4" );
+		PORT_DIPSETTING(      0x0003, "5" );
+		PORT_DIPSETTING(      0x0002, "6" );
+		PORT_DIPSETTING(      0x0001, "7" );
+		PORT_DIPSETTING(      0x0000, "8" );
+		PORT_DIPNAME( 0x0008, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0030, 0x0010, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x0030, "1" );
+		PORT_DIPSETTING(      0x0020, "2" );
+		PORT_DIPSETTING(      0x0010, "3" );
+		PORT_DIPSETTING(      0x0000, "4" );
+		PORT_DIPNAME( 0x00c0, 0x0080, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x00c0, "1 Coin/99 Credits" );
+		PORT_DIPNAME( 0x0100, 0x0100, "Info" );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0200, 0x0200, "Explane Type" );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0400, 0x0400, "Game Selection" );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },
-		{ 0, 1, 2, 3, 4, 5, 6, 7,
+		new int[] { RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7,
 				16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 				8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 		16*16
-	};
+	);
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },
-		{ 16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+		new int[] { RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },
+		new int[] { 16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 				0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 				8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 		16*16
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tilelayout,   0x100, 32 },
-		{ REGION_GFX2, 0, &spritelayout, 0x000, 16 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, tilelayout,   0x100, 32 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, spritelayout, 0x000, 16 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -287,43 +291,43 @@ public class gotcha
 	
 	***************************************************************************/
 	
-	ROM_START( gotcha )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "gotcha.u3",    0x00000, 0x40000, CRC(5e5d52e0) SHA1(c3e9375350b7931e3c9874a045d7a9d8df5ea691) )
-		ROM_LOAD16_BYTE( "gotcha.u2",    0x00001, 0x40000, CRC(3aa8eaff) SHA1(348f2ab43101d51c553ff10f9d18cc499006c965) )
+	static RomLoadPtr rom_gotcha = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "gotcha.u3",    0x00000, 0x40000, CRC(5e5d52e0);SHA1(c3e9375350b7931e3c9874a045d7a9d8df5ea691) )
+		ROM_LOAD16_BYTE( "gotcha.u2",    0x00001, 0x40000, CRC(3aa8eaff);SHA1(348f2ab43101d51c553ff10f9d18cc499006c965) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
-		ROM_LOAD( "gotcha_u.z02", 0x0000, 0x10000, CRC(f4f6e16b) SHA1(a360c571bee7391c66e98e5e111e78ac9732390e) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* 64k for the audio CPU */
+		ROM_LOAD( "gotcha_u.z02", 0x0000, 0x10000, CRC(f4f6e16b);SHA1(a360c571bee7391c66e98e5e111e78ac9732390e) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "gotcha-u.42a", 0x000000, 0x20000, CRC(4ea822f0) SHA1(5b25d4c80138d9a0f3d481fa0c2f3665772bc0c8) )
-		ROM_CONTINUE(             0x100000, 0x20000 )
-		ROM_CONTINUE(             0x020000, 0x20000 )
-		ROM_CONTINUE(             0x120000, 0x20000 )
-		ROM_LOAD( "gotcha-u.42b", 0x040000, 0x20000, CRC(6bb529ac) SHA1(d872ec3d13d2bef4f8e0d0a8e72827b5ca87e193) )
-		ROM_CONTINUE(             0x140000, 0x20000 )
-		ROM_CONTINUE(             0x060000, 0x20000 )
-		ROM_CONTINUE(             0x160000, 0x20000 )
-		ROM_LOAD( "gotcha-u.41a", 0x080000, 0x20000, CRC(49299b7b) SHA1(85276453b6fce925c7b10c713e35284066df6ebf) )
-		ROM_CONTINUE(             0x180000, 0x20000 )
-		ROM_CONTINUE(             0x0a0000, 0x20000 )
-		ROM_CONTINUE(             0x1a0000, 0x20000 )
-		ROM_LOAD( "gotcha-u.41b", 0x0c0000, 0x20000, CRC(c093f04e) SHA1(e731714c9fe9b583a23e162a5513574e63d0f454) )
-		ROM_CONTINUE(             0x1c0000, 0x20000 )
-		ROM_CONTINUE(             0x0e0000, 0x20000 )
-		ROM_CONTINUE(             0x1e0000, 0x20000 )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "gotcha-u.42a", 0x000000, 0x20000, CRC(4ea822f0);SHA1(5b25d4c80138d9a0f3d481fa0c2f3665772bc0c8) )
+		ROM_CONTINUE(             0x100000, 0x20000 );
+		ROM_CONTINUE(             0x020000, 0x20000 );
+		ROM_CONTINUE(             0x120000, 0x20000 );
+		ROM_LOAD( "gotcha-u.42b", 0x040000, 0x20000, CRC(6bb529ac);SHA1(d872ec3d13d2bef4f8e0d0a8e72827b5ca87e193) )
+		ROM_CONTINUE(             0x140000, 0x20000 );
+		ROM_CONTINUE(             0x060000, 0x20000 );
+		ROM_CONTINUE(             0x160000, 0x20000 );
+		ROM_LOAD( "gotcha-u.41a", 0x080000, 0x20000, CRC(49299b7b);SHA1(85276453b6fce925c7b10c713e35284066df6ebf) )
+		ROM_CONTINUE(             0x180000, 0x20000 );
+		ROM_CONTINUE(             0x0a0000, 0x20000 );
+		ROM_CONTINUE(             0x1a0000, 0x20000 );
+		ROM_LOAD( "gotcha-u.41b", 0x0c0000, 0x20000, CRC(c093f04e);SHA1(e731714c9fe9b583a23e162a5513574e63d0f454) )
+		ROM_CONTINUE(             0x1c0000, 0x20000 );
+		ROM_CONTINUE(             0x0e0000, 0x20000 );
+		ROM_CONTINUE(             0x1e0000, 0x20000 );
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "gotcha.u56",   0x000000, 0x80000, CRC(85f6a062) SHA1(77d1c9c8394af0c487fa6d657ae740eae940682a) )
-		ROM_LOAD( "gotcha.u55",   0x080000, 0x80000, CRC(426b4e48) SHA1(91e79c9fd1f9cf84df8e1d6b67780d1cacd4a0f2) )
-		ROM_LOAD( "gotcha.u54",   0x100000, 0x80000, CRC(903e05a4) SHA1(4fb675958f4dc057f8da7edff1f6680482bdc5dd) )
-		ROM_LOAD( "gotcha.u53",   0x180000, 0x80000, CRC(3c24d51e) SHA1(8b987db14a56950cc0f77e232e20fcdd89f98f2b) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "gotcha.u56",   0x000000, 0x80000, CRC(85f6a062);SHA1(77d1c9c8394af0c487fa6d657ae740eae940682a) )
+		ROM_LOAD( "gotcha.u55",   0x080000, 0x80000, CRC(426b4e48);SHA1(91e79c9fd1f9cf84df8e1d6b67780d1cacd4a0f2) )
+		ROM_LOAD( "gotcha.u54",   0x100000, 0x80000, CRC(903e05a4);SHA1(4fb675958f4dc057f8da7edff1f6680482bdc5dd) )
+		ROM_LOAD( "gotcha.u53",   0x180000, 0x80000, CRC(3c24d51e);SHA1(8b987db14a56950cc0f77e232e20fcdd89f98f2b) )
 	
-		ROM_REGION( 0x80000, REGION_SOUND1, 0 )
-		ROM_LOAD( "gotcha-u.z11", 0x000000, 0x80000, CRC(6111c6ae) SHA1(9170a37eaca56586da2f5e4894816640193c8802) )
-	ROM_END
+		ROM_REGION( 0x80000, REGION_SOUND1, 0 );
+		ROM_LOAD( "gotcha-u.z11", 0x000000, 0x80000, CRC(6111c6ae);SHA1(9170a37eaca56586da2f5e4894816640193c8802) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAME( 1997, gotcha, 0, gotcha, gotcha, 0, ROT0, "Dongsung", "Got-cha" )
+	public static GameDriver driver_gotcha	   = new GameDriver("1997"	,"gotcha"	,"gotcha.java"	,rom_gotcha,null	,machine_driver_gotcha	,input_ports_gotcha	,null	,ROT0	,	"Dongsung", "Got-cha" )
 }

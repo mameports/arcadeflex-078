@@ -51,7 +51,7 @@ public class aeroboto
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,32,64);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(bg_tilemap,0);
@@ -85,12 +85,12 @@ public class aeroboto
 	
 	***************************************************************************/
 	
-	READ_HANDLER( aeroboto_in0_r )
+	public static ReadHandlerPtr aeroboto_in0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(flip_screen ? 1 : 0);
-	}
+	} };
 	
-	WRITE_HANDLER( aeroboto_3000_w )
+	public static WriteHandlerPtr aeroboto_3000_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 selects both flip screen and player1/player2 controls */
 		flip_screen_set(data & 0x01);
@@ -104,25 +104,25 @@ public class aeroboto
 	
 		/* bit 2 = disable star field? */
 		aeroboto_starsoff = data & 0x4;
-	}
+	} };
 	
-	WRITE_HANDLER( aeroboto_videoram_w )
+	public static WriteHandlerPtr aeroboto_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (aeroboto_videoram[offset] != data)
 		{
 			aeroboto_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( aeroboto_tilecolor_w )
+	public static WriteHandlerPtr aeroboto_tilecolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (aeroboto_tilecolor[offset] != data)
 		{
 			aeroboto_tilecolor[offset] = data;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
 	
 	
@@ -138,8 +138,8 @@ public class aeroboto
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			int x = spriteram[offs+3];
-			int y = 240 - spriteram[offs];
+			int x = spriteram.read(offs+3);
+			int y = 240 - spriteram.read(offs);
 	
 			if (flip_screen)
 			{
@@ -148,8 +148,8 @@ public class aeroboto
 			}
 	
 			drawgfx(bitmap, Machine->gfx[1],
-					spriteram[offs+1],
-					spriteram[offs+2] & 0x07,
+					spriteram.read(offs+1),
+					spriteram.read(offs+2)& 0x07,
 					flip_screen, flip_screen,
 					((x + 8) & 0xff) - 8, y,
 					cliprect, TRANSPARENCY_PEN, 0);
@@ -159,8 +159,8 @@ public class aeroboto
 	
 	VIDEO_UPDATE( aeroboto )
 	{
-		static struct rectangle splitrect1 = { 0, 255, 0, 39 };
-		static struct rectangle splitrect2 = { 0, 255, 40, 255 };
+		static rectangle splitrect1 = new rectangle( 0, 255, 0, 39 );
+		static rectangle splitrect2 = new rectangle( 0, 255, 40, 255 );
 		static int sx=0, sy=0;
 		static data8_t ox=0, oy=0;
 		data8_t *src_base, *src_colptr, *src_rowptr;
@@ -169,7 +169,7 @@ public class aeroboto
 		sky_color = star_color = *aeroboto_bgcolor << 2;
 	
 		// the star field is supposed to be seen through tile pen 0 when active
-		if (!aeroboto_starsoff)
+		if (aeroboto_starsoff == 0)
 		{
 			if (star_color < 0xd0) { star_color = 0xd0; sky_color = 0; }
 			star_color += 2;

@@ -32,8 +32,6 @@ public class pastelgl
 	static unsigned char *pastelgl_paltbl;
 	
 	
-	void pastelgl_vramflip(void);
-	void pastelgl_gfxdraw(void);
 	
 	
 	/******************************************************************************
@@ -48,20 +46,20 @@ public class pastelgl
 		{
 			int bit0, bit1, bit2, bit3, r, g, b;
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -245,7 +243,7 @@ public class pastelgl
 					dy = ((pastelgl_drawy + y) & 0xff);
 				}
 	
-				if (!readflag)
+				if (readflag == 0)
 				{
 					// 1st, 3rd, 5th, ... read
 					color = (color & 0x0f);
@@ -263,7 +261,7 @@ public class pastelgl
 	
 				if (pastelgl_paltbl[color] & 0xf0)
 				{
-					if (!color) tflag = 0;
+					if (color == 0) tflag = 0;
 					drawcolor = ((pastelgl_palbank * 0x10) + color);
 				}
 				else

@@ -49,25 +49,25 @@ public class tagteam
 		}
 	}
 	
-	WRITE_HANDLER( tagteam_videoram_w )
+	public static WriteHandlerPtr tagteam_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tagteam_colorram_w )
+	public static WriteHandlerPtr tagteam_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( tagteam_mirrorvideoram_r )
+	public static ReadHandlerPtr tagteam_mirrorvideoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int x,y;
 	
@@ -77,9 +77,9 @@ public class tagteam
 		offset = 32 * y + x;
 	
 		return videoram_r(offset);
-	}
+	} };
 	
-	READ_HANDLER( tagteam_mirrorcolorram_r )
+	public static ReadHandlerPtr tagteam_mirrorcolorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int x,y;
 	
@@ -89,9 +89,9 @@ public class tagteam
 		offset = 32 * y + x;
 	
 		return colorram_r(offset);
-	}
+	} };
 	
-	WRITE_HANDLER( tagteam_mirrorvideoram_w )
+	public static WriteHandlerPtr tagteam_mirrorvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y;
 	
@@ -101,9 +101,9 @@ public class tagteam
 		offset = 32 * y + x;
 	
 		tagteam_videoram_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( tagteam_mirrorcolorram_w )
+	public static WriteHandlerPtr tagteam_mirrorcolorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y;
 	
@@ -113,28 +113,28 @@ public class tagteam
 		offset = 32 * y + x;
 	
 		tagteam_colorram_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( tagteam_control_w )
+	public static WriteHandlerPtr tagteam_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	logerror("%04x: control = %02x\n",activecpu_get_pc(),data);
 	
 		/* bit 7 is the palette bank */
 		palettebank = (data & 0x80) >> 7;
-	}
+	} };
 	
-	WRITE_HANDLER( tagteam_flipscreen_w )
+	public static WriteHandlerPtr tagteam_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data &0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 256 * colorram[tile_index];
+		int code = videoram.read(tile_index)+ 256 * colorram.read(tile_index);
 		int color = palettebank * 2; // GUESS
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -145,7 +145,7 @@ public class tagteam
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows_flip_x,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -157,15 +157,15 @@ public class tagteam
 	
 		for (offs = 0; offs < 0x20; offs += 4)
 		{
-			int spritebank = (videoram[offs] & 0x30) << 4;
-			int code = videoram[offs + 1] + 256 * spritebank;
+			int spritebank = (videoram.read(offs)& 0x30) << 4;
+			int code = videoram.read(offs + 1)+ 256 * spritebank;
 			int color = 1 + 2 * palettebank; // GUESS
-			int flipx = videoram[offs] & 0x04;
-			int flipy = videoram[offs] & 0x02;
-			int sx = 240 - videoram[offs + 3];
-			int sy = 240 - videoram[offs + 2];
+			int flipx = videoram.read(offs)& 0x04;
+			int flipy = videoram.read(offs)& 0x02;
+			int sx = 240 - videoram.read(offs + 3);
+			int sy = 240 - videoram.read(offs + 2);
 	
-			if (!(videoram[offs] & 0x01)) continue;
+			if (!(videoram.read(offs)& 0x01)) continue;
 	
 			if (flip_screen)
 			{
@@ -184,7 +184,7 @@ public class tagteam
 	
 			/* Wrap around */
 	
-			code = videoram[offs + 0x20] + 256 * spritebank;
+			code = videoram.read(offs + 0x20)+ 256 * spritebank;
 			color = palettebank;
 			sy += (flip_screen ? -256 : 256);
 	

@@ -162,15 +162,15 @@ public class exidy
 	        return 1;
 	
 		motion_object_1_vid = auto_bitmap_alloc(16, 16);
-	    if (!motion_object_1_vid)
+	    if (motion_object_1_vid == 0)
 	        return 1;
 	
 		motion_object_2_vid = auto_bitmap_alloc(16, 16);
-	    if (!motion_object_2_vid)
+	    if (motion_object_2_vid == 0)
 	        return 1;
 	
 		motion_object_2_clip = auto_bitmap_alloc(16, 16);
-	    if (!motion_object_2_clip)
+	    if (motion_object_2_clip == 0)
 	        return 1;
 	
 	    return 0;
@@ -212,14 +212,14 @@ public class exidy
 	}
 	
 	
-	READ_HANDLER( exidy_interrupt_r )
+	public static ReadHandlerPtr exidy_interrupt_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* clear any interrupts */
 		cpu_set_irq_line(0, 0, CLEAR_LINE);
 	
 		/* return the latched condition */
 		return int_condition;
-	}
+	} };
 	
 	
 	
@@ -229,14 +229,14 @@ public class exidy
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( exidy_characterram_w )
+	public static WriteHandlerPtr exidy_characterram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (exidy_characterram[offset] != data)
 		{
 			exidy_characterram[offset] = data;
 			chardirty[offset / 8 % 256] = 1;
 		}
-	}
+	} };
 	
 	
 	
@@ -246,7 +246,7 @@ public class exidy
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( exidy_color_w )
+	public static WriteHandlerPtr exidy_color_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -259,7 +259,7 @@ public class exidy
 			int r = ((exidy_color_latch[2] >> i) & 0x01) * 0xff;
 			palette_set_color(i, r, g, b);
 		}
-	}
+	} };
 	
 	
 	
@@ -277,7 +277,7 @@ public class exidy
 		for (y = offs = 0; y < 32; y++)
 			for (x = 0; x < 32; x++, offs++)
 			{
-				int code = videoram[offs];
+				int code = videoram.read(offs);
 	
 				/* see if the character is dirty */
 				if (chardirty[code] == 1)
@@ -379,7 +379,7 @@ public class exidy
 		}
 	
 		/* update the background if necessary */
-		if (!update_complete)
+		if (update_complete == 0)
 			update_background();
 		update_complete = 0;
 	

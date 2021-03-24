@@ -79,35 +79,35 @@ public class cbasebal
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( cbasebal_textram_w )
+	public static WriteHandlerPtr cbasebal_textram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (cbasebal_textram[offset] != data)
 		{
 			cbasebal_textram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	READ_HANDLER( cbasebal_textram_r )
+	public static ReadHandlerPtr cbasebal_textram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return cbasebal_textram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( cbasebal_scrollram_w )
+	public static WriteHandlerPtr cbasebal_scrollram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (cbasebal_scrollram[offset] != data)
 		{
 			cbasebal_scrollram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
-	READ_HANDLER( cbasebal_scrollram_r )
+	public static ReadHandlerPtr cbasebal_scrollram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return cbasebal_scrollram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( cbasebal_gfxctrl_w )
+	public static WriteHandlerPtr cbasebal_gfxctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 is unknown - toggles continuously */
 	
@@ -135,23 +135,23 @@ public class cbasebal
 		obj_on = ~data & 0x80;
 	
 		/* other bits unknown, but used */
-	}
+	} };
 	
-	WRITE_HANDLER( cbasebal_scrollx_w )
+	public static WriteHandlerPtr cbasebal_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(bg_tilemap,0,scroll[0] + 256 * scroll[1]);
-	}
+	} };
 	
-	WRITE_HANDLER( cbasebal_scrolly_w )
+	public static WriteHandlerPtr cbasebal_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrolly(bg_tilemap,0,scroll[0] + 256 * scroll[1]);
-	}
+	} };
 	
 	
 	
@@ -169,12 +169,12 @@ public class cbasebal
 		/* moving diagonally across the screen */
 		for (offs = spriteram_size-8;offs >= 0;offs -= 4)
 		{
-			int code = spriteram[offs];
-			int attr = spriteram[offs+1];
+			int code = spriteram.read(offs);
+			int attr = spriteram.read(offs+1);
 			int color = attr & 0x07;
 			int flipx = attr & 0x08;
-			sx = spriteram[offs+3] + ((attr & 0x10) << 4);
-			sy = ((spriteram[offs+2] + 8) & 0xff) - 8;
+			sx = spriteram.read(offs+3)+ ((attr & 0x10) << 4);
+			sy = ((spriteram.read(offs+2)+ 8) & 0xff) - 8;
 			code += (attr & 0xe0) << 3;
 			code += spritebank * 0x800;
 	

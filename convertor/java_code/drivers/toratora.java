@@ -31,13 +31,13 @@ public class toratora
 	
 	
 	
-	WRITE_HANDLER( toratora_videoram_w )
+	public static WriteHandlerPtr toratora_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
 			int i,x,y;
 	
-			videoram[offset] = data;
+			videoram.write(offset,data);
 	
 			y = offset / 32;
 			x = 8 * (offset % 32);
@@ -50,13 +50,13 @@ public class toratora
 				data <<= 1;
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( toratora_clear_tv_w )
+	public static WriteHandlerPtr toratora_clear_tv_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		for (offset = 0;offset < 0x2000;offset++)
 			toratora_videoram_w(offset,0);
-	}
+	} };
 	
 	
 	
@@ -71,45 +71,45 @@ public class toratora
 	
 	
 	
-	static READ_HANDLER( porta_0_r )
+	public static ReadHandlerPtr porta_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(0) & 0x0f;
-	}
+	} };
 	
-	static READ_HANDLER( ca1_0_r )
+	public static ReadHandlerPtr ca1_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(0) & 0x10) >> 4;	/* coin A */
-	}
+	} };
 	
-	static READ_HANDLER( ca2_0_r )
+	public static ReadHandlerPtr ca2_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(0) & 0x20) >> 5;	/* coin B */
-	}
+	} };
 	
-	static WRITE_HANDLER( portb_0_w )
+	public static WriteHandlerPtr portb_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* this is the coin counter output, however it is controlled by changing
 		   the PIA DDR (FF/DF) so we don't have a way to know which is which
 		   because we always get a 00 write. */
-	}
+	} };
 	
 	
 	
-	static READ_HANDLER( portb_1_r )
+	public static ReadHandlerPtr portb_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		logerror("%04x: read DIP\n",activecpu_get_pc());
 		return readinputport(1);
-	}
+	} };
 	
-	static WRITE_HANDLER( ca2_1_w )
+	public static WriteHandlerPtr ca2_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		logerror("76477 #0 VCO SEL = %d\n",data & 1);
-	}
+	} };
 	
-	static WRITE_HANDLER( cb2_1_w )
+	public static WriteHandlerPtr cb2_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		logerror("DIP tristate %sactive\n",(data & 1) ? "in" : "");
-	}
+	} };
 	
 	static struct pia6821_interface pia0_intf =
 	{
@@ -152,74 +152,78 @@ public class toratora
 		if (timer & 0x100) usrintf_showmessage("watchdog!");
 	}
 	
-	static READ_HANDLER( toratora_timer_r )
+	public static ReadHandlerPtr toratora_timer_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return timer;
-	}
+	} };
 	
-	static WRITE_HANDLER( toratora_clear_timer_w )
+	public static WriteHandlerPtr toratora_clear_timer_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		timer = 0;
-	}
+	} };
 	
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x0fff, MRA_RAM },
-		{ 0x1000, 0x2fff, MRA_ROM },
-		{ 0x8000, 0x9fff, MRA_RAM },
-		{ 0xf04b, 0xf04b, toratora_timer_r },
-		{ 0xf0a0, 0xf0a3, pia_0_r },
-		{ 0xf0a4, 0xf0a7, pia_1_r },
-		{ 0xf0a8, 0xf0ab, pia_2_r },
-		{ 0xf800, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x0fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1000, 0x2fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x9fff, MRA_RAM ),
+		new Memory_ReadAddress( 0xf04b, 0xf04b, toratora_timer_r ),
+		new Memory_ReadAddress( 0xf0a0, 0xf0a3, pia_0_r ),
+		new Memory_ReadAddress( 0xf0a4, 0xf0a7, pia_1_r ),
+		new Memory_ReadAddress( 0xf0a8, 0xf0ab, pia_2_r ),
+		new Memory_ReadAddress( 0xf800, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x0fff, MWA_RAM },
-		{ 0x1000, 0x2fff, MWA_ROM },
-		{ 0x8000, 0x9fff, toratora_videoram_w, &videoram },
-		{ 0xf04a, 0xf04a, toratora_clear_tv_w },
-		{ 0xf04b, 0xf04b, toratora_clear_timer_w },
-		{ 0xf0a0, 0xf0a3, pia_0_w },
-		{ 0xf0a4, 0xf0a7, pia_1_w },
-		{ 0xf0a8, 0xf0ab, pia_2_w },
-		{ 0xf800, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x0fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x1000, 0x2fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x9fff, toratora_videoram_w, videoram ),
+		new Memory_WriteAddress( 0xf04a, 0xf04a, toratora_clear_tv_w ),
+		new Memory_WriteAddress( 0xf04b, 0xf04b, toratora_clear_timer_w ),
+		new Memory_WriteAddress( 0xf0a0, 0xf0a3, pia_0_w ),
+		new Memory_WriteAddress( 0xf0a4, 0xf0a7, pia_1_w ),
+		new Memory_WriteAddress( 0xf0a8, 0xf0ab, pia_2_w ),
+		new Memory_WriteAddress( 0xf800, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	INPUT_PORTS_START( toratora )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
+	static InputPortPtr input_ports_toratora = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED );
 	
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x03, "3" )
-		PORT_DIPSETTING(    0x02, "2" )
-		PORT_DIPSETTING(    0x03, "1" )
-		PORT_DIPSETTING(    0x02, "0" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x0c, "3" )
-		PORT_DIPSETTING(    0x08, "2" )
-		PORT_DIPSETTING(    0x04, "1" )
-		PORT_DIPSETTING(    0x02, "0" )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x20, "3" )
-		PORT_DIPSETTING(    0x00, "4" )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x03, "3" );
+		PORT_DIPSETTING(    0x02, "2" );
+		PORT_DIPSETTING(    0x03, "1" );
+		PORT_DIPSETTING(    0x02, "0" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x0c, "3" );
+		PORT_DIPSETTING(    0x08, "2" );
+		PORT_DIPSETTING(    0x04, "1" );
+		PORT_DIPSETTING(    0x02, "0" );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x20, "3" );
+		PORT_DIPSETTING(    0x00, "4" );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -257,16 +261,16 @@ public class toratora
 	
 	***************************************************************************/
 	
-	ROM_START( toratora )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "tora.u1",      0x1000, 0x0800, CRC(413c743a) SHA1(a887dfaaee557327a1699bb424488b934dab8612) )
-		ROM_LOAD( "tora.u10",     0x1800, 0x0800, CRC(dc771b1c) SHA1(1bd81decb4d0a854878227c52d45ac0eea0602ec) )
-		ROM_LOAD( "tora.u2",      0x2000, 0x0800, CRC(c574c664) SHA1(9f41a53ca51d04e5bec7525fe83c5f4bdfcf128d) )
-		ROM_LOAD( "tora.u9",      0x2800, 0x0800, CRC(b67aa11f) SHA1(da9e77255640a4b32eed2be89b686b98a248bd72) )
-		ROM_LOAD( "tora.u11",     0xf800, 0x0800, CRC(55135d6f) SHA1(c48f180a9d6e894aafe87b2daf74e9a082f4600e) )
-	ROM_END
+	static RomLoadPtr rom_toratora = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "tora.u1",      0x1000, 0x0800, CRC(413c743a);SHA1(a887dfaaee557327a1699bb424488b934dab8612) )
+		ROM_LOAD( "tora.u10",     0x1800, 0x0800, CRC(dc771b1c);SHA1(1bd81decb4d0a854878227c52d45ac0eea0602ec) )
+		ROM_LOAD( "tora.u2",      0x2000, 0x0800, CRC(c574c664);SHA1(9f41a53ca51d04e5bec7525fe83c5f4bdfcf128d) )
+		ROM_LOAD( "tora.u9",      0x2800, 0x0800, CRC(b67aa11f);SHA1(da9e77255640a4b32eed2be89b686b98a248bd72) )
+		ROM_LOAD( "tora.u11",     0xf800, 0x0800, CRC(55135d6f);SHA1(c48f180a9d6e894aafe87b2daf74e9a082f4600e) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX( 1980, toratora, 0, toratora, toratora, 0, ROT90, "GamePlan", "Tora Tora", GAME_NOT_WORKING | GAME_NO_SOUND )
+	public static GameDriver driver_toratora	   = new GameDriver("1980"	,"toratora"	,"toratora.java"	,rom_toratora,null	,machine_driver_toratora	,input_ports_toratora	,null	,ROT90	,	"GamePlan", "Tora Tora", GAME_NOT_WORKING | GAME_NO_SOUND )
 }

@@ -146,64 +146,64 @@ public class docastle
 		convert_color_prom(colortable,color_prom,1);
 	}
 	
-	WRITE_HANDLER( docastle_videoram_w )
+	public static WriteHandlerPtr docastle_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( docastle_colorram_w )
+	public static WriteHandlerPtr docastle_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( docastle_flipscreen_off_r )
+	public static ReadHandlerPtr docastle_flipscreen_off_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		flip_screen_set(0);
 		tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		return 0;
-	}
+	} };
 	
-	READ_HANDLER( docastle_flipscreen_on_r )
+	public static ReadHandlerPtr docastle_flipscreen_on_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		flip_screen_set(1);
 		tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		return 1;
-	}
+	} };
 	
-	WRITE_HANDLER( docastle_flipscreen_off_w )
+	public static WriteHandlerPtr docastle_flipscreen_off_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(0);
 		tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
-	}
+	} };
 	
-	WRITE_HANDLER( docastle_flipscreen_on_w )
+	public static WriteHandlerPtr docastle_flipscreen_on_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(1);
 		tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 8 * (colorram[tile_index] & 0x20);
-		int color = colorram[tile_index] & 0x1f;
+		int code = videoram.read(tile_index)+ 8 * (colorram.read(tile_index)& 0x20);
+		int color = colorram.read(tile_index)& 0x1f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 8 * (colorram[tile_index] & 0x20);
-		int color = (colorram[tile_index] & 0x1f) + 32;
+		int code = videoram.read(tile_index)+ 8 * (colorram.read(tile_index)& 0x20);
+		int color = (colorram.read(tile_index)& 0x1f) + 32;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -213,13 +213,13 @@ public class docastle
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT_COLOR, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 256);
@@ -256,14 +256,14 @@ public class docastle
 	
 				 */
 	
-				code = spriteram[offs + 3];
-				color = spriteram[offs + 2] & 0x0f;
-				sx = ((spriteram[offs + 1] + 8) & 0xff) - 8;
-				sy = spriteram[offs];
-				flipx = spriteram[offs + 2] & 0x40;
+				code = spriteram.read(offs + 3);
+				color = spriteram.read(offs + 2)& 0x0f;
+				sx = ((spriteram.read(offs + 1)+ 8) & 0xff) - 8;
+				sy = spriteram.read(offs);
+				flipx = spriteram.read(offs + 2)& 0x40;
 				flipy = 0;
-				if (spriteram[offs + 2] & 0x10) code += 0x100;
-				if (spriteram[offs + 2] & 0x80) code += 0x200;
+				if (spriteram.read(offs + 2)& 0x10) code += 0x100;
+				if (spriteram.read(offs + 2)& 0x80) code += 0x200;
 			}
 			else
 			{
@@ -282,12 +282,12 @@ public class docastle
 	
 				 */
 	
-				code = spriteram[offs + 3];
-				color = spriteram[offs + 2] & 0x1f;
-				sx = ((spriteram[offs + 1] + 8) & 0xff) - 8;
-				sy = spriteram[offs];
-				flipx = spriteram[offs + 2] & 0x40;
-				flipy = spriteram[offs + 2] & 0x80;
+				code = spriteram.read(offs + 3);
+				color = spriteram.read(offs + 2)& 0x1f;
+				sx = ((spriteram.read(offs + 1)+ 8) & 0xff) - 8;
+				sy = spriteram.read(offs);
+				flipx = spriteram.read(offs + 2)& 0x40;
+				flipy = spriteram.read(offs + 2)& 0x80;
 			}
 	
 			if (flip_screen)

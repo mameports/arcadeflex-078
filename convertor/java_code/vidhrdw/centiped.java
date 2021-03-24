@@ -27,14 +27,14 @@ public class centiped
 	
 	static void centiped_get_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index];
+		int data = videoram.read(tile_index);
 		SET_TILE_INFO(0, (data & 0x3f) + 0x40, 0, TILE_FLIPYX(data >> 6));
 	}
 	
 	
 	static void warlords_get_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index];
+		int data = videoram.read(tile_index);
 		int color = ((tile_index & 0x10) >> 4) | ((tile_index & 0x200) >> 8) | (centiped_flipscreen >> 5);
 		SET_TILE_INFO(0, data & 0x3f, color, TILE_FLIPYX(data >> 6));
 	}
@@ -42,7 +42,7 @@ public class centiped
 	
 	static void milliped_get_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index];
+		int data = videoram.read(tile_index);
 		int bank = (data >> 6) & 1;
 		int color = (data >> 6) & 3;
 		SET_TILE_INFO(0, (data & 0x3f) + 0x40 + (bank * 0x80), color, 0);
@@ -58,7 +58,7 @@ public class centiped
 	VIDEO_START( centiped )
 	{
 		tilemap = tilemap_create(centiped_get_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 8,8, 32,32);
-		if (!tilemap)
+		if (tilemap == 0)
 			return 1;
 	
 		centiped_flipscreen = 0;
@@ -69,7 +69,7 @@ public class centiped
 	VIDEO_START( warlords )
 	{
 		tilemap = tilemap_create(warlords_get_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 8,8, 32,32);
-		if (!tilemap)
+		if (tilemap == 0)
 			return 1;
 	
 		/* we overload centiped_flipscreen here to track the cocktail/upright state */
@@ -81,7 +81,7 @@ public class centiped
 	VIDEO_START( milliped )
 	{
 		tilemap = tilemap_create(milliped_get_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 8,8, 32,32);
-		if (!tilemap)
+		if (tilemap == 0)
 			return 1;
 	
 		centiped_flipscreen = 0;
@@ -96,11 +96,11 @@ public class centiped
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( centiped_videoram_w )
+	public static WriteHandlerPtr centiped_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(tilemap, offset);
-	}
+	} };
 	
 	
 	
@@ -110,10 +110,10 @@ public class centiped
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( centiped_flip_screen_w )
+	public static WriteHandlerPtr centiped_flip_screen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		centiped_flipscreen = data >> 7;
-	}
+	} };
 	
 	
 	
@@ -166,11 +166,11 @@ public class centiped
 	}
 	
 	
-	WRITE_HANDLER( centiped_paletteram_w )
+	public static WriteHandlerPtr centiped_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		r = 0xff * ((~data >> 0) & 1);
 		g = 0xff * ((~data >> 1) & 1);
@@ -188,7 +188,7 @@ public class centiped
 			palette_set_color(offset - 4, r, g, b);
 		else if (offset >= 12 && offset < 16)
 			palette_set_color(4 + (offset - 12), r, g, b);
-	}
+	} };
 	
 	
 	
@@ -277,12 +277,12 @@ public class centiped
 	}
 	
 	
-	WRITE_HANDLER( milliped_paletteram_w )
+	public static WriteHandlerPtr milliped_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bit0,bit1,bit2;
 		int r,g,b;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		/* red component */
 		bit0 = (~data >> 5) & 0x01;
@@ -303,7 +303,7 @@ public class centiped
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 		palette_set_color(offset, r, g, b);
-	}
+	} };
 	
 	
 	
@@ -330,11 +330,11 @@ public class centiped
 		/* draw the sprites */
 		for (offs = 0; offs < 0x10; offs++)
 		{
-			int code = ((spriteram[offs] & 0x3e) >> 1) | ((spriteram[offs] & 0x01) << 6);
-			int color = spriteram[offs + 0x30];
-			int flipy = spriteram[offs] & 0x80;
-			int x = spriteram[offs + 0x20];
-			int y = 240 - spriteram[offs + 0x10];
+			int code = ((spriteram.read(offs)& 0x3e) >> 1) | ((spriteram.read(offs)& 0x01) << 6);
+			int color = spriteram.read(offs + 0x30);
+			int flipy = spriteram.read(offs)& 0x80;
+			int x = spriteram.read(offs + 0x20);
+			int y = 240 - spriteram.read(offs + 0x10);
 	
 			drawgfx(bitmap, Machine->gfx[1], code, color & 0x3f, centiped_flipscreen, flipy, x, y,
 					&spriteclip, TRANSPARENCY_PEN, 0);
@@ -361,11 +361,11 @@ public class centiped
 		/* draw the sprites */
 		for (offs = 0; offs < 0x10; offs++)
 		{
-			int code = spriteram[offs] & 0x3f;
-			int flipx = spriteram[offs] & 0x40;
-			int flipy = spriteram[offs] & 0x80;
-			int x = spriteram[offs + 0x20];
-			int y = 248 - spriteram[offs + 0x10];
+			int code = spriteram.read(offs)& 0x3f;
+			int flipx = spriteram.read(offs)& 0x40;
+			int flipy = spriteram.read(offs)& 0x80;
+			int x = spriteram.read(offs + 0x20);
+			int y = 248 - spriteram.read(offs + 0x10);
 	
 			/* The four quadrants have different colors. This is not 100% accurate,
 			   because right on the middle the sprite could actually have two or more

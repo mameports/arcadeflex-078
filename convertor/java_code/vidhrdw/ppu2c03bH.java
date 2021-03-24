@@ -92,17 +92,12 @@ public class ppu2c03bH
 	void ppu2c03b_set_scanlines_per_frame( int num, int scanlines );
 	
 	//27/12/2002
-	extern void (*ppu_latch)( offs_t offset );
 	
 	void ppu2c03b_w( int num, int offset, int data );
 	int ppu2c03b_r( int num, int offset );
 	
 	/* accesors */
-	READ_HANDLER( ppu2c03b_0_r );
-	READ_HANDLER( ppu2c03b_1_r );
 	
-	WRITE_HANDLER( ppu2c03b_0_w );
-	WRITE_HANDLER( ppu2c03b_1_w );
 	
 	#endif /* __PPU_2C03B_H__ */
 }

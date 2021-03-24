@@ -59,12 +59,12 @@ public class drgnmst
 	}
 	
 	
-	static READ_HANDLER( pic16c5x_port0_r )
+	public static ReadHandlerPtr pic16c5x_port0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return pic16c5x_port0;
-	}
+	} };
 	
-	static READ_HANDLER( drgnmst_snd_command_r )
+	public static ReadHandlerPtr drgnmst_snd_command_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int data = 0;
 	
@@ -78,9 +78,9 @@ public class drgnmst
 		}
 	
 		return data;
-	}
+	} };
 	
-	static READ_HANDLER( drgnmst_snd_flag_r )
+	public static ReadHandlerPtr drgnmst_snd_flag_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (drgnmst_snd_flag) {
 			drgnmst_snd_flag = 0;
@@ -88,9 +88,9 @@ public class drgnmst
 		}
 	
 		return 0x00;
-	}
+	} };
 	
-	static WRITE_HANDLER( drgnmst_pcm_banksel_w )
+	public static WriteHandlerPtr drgnmst_pcm_banksel_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*	This is a 4 bit port.
 			Each pair of bits is used in part of the OKI PCM ROM bank selectors.
@@ -98,14 +98,14 @@ public class drgnmst
 		*/
 	
 		pic16c5x_port0 = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( drgnmst_oki_w )
+	public static WriteHandlerPtr drgnmst_oki_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		drgnmst_oki_command = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( drgnmst_snd_control_w )
+	public static WriteHandlerPtr drgnmst_snd_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*	This port controls communications to and from the 68K, both OKI
 			devices, and part of the OKI PCM ROM bank selection.
@@ -160,13 +160,13 @@ public class drgnmst
 						break;
 			default:	break;
 		}
-	}
+	} };
 	
 	
-	static READ_HANDLER( PIC16C5X_T0_clk_r )
+	public static ReadHandlerPtr PIC16C5X_T0_clk_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 0;
-	}
+	} };
 	
 	
 	
@@ -217,176 +217,184 @@ public class drgnmst
 	MEMORY_END
 	
 	
-	static MEMORY_READ_START( drgnmst_sound_readmem )
-		{ PIC16C55_MEMORY_READ },
+	public static Memory_ReadAddress drgnmst_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( PIC16C55_MEMORY_READ ),
 			/* $000 - 01F  Internal memory mapped registers */
 			/* $000 - 1FF  Program ROM for PIC16C55. Note: code is 12bits wide */
 			/*             View the ROM at $1000 in the debugger memory windows */
-	MEMORY_END
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( drgnmst_sound_writemem )
-		{ PIC16C55_MEMORY_WRITE },
-	MEMORY_END
+	public static Memory_WriteAddress drgnmst_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( PIC16C55_MEMORY_WRITE ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( drgnmst_sound_readport )
-		{ 0x00, 0x00, pic16c5x_port0_r },		/* 4 bit port */
-		{ 0x01, 0x01, drgnmst_snd_command_r },
-		{ 0x02, 0x02, drgnmst_snd_flag_r },
-		{ PIC16C5x_T0, PIC16C5x_T0, PIC16C5X_T0_clk_r },
-	PORT_END
+	public static IO_ReadPort drgnmst_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, pic16c5x_port0_r ),		/* 4 bit port */
+		new IO_ReadPort( 0x01, 0x01, drgnmst_snd_command_r ),
+		new IO_ReadPort( 0x02, 0x02, drgnmst_snd_flag_r ),
+		new IO_ReadPort( PIC16C5x_T0, PIC16C5x_T0, PIC16C5X_T0_clk_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( drgnmst_sound_writeport )
-		{ 0x00, 0x00, drgnmst_pcm_banksel_w },	/* 4 bit port */
-		{ 0x01, 0x01, drgnmst_oki_w },
-		{ 0x02, 0x02, drgnmst_snd_control_w },
-	PORT_END
-	
-	
-	
-	INPUT_PORTS_START( drgnmst )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( Coinage ) )
-	/*	PORT_DIPSETTING(      0x0300, DEF_STR( Off ) ) */
-		PORT_DIPSETTING(      0x0000, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0100, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0200, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0700, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0600, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0500, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0400, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0x0800, 0x0000, "Continue" )
-		PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1000, 0x0000, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x2000, 0x2000, "Two credits to start" )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR ( Free_Play ) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x8000, 0x8000, "Game Pause" )
-		PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	
-		PORT_START
-		PORT_DIPNAME( 0x0700, 0x0400, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0700, "Easiest" )
-		PORT_DIPSETTING(      0x0600, "Easier" )
-		PORT_DIPSETTING(      0x0500, "Easy" )
-		PORT_DIPSETTING(      0x0400, "Normal" )
-		PORT_DIPSETTING(      0x0300, "Medium" )
-		PORT_DIPSETTING(      0x0200, "Hard" )
-		PORT_DIPSETTING(      0x0100, "Harder" )
-		PORT_DIPSETTING(      0x0000, "Hardest" )
-		PORT_DIPNAME( 0x0800, 0x0800, "Language" )
-		PORT_DIPSETTING(      0x0800, "English" )
-		PORT_DIPSETTING(      0x0000, "Korea" )
-		PORT_DIPNAME( 0x1000, 0x1000, "Game Time" )
-		PORT_DIPSETTING(      0x1000, "Normal" )
-		PORT_DIPSETTING(      0x0000, "Short" )
-		PORT_DIPNAME( 0x2000, 0x2000, "Stage Skip" )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x4000, "Spit Color" )
-		PORT_DIPSETTING(      0x4000, "Grey" )
-		PORT_DIPSETTING(      0x0000, "Red" )
-		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
-	
-		PORT_START
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER1 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER2 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+	public static IO_WritePort drgnmst_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, drgnmst_pcm_banksel_w ),	/* 4 bit port */
+		new IO_WritePort( 0x01, 0x01, drgnmst_oki_w ),
+		new IO_WritePort( 0x02, 0x02, drgnmst_snd_control_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static struct GfxLayout drgnmst_char8x8_layout =
-	{
+	
+	static InputPortPtr input_ports_drgnmst = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 );
+	
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( "Coinage") );
+	/*	PORT_DIPSETTING(      0x0300, DEF_STR( "Off") ); */
+		PORT_DIPSETTING(      0x0000, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0700, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0600, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0500, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0x0800, 0x0000, "Continue" );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1000, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x2000, 0x2000, "Two credits to start" );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR ( Free_Play );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x8000, 0x8000, "Game Pause" );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+	
+		PORT_START(); 
+		PORT_DIPNAME( 0x0700, 0x0400, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0700, "Easiest" );
+		PORT_DIPSETTING(      0x0600, "Easier" );
+		PORT_DIPSETTING(      0x0500, "Easy" );
+		PORT_DIPSETTING(      0x0400, "Normal" );
+		PORT_DIPSETTING(      0x0300, "Medium" );
+		PORT_DIPSETTING(      0x0200, "Hard" );
+		PORT_DIPSETTING(      0x0100, "Harder" );
+		PORT_DIPSETTING(      0x0000, "Hardest" );
+		PORT_DIPNAME( 0x0800, 0x0800, "Language" );
+		PORT_DIPSETTING(      0x0800, "English" );
+		PORT_DIPSETTING(      0x0000, "Korea" );
+		PORT_DIPNAME( 0x1000, 0x1000, "Game Time" );
+		PORT_DIPSETTING(      0x1000, "Normal" );
+		PORT_DIPSETTING(      0x0000, "Short" );
+		PORT_DIPNAME( 0x2000, 0x2000, "Stage Skip" );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x4000, "Spit Color" );
+		PORT_DIPSETTING(      0x4000, "Grey" );
+		PORT_DIPSETTING(      0x0000, "Red" );
+		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW );
+	
+		PORT_START(); 
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER1 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER2 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static GfxLayout drgnmst_char8x8_layout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 24,8,16, 0 },
-		{ 0,1,2,3,4,5,6,7 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 24,8,16, 0 },
+		new int[] { 0,1,2,3,4,5,6,7 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		8*32
-	};
+	);
 	
 	
-	static struct GfxLayout drgnmst_char16x16_layout =
-	{
+	static GfxLayout drgnmst_char16x16_layout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,2),
 		4,
-		{ 24, 8,16,0 },
-		{ RGN_FRAC(1,2)+0,RGN_FRAC(1,2)+1,RGN_FRAC(1,2)+2,RGN_FRAC(1,2)+3,RGN_FRAC(1,2)+4,RGN_FRAC(1,2)+5,RGN_FRAC(1,2)+6,RGN_FRAC(1,2)+7,
+		new int[] { 24, 8,16,0 },
+		new int[] { RGN_FRAC(1,2)+0,RGN_FRAC(1,2)+1,RGN_FRAC(1,2)+2,RGN_FRAC(1,2)+3,RGN_FRAC(1,2)+4,RGN_FRAC(1,2)+5,RGN_FRAC(1,2)+6,RGN_FRAC(1,2)+7,
 			0,1,2,3,4,5,6,7 },
-		{ 0*32,1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+		new int[] { 0*32,1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 		  8*32,9*32,10*32,11*32,12*32,13*32,14*32,15*32 },
 		16*32
-	};
+	);
 	
 	
 	
-	static struct GfxLayout drgnmst_char32x32_layout =
-	{
+	static GfxLayout drgnmst_char32x32_layout = new GfxLayout
+	(
 		32,32,
 		RGN_FRAC(1,2),
 		4,
-		{ 24,8, 16,0 },
-		{ 	RGN_FRAC(1,2)+0,RGN_FRAC(1,2)+1,RGN_FRAC(1,2)+2,RGN_FRAC(1,2)+3,RGN_FRAC(1,2)+4,RGN_FRAC(1,2)+5,RGN_FRAC(1,2)+6,RGN_FRAC(1,2)+7,
+		new int[] { 24,8, 16,0 },
+		new int[] { 	RGN_FRAC(1,2)+0,RGN_FRAC(1,2)+1,RGN_FRAC(1,2)+2,RGN_FRAC(1,2)+3,RGN_FRAC(1,2)+4,RGN_FRAC(1,2)+5,RGN_FRAC(1,2)+6,RGN_FRAC(1,2)+7,
 			0,1,2,3,4,5,6,7,
 		    RGN_FRAC(1,2)+32,RGN_FRAC(1,2)+33,RGN_FRAC(1,2)+34,RGN_FRAC(1,2)+35,RGN_FRAC(1,2)+36,RGN_FRAC(1,2)+37,RGN_FRAC(1,2)+38,RGN_FRAC(1,2)+39,
 			32,33,34,35,36,37,38,39 },
 	
-		{	 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		new int[] {	 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 			 8*64, 9*64,10*64,11*64,12*64,13*64,14*64,15*64,
 		 	16*64,17*64,18*64,19*64,20*64,21*64,22*64,23*64,
 		 	24*64,25*64,26*64,27*64,28*64,29*64,30*64,31*64 },
 		32*64
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &drgnmst_char16x16_layout,   0,      0x200  }, /* sprite tiles */
-		{ REGION_GFX2, 0, &drgnmst_char8x8_layout,     0x200,  0x200  }, /* fg tiles */
-		{ REGION_GFX2, 0, &drgnmst_char16x16_layout,   0x0400, 0x200  }, /* md tiles */
-		{ REGION_GFX2, 0, &drgnmst_char32x32_layout,   0x0600, 0x200  }, /* bg tiles */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, drgnmst_char16x16_layout,   0,      0x200  ), /* sprite tiles */
+		new GfxDecodeInfo( REGION_GFX2, 0, drgnmst_char8x8_layout,     0x200,  0x200  ), /* fg tiles */
+		new GfxDecodeInfo( REGION_GFX2, 0, drgnmst_char16x16_layout,   0x0400, 0x200  ), /* md tiles */
+		new GfxDecodeInfo( REGION_GFX2, 0, drgnmst_char32x32_layout,   0x0600, 0x200  ), /* bg tiles */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -427,42 +435,42 @@ public class drgnmst
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( drgnmst )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* 68000 Code */
-		ROM_LOAD16_BYTE( "dm1000e", 0x00000, 0x80000, CRC(29467dac) SHA1(42ca42340ffd9b04be23853ca4e936d0528a66ee) )
-		ROM_LOAD16_BYTE( "dm1000o", 0x00001, 0x80000, CRC(ba48e9cf) SHA1(1107f927424107918bb10ff23f40c50579b23836) )
+	static RomLoadPtr rom_drgnmst = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 Code */
+		ROM_LOAD16_BYTE( "dm1000e", 0x00000, 0x80000, CRC(29467dac);SHA1(42ca42340ffd9b04be23853ca4e936d0528a66ee) )
+		ROM_LOAD16_BYTE( "dm1000o", 0x00001, 0x80000, CRC(ba48e9cf);SHA1(1107f927424107918bb10ff23f40c50579b23836) )
 	
-		ROM_REGION( 0x4000, REGION_CPU2, 0 ) /* PIC16C55 Code */
-	//	ROM_LOAD( "pic16c55", PIC16C55_PGM_OFFSET, 0x400, CRC(531c9f8d) SHA1(8ec180b0566f2ce1e08f0347e5ad402c73b44049) )
+		ROM_REGION( 0x4000, REGION_CPU2, 0 );/* PIC16C55 Code */
+	//	ROM_LOAD( "pic16c55", PIC16C55_PGM_OFFSET, 0x400, CRC(531c9f8d);SHA1(8ec180b0566f2ce1e08f0347e5ad402c73b44049) )
 		/* ROM will be copied here by the init code from the USER1 region */
 	
-		ROM_REGION( 0x1000, REGION_USER1, ROMREGION_DISPOSE )
-		ROM_LOAD( "pic16c55.hex", 0x000, 0x0b7b, CRC(f17011e7) SHA1(8f3bd94ffb528f661eed77d89e5b772442d2f5a6) )
+		ROM_REGION( 0x1000, REGION_USER1, ROMREGION_DISPOSE );
+		ROM_LOAD( "pic16c55.hex", 0x000, 0x0b7b, CRC(f17011e7);SHA1(8f3bd94ffb528f661eed77d89e5b772442d2f5a6) )
 	
-		ROM_REGION( 0x140000, REGION_SOUND1, 0 ) /* OKI-0 Samples */
-		ROM_LOAD( "dm1001", 0x00000, 0x100000, CRC(63566f7f) SHA1(0fe6cb67a5d99cd54e46e9889ea121097756b9ef) )
+		ROM_REGION( 0x140000, REGION_SOUND1, 0 );/* OKI-0 Samples */
+		ROM_LOAD( "dm1001", 0x00000, 0x100000, CRC(63566f7f);SHA1(0fe6cb67a5d99cd54e46e9889ea121097756b9ef) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND2, 0 ) /* OKI-1 Samples */
-		ROM_LOAD( "dm1002", 0x00000, 0x200000, CRC(0f1a874e) SHA1(8efc39f8ff7e6e7138b19959bd083b9df002acca) )
+		ROM_REGION( 0x200000, REGION_SOUND2, 0 );/* OKI-1 Samples */
+		ROM_LOAD( "dm1002", 0x00000, 0x200000, CRC(0f1a874e);SHA1(8efc39f8ff7e6e7138b19959bd083b9df002acca) )
 	
-		ROM_REGION( 0x800000, REGION_GFX1, 0 ) /* Sprites (16x16x4) */
-		ROM_LOAD16_BYTE( "dm1003", 0x000000, 0x080000, CRC(0ca10e81) SHA1(abebd8437764110278c8b7e583d846db27e205ec) )
-		ROM_CONTINUE(0x400000, 0x080000)
-		ROM_CONTINUE(0x100000, 0x080000)
-		ROM_CONTINUE(0x500000, 0x080000)
-		ROM_LOAD16_BYTE( "dm1005", 0x000001, 0x080000, CRC(4c2b1db5) SHA1(35d799cd13540e2aca1d1164291fe4c9938ed0ce) )
-		ROM_CONTINUE(0x400001, 0x080000)
-		ROM_CONTINUE(0x100001, 0x080000)
-		ROM_CONTINUE(0x500001, 0x080000)
-		ROM_LOAD16_BYTE( "dm1004", 0x200000, 0x040000, CRC(1a9ac249) SHA1(c15c7399dcb24dcab05887e3711e5b31bb7f31e8) )
-		ROM_CONTINUE(0x600000, 0x040000)
-		ROM_LOAD16_BYTE( "dm1006", 0x200001, 0x040000, CRC(c46da6fc) SHA1(f2256f02c833bc1074681729bd2b95fa6f3350cf) )
-		ROM_CONTINUE(0x600001, 0x040000)
+		ROM_REGION( 0x800000, REGION_GFX1, 0 );/* Sprites (16x16x4) */
+		ROM_LOAD16_BYTE( "dm1003", 0x000000, 0x080000, CRC(0ca10e81);SHA1(abebd8437764110278c8b7e583d846db27e205ec) )
+		ROM_CONTINUE(0x400000, 0x080000);
+		ROM_CONTINUE(0x100000, 0x080000);
+		ROM_CONTINUE(0x500000, 0x080000);
+		ROM_LOAD16_BYTE( "dm1005", 0x000001, 0x080000, CRC(4c2b1db5);SHA1(35d799cd13540e2aca1d1164291fe4c9938ed0ce) )
+		ROM_CONTINUE(0x400001, 0x080000);
+		ROM_CONTINUE(0x100001, 0x080000);
+		ROM_CONTINUE(0x500001, 0x080000);
+		ROM_LOAD16_BYTE( "dm1004", 0x200000, 0x040000, CRC(1a9ac249);SHA1(c15c7399dcb24dcab05887e3711e5b31bb7f31e8) )
+		ROM_CONTINUE(0x600000, 0x040000);
+		ROM_LOAD16_BYTE( "dm1006", 0x200001, 0x040000, CRC(c46da6fc);SHA1(f2256f02c833bc1074681729bd2b95fa6f3350cf) )
+		ROM_CONTINUE(0x600001, 0x040000);
 	
-		ROM_REGION( 0x200000, REGION_GFX2, 0 ) /* BG Tiles (8x8x4, 16x16x4 and 32x32x4) */
-		ROM_LOAD16_BYTE( "dm1007", 0x000001, 0x100000, CRC(d5ad81c4) SHA1(03df467b218682a02245a6e8f500ab83de382448) )
-		ROM_LOAD16_BYTE( "dm1008", 0x000000, 0x100000, CRC(b8572be3) SHA1(29aab76821e0a56033cf06b0a1890b11804da8d8) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_GFX2, 0 );/* BG Tiles (8x8x4, 16x16x4 and 32x32x4) */
+		ROM_LOAD16_BYTE( "dm1007", 0x000001, 0x100000, CRC(d5ad81c4);SHA1(03df467b218682a02245a6e8f500ab83de382448) )
+		ROM_LOAD16_BYTE( "dm1008", 0x000000, 0x100000, CRC(b8572be3);SHA1(29aab76821e0a56033cf06b0a1890b11804da8d8) )
+	ROM_END(); }}; 
 	
 	
 	static UINT8 drgnmst_asciitohex(UINT8 data)
@@ -553,5 +561,5 @@ public class drgnmst
 	}
 	
 	
-	GAME( 1994, drgnmst, 0, drgnmst,  drgnmst, drgnmst, ROT0, "Unico", "Dragon Master" )
+	public static GameDriver driver_drgnmst	   = new GameDriver("1994"	,"drgnmst"	,"drgnmst.java"	,rom_drgnmst,null	,machine_driver_drgnmst	,input_ports_drgnmst	,init_drgnmst	,ROT0	,	"Unico", "Dragon Master" )
 }

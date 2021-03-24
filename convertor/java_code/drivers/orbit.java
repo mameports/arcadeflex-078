@@ -32,9 +32,7 @@ public class orbit
 	extern UINT8* orbit_playfield_ram;
 	extern UINT8* orbit_sprite_ram;
 	
-	extern WRITE_HANDLER( orbit_playfield_w );
-	extern WRITE_HANDLER( orbit_sprite_w );
-	
+	extern extern 
 	static int orbit_nmi_enable;
 	
 	static UINT8 orbit_misc_flags;
@@ -79,30 +77,30 @@ public class orbit
 	}
 	
 	
-	WRITE_HANDLER( orbit_note_w )
+	public static WriteHandlerPtr orbit_note_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(0, (~data) & 0xff);
-	}
+	} };
 	
-	WRITE_HANDLER( orbit_note_amp_w )
+	public static WriteHandlerPtr orbit_note_amp_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(1, data & 0x0f);
 		discrete_sound_w(2, (data >> 4) & 0x0f);
-	}
+	} };
 	
-	WRITE_HANDLER( orbit_noise_amp_w )
+	public static WriteHandlerPtr orbit_noise_amp_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(3, data & 0x0f);
 		discrete_sound_w(4, (data & 0xf0) >> 4);
-	}
+	} };
 	
-	WRITE_HANDLER( orbit_noise_rst_w )
+	public static WriteHandlerPtr orbit_noise_rst_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(6, 0);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( orbit_misc_w )
+	public static WriteHandlerPtr orbit_misc_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 bit = offset >> 1;
 	
@@ -114,202 +112,206 @@ public class orbit
 		{
 			update_misc_flags(orbit_misc_flags & ~(1 << bit));
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( orbit_zeropage_w )
+	public static WriteHandlerPtr orbit_zeropage_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		memory_region(REGION_CPU1)[offset & 0xff] = data;
-	}
+	} };
 	
 	
-	READ_HANDLER( orbit_zeropage_r )
+	public static ReadHandlerPtr orbit_zeropage_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return memory_region(REGION_CPU1)[offset & 0xff];
-	}
+	} };
 	
 	
-	static MEMORY_READ_START( orbit_readmem )
-		{ 0x0000, 0x00ff, MRA_RAM },
-		{ 0x0100, 0x07ff, orbit_zeropage_r },
-		{ 0x0800, 0x0800, input_port_0_r },
-		{ 0x1000, 0x1000, input_port_1_r },
-		{ 0x1800, 0x1800, input_port_2_r },
-		{ 0x2000, 0x2000, input_port_3_r },
-		{ 0x2800, 0x2800, input_port_4_r },
-		{ 0x3000, 0x33ff, MRA_RAM },
-		{ 0x6800, 0x7fff, MRA_ROM }, /* program */
-		{ 0xfc00, 0xffff, MRA_ROM }, /* program mirror */
-	MEMORY_END
+	public static Memory_ReadAddress orbit_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x00ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x0100, 0x07ff, orbit_zeropage_r ),
+		new Memory_ReadAddress( 0x0800, 0x0800, input_port_0_r ),
+		new Memory_ReadAddress( 0x1000, 0x1000, input_port_1_r ),
+		new Memory_ReadAddress( 0x1800, 0x1800, input_port_2_r ),
+		new Memory_ReadAddress( 0x2000, 0x2000, input_port_3_r ),
+		new Memory_ReadAddress( 0x2800, 0x2800, input_port_4_r ),
+		new Memory_ReadAddress( 0x3000, 0x33ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x6800, 0x7fff, MRA_ROM ), /* program */
+		new Memory_ReadAddress( 0xfc00, 0xffff, MRA_ROM ), /* program mirror */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( orbit_writemem )
-		{ 0x0000, 0x07ff, orbit_zeropage_w },
-		{ 0x3000, 0x33bf, orbit_playfield_w, &orbit_playfield_ram },
-		{ 0x33c0, 0x33ff, orbit_sprite_w, &orbit_sprite_ram },
-		{ 0x3400, 0x37bf, orbit_playfield_w },
-		{ 0x37c0, 0x37ff, orbit_sprite_w },
-		{ 0x3800, 0x3800, orbit_note_w },
-		{ 0x3900, 0x3900, orbit_noise_amp_w },
-		{ 0x3a00, 0x3a00, orbit_note_amp_w },
-		{ 0x3c00, 0x3c0f, orbit_misc_w },
-		{ 0x3e00, 0x3e00, orbit_noise_rst_w },
-		{ 0x3f00, 0x3f00, watchdog_reset_w },
-		{ 0x6800, 0x7fff, MWA_ROM }, /* program */
-		{ 0xfc00, 0xffff, MWA_ROM }, /* program mirror */
-	MEMORY_END
-	
-	
-	INPUT_PORTS_START( orbit )
-		PORT_START /* 0800 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 ) /* actually buttons */
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
-	
-		PORT_START /* 1000 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 ) /* actually buttons */
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
-	
-		PORT_START /* 1800 */
-		PORT_DIPNAME( 0x07, 0x00, "Play Time Per Credit" )
-		PORT_DIPSETTING( 0x00, "0:30" )
-		PORT_DIPSETTING( 0x01, "1:00" )
-		PORT_DIPSETTING( 0x02, "1:30" )
-		PORT_DIPSETTING( 0x03, "2:00" )
-		PORT_DIPSETTING( 0x04, "2:30" )
-		PORT_DIPSETTING( 0x05, "3:00" )
-		PORT_DIPSETTING( 0x06, "3:30" )
-		PORT_DIPSETTING( 0x07, "4:00" )
-		PORT_DIPNAME( 0x18, 0x00, "Language" )
-		PORT_DIPSETTING( 0x00, "English" )
-		PORT_DIPSETTING( 0x08, "Spanish" )
-		PORT_DIPSETTING( 0x10, "French" )
-		PORT_DIPSETTING( 0x18, "German" )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Free_Play ))
-		PORT_DIPSETTING( 0x00, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x20, DEF_STR( On ))
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown )) /* probably unused */
-		PORT_DIPSETTING( 0x00, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x40, DEF_STR( On ))
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown )) /* probably unused */
-		PORT_DIPSETTING( 0x00, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x80, DEF_STR( On ))
-	
-		PORT_START /* 2000 */
-		PORT_BITX( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1, "Game Reset", KEYCODE_PLUS_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 9", KEYCODE_9_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 8", KEYCODE_8_PAD, IP_JOY_NONE )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Flip_Screen ))
-		PORT_DIPSETTING( 0x00, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x08, DEF_STR( On ))
-		PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1, "Heat Reset", KEYCODE_ENTER_PAD, IP_JOY_NONE )
-		PORT_DIPNAME( 0x20, 0x20, "NEXT TEST" ) /* should be off */
-		PORT_DIPSETTING( 0x20, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x00, DEF_STR( On ))
-		PORT_DIPNAME( 0x40, 0x40, "DIAG TEST" ) /* should be off */
-		PORT_DIPSETTING( 0x40, DEF_STR( Off ))
-		PORT_DIPSETTING( 0x00, DEF_STR( On ))
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
-	
-		PORT_START /* 2800 */
-		PORT_BITX( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 7 / Strong Gravity",  KEYCODE_7_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 6 / Stars",  KEYCODE_6_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 5 / Unlimited Supplies",  KEYCODE_5_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 4 / Space Stations",  KEYCODE_4_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 3 / Black Hole",  KEYCODE_3_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 2 / Zero Gravity",  KEYCODE_2_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 1 / Negative Gravity",  KEYCODE_1_PAD, IP_JOY_NONE )
-		PORT_BITX( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 0 / Bounce Back",  KEYCODE_0_PAD, IP_JOY_NONE )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress orbit_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x07ff, orbit_zeropage_w ),
+		new Memory_WriteAddress( 0x3000, 0x33bf, orbit_playfield_w, orbit_playfield_ram ),
+		new Memory_WriteAddress( 0x33c0, 0x33ff, orbit_sprite_w, orbit_sprite_ram ),
+		new Memory_WriteAddress( 0x3400, 0x37bf, orbit_playfield_w ),
+		new Memory_WriteAddress( 0x37c0, 0x37ff, orbit_sprite_w ),
+		new Memory_WriteAddress( 0x3800, 0x3800, orbit_note_w ),
+		new Memory_WriteAddress( 0x3900, 0x3900, orbit_noise_amp_w ),
+		new Memory_WriteAddress( 0x3a00, 0x3a00, orbit_note_amp_w ),
+		new Memory_WriteAddress( 0x3c00, 0x3c0f, orbit_misc_w ),
+		new Memory_WriteAddress( 0x3e00, 0x3e00, orbit_noise_rst_w ),
+		new Memory_WriteAddress( 0x3f00, 0x3f00, watchdog_reset_w ),
+		new Memory_WriteAddress( 0x6800, 0x7fff, MWA_ROM ), /* program */
+		new Memory_WriteAddress( 0xfc00, 0xffff, MWA_ROM ), /* program mirror */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static struct GfxLayout orbit_full_sprite_layout =
-	{
+	static InputPortPtr input_ports_orbit = new InputPortPtr(){ public void handler() { 
+		PORT_START();  /* 0800 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 );/* actually buttons */
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_TILT );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
+	
+		PORT_START();  /* 1000 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 );/* actually buttons */
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_SERVICE( 0x40, IP_ACTIVE_LOW );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 );
+	
+		PORT_START();  /* 1800 */
+		PORT_DIPNAME( 0x07, 0x00, "Play Time Per Credit" );
+		PORT_DIPSETTING( 0x00, "0:30" );
+		PORT_DIPSETTING( 0x01, "1:00" );
+		PORT_DIPSETTING( 0x02, "1:30" );
+		PORT_DIPSETTING( 0x03, "2:00" );
+		PORT_DIPSETTING( 0x04, "2:30" );
+		PORT_DIPSETTING( 0x05, "3:00" );
+		PORT_DIPSETTING( 0x06, "3:30" );
+		PORT_DIPSETTING( 0x07, "4:00" );
+		PORT_DIPNAME( 0x18, 0x00, "Language" );
+		PORT_DIPSETTING( 0x00, "English" );
+		PORT_DIPSETTING( 0x08, "Spanish" );
+		PORT_DIPSETTING( 0x10, "French" );
+		PORT_DIPSETTING( 0x18, "German" );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Unknown") ); /* probably unused */
+		PORT_DIPSETTING( 0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x40, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Unknown") ); /* probably unused */
+		PORT_DIPSETTING( 0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x80, DEF_STR( "On") );
+	
+		PORT_START();  /* 2000 */
+		PORT_BITX( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1, "Game Reset", KEYCODE_PLUS_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 9", KEYCODE_9_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 8", KEYCODE_8_PAD, IP_JOY_NONE );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x08, DEF_STR( "On") );
+		PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1, "Heat Reset", KEYCODE_ENTER_PAD, IP_JOY_NONE );
+		PORT_DIPNAME( 0x20, 0x20, "NEXT TEST" );/* should be off */
+		PORT_DIPSETTING( 0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, "DIAG TEST" );/* should be off */
+		PORT_DIPSETTING( 0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "On") );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK );
+	
+		PORT_START();  /* 2800 */
+		PORT_BITX( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 7 / Strong Gravity",  KEYCODE_7_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 6 / Stars",  KEYCODE_6_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 5 / Unlimited Supplies",  KEYCODE_5_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 4 / Space Stations",  KEYCODE_4_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 3 / Black Hole",  KEYCODE_3_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 2 / Zero Gravity",  KEYCODE_2_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 1 / Negative Gravity",  KEYCODE_1_PAD, IP_JOY_NONE );
+		PORT_BITX( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1, "Game 0 / Bounce Back",  KEYCODE_0_PAD, IP_JOY_NONE );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static GfxLayout orbit_full_sprite_layout = new GfxLayout
+	(
 		8, 32,    /* width, height */
 		128,      /* total         */
 		1,        /* planes        */
-		{ 0 },    /* plane offsets */
-		{
+		new int[] { 0 },    /* plane offsets */
+		new int[] {
 			0, 1, 2, 3, 4, 5, 6, 7
 		},
-		{
+		new int[] {
 			0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38,
 			0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78,
 			0x80, 0x88, 0x90, 0x98, 0xA0, 0xA8, 0xB0, 0xB8,
 			0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8, 0xF0, 0xF8
 		},
 		0x100     /* increment */
-	};
+	);
 	
 	
-	static struct GfxLayout orbit_upper_sprite_layout =
-	{
+	static GfxLayout orbit_upper_sprite_layout = new GfxLayout
+	(
 		8, 16,    /* width, height */
 		128,      /* total         */
 		1,        /* planes        */
-		{ 0 },    /* plane offsets */
-		{
+		new int[] { 0 },    /* plane offsets */
+		new int[] {
 			0, 1, 2, 3, 4, 5, 6, 7
 		},
-		{
+		new int[] {
 			0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38,
 			0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78
 		},
 		0x100     /* increment */
-	};
+	);
 	
 	
-	static struct GfxLayout orbit_lower_sprite_layout =
-	{
+	static GfxLayout orbit_lower_sprite_layout = new GfxLayout
+	(
 		8, 16,    /* width, height */
 		128,      /* total         */
 		1,        /* planes        */
-		{ 0 },    /* plane offsets */
-		{
+		new int[] { 0 },    /* plane offsets */
+		new int[] {
 			0, 1, 2, 3, 4, 5, 6, 7
 		},
-		{
+		new int[] {
 			0x80, 0x88, 0x90, 0x98, 0xA0, 0xA8, 0xB0, 0xB8,
 			0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8, 0xF0, 0xF8
 		},
 		0x100     /* increment */
-	};
+	);
 	
 	
-	static struct GfxLayout orbit_tile_layout =
-	{
+	static GfxLayout orbit_tile_layout = new GfxLayout
+	(
 		16, 16,   /* width, height */
 		64,       /* total         */
 		1,        /* planes        */
-		{ 0 },    /* plane offsets */
-		{
+		new int[] { 0 },    /* plane offsets */
+		new int[] {
 			0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7
 		},
-		{
+		new int[] {
 			0x00, 0x00, 0x08, 0x08, 0x10, 0x10, 0x18, 0x18,
 			0x20, 0x20, 0x28, 0x28, 0x30, 0x30, 0x38, 0x38
 		},
 		0x40      /* increment */
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo orbit_gfx_decode_info[] =
+	static GfxDecodeInfo orbit_gfx_decode_info[] =
 	{
-		{ REGION_GFX1, 0, &orbit_full_sprite_layout, 0, 1 },
-		{ REGION_GFX1, 0, &orbit_upper_sprite_layout, 0, 1 },
-		{ REGION_GFX1, 0, &orbit_lower_sprite_layout, 0, 1 },
-		{ REGION_GFX2, 0, &orbit_tile_layout, 0, 1 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, orbit_full_sprite_layout, 0, 1 ),
+		new GfxDecodeInfo( REGION_GFX1, 0, orbit_upper_sprite_layout, 0, 1 ),
+		new GfxDecodeInfo( REGION_GFX1, 0, orbit_lower_sprite_layout, 0, 1 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, orbit_tile_layout, 0, 1 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -448,34 +450,34 @@ public class orbit
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( orbit )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD_NIB_LOW ( "033701.h2", 0x6800, 0x400, CRC(6de43b85) SHA1(1643972f45d3a0dd6540158c575cd84cee2b0c9a) )
-		ROM_LOAD_NIB_HIGH( "033693.l2", 0x6800, 0x400, CRC(8878409e) SHA1(a14e0161705bbc230f0aec1837ebc41d62178368) )
-		ROM_LOAD_NIB_LOW ( "033702.h1", 0x6C00, 0x400, CRC(8166bdcb) SHA1(b7ae6cd46b4aff6e1e1ec9273cf068dec4a8cd46) )
-		ROM_LOAD_NIB_HIGH( "033694.l1", 0x6C00, 0x400, CRC(5337a8ee) SHA1(1606bfa652bb5253c387f11c96d77d7a84983344) )
-		ROM_LOAD_NIB_LOW ( "033699.f2", 0x7000, 0x400, CRC(b498b36f) SHA1(5d150af193196fccd7c20ba731a020a9ae75e516) )
-		ROM_LOAD_NIB_HIGH( "033691.m2", 0x7000, 0x400, CRC(6cbabb21) SHA1(fffb3f7be73c72b4775d8cdfe174c75ae4389cba) )
-		ROM_LOAD_NIB_LOW ( "033700.f1", 0x7400, 0x400, CRC(9807c922) SHA1(b6b62530b24d967104f632540ef98f2b4780c3ed) )
-		ROM_LOAD_NIB_HIGH( "033692.m1", 0x7400, 0x400, CRC(96167d1b) SHA1(6f272b2f1b30aa94f51ea5710f4114bfdea19f2c) )
-		ROM_LOAD_NIB_LOW ( "033697.e2", 0x7800, 0x400, CRC(19ccf0dc) SHA1(7d12c4985bd0a25ef518246faf2849e5a0cf600b) )
-		ROM_LOAD_NIB_HIGH( "033689.n2", 0x7800, 0x400, CRC(ea3b70c1) SHA1(5e985fed057f362deaeb5e4049c4e8c1d449d6e1) )
-		ROM_LOAD_NIB_LOW ( "033698.e1", 0x7C00, 0x400, CRC(356a7c32) SHA1(a3496c0f9d9f3e2e0b452cdc0e908dc93d179990) )
-		ROM_RELOAD(                     0xFC00, 0x400 )
-		ROM_LOAD_NIB_HIGH( "033690.n1", 0x7C00, 0x400, CRC(f756ebd4) SHA1(4e473541b712078c6a81901714a6243de348e543) )
-		ROM_RELOAD(                     0xFC00, 0x400 )
+	static RomLoadPtr rom_orbit = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD_NIB_LOW ( "033701.h2", 0x6800, 0x400, CRC(6de43b85);SHA1(1643972f45d3a0dd6540158c575cd84cee2b0c9a) )
+		ROM_LOAD_NIB_HIGH( "033693.l2", 0x6800, 0x400, CRC(8878409e);SHA1(a14e0161705bbc230f0aec1837ebc41d62178368) )
+		ROM_LOAD_NIB_LOW ( "033702.h1", 0x6C00, 0x400, CRC(8166bdcb);SHA1(b7ae6cd46b4aff6e1e1ec9273cf068dec4a8cd46) )
+		ROM_LOAD_NIB_HIGH( "033694.l1", 0x6C00, 0x400, CRC(5337a8ee);SHA1(1606bfa652bb5253c387f11c96d77d7a84983344) )
+		ROM_LOAD_NIB_LOW ( "033699.f2", 0x7000, 0x400, CRC(b498b36f);SHA1(5d150af193196fccd7c20ba731a020a9ae75e516) )
+		ROM_LOAD_NIB_HIGH( "033691.m2", 0x7000, 0x400, CRC(6cbabb21);SHA1(fffb3f7be73c72b4775d8cdfe174c75ae4389cba) )
+		ROM_LOAD_NIB_LOW ( "033700.f1", 0x7400, 0x400, CRC(9807c922);SHA1(b6b62530b24d967104f632540ef98f2b4780c3ed) )
+		ROM_LOAD_NIB_HIGH( "033692.m1", 0x7400, 0x400, CRC(96167d1b);SHA1(6f272b2f1b30aa94f51ea5710f4114bfdea19f2c) )
+		ROM_LOAD_NIB_LOW ( "033697.e2", 0x7800, 0x400, CRC(19ccf0dc);SHA1(7d12c4985bd0a25ef518246faf2849e5a0cf600b) )
+		ROM_LOAD_NIB_HIGH( "033689.n2", 0x7800, 0x400, CRC(ea3b70c1);SHA1(5e985fed057f362deaeb5e4049c4e8c1d449d6e1) )
+		ROM_LOAD_NIB_LOW ( "033698.e1", 0x7C00, 0x400, CRC(356a7c32);SHA1(a3496c0f9d9f3e2e0b452cdc0e908dc93d179990) )
+		ROM_RELOAD(                     0xFC00, 0x400 );
+		ROM_LOAD_NIB_HIGH( "033690.n1", 0x7C00, 0x400, CRC(f756ebd4);SHA1(4e473541b712078c6a81901714a6243de348e543) )
+		ROM_RELOAD(                     0xFC00, 0x400 );
 	
-		ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )  /* sprites */
-		ROM_LOAD( "033712.b7", 0x0000, 0x800, CRC(cfd43bf2) SHA1(dbca0da6ed355aac921bae5adeef2f384f5fa2c3) )
-		ROM_LOAD( "033713.d7", 0x0800, 0x800, CRC(5ac89f4d) SHA1(747889b33cd83510a640e68fb4581a3e881c43a3) )
+		ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE ); /* sprites */
+		ROM_LOAD( "033712.b7", 0x0000, 0x800, CRC(cfd43bf2);SHA1(dbca0da6ed355aac921bae5adeef2f384f5fa2c3) )
+		ROM_LOAD( "033713.d7", 0x0800, 0x800, CRC(5ac89f4d);SHA1(747889b33cd83510a640e68fb4581a3e881c43a3) )
 	
-		ROM_REGION( 0x200, REGION_GFX2, ROMREGION_DISPOSE )   /* tiles */
-		ROM_LOAD( "033711.a7", 0x0000, 0x200, CRC(9987174a) SHA1(d2117b6e6d64c29aef8ad8c94256baea493bce5c) )
+		ROM_REGION( 0x200, REGION_GFX2, ROMREGION_DISPOSE );  /* tiles */
+		ROM_LOAD( "033711.a7", 0x0000, 0x200, CRC(9987174a);SHA1(d2117b6e6d64c29aef8ad8c94256baea493bce5c) )
 	
-		ROM_REGION( 0x100, REGION_PROMS, 0 )                  /* sync, unused */
-		ROM_LOAD( "033688.p6", 0x0000, 0x100, CRC(ee66ddba) SHA1(5b9ae4cbf019375c8d54528b69280413c641c4f2) )
-	ROM_END
+		ROM_REGION( 0x100, REGION_PROMS, 0 );                 /* sync, unused */
+		ROM_LOAD( "033688.p6", 0x0000, 0x100, CRC(ee66ddba);SHA1(5b9ae4cbf019375c8d54528b69280413c641c4f2) )
+	ROM_END(); }}; 
 	
 	
-	GAME( 1978, orbit, 0, orbit, orbit, 0, 0, "Atari", "Orbit" )
+	public static GameDriver driver_orbit	   = new GameDriver("1978"	,"orbit"	,"orbit.java"	,rom_orbit,null	,machine_driver_orbit	,input_ports_orbit	,null	,0	,	"Atari", "Orbit" )
 }

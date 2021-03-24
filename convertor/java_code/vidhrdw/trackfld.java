@@ -83,37 +83,37 @@ public class trackfld
 			COLOR(0,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( trackfld_videoram_w )
+	public static WriteHandlerPtr trackfld_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( trackfld_colorram_w )
+	public static WriteHandlerPtr trackfld_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( trackfld_flipscreen_w )
+	public static WriteHandlerPtr trackfld_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != data)
 		{
 			flip_screen_set(data);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + 4 * (attr & 0xc0);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ 4 * (attr & 0xc0);
 		int color = attr & 0x0f;
 		int flags = ((attr & 0x10) ? TILE_FLIPX : 0) | ((attr & 0x20) ? TILE_FLIPY : 0);
 	
@@ -125,7 +125,7 @@ public class trackfld
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -139,13 +139,13 @@ public class trackfld
 	
 		for (offs = spriteram_size - 2; offs >= 0; offs -= 2)
 		{
-			int attr = spriteram_2[offs];
-			int code = spriteram[offs + 1];
+			int attr = spriteram_2.read(offs);
+			int code = spriteram.read(offs + 1);
 			int color = attr & 0x0f;
 			int flipx = ~attr & 0x40;
 			int flipy = attr & 0x80;
-			int sx = spriteram[offs] - 1;
-			int sy = 240 - spriteram_2[offs + 1];
+			int sx = spriteram.read(offs)- 1;
+			int sy = 240 - spriteram_2.read(offs + 1);
 	
 			if (flip_screen)
 			{

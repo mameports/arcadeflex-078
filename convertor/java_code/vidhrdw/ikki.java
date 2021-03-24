@@ -27,9 +27,9 @@ public class ikki
 		{
 			int r,g,b;
 	
-			r = color_prom[0]*0x11;
-			g = color_prom[256]*0x11;
-			b = color_prom[2*256]*0x11;
+			r = color_prom.read(0)*0x11;
+			g = color_prom.read(256)*0x11;
+			b = color_prom.read(2*256)*0x11;
 	
 			palette_set_color(i,r,g,b);
 	
@@ -60,15 +60,15 @@ public class ikki
 	
 	}
 	
-	WRITE_HANDLER( ikki_scroll_w )
+	public static WriteHandlerPtr ikki_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ikki_scroll[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( ikki_scrn_ctrl_w )
+	public static WriteHandlerPtr ikki_scrn_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ikki_flipscreen = (data >> 2) & 1;
-	}
+	} };
 	
 	VIDEO_UPDATE( ikki )
 	{
@@ -123,12 +123,12 @@ public class ikki
 				py = 248-py;
 			}
 	
-			col = videoram[offs*2];
+			col = videoram.read(offs*2);
 			bank = (col & 0xe0) << 3;
 			col = ((col & 0x1f)<<0) | ((col & 0x80) >> 2);
 	
 			drawgfx(bitmap,Machine->gfx[0],
-				videoram[offs*2+1] + bank,
+				videoram.read(offs*2+1)+ bank,
 				col,
 				f,f,
 				px,py,
@@ -142,11 +142,11 @@ public class ikki
 		/* c060 - c0ff */
 		for (offs=0x00; offs<0x800; offs +=4)
 		{
-			chr = spriteram[offs+1] >> 1 ;
-			col = spriteram[offs+2];
+			chr = spriteram.read(offs+1)>> 1 ;
+			col = spriteram.read(offs+2);
 	
-			px = spriteram[offs+3];
-			py = spriteram[offs+0];
+			px = spriteram.read(offs+3);
+			py = spriteram.read(offs+0);
 	
 			chr += (col & 0x80);
 			col = (col & 0x3f) >> 0 ;
@@ -197,12 +197,12 @@ public class ikki
 					py = 248-py;
 				}
 	
-				col = videoram[offs*2];
+				col = videoram.read(offs*2);
 				bank = (col & 0xe0) << 3;
 				col = ((col & 0x1f)<<0) | ((col & 0x80) >> 2);
 	
 				drawgfx(bitmap,Machine->gfx[0],
-					videoram[offs*2+1] + bank,
+					videoram.read(offs*2+1)+ bank,
 					col,
 					f,f,
 					px,py,

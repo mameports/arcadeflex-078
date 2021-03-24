@@ -102,8 +102,7 @@ public class gridlee
 	
 	
 	/* local prototypes */
-	static void poly17_init(void);
-	
+	static 
 	
 	/*************************************
 	 *
@@ -170,7 +169,7 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( analog_port_r )
+	public static ReadHandlerPtr analog_port_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int delta, sign, magnitude;
 		UINT8 newval;
@@ -199,7 +198,7 @@ public class gridlee
 	
 		/* or in the sign bit and return that */
 		return (last_analog_output[offset] & 15) | sign;
-	}
+	} };
 	
 	
 	
@@ -228,7 +227,7 @@ public class gridlee
 	
 		/* allocate memory */
 		p = poly17 = auto_malloc(2 * (POLY17_SIZE + 1));
-		if (!poly17)
+		if (poly17 == 0)
 			return;
 		r = rand17 = poly17 + POLY17_SIZE + 1;
 	
@@ -252,7 +251,7 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( random_num_r )
+	public static ReadHandlerPtr random_num_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		unsigned int cc;
 	
@@ -262,7 +261,7 @@ public class gridlee
 		/* 12.5 = 8 + 4 + 0.5 */
 		cc = (cc << 3) + (cc << 2) + (cc >> 1);
 		return rand17[cc & POLY17_SIZE];
-	}
+	} };
 	
 	
 	
@@ -272,25 +271,25 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( led_0_w )
+	public static WriteHandlerPtr led_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(0, data & 1);
 		logerror("LED 0 %s\n", (data & 1) ? "on" : "off");
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( led_1_w )
+	public static WriteHandlerPtr led_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(1, data & 1);
 		logerror("LED 1 %s\n", (data & 1) ? "on" : "off");
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( gridlee_coin_counter_w )
+	public static WriteHandlerPtr gridlee_coin_counter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(0, data & 1);
 		logerror("coin counter %s\n", (data & 1) ? "on" : "off");
-	}
+	} };
 	
 	
 	
@@ -301,34 +300,38 @@ public class gridlee
 	 *************************************/
 	
 	/* CPU 1 read addresses */
-	static MEMORY_READ_START( readmem_cpu1 )
-		{ 0x0000, 0x7fff, MRA_RAM },
-		{ 0x9500, 0x9501, analog_port_r },
-		{ 0x9502, 0x9502, input_port_4_r },
-		{ 0x9503, 0x9503, input_port_5_r },
-		{ 0x9600, 0x9600, input_port_6_r },
-		{ 0x9700, 0x9700, input_port_7_r },
-		{ 0x9820, 0x9820, random_num_r },
-		{ 0x9c00, 0x9cff, MRA_RAM },
-		{ 0xa000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem_cpu1[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x9500, 0x9501, analog_port_r ),
+		new Memory_ReadAddress( 0x9502, 0x9502, input_port_4_r ),
+		new Memory_ReadAddress( 0x9503, 0x9503, input_port_5_r ),
+		new Memory_ReadAddress( 0x9600, 0x9600, input_port_6_r ),
+		new Memory_ReadAddress( 0x9700, 0x9700, input_port_7_r ),
+		new Memory_ReadAddress( 0x9820, 0x9820, random_num_r ),
+		new Memory_ReadAddress( 0x9c00, 0x9cff, MRA_RAM ),
+		new Memory_ReadAddress( 0xa000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem_cpu1 )
-		{ 0x0000, 0x07ff, MWA_RAM, &spriteram },
-		{ 0x0800, 0x7fff, gridlee_videoram_w, &videoram, &videoram_size },
-		{ 0x9000, 0x9000, led_0_w },
-		{ 0x9010, 0x9010, led_1_w },
-		{ 0x9020, 0x9020, gridlee_coin_counter_w },
-	/*	{ 0x9060, 0x9060, unknown - only written to at startup */
+	public static Memory_WriteAddress writemem_cpu1[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x07ff, MWA_RAM, spriteram ),
+		new Memory_WriteAddress( 0x0800, 0x7fff, gridlee_videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0x9000, 0x9000, led_0_w ),
+		new Memory_WriteAddress( 0x9010, 0x9010, led_1_w ),
+		new Memory_WriteAddress( 0x9020, 0x9020, gridlee_coin_counter_w ),
+	/*	new Memory_WriteAddress( 0x9060, 0x9060, unknown - only written to at startup */
 		{ 0x9070, 0x9070, gridlee_cocktail_flip_w },
 		{ 0x9200, 0x9200, gridlee_palette_select_w },
 		{ 0x9380, 0x9380, watchdog_reset_w },
 		{ 0x9700, 0x9700, MWA_NOP },
 		{ 0x9828, 0x993f, gridlee_sound_w },
-		{ 0x9c00, 0x9cff, MWA_RAM, &generic_nvram, &generic_nvram_size },
+		{ 0x9c00, 0x9cff, MWA_RAM, generic_nvram, generic_nvram_size },
 		{ 0xa000, 0xffff, MWA_ROM },
-	MEMORY_END
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -338,65 +341,65 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( gridlee )
-		PORT_START	/* 9500 (fake) */
-	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y, 20, 8, 0x00, 0xff )
+	static InputPortPtr input_ports_gridlee = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* 9500 (fake) */
+	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y, 20, 8, 0x00, 0xff );
 	
-		PORT_START	/* 9501 (fake) */
-	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X | IPF_REVERSE, 20, 8, 0x00, 0xff )
+		PORT_START(); 	/* 9501 (fake) */
+	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X | IPF_REVERSE, 20, 8, 0x00, 0xff );
 	
-		PORT_START	/* 9500 (fake) */
-	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y | IPF_COCKTAIL, 20, 8, 0x00, 0xff )
+		PORT_START(); 	/* 9500 (fake) */
+	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y | IPF_COCKTAIL, 20, 8, 0x00, 0xff );
 	
-		PORT_START	/* 9501 (fake) */
-	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X | IPF_REVERSE | IPF_COCKTAIL, 20, 8, 0x00, 0xff )
+		PORT_START(); 	/* 9501 (fake) */
+	    PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X | IPF_REVERSE | IPF_COCKTAIL, 20, 8, 0x00, 0xff );
 	
-		PORT_START	/* 9502 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* 9502 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* 9503 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_DIPNAME( 0x30, 0x00, DEF_STR( Coinage ))
-		PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ))
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ))
-		PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* 9503 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_DIPNAME( 0x30, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_2C") );
+		PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* 9600 */
-		PORT_DIPNAME( 0x03, 0x01, DEF_STR( Bonus_Life ))
-		PORT_DIPSETTING(    0x00, "8000 points" )
-		PORT_DIPSETTING(    0x01, "10000 points" )
-		PORT_DIPSETTING(    0x02, "12000 points" )
-		PORT_DIPSETTING(    0x03, "14000 points" )
-		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Lives ))
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPSETTING(    0x04, "3" )
-		PORT_DIPSETTING(    0x08, "4" )
-		PORT_DIPSETTING(    0x0c, "5" )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Free_Play ))
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ))
-		PORT_DIPSETTING(    0x10, DEF_STR( On ))
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cocktail ))
-		PORT_DIPSETTING(    0x00, DEF_STR( No ))
-		PORT_DIPSETTING(    0x20, DEF_STR( Yes ))
-		PORT_DIPNAME( 0x40, 0x00, "Reset Hall of Fame" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ))
-		PORT_DIPSETTING(    0x40, DEF_STR( Yes ))
-		PORT_DIPNAME( 0x80, 0x00, "Reset Game Data" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ))
-		PORT_DIPSETTING(    0x80, DEF_STR( Yes ))
+		PORT_START(); 	/* 9600 */
+		PORT_DIPNAME( 0x03, 0x01, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x00, "8000 points" );
+		PORT_DIPSETTING(    0x01, "10000 points" );
+		PORT_DIPSETTING(    0x02, "12000 points" );
+		PORT_DIPSETTING(    0x03, "14000 points" );
+		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPSETTING(    0x04, "3" );
+		PORT_DIPSETTING(    0x08, "4" );
+		PORT_DIPSETTING(    0x0c, "5" );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Cocktail") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x40, 0x00, "Reset Hall of Fame" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x80, 0x00, "Reset Game Data" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Yes") );
 	
-		PORT_START	/* 9700 */
-		PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
-	INPUT_PORTS_END
+		PORT_START(); 	/* 9700 */
+		PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_SERVICE( 0x20, IP_ACTIVE_LOW );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -406,10 +409,10 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	static struct CustomSound_interface custom_interface =
-	{
+	static CustomSound_interface custom_interface = new CustomSound_interface
+	(
 		gridlee_sh_start
-	};
+	);
 	
 	
 	static const char *sample_names[] =
@@ -470,26 +473,26 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	ROM_START( gridlee )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "gridfnla.bin", 0xa000, 0x1000, CRC(1c43539e) SHA1(8b4a6f5c2c22bb021937157606d2129e2b01f718) )
-		ROM_LOAD( "gridfnlb.bin", 0xb000, 0x1000, CRC(c48b91b8) SHA1(651210470ddf7c14f16f6c3046a9b8e903824ab8) )
-		ROM_LOAD( "gridfnlc.bin", 0xc000, 0x1000, CRC(6ad436dd) SHA1(f393b63077f249d34a8e85649aea58b27a0425b1) )
-		ROM_LOAD( "gridfnld.bin", 0xd000, 0x1000, CRC(f7188ddb) SHA1(eeb3f7dd8c61689cdd9992280ee1b3b5dc79a54c) )
-		ROM_LOAD( "gridfnle.bin", 0xe000, 0x1000, CRC(d5330bee) SHA1(802bb5705d4cd22d556c1bcbcf730d688ca8e8ab) )
-		ROM_LOAD( "gridfnlf.bin", 0xf000, 0x1000, CRC(695d16a3) SHA1(53d22cbedbedad8c89a964b6a38b7075c43cf03b) )
+	static RomLoadPtr rom_gridlee = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "gridfnla.bin", 0xa000, 0x1000, CRC(1c43539e);SHA1(8b4a6f5c2c22bb021937157606d2129e2b01f718) )
+		ROM_LOAD( "gridfnlb.bin", 0xb000, 0x1000, CRC(c48b91b8);SHA1(651210470ddf7c14f16f6c3046a9b8e903824ab8) )
+		ROM_LOAD( "gridfnlc.bin", 0xc000, 0x1000, CRC(6ad436dd);SHA1(f393b63077f249d34a8e85649aea58b27a0425b1) )
+		ROM_LOAD( "gridfnld.bin", 0xd000, 0x1000, CRC(f7188ddb);SHA1(eeb3f7dd8c61689cdd9992280ee1b3b5dc79a54c) )
+		ROM_LOAD( "gridfnle.bin", 0xe000, 0x1000, CRC(d5330bee);SHA1(802bb5705d4cd22d556c1bcbcf730d688ca8e8ab) )
+		ROM_LOAD( "gridfnlf.bin", 0xf000, 0x1000, CRC(695d16a3);SHA1(53d22cbedbedad8c89a964b6a38b7075c43cf03b) )
 	
-		ROM_REGION( 0x4000, REGION_GFX1, 0 )
-		ROM_LOAD( "gridpix0.bin", 0x0000, 0x1000, CRC(e6ea15ae) SHA1(2c482e25ea44aafd63ca5533b5a2e2dd8bf89365) )
-		ROM_LOAD( "gridpix1.bin", 0x1000, 0x1000, CRC(d722f459) SHA1(8cad028eefbba387bdd57fb8bb3a855ae314fb32) )
-		ROM_LOAD( "gridpix2.bin", 0x2000, 0x1000, CRC(1e99143c) SHA1(89c2f772cd15f2c37c8167a03dc4c7d1c923e4c3) )
-		ROM_LOAD( "gridpix3.bin", 0x3000, 0x1000, CRC(274342a0) SHA1(818cfd4132183d922ff4585c73f2cd6e4546c75b) )
+		ROM_REGION( 0x4000, REGION_GFX1, 0 );
+		ROM_LOAD( "gridpix0.bin", 0x0000, 0x1000, CRC(e6ea15ae);SHA1(2c482e25ea44aafd63ca5533b5a2e2dd8bf89365) )
+		ROM_LOAD( "gridpix1.bin", 0x1000, 0x1000, CRC(d722f459);SHA1(8cad028eefbba387bdd57fb8bb3a855ae314fb32) )
+		ROM_LOAD( "gridpix2.bin", 0x2000, 0x1000, CRC(1e99143c);SHA1(89c2f772cd15f2c37c8167a03dc4c7d1c923e4c3) )
+		ROM_LOAD( "gridpix3.bin", 0x3000, 0x1000, CRC(274342a0);SHA1(818cfd4132183d922ff4585c73f2cd6e4546c75b) )
 	
-		ROM_REGION( 0x1800, REGION_PROMS, 0 )
-		ROM_LOAD( "grdrprom.bin", 0x0000, 0x800, CRC(f28f87ed) SHA1(736f38c3ec5455de1266aad348ba708d7201b21a) )
-		ROM_LOAD( "grdgprom.bin", 0x0800, 0x800, CRC(921b0328) SHA1(59d1a3d3a90bd680a75adca5dd1b4682236c673b) )
-		ROM_LOAD( "grdbprom.bin", 0x1000, 0x800, CRC(04350348) SHA1(098fec3073143e0b8746e728d7d321f2a353286f) )
-	ROM_END
+		ROM_REGION( 0x1800, REGION_PROMS, 0 );
+		ROM_LOAD( "grdrprom.bin", 0x0000, 0x800, CRC(f28f87ed);SHA1(736f38c3ec5455de1266aad348ba708d7201b21a) )
+		ROM_LOAD( "grdgprom.bin", 0x0800, 0x800, CRC(921b0328);SHA1(59d1a3d3a90bd680a75adca5dd1b4682236c673b) )
+		ROM_LOAD( "grdbprom.bin", 0x1000, 0x800, CRC(04350348);SHA1(098fec3073143e0b8746e728d7d321f2a353286f) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -499,5 +502,5 @@ public class gridlee
 	 *
 	 *************************************/
 	
-	GAMEX( 1983, gridlee, 0,        gridlee, gridlee, 0,     ROT0, "Videa", "Gridlee", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_gridlee	   = new GameDriver("1983"	,"gridlee"	,"gridlee.java"	,rom_gridlee,null	,machine_driver_gridlee	,input_ports_gridlee	,null	,ROT0	,	"Videa", "Gridlee", GAME_IMPERFECT_SOUND )
 }

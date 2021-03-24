@@ -42,26 +42,26 @@ public class grobda
 		{
 			int bit0,bit1,bit2,r,g,b;
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
 		/* characters */
 		for (i = 0; i < 256; i++)
-			colortable[i] = (0x1f - (color_prom[i + 32] & 0x0f));
+			colortable[i] = (0x1f - (color_prom.read(i + 32)& 0x0f));
 		/* sprites */
 		for (i = 256; i < 512; i++)
-			colortable[i] = (color_prom[i + 32] & 0x0f);
+			colortable[i] = (color_prom.read(i + 32)& 0x0f);
 	}
 	
 	
@@ -78,12 +78,12 @@ public class grobda
 	
 		for (offs = 0; offs < 0x80; offs += 2)
 		{
-			int number = spriteram[offs+0x0780];
-			int color = spriteram[offs+0x0781];
-			int sx = (spriteram[offs+0x0f81]-40) + 0x100*(spriteram[offs+0x1781] & 1);
-			int sy = 28*8-spriteram[offs+0x0f80] - 16;
-			int flipx = spriteram[offs+0x1780] & 1;
-			int flipy = spriteram[offs+0x1780] & 2;
+			int number = spriteram.read(offs+0x0780);
+			int color = spriteram.read(offs+0x0781);
+			int sx = (spriteram.read(offs+0x0f81)-40) + 0x100*(spriteram.read(offs+0x1781)& 1);
+			int sy = 28*8-spriteram.read(offs+0x0f80)- 16;
+			int flipx = spriteram.read(offs+0x1780)& 1;
+			int flipy = spriteram.read(offs+0x1780)& 2;
 			int width,height;
 	
 			if (flip_screen)
@@ -92,9 +92,9 @@ public class grobda
 				flipy = !flipy;
 			}
 	
-			if (spriteram[offs+0x1781] & 2) continue;
+			if (spriteram.read(offs+0x1781)& 2) continue;
 	
-			switch (spriteram[offs+0x1780] & 0x0c)
+			switch (spriteram.read(offs+0x1780)& 0x0c)
 			{
 				case 0x0c:	/* 2x both ways */
 					width = height = 2; number &= (~3); break;
@@ -175,8 +175,8 @@ public class grobda
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flip_screen,flip_screen,
 						sx*8,sy*8,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);

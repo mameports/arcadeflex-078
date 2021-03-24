@@ -43,13 +43,13 @@ public class carjmbre
 		}
 	}
 	
-	WRITE_HANDLER( carjmbre_flipscreen_w )
+	public static WriteHandlerPtr carjmbre_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		carjmbre_flipscreen = data?(TILEMAP_FLIPX|TILEMAP_FLIPY):0;
 		tilemap_set_flip( ALL_TILEMAPS,carjmbre_flipscreen );
-	}
+	} };
 	
-	WRITE_HANDLER( carjmbre_bgcolor_w )
+	public static WriteHandlerPtr carjmbre_bgcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int oldbg,i;
 	
@@ -60,16 +60,16 @@ public class carjmbre
 	
 		if(oldbg!=carjmbre_bgcolor)
 		{
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 	
 			for (i=0;i<64;i+=4)
 				palette_set_color(i, (carjmbre_bgcolor&0xff)*0x50, (carjmbre_bgcolor&0xff)*0x50, (carjmbre_bgcolor&0xff)!=0?0x50:0);
 		}
-	}
+	} };
 	
 	static void get_carjmbre_tile_info(int tile_index){
-		unsigned int tile_number = videoram[tile_index] & 0xFF;
-		unsigned char attr  = videoram[tile_index+0x400];
+		unsigned int tile_number = videoram.read(tile_index)& 0xFF;
+		unsigned char attr  = videoram.read(tile_index+0x400);
 		tile_number += (attr & 0x80) << 1; /* bank */
 		SET_TILE_INFO(
 				0,
@@ -78,10 +78,10 @@ public class carjmbre
 				0)
 	}
 	
-	WRITE_HANDLER( carjmbre_videoram_w ){
-		videoram[offset] = data;
+	public static WriteHandlerPtr carjmbre_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data){
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(carjmbre_tilemap,offset&0x3ff);
-	}
+	} };
 	
 	
 	
@@ -109,7 +109,7 @@ public class carjmbre
 	
 		tilemap_draw( bitmap,cliprect,carjmbre_tilemap,0,0 );
 	
-		//spriteram[offs]
+		//spriteram.read(offs)
 		//+0       y pos
 		//+1       sprite number
 		//+2
@@ -127,13 +127,13 @@ public class carjmbre
 			troffs=(offs-4+spriteram_size)%spriteram_size;
 	
 			//unused sprites are marked with ypos <= 0x02 (or >= 0xfd if screen flipped)
-			if (spriteram[troffs] > 0x02 && spriteram[troffs] < 0xfd)
+			if (spriteram.read(troffs)> 0x02 && spriteram.read(troffs)< 0xfd)
 			{
 				{
-					sx = spriteram[troffs+3]-7;
-					sy = 241-spriteram[troffs];
-					flipx = (spriteram[troffs+2]&0x40)>>6;
-					flipy = (spriteram[troffs+2]&0x80)>>7;
+					sx = spriteram.read(troffs+3)-7;
+					sy = 241-spriteram.read(troffs);
+					flipx = (spriteram.read(troffs+2)&0x40)>>6;
+					flipy = (spriteram.read(troffs+2)&0x80)>>7;
 	
 					if (carjmbre_flipscreen)
 					{
@@ -144,8 +144,8 @@ public class carjmbre
 					}
 	
 					drawgfx(bitmap,Machine->gfx[1],
-							spriteram[troffs+1],
-							spriteram[troffs+2]&0x07,
+							spriteram.read(troffs+1),
+							spriteram.read(troffs+2)&0x07,
 							flipx,flipy,
 							sx,sy,
 							cliprect,TRANSPARENCY_PEN,0);

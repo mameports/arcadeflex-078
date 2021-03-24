@@ -1232,15 +1232,15 @@ public class konamiic
 		K007121_ctrlram[chip][offset] = data;
 	}
 	
-	WRITE_HANDLER( K007121_ctrl_0_w )
+	public static WriteHandlerPtr K007121_ctrl_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K007121_ctrl_w(0,offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( K007121_ctrl_1_w )
+	public static WriteHandlerPtr K007121_ctrl_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K007121_ctrl_w(1,offset,data);
-	}
+	} };
 	
 	
 	/*
@@ -1521,12 +1521,12 @@ public class konamiic
 		return 0;
 	}
 	
-	READ_HANDLER( K007342_r )
+	public static ReadHandlerPtr K007342_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K007342_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( K007342_w )
+	public static WriteHandlerPtr K007342_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset < 0x1000)
 		{		/* layer 0 */
@@ -1544,19 +1544,19 @@ public class konamiic
 				tilemap_mark_tile_dirty(K007342_tilemap[1],offset & 0x7ff);
 			}
 		}
-	}
+	} };
 	
-	READ_HANDLER( K007342_scroll_r )
+	public static ReadHandlerPtr K007342_scroll_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K007342_scroll_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( K007342_scroll_w )
+	public static WriteHandlerPtr K007342_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K007342_scroll_ram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( K007342_vreg_w )
+	public static WriteHandlerPtr K007342_vreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch(offset)
 		{
@@ -1589,7 +1589,7 @@ public class konamiic
 				break;
 		}
 		K007342_regs[offset] = data;
-	}
+	} };
 	
 	void K007342_tilemap_update(void)
 	{
@@ -1682,7 +1682,7 @@ public class konamiic
 		K007420_gfx = Machine->gfx[gfxnum];
 		K007420_callback = callback;
 		K007420_ram = auto_malloc(0x200);
-		if (!K007420_ram) return 1;
+		if (K007420_ram == 0) return 1;
 	
 		memset(K007420_ram,0,0x200);
 	
@@ -1691,15 +1691,15 @@ public class konamiic
 		return 0;
 	}
 	
-	READ_HANDLER( K007420_r )
+	public static ReadHandlerPtr K007420_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K007420_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( K007420_w )
+	public static WriteHandlerPtr K007420_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K007420_ram[offset] = data;
-	}
+	} };
 	
 	/*
 	 * Sprite Format
@@ -1748,7 +1748,7 @@ public class konamiic
 	
 			/* 0x080 = normal scale, 0x040 = double size, 0x100 half size */
 			zoom = K007420_ram[offs+5] | ((K007420_ram[offs+4] & 0x03) << 8);
-			if (!zoom) continue;
+			if (zoom == 0) continue;
 			zoom = 0x10000 * 128 / zoom;
 	
 			switch (K007420_ram[offs+4] & 0x70)
@@ -1959,16 +1959,16 @@ public class konamiic
 			void (*callback)(int tilemap,int bank,int *code,int *color))
 	{
 		int gfx_index;
-		static struct GfxLayout charlayout =
-		{
+		static GfxLayout charlayout = new GfxLayout
+		(
 			8,8,
 			0,				/* filled in later */
 			4,
-			{ 0, 0, 0, 0 },	/* filled in later */
-			{ 0, 1, 2, 3, 4, 5, 6, 7 },
-			{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+			new int[] { 0, 0, 0, 0 },	/* filled in later */
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+			new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 			32*8
-		};
+		);
 	
 	
 		/* find first empty slot to decode gfx */
@@ -2049,7 +2049,7 @@ public class konamiic
 	
 	
 	
-	READ_HANDLER( K052109_r )
+	public static ReadHandlerPtr K052109_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (K052109_RMRD_line == CLEAR_LINE)
 		{
@@ -2089,9 +2089,9 @@ public class konamiic
 	
 			return memory_region(K052109_memory_region)[addr];
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( K052109_w )
+	public static WriteHandlerPtr K052109_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 0x1fff) < 0x1800) /* tilemap RAM */
 		{
@@ -2197,7 +2197,7 @@ public class konamiic
 	//		else
 	//logerror("%04x: write %02x to unknown 052109 address %04x\n",activecpu_get_pc(),data,offset);
 		}
-	}
+	} };
 	
 	READ16_HANDLER( K052109_word_r )
 	{
@@ -2421,18 +2421,18 @@ public class konamiic
 			void (*callback)(int *code,int *color,int *priority,int *shadow))
 	{
 		int gfx_index,i;
-		static struct GfxLayout spritelayout =
-		{
+		static GfxLayout spritelayout = new GfxLayout
+		(
 			16,16,
 			0,				/* filled in later */
 			4,
-			{ 0, 0, 0, 0 },	/* filled in later */
-			{ 0, 1, 2, 3, 4, 5, 6, 7,
+			new int[] { 0, 0, 0, 0 },	/* filled in later */
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7,
 					8*32+0, 8*32+1, 8*32+2, 8*32+3, 8*32+4, 8*32+5, 8*32+6, 8*32+7 },
-			{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 					16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32 },
 			128*8
-		};
+		);
 	
 	
 		/* find first empty slot to decode gfx */
@@ -2481,7 +2481,7 @@ public class konamiic
 		K051960_gfx = Machine->gfx[gfx_index];
 		K051960_callback = callback;
 		K051960_ram = auto_malloc(0x400);
-		if (!K051960_ram) return 1;
+		if (K051960_ram == 0) return 1;
 		memset(K051960_ram,0,0x400);
 	
 		return 0;
@@ -2510,7 +2510,7 @@ public class konamiic
 		return memory_region(K051960_memory_region)[addr];
 	}
 	
-	READ_HANDLER( K051960_r )
+	public static ReadHandlerPtr K051960_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (K051960_readroms)
 		{
@@ -2520,12 +2520,12 @@ public class konamiic
 		}
 		else
 			return K051960_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( K051960_w )
+	public static WriteHandlerPtr K051960_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051960_ram[offset] = data;
-	}
+	} };
 	
 	READ16_HANDLER( K051960_word_r )
 	{
@@ -2540,7 +2540,7 @@ public class konamiic
 			K051960_w(offset*2 + 1,data & 0xff);
 	}
 	
-	READ_HANDLER( K051937_r )
+	public static ReadHandlerPtr K051937_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (K051960_readroms && offset >= 4 && offset < 8)
 		{
@@ -2558,9 +2558,9 @@ public class konamiic
 	//logerror("%04x: read unknown 051937 address %x\n",activecpu_get_pc(),offset);
 			return 0;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( K051937_w )
+	public static WriteHandlerPtr K051937_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset == 0)
 		{
@@ -2598,7 +2598,7 @@ public class konamiic
 	//	usrintf_showmessage("%04x: write %02x to 051937 address %x",activecpu_get_pc(),data,offset);
 	//logerror("%04x: write %02x to unknown 051937 address %x\n",activecpu_get_pc(),data,offset);
 		}
-	}
+	} };
 	
 	READ16_HANDLER( K051937_word_r )
 	{
@@ -2830,7 +2830,7 @@ public class konamiic
 	
 	
 	
-	READ_HANDLER( K052109_051960_r )
+	public static ReadHandlerPtr K052109_051960_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (K052109_RMRD_line == CLEAR_LINE)
 		{
@@ -2842,9 +2842,9 @@ public class konamiic
 				return K051960_r(offset - 0x3c00);
 		}
 		else return K052109_r(offset);
-	}
+	} };
 	
-	WRITE_HANDLER( K052109_051960_w )
+	public static WriteHandlerPtr K052109_051960_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset >= 0x3800 && offset < 0x3808)
 			K051937_w(offset - 0x3800,data);
@@ -2852,7 +2852,7 @@ public class konamiic
 			K052109_w(offset,data);
 		else
 			K051960_w(offset - 0x3c00,data);
-	}
+	} };
 	
 	
 	
@@ -2905,18 +2905,18 @@ public class konamiic
 			void (*callback)(int *code,int *color,int *priority))
 	{
 		int gfx_index,i;
-		static struct GfxLayout spritelayout =
-		{
+		static GfxLayout spritelayout = new GfxLayout
+		(
 			16,16,
 			0,				/* filled in later */
 			4,
-			{ 0, 0, 0, 0 },	/* filled in later */
-			{ 0, 1, 2, 3, 4, 5, 6, 7,
+			new int[] { 0, 0, 0, 0 },	/* filled in later */
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7,
 					8*32+0, 8*32+1, 8*32+2, 8*32+3, 8*32+4, 8*32+5, 8*32+6, 8*32+7 },
-			{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 					16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32 },
 			128*8
-		};
+		);
 	
 	
 		/* find first empty slot to decode gfx */
@@ -2967,10 +2967,10 @@ public class konamiic
 		K053244_rombank = 0;
 		K053245_ramsize = 0x800;
 		K053245_ram = auto_malloc(K053245_ramsize);
-		if (!K053245_ram) return 1;
+		if (K053245_ram == 0) return 1;
 	
 		K053245_buffer = auto_malloc(K053245_ramsize);
-		if (!K053245_buffer)
+		if (K053245_buffer == 0)
 			return 1;
 	
 		memset(K053245_ram,0,K053245_ramsize);
@@ -2989,21 +2989,21 @@ public class konamiic
 		COMBINE_DATA(K053245_ram+offset);
 	}
 	
-	READ_HANDLER( K053245_r )
+	public static ReadHandlerPtr K053245_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if(offset & 1)
 			return K053245_ram[offset>>1] & 0xff;
 		else
 			return (K053245_ram[offset>>1]>>8) & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( K053245_w )
+	public static WriteHandlerPtr K053245_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if(offset & 1)
 			K053245_ram[offset>>1] = (K053245_ram[offset>>1] & 0xff00) | data;
 		else
 			K053245_ram[offset>>1] = (K053245_ram[offset>>1] & 0x00ff) | (data<<8);
-	}
+	} };
 	
 	void K053245_clear_buffer(void)
 	{
@@ -3016,7 +3016,7 @@ public class konamiic
 		memcpy(K053245_buffer, K053245_ram, K053245_ramsize);
 	}
 	
-	READ_HANDLER( K053244_r )
+	public static ReadHandlerPtr K053244_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if ((K053244_regs[5] & 0x10) && offset >= 0x0c && offset < 0x10)
 		{
@@ -3041,9 +3041,9 @@ public class konamiic
 	//logerror("%04x: read from unknown 053244 address %x\n",activecpu_get_pc(),offset);
 			return 0;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( K053244_w )
+	public static WriteHandlerPtr K053244_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K053244_regs[offset] = data;
 	
@@ -3060,7 +3060,7 @@ public class konamiic
 			K053245_update_buffer();
 			break;
 		}
-	}
+	} };
 	
 	READ16_HANDLER( K053244_lsb_r )
 	{
@@ -3227,12 +3227,12 @@ public class konamiic
 			if (flipscreenX)
 			{
 				ox = 512 - ox;
-				if (!mirrorx) flipx = !flipx;
+				if (mirrorx == 0) flipx = !flipx;
 			}
 			if (flipscreenY)
 			{
 				oy = -oy;
-				if (!mirrory) flipy = !flipy;
+				if (mirrory == 0) flipy = !flipy;
 			}
 	
 			ox = (ox + 0x5d) & 0x3ff;
@@ -3385,18 +3385,18 @@ public class konamiic
 						 void (*callback)(int *code,int *color,int *priority))
 	{
 		int gfx_index,i;
-		static struct GfxLayout spritelayout =
-		{
+		static GfxLayout spritelayout = new GfxLayout
+		(
 			16,16,
 			0,				/* filled in later */
 			4,
-			{ 0, 0, 0, 0 },	/* filled in later */
-			{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
+			new int[] { 0, 0, 0, 0 },	/* filled in later */
+			new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
 					10*4, 11*4, 8*4, 9*4, 14*4, 15*4, 12*4, 13*4 },
-			{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+			new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 					8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 			128*8
-		};
+		);
 	
 	
 		/* find first empty slot to decode gfx */
@@ -3458,7 +3458,7 @@ public class konamiic
 		K053247_callback = callback;
 		K053246_OBJCHA_line = CLEAR_LINE;
 		K053247_ram = auto_malloc(0x1000);
-		if (!K053247_ram) return 1;
+		if (K053247_ram == 0) return 1;
 	
 		memset(K053247_ram,  0, 0x1000);
 		memset(K053246_regs, 0, 8);
@@ -3477,49 +3477,49 @@ public class konamiic
 	{
 		int gfx_index;
 	
-		static struct GfxLayout spritelayout =	/* System GX sprite layout */
-		{
+		static GfxLayout spritelayout = new GfxLayout/* System GX sprite layout */
+		(
 			16,16,
 			32768,				/* filled in later */
 			5,
-			{ 32, 24, 16, 8, 0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 40, 41, 42, 43, 44, 45, 46, 47 },
-			{ 0, 10*8, 10*8*2, 10*8*3, 10*8*4, 10*8*5, 10*8*6, 10*8*7, 10*8*8,
+			new int[] { 32, 24, 16, 8, 0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 40, 41, 42, 43, 44, 45, 46, 47 },
+			new int[] { 0, 10*8, 10*8*2, 10*8*3, 10*8*4, 10*8*5, 10*8*6, 10*8*7, 10*8*8,
 			  10*8*9, 10*8*10, 10*8*11, 10*8*12, 10*8*13, 10*8*14, 10*8*15 },
 			16*16*5
-		};
-		static struct GfxLayout spritelayout2 =	/* Run and Gun sprite layout */
-		{
+		);
+		static GfxLayout spritelayout2 = new GfxLayout/* Run and Gun sprite layout */
+		(
 			16,16,
 			32768,				/* filled in later */
 			4,
-			{ 24, 16, 8, 0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39 },
-			{ 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960 },
+			new int[] { 24, 16, 8, 0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39 },
+			new int[] { 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960 },
 			16*16*4
-		};
-		static struct GfxLayout spritelayout3 =	/* Lethal Enforcers II sprite layout */
-		{
+		);
+		static GfxLayout spritelayout3 = new GfxLayout/* Lethal Enforcers II sprite layout */
+		(
 			16,16,
 			32768,				/* filled in later */
 			8,
-			{ 8*1,8*0,8*3,8*2,8*5,8*4,8*7,8*6 },
-			{  0,1,2,3,4,5,6,7,64+0,64+1,64+2,64+3,64+4,64+5,64+6,64+7 },
-			{ 128*0, 128*1, 128*2,  128*3,  128*4,  128*5,  128*6,  128*7,
+			new int[] { 8*1,8*0,8*3,8*2,8*5,8*4,8*7,8*6 },
+			new int[] {  0,1,2,3,4,5,6,7,64+0,64+1,64+2,64+3,64+4,64+5,64+6,64+7 },
+			new int[] { 128*0, 128*1, 128*2,  128*3,  128*4,  128*5,  128*6,  128*7,
 			  128*8, 128*9, 128*10, 128*11, 128*12, 128*13, 128*14, 128*15 },
 			128*16
-		};
-		static struct GfxLayout spritelayout4 =	/* System GX 6bpp sprite layout */
-		{
+		);
+		static GfxLayout spritelayout4 = new GfxLayout/* System GX 6bpp sprite layout */
+		(
 			16,16,
 			32768,				/* filled in later */
 			6,
-			{ 40, 32, 24, 16, 8, 0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 48, 49, 50, 51, 52, 53, 54, 55 },
-			{ 0, 12*8, 12*8*2, 12*8*3, 12*8*4, 12*8*5, 12*8*6, 12*8*7, 12*8*8,
+			new int[] { 40, 32, 24, 16, 8, 0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 48, 49, 50, 51, 52, 53, 54, 55 },
+			new int[] { 0, 12*8, 12*8*2, 12*8*3, 12*8*4, 12*8*5, 12*8*6, 12*8*7, 12*8*8,
 			  12*8*9, 12*8*10, 12*8*11, 12*8*12, 12*8*13, 12*8*14, 12*8*15 },
 			16*16*6
-		};
+		);
 		unsigned char *s1, *s2, *d;
 		long i, c;
 		data16_t *K055673_rom;
@@ -3614,7 +3614,7 @@ public class konamiic
 		K053247_callback = callback;
 		K053246_OBJCHA_line = CLEAR_LINE;
 		K053247_ram = auto_malloc(0x1000);
-		if (!K053247_ram) return 1;
+		if (K053247_ram == 0) return 1;
 	
 		memset(K053247_ram,  0, 0x1000);
 		memset(K053246_regs, 0, 8);
@@ -3666,7 +3666,7 @@ public class konamiic
 		COMBINE_DATA(K053247_ram + offset);
 	}
 	
-	READ_HANDLER( K053247_r )
+	public static ReadHandlerPtr K053247_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int offs = offset >> 1;
 	
@@ -3674,9 +3674,9 @@ public class konamiic
 			return(K053247_ram[offs] & 0xff);
 		else
 			return(K053247_ram[offs] >> 8);
-	}
+	} };
 	
-	WRITE_HANDLER( K053247_w )
+	public static WriteHandlerPtr K053247_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int offs = offset >> 1;
 	
@@ -3684,7 +3684,7 @@ public class konamiic
 			K053247_ram[offs] = (K053247_ram[offs] & 0xff00) | data;
 		else
 			K053247_ram[offs] = (K053247_ram[offs] & 0x00ff) | (data<<8);
-	}
+	} };
 	
 	// Mystic Warriors hardware games support a non-OBJCHA based ROM readback
 	// write the address to the 246 as usual, but there's a completely separate ROM
@@ -3778,7 +3778,7 @@ public class konamiic
 		return 0;
 	}
 	
-	READ_HANDLER( K053246_r )
+	public static ReadHandlerPtr K053246_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (K053246_OBJCHA_line == ASSERT_LINE)
 		{
@@ -3798,12 +3798,12 @@ public class konamiic
 	#endif
 			return 0;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( K053246_w )
+	public static WriteHandlerPtr K053246_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K053246_regs[offset] = data;
-	}
+	} };
 	
 	READ16_HANDLER( K053246_word_r )
 	{
@@ -4116,12 +4116,12 @@ public class konamiic
 			if (flipscreenx)
 			{
 				ox = -ox;
-				if (!mirrorx) flipx = !flipx;
+				if (mirrorx == 0) flipx = !flipx;
 			}
 			if (flipscreeny)
 			{
 				oy = -oy;
-				if (!mirrory) flipy = !flipy;
+				if (mirrory == 0) flipy = !flipy;
 			}
 	
 			// apply wrapping and global offsets
@@ -4316,18 +4316,18 @@ public class konamiic
 	
 		if (bpp == 4)
 		{
-			static struct GfxLayout charlayout =
-			{
+			static GfxLayout charlayout = new GfxLayout
+			(
 				16,16,
 				0,				/* filled in later */
 				4,
-				{ 0, 1, 2, 3 },
-				{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+				new int[] { 0, 1, 2, 3 },
+				new int[] { 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 						8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
-				{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+				new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 						8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 				128*8
-			};
+			);
 	
 	
 			/* tweak the structure for the number of tiles we have */
@@ -4338,18 +4338,18 @@ public class konamiic
 		}
 		else if (bpp == 7 || bpp == 8)
 		{
-			static struct GfxLayout charlayout =
-			{
+			static GfxLayout charlayout = new GfxLayout
+			(
 				16,16,
 				0,				/* filled in later */
 				0,				/* filled in later */
-				{ 0 },			/* filled in later */
-				{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+				new int[] { 0 },			/* filled in later */
+				new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 						8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-				{ 0*128, 1*128, 2*128, 3*128, 4*128, 5*128, 6*128, 7*128,
+				new int[] { 0*128, 1*128, 2*128, 3*128, 4*128, 5*128, 6*128, 7*128,
 						8*128, 9*128, 10*128, 11*128, 12*128, 13*128, 14*128, 15*128 },
 				256*8
-			};
+			);
 			int i;
 	
 	
@@ -4430,20 +4430,20 @@ public class konamiic
 		return K051316_ram[chip][offset];
 	}
 	
-	READ_HANDLER( K051316_0_r )
+	public static ReadHandlerPtr K051316_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_r(0, offset);
-	}
+	} };
 	
-	READ_HANDLER( K051316_1_r )
+	public static ReadHandlerPtr K051316_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_r(1, offset);
-	}
+	} };
 	
-	READ_HANDLER( K051316_2_r )
+	public static ReadHandlerPtr K051316_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_r(2, offset);
-	}
+	} };
 	
 	
 	void K051316_w(int chip,int offset,int data)
@@ -4455,20 +4455,20 @@ public class konamiic
 		}
 	}
 	
-	WRITE_HANDLER( K051316_0_w )
+	public static WriteHandlerPtr K051316_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_w(0,offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( K051316_1_w )
+	public static WriteHandlerPtr K051316_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_w(1,offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( K051316_2_w )
+	public static WriteHandlerPtr K051316_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_w(2,offset,data);
-	}
+	} };
 	
 	
 	int K051316_rom_r(int chip, int offset)
@@ -4492,20 +4492,20 @@ public class konamiic
 		}
 	}
 	
-	READ_HANDLER( K051316_rom_0_r )
+	public static ReadHandlerPtr K051316_rom_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_rom_r(0,offset);
-	}
+	} };
 	
-	READ_HANDLER( K051316_rom_1_r )
+	public static ReadHandlerPtr K051316_rom_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_rom_r(1,offset);
-	}
+	} };
 	
-	READ_HANDLER( K051316_rom_2_r )
+	public static ReadHandlerPtr K051316_rom_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return K051316_rom_r(2,offset);
-	}
+	} };
 	
 	
 	
@@ -4515,20 +4515,20 @@ public class konamiic
 	//if (offset >= 0x0c) logerror("%04x: write %02x to 051316 reg %x\n",activecpu_get_pc(),data,offset);
 	}
 	
-	WRITE_HANDLER( K051316_ctrl_0_w )
+	public static WriteHandlerPtr K051316_ctrl_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_ctrl_w(0,offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( K051316_ctrl_1_w )
+	public static WriteHandlerPtr K051316_ctrl_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_ctrl_w(1,offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( K051316_ctrl_2_w )
+	public static WriteHandlerPtr K051316_ctrl_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		K051316_ctrl_w(2,offset,data);
-	}
+	} };
 	
 	void K051316_wraparound_enable(int chip, int status)
 	{
@@ -4770,7 +4770,7 @@ public class konamiic
 		K053251_palette_index[4] = 16 * ((K053251_ram[10] >> 3) & 0x07);
 	}
 	
-	int K053251_vh_start(void)
+	public static VhStartPtr K053251_vh_start = new VhStartPtr() { public int handler() 
 	{
 		K053251_set_tilemaps(NULL,NULL,NULL,NULL,NULL);
 	
@@ -4778,7 +4778,7 @@ public class konamiic
 		state_save_register_func_postload(K053251_reset_indexes);
 	
 		return 0;
-	}
+	} };
 	
 	void K053251_set_tilemaps(struct tilemap *ci0,struct tilemap *ci1,struct tilemap *ci2,struct tilemap *ci3,struct tilemap *ci4)
 	{
@@ -4791,7 +4791,7 @@ public class konamiic
 		K053251_tilemaps_set = (ci0 || ci1 || ci2 || ci3 || ci4) ? 1 : 0;
 	}
 	
-	WRITE_HANDLER( K053251_w )
+	public static WriteHandlerPtr K053251_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i,newind;
 	
@@ -4815,7 +4815,7 @@ public class konamiic
 					}
 				}
 	
-				if (!K053251_tilemaps_set)
+				if (K053251_tilemaps_set == 0)
 					tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 			}
 			else if (offset == 10)
@@ -4833,11 +4833,11 @@ public class konamiic
 					}
 				}
 	
-				if (!K053251_tilemaps_set)
+				if (K053251_tilemaps_set == 0)
 					tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 			}
 		}
-	}
+	} };
 	
 	WRITE16_HANDLER( K053251_lsb_w )
 	{
@@ -4871,14 +4871,14 @@ public class konamiic
 	
 	static unsigned char K054000_ram[0x20];
 	
-	WRITE_HANDLER( K054000_w )
+	public static WriteHandlerPtr K054000_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	//logerror("%04x: write %02x to 054000 address %02x\n",activecpu_get_pc(),data,offset);
 	
 		K054000_ram[offset] = data;
-	}
+	} };
 	
-	READ_HANDLER( K054000_r )
+	public static ReadHandlerPtr K054000_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int Acx,Acy,Aax,Aay;
 		int Bcx,Bcy,Bax,Bay;
@@ -4913,7 +4913,7 @@ public class konamiic
 			return 1;
 	
 		return 0;
-	}
+	} };
 	
 	READ16_HANDLER( K054000_lsb_r )
 	{
@@ -4936,12 +4936,12 @@ public class konamiic
 	
 	static unsigned char K051733_ram[0x20];
 	
-	WRITE_HANDLER( K051733_w )
+	public static WriteHandlerPtr K051733_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	//logerror("%04x: write %02x to 051733 address %02x\n",activecpu_get_pc(),data,offset);
 	
 		K051733_ram[offset] = data;
-	}
+	} };
 	
 	
 	static int int_sqrt(UINT32 op)
@@ -4960,7 +4960,7 @@ public class konamiic
 		return i;
 	}
 	
-	READ_HANDLER( K051733_r )
+	public static ReadHandlerPtr K051733_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int op1 = (K051733_ram[0x00] << 8) | K051733_ram[0x01];
 		int op2 = (K051733_ram[0x02] << 8) | K051733_ram[0x03];
@@ -5018,7 +5018,7 @@ public class konamiic
 			default:
 				return K051733_ram[offset];
 		}
-	}
+	} };
 	
 	
 	
@@ -5242,16 +5242,16 @@ public class konamiic
 	{
 		int gfx_index;
 		int i;
-		static struct GfxLayout charlayout =
-		{
+		static GfxLayout charlayout = new GfxLayout
+		(
 			8, 8,
 			0,				/* filled in later */
 			4,
-			{ 0, 0, 0, 0 },	/* filled in later */
-			{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
-			{ 0*8*4, 1*8*4, 2*8*4, 3*8*4, 4*8*4, 5*8*4, 6*8*4, 7*8*4 },
+			new int[] { 0, 0, 0, 0 },	/* filled in later */
+			new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
+			new int[] { 0*8*4, 1*8*4, 2*8*4, 3*8*4, 4*8*4, 5*8*4, 6*8*4, 7*8*4 },
 			8*8*4
-		};
+		);
 	
 		/* find first empty slot to decode gfx */
 		for (gfx_index = 0; gfx_index < MAX_GFX_ELEMENTS; gfx_index++)
@@ -5762,56 +5762,56 @@ public class konamiic
 		struct tilemap *tilemap;
 		int gfx_index;
 		int i;
-		struct GfxLayout charlayout8 =
-		{
+		static GfxLayout charlayout8 = new GfxLayout
+		(
 			8, 8,
 			0, /* filled in later */
 			8,
-			{ 8*7,8*3,8*5,8*1,8*6,8*2,8*4,8*0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7 },
-			{ 0, 8*8, 8*8*2, 8*8*3, 8*8*4, 8*8*5, 8*8*6, 8*8*7 },
+			new int[] { 8*7,8*3,8*5,8*1,8*6,8*2,8*4,8*0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+			new int[] { 0, 8*8, 8*8*2, 8*8*3, 8*8*4, 8*8*5, 8*8*6, 8*8*7 },
 			8*8*8
-		};
-		struct GfxLayout charlayout6 =
-		{
+		);
+		static GfxLayout charlayout6 = new GfxLayout
+		(
 			8, 8,
 			0, /* filled in later */
 			6,
-			{ 40, 32, 24, 8, 16, 0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7 },
-			{ 0, 6*8, 6*8*2, 6*8*3, 6*8*4, 6*8*5, 6*8*6, 6*8*7 },
+			new int[] { 40, 32, 24, 8, 16, 0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+			new int[] { 0, 6*8, 6*8*2, 6*8*3, 6*8*4, 6*8*5, 6*8*6, 6*8*7 },
 			8*8*6
-		};
-		struct GfxLayout charlayout5 =
-		{
+		);
+		static GfxLayout charlayout5 = new GfxLayout
+		(
 			8, 8,
 			0, /* filled in later */
 			5,
-			{ 32, 24, 8, 16, 0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7 },
-			{ 0, 5*8, 5*8*2, 5*8*3, 5*8*4, 5*8*5, 5*8*6, 5*8*7 },
+			new int[] { 32, 24, 8, 16, 0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+			new int[] { 0, 5*8, 5*8*2, 5*8*3, 5*8*4, 5*8*5, 5*8*6, 5*8*7 },
 			8*8*5
-		};
-		struct GfxLayout charlayout4 =
-		{
+		);
+		static GfxLayout charlayout4 = new GfxLayout
+		(
 			8, 8,
 			0, /* filled in later */
 			4,
-			{ 0, 1, 2, 3 },
-			{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
-			{ 0*8*4, 1*8*4, 2*8*4, 3*8*4, 4*8*4, 5*8*4, 6*8*4, 7*8*4 },
+			new int[] { 0, 1, 2, 3 },
+			new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
+			new int[] { 0*8*4, 1*8*4, 2*8*4, 3*8*4, 4*8*4, 5*8*4, 6*8*4, 7*8*4 },
 			8*8*4
-		};
-		static struct GfxLayout charlayout4dj =
-		{
+		);
+		static GfxLayout charlayout4dj = new GfxLayout
+		(
 			8, 8,
 			0,				/* filled in later */
 			4,
-			{ 8*3,8*1,8*2,8*0 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7 },
-			{ 0, 8*4, 8*4*2, 8*4*3, 8*4*4, 8*4*5, 8*4*6, 8*4*7 },
+			new int[] { 8*3,8*1,8*2,8*0 },
+			new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+			new int[] { 0, 8*4, 8*4*2, 8*4*3, 8*4*4, 8*4*5, 8*4*6, 8*4*7 },
 			8*8*4
-		};
+		);
 	
 		K056832_bpp = bpp;
 	
@@ -6093,10 +6093,10 @@ public class konamiic
 		ofs16 += (K056832_CurGfxBank*5*1024);
 		ofs8 += (K056832_CurGfxBank*10*1024);
 	
-	//	if (!offset)
+	//	if (offset == 0)
 	//		printf("CurGfxBank = %x\n", K056832_CurGfxBank);
 	
-		if (!K056832_rombase)
+		if (K056832_rombase == 0)
 		{
 			K056832_rombase = memory_region(K056832_memory_region);
 		}
@@ -6355,7 +6355,7 @@ public class konamiic
 		UINT8 code_transparent, code_opaque;
 	
 		if (K056832_PageTileMode[page]) return(0);
-		if (!K056832_linemap_enabled) return(1);
+		if (K056832_linemap_enabled == 0) return(1);
 	
 		tilemap = K056832_tilemap[page];
 		pixmap  = K056832_pixmap[page];
@@ -6393,7 +6393,7 @@ public class konamiic
 	
 		for (line=0; line<256; xpr_ptr+=dst_pitch, dst_ptr+=dst_pitch, line++)
 		{
-			if (!all_dirty)
+			if (all_dirty == 0)
 			{
 				offs = line >> 5;
 				mask = 1 << (line & 0x1f);
@@ -6522,7 +6522,7 @@ public class konamiic
 			sy = ay;
 			ty = r * K056832_PAGE_HEIGHT;
 	
-			if (!flipy)
+			if (flipy == 0)
 			{
 				// handle bottom-edge wraparoundness and cull off-screen tilemaps
 				if ((r == 0) && (sy > height - K056832_PAGE_HEIGHT)) sy -= height;
@@ -6578,7 +6578,7 @@ public class konamiic
 			cliph = line_endy = K056832_PAGE_HEIGHT;
 			clipy = line_starty = 0;
 	
-			if (!flipy)
+			if (flipy == 0)
 				sdat_start = dy;
 			else
 				/*
@@ -6620,7 +6620,7 @@ public class konamiic
 				}
 			}
 			else
-				if (!pageIndex) K056832_ActiveLayer = 0;
+				if (pageIndex == 0) K056832_ActiveLayer = 0;
 	
 			if (K056832_update_linemap(bitmap, pageIndex, flags)) continue;
 	
@@ -6657,7 +6657,7 @@ public class konamiic
 					//tx = c * K056832_PAGE_WIDTH;
 					tx = c << 9;
 	
-					if (!flipx)
+					if (flipx == 0)
 					{
 						// handle right-edge wraparoundness and cull off-screen tilemaps
 						if ((c == 0) && (sx > width - K056832_PAGE_WIDTH)) sx -= width;
@@ -6877,7 +6877,7 @@ public class konamiic
 				}
 			}
 			else
-				if (!pageIndex) K056832_ActiveLayer = 0;
+				if (pageIndex == 0) K056832_ActiveLayer = 0;
 	
 			if (K056832_update_linemap(bitmap, pageIndex, flags)) continue;
 	
@@ -6914,7 +6914,7 @@ public class konamiic
 					//tx = c * K056832_PAGE_WIDTH;
 					tx = c << 9;
 	
-					if (!flipx)
+					if (flipx == 0)
 					{
 						// handle right-edge wraparoundness and cull off-screen tilemaps
 						if ((c == 0) && (sx > width - K056832_PAGE_WIDTH)) sx -= width;
@@ -7116,7 +7116,7 @@ public class konamiic
 	// K054338 alpha blend / final mixer (normally used with the 55555)
 	// because the implementation is vidhrdw dependant, this is just a
 	// register-handling shell.
-	int K054338_vh_start(void)
+	public static VhStartPtr K054338_vh_start = new VhStartPtr() { public int handler() 
 	{
 		memset(k54338_regs, 0, sizeof(data16_t)*32);
 		memset(K054338_shdRGB, 0, sizeof(int)*9);
@@ -7125,7 +7125,7 @@ public class konamiic
 		state_save_register_UINT16("K054338", 0, "registers", k54338_regs, 32);
 	
 		return 0;
-	}
+	} };
 	
 	WRITE16_HANDLER( K054338_word_w )
 	{
@@ -7202,7 +7202,7 @@ public class konamiic
 		BGC_SET = 0;
 		pal_ptr = paletteram32;
 	
-		if (!mode)
+		if (mode == 0)
 		{
 			// single color output from CLTC
 			bgcolor = (int)(k54338_regs[K338_REG_BGC_R]&0xff)<<16 | (int)k54338_regs[K338_REG_BGC_GB];
@@ -7217,7 +7217,7 @@ public class konamiic
 			if (!(BGC_SET & 2)) { bgcolor = *pal_ptr; mode = 0; } else bgcolor = 0;
 		}
 	
-		if (!mode)
+		if (mode == 0)
 		{
 			// single color fill
 			dst_ptr += clipw;
@@ -7290,7 +7290,7 @@ public class konamiic
 	    }
 		else
 		{
-			if (!mixpri)
+			if (mixpri == 0)
 			{
 				// source x alpha  +  target (clipped at 255)
 			}
@@ -7984,7 +7984,7 @@ public class konamiic
 			src_fdx = zoom << (FIXPOINT_PRECISION-6);
 	
 			// pre-advance source for the clipped region
-			if (!flip)
+			if (flip == 0)
 				src_fx = (scroll + dst_min) * src_fdx + FIXPOINT_PRECISION_HALF;
 			else
 			{

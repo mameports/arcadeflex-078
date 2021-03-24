@@ -100,37 +100,37 @@ public class wallc
 			int bit0,bit1,bit7,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 5) & 0x01;
-			bit1 = (color_prom[i] >> 6) & 0x01;
+			bit0 = (color_prom.read(i)>> 5) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
 			r = combine_2_weights(weights_r, bit1, bit0);
 	
 			/* green component */
-			bit0 = (color_prom[i] >> 2) & 0x01;
-			bit1 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 2) & 0x01;
+			bit1 = (color_prom.read(i)>> 3) & 0x01;
 			g = combine_2_weights(weights_g, bit1, bit0);
 	
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit7 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit7 = (color_prom.read(i)>> 7) & 0x01;
 			b = combine_3_weights(weights_b, bit7, bit1, bit0);
 	
 			palette_set_color(i,r,g,b);
 		}
 	}
 	
-	static WRITE_HANDLER( wallc_videoram_w )
+	public static WriteHandlerPtr wallc_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 0x100;
+		int code = videoram.read(tile_index)+ 0x100;
 		int color = 1;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -141,7 +141,7 @@ public class wallc
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols_flip_y,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -153,143 +153,147 @@ public class wallc
 	}
 	
 	static int wcb0=-1;
-	static WRITE_HANDLER( wc_b0 )
+	public static WriteHandlerPtr wc_b0 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wcb0!=data)
 		{
 			wcb0 = data;
 			//logerror("wcb0=%i pc=%4x\n",wcb0, activecpu_get_pc() );
 		}
-	}
+	} };
 	static int wcb1=-1;
-	static WRITE_HANDLER( wc_b1 )
+	public static WriteHandlerPtr wc_b1 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wcb1!=data)
 		{
 			wcb1 = data;
 			//logerror("wcb1=%i pc=%4x\n",wcb1, activecpu_get_pc() );
 		}
-	}
+	} };
 	static int wcb2=-1;
-	static WRITE_HANDLER( wc_b2 )
+	public static WriteHandlerPtr wc_b2 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wcb2!=data)
 		{
 			wcb2 = data;
 			//logerror("wcb2=%i pc=%4x\n",wcb2, activecpu_get_pc() );
 		}
-	}
+	} };
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x3fff, MRA_ROM },
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x3fff, MRA_ROM ),
 	
-		{ 0x8000, 0x83ff, MRA_RAM },
-		{ 0x8400, 0x87ff, MRA_RAM }, /* mirror */
-		{ 0x8800, 0x8bff, MRA_RAM }, /* mirror */
-		{ 0x8c00, 0x8fff, MRA_RAM }, /* mirror */
+		new Memory_ReadAddress( 0x8000, 0x83ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8400, 0x87ff, MRA_RAM ), /* mirror */
+		new Memory_ReadAddress( 0x8800, 0x8bff, MRA_RAM ), /* mirror */
+		new Memory_ReadAddress( 0x8c00, 0x8fff, MRA_RAM ), /* mirror */
 	
-		{ 0xa000, 0xa3ff, MRA_RAM },
+		new Memory_ReadAddress( 0xa000, 0xa3ff, MRA_RAM ),
 	
-		{ 0xb000, 0xb000, input_port_0_r },
-		{ 0xb200, 0xb200, input_port_1_r },
-		{ 0xb400, 0xb400, input_port_2_r },
-		{ 0xb600, 0xb600, input_port_3_r },
-	MEMORY_END
-	
-	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-	
-		{ 0x8000, 0x83ff, wallc_videoram_w, &videoram },	/* 2114, 2114 */
-		{ 0x8400, 0x87ff, wallc_videoram_w },	/* mirror */
-		{ 0x8800, 0x8bff, wallc_videoram_w },	/* mirror */
-		{ 0x8c00, 0x8fff, wallc_videoram_w },	/* mirror */
-	
-		{ 0xa000, 0xa3ff, MWA_RAM },		/* 2114, 2114 */
-	
-		{ 0xb000, 0xb000, wc_b0 }, /*?*/
-		{ 0xb100, 0xb100, wc_b1 }, /*?*/
-		{ 0xb200, 0xb200, wc_b2 }, /*?*/
-	
-		{ 0xb500, 0xb500, AY8910_control_port_0_w },
-		{ 0xb600, 0xb600, AY8910_write_port_0_w },
-	MEMORY_END
+		new Memory_ReadAddress( 0xb000, 0xb000, input_port_0_r ),
+		new Memory_ReadAddress( 0xb200, 0xb200, input_port_1_r ),
+		new Memory_ReadAddress( 0xb400, 0xb400, input_port_2_r ),
+		new Memory_ReadAddress( 0xb600, 0xb600, input_port_3_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( wallc )
-		PORT_START	/* DSW - read from b000 */
-		PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
-		PORT_DIPSETTING(	0x03, "5" )
-		PORT_DIPSETTING(	0x02, "4" )
-		PORT_DIPSETTING(	0x01, "3" )
-		PORT_DIPSETTING(	0x00, "2" )
-		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Bonus_Life) )
-		PORT_DIPSETTING(	0x0c, "100K/200K/400K/800K" )
-		PORT_DIPSETTING(	0x08, "80K/160K/320K/640K" )
-		PORT_DIPSETTING(	0x04, "60K/120K/240K/480K" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPNAME( 0x10, 0x00, "Curve Effect" )
-		PORT_DIPSETTING(	0x10, "Normal" )
-		PORT_DIPSETTING(	0x00, "More" )
-		PORT_DIPNAME( 0x60, 0x60, "Timer Speed" )
-		PORT_DIPSETTING(	0x60, "Slow" )
-		PORT_DIPSETTING(	0x40, "Normal" )
-		PORT_DIPSETTING(	0x20, "Fast" )
-		PORT_DIPSETTING(	0x00, "Super Fast" )
-		PORT_DIPNAME( 0x80, 0x00, "Service" )
-		PORT_DIPSETTING(	0x80, "Free Play With Level Select" )
-		PORT_DIPSETTING(	0x00, "Normal" )
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
 	
-		PORT_START	/* b200 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )	//Right curve button; select current playfield in test mode
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )	//not used ?
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )	//service?? plays loud,high-pitched sound
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )	//Left curve button; browse playfields in test mode
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )	//ok
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )	//ok
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN3 )	//ok
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )	//ok
+		new Memory_WriteAddress( 0x8000, 0x83ff, wallc_videoram_w, videoram ),	/* 2114, 2114 */
+		new Memory_WriteAddress( 0x8400, 0x87ff, wallc_videoram_w ),	/* mirror */
+		new Memory_WriteAddress( 0x8800, 0x8bff, wallc_videoram_w ),	/* mirror */
+		new Memory_WriteAddress( 0x8c00, 0x8fff, wallc_videoram_w ),	/* mirror */
 	
-		PORT_START	/* b400 - player position 8 bit analog input - value read is used as position of the player directly - what type of input is that ? DIAL ?*/
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER1 | IPF_REVERSE, 50, 3, 0, 0 )
+		new Memory_WriteAddress( 0xa000, 0xa3ff, MWA_RAM ),		/* 2114, 2114 */
 	
-		PORT_START	/* b600 - bits 0-5: coinage */
-		PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_5C ) )
-		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_5C ) )
-		PORT_DIPNAME( 0x30, 0x00, "Coin C" )
-		PORT_DIPSETTING(    0x30, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_5C ) )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
+		new Memory_WriteAddress( 0xb000, 0xb000, wc_b0 ), /*?*/
+		new Memory_WriteAddress( 0xb100, 0xb100, wc_b1 ), /*?*/
+		new Memory_WriteAddress( 0xb200, 0xb200, wc_b2 ), /*?*/
+	
+		new Memory_WriteAddress( 0xb500, 0xb500, AY8910_control_port_0_w ),
+		new Memory_WriteAddress( 0xb600, 0xb600, AY8910_write_port_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
+	static InputPortPtr input_ports_wallc = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* DSW - read from b000 */
+		PORT_DIPNAME( 0x03, 0x01, DEF_STR( "Lives") );
+		PORT_DIPSETTING(	0x03, "5" );
+		PORT_DIPSETTING(	0x02, "4" );
+		PORT_DIPSETTING(	0x01, "3" );
+		PORT_DIPSETTING(	0x00, "2" );
+		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( "Bonus_Life"));
+		PORT_DIPSETTING(	0x0c, "100K/200K/400K/800K" );
+		PORT_DIPSETTING(	0x08, "80K/160K/320K/640K" );
+		PORT_DIPSETTING(	0x04, "60K/120K/240K/480K" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPNAME( 0x10, 0x00, "Curve Effect" );
+		PORT_DIPSETTING(	0x10, "Normal" );
+		PORT_DIPSETTING(	0x00, "More" );
+		PORT_DIPNAME( 0x60, 0x60, "Timer Speed" );
+		PORT_DIPSETTING(	0x60, "Slow" );
+		PORT_DIPSETTING(	0x40, "Normal" );
+		PORT_DIPSETTING(	0x20, "Fast" );
+		PORT_DIPSETTING(	0x00, "Super Fast" );
+		PORT_DIPNAME( 0x80, 0x00, "Service" );
+		PORT_DIPSETTING(	0x80, "Free Play With Level Select" );
+		PORT_DIPSETTING(	0x00, "Normal" );
 	
-	static struct GfxLayout charlayout =
-	{
+		PORT_START(); 	/* b200 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 );//Right curve button; select current playfield in test mode
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );//not used ?
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 );//service?? plays loud,high-pitched sound
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 );//Left curve button; browse playfields in test mode
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 );//ok
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 );//ok
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN3 );//ok
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );//ok
+	
+		PORT_START(); 	/* b400 - player position 8 bit analog input - value read is used as position of the player directly - what type of input is that ? DIAL ?*/
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER1 | IPF_REVERSE, 50, 3, 0, 0 );
+	
+		PORT_START(); 	/* b600 - bits 0-5: coinage */
+		PORT_DIPNAME( 0x03, 0x00, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_5C") );
+		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_5C") );
+		PORT_DIPNAME( 0x30, 0x00, "Coin C" );
+		PORT_DIPSETTING(    0x30, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_5C") );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,	/* 8*8 characters */
 		512,	/* 512 characters */
 		3,	/* 3 bits per pixel */
-		{ 0, 0x1000*8*1, 0x1000*8*2 }, /* the bitplanes are separated */
-		{ 7, 6, 5, 4, 3, 2, 1, 0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0, 0x1000*8*1, 0x1000*8*2 }, /* the bitplanes are separated */
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8 /* every char takes 8 consecutive bytes */
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0     , &charlayout, 0, 4 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0     , charlayout, 0, 4 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	static DRIVER_INIT( wallc )
@@ -309,16 +313,16 @@ public class wallc
 	
 	
 	
-	static struct AY8910interface ay8912_interface =
-	{
+	static AY8910interface ay8912_interface = new AY8910interface
+	(
 		1,	/* 1 chip */
 		12288000 / 8,	/* 1.536 MHz? */
-		{ 30 },
-		{ 0 },
-		{ 0 },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { 30 },
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
 	
 	static MACHINE_DRIVER_START( wallc )
@@ -351,19 +355,19 @@ public class wallc
 	
 	***************************************************************************/
 	
-	ROM_START( wallc )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for main CPU */
-		ROM_LOAD( "wac05.h7",   0x0000, 0x2000, CRC(ab6e472e) SHA1(a387fec24fb899df349a35d1d3a91e897b074712) )
-		ROM_LOAD( "wac1-52.h6", 0x2000, 0x2000, CRC(988eaa6d) SHA1(d5e5dbee6e7e0488fdecfb864198c686cbd5d59c) )
+	static RomLoadPtr rom_wallc = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for main CPU */
+		ROM_LOAD( "wac05.h7",   0x0000, 0x2000, CRC(ab6e472e);SHA1(a387fec24fb899df349a35d1d3a91e897b074712) )
+		ROM_LOAD( "wac1-52.h6", 0x2000, 0x2000, CRC(988eaa6d);SHA1(d5e5dbee6e7e0488fdecfb864198c686cbd5d59c) )
 	
-		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "wc1.e3",		0x0000, 0x1000, CRC(ca5c4b53) SHA1(5d2e14fe81cca4ec7dbe0c98eaa26890fca28e58) )
-		ROM_LOAD( "wc2.e2",		0x1000, 0x1000, CRC(b7f52a59) SHA1(737e7616d7295762057fbdb69d65c8c1edc773dc) )
-		ROM_LOAD( "wc3.e1",		0x2000, 0x1000, CRC(f6854b3a) SHA1(bc1e7f785c338c1afa4ab61c07c61397b3de0b01) )
+		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "wc1.e3",		0x0000, 0x1000, CRC(ca5c4b53);SHA1(5d2e14fe81cca4ec7dbe0c98eaa26890fca28e58) )
+		ROM_LOAD( "wc2.e2",		0x1000, 0x1000, CRC(b7f52a59);SHA1(737e7616d7295762057fbdb69d65c8c1edc773dc) )
+		ROM_LOAD( "wc3.e1",		0x2000, 0x1000, CRC(f6854b3a);SHA1(bc1e7f785c338c1afa4ab61c07c61397b3de0b01) )
 	
-		ROM_REGION( 0x0020, REGION_PROMS, 0 )
-		ROM_LOAD( "74s288.c2",  0x0000, 0x0020, CRC(83e3e293) SHA1(a98c5e63b688de8d175adb6539e0cdc668f313fd) )
-	ROM_END
+		ROM_REGION( 0x0020, REGION_PROMS, 0 );
+		ROM_LOAD( "74s288.c2",  0x0000, 0x0020, CRC(83e3e293);SHA1(a98c5e63b688de8d175adb6539e0cdc668f313fd) )
+	ROM_END(); }}; 
 	
-	GAME( 1984, wallc, 0,      wallc,  wallc, wallc, ROT0, "Midcoin", "Wall Crash" )
+	public static GameDriver driver_wallc	   = new GameDriver("1984"	,"wallc"	,"wallc.java"	,rom_wallc,null	,machine_driver_wallc	,input_ports_wallc	,init_wallc	,ROT0	,	"Midcoin", "Wall Crash" )
 }

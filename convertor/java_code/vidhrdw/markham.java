@@ -27,9 +27,9 @@ public class markham
 	
 		for (i = 0;i < Machine->drv->total_colors;i++)
 		{
-			int r = color_prom[0]*0x11;
-			int g = color_prom[Machine->drv->total_colors]*0x11;
-			int b = color_prom[2*Machine->drv->total_colors]*0x11;
+			int r = color_prom.read(0)*0x11;
+			int g = color_prom.read(Machine->drv->total_colors)*0x11;
+			int b = color_prom.read(2*Machine->drv->total_colors)*0x11;
 	
 			palette_set_color(i,r,g,b);
 			color_prom++;
@@ -49,33 +49,33 @@ public class markham
 	
 	}
 	
-	WRITE_HANDLER( markham_videoram_w )
+	public static WriteHandlerPtr markham_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( markham_scroll_x_w )
+	public static WriteHandlerPtr markham_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		markham_xscroll[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( markham_flipscreen_w )
+	public static WriteHandlerPtr markham_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = videoram[tile_index * 2];
-		int code = videoram[(tile_index * 2) + 1] + ((attr & 0x60) << 3);
+		int attr = videoram.read(tile_index * 2);
+		int code = videoram.read((tile_index * 2) + 1)+ ((attr & 0x60) << 3);
 		int color = (attr & 0x1f) | ((attr & 0x80) >> 2);
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -86,7 +86,7 @@ public class markham
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -100,14 +100,14 @@ public class markham
 	
 		for (offs=0x60; offs<0x100; offs +=4)
 		{
-			int chr = spriteram[offs+1];
-			int col = spriteram[offs+2];
+			int chr = spriteram.read(offs+1);
+			int col = spriteram.read(offs+2);
 	
 			int fx = flip_screen;
 			int fy = flip_screen;
 	
-			int x = spriteram[offs+3];
-			int y = spriteram[offs+0];
+			int x = spriteram.read(offs+3);
+			int y = spriteram.read(offs+0);
 			int px,py;
 			col &= 0x3f ;
 	

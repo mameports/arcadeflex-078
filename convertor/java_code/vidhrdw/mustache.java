@@ -27,38 +27,38 @@ public class mustache
 		int bit0,bit1,bit2,bit3,r,g,b;
 	
 		/* red component */
-		bit0 = (color_prom[i] >> 0) & 0x01;
-		bit1 = (color_prom[i] >> 1) & 0x01;
-		bit2 = (color_prom[i] >> 2) & 0x01;
-		bit3 = (color_prom[i] >> 3) & 0x01;
+		bit0 = (color_prom.read(i)>> 0) & 0x01;
+		bit1 = (color_prom.read(i)>> 1) & 0x01;
+		bit2 = (color_prom.read(i)>> 2) & 0x01;
+		bit3 = (color_prom.read(i)>> 3) & 0x01;
 		r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 		/* green component */
-		bit0 = (color_prom[i + 256] >> 0) & 0x01;
-		bit1 = (color_prom[i + 256] >> 1) & 0x01;
-		bit2 = (color_prom[i + 256] >> 2) & 0x01;
-		bit3 = (color_prom[i + 256] >> 3) & 0x01;
+		bit0 = (color_prom.read(i + 256)>> 0) & 0x01;
+		bit1 = (color_prom.read(i + 256)>> 1) & 0x01;
+		bit2 = (color_prom.read(i + 256)>> 2) & 0x01;
+		bit3 = (color_prom.read(i + 256)>> 3) & 0x01;
 		g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 		/* blue component */
-		bit0 = (color_prom[i + 512] >> 0) & 0x01;
-		bit1 = (color_prom[i + 512] >> 1) & 0x01;
-		bit2 = (color_prom[i + 512] >> 2) & 0x01;
-		bit3 = (color_prom[i + 512] >> 3) & 0x01;
+		bit0 = (color_prom.read(i + 512)>> 0) & 0x01;
+		bit1 = (color_prom.read(i + 512)>> 1) & 0x01;
+		bit2 = (color_prom.read(i + 512)>> 2) & 0x01;
+		bit3 = (color_prom.read(i + 512)>> 3) & 0x01;
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 		palette_set_color(i,r,g,b);
 	  }
 	}
 	
-	WRITE_HANDLER( mustache_videoram_w )
+	public static WriteHandlerPtr mustache_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
 	WRITE_HANDLER (mustache_video_control_w)
 	{
@@ -77,18 +77,18 @@ public class mustache
 		}
 	}
 	
-	WRITE_HANDLER( mustache_scroll_w )
+	public static WriteHandlerPtr mustache_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, 0x100 - data);
 		tilemap_set_scrollx(bg_tilemap, 1, 0x100 - data);
 		tilemap_set_scrollx(bg_tilemap, 2, 0x100 - data);
 		tilemap_set_scrollx(bg_tilemap, 3, 0x100);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = videoram[2 * tile_index + 1];
-		int code = videoram[2 * tile_index] + ((attr & 0xe0) << 3) + ((control_byte & 0x08) << 7);
+		int attr = videoram.read(2 * tile_index + 1);
+		int code = videoram.read(2 * tile_index)+ ((attr & 0xe0) << 3) + ((control_byte & 0x08) << 7);
 		int color = attr & 0x0f;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -112,10 +112,10 @@ public class mustache
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			int sy = 240-spriteram[offs];
-			int sx = 240-spriteram[offs+3];
-			int code = spriteram[offs+2];
-			int attr = spriteram[offs+1];
+			int sy = 240-spriteram.read(offs);
+			int sx = 240-spriteram.read(offs+3);
+			int code = spriteram.read(offs+2);
+			int attr = spriteram.read(offs+1);
 			int color = (attr & 0xe0)>>5;
 	
 			if (sy == 240) continue;

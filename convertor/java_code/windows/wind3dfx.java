@@ -32,7 +32,6 @@ public class wind3dfx
 	//============================================================
 	
 	// from input.c
-	extern int verbose;
 	
 	// from wind3d.c (surfaces)
 	extern LPDIRECTDRAWSURFACE7 win_d3d_background_surface;
@@ -46,10 +45,8 @@ public class wind3dfx
 	extern UINT8 win_d3d_use_feedback;
 	
 	// from wind3d.c (prescale)
-	extern int win_d3d_prescalex, win_d3d_prescaley;
 	
 	// from wind3d.c (zoom level)
-	extern int win_d3d_current_zoom;
 	
 	
 	
@@ -156,9 +153,7 @@ public class wind3dfx
 	static int win_d3d_decode_effect(struct rc_option *option, const char *arg, int priority);
 	static int win_d3d_decode_expert(struct rc_option *option, const char *arg, int priority);
 	
-	static int effects_rgb_init(void);
-	static int effects_scanline_init(void);
-	
+	static static 
 	static int replicate_pattern(int pattern_xsize, int pattern_ysize, UINT8 *pattern_data);
 	static void win_ddrawsurf_plot_pixel(const LPDDSURFACEDESC2 surface_desc, int x, int y, int colour);
 	
@@ -768,7 +763,7 @@ public class wind3dfx
 			}
 		}
 	
-		if (!internal_pattern) {
+		if (internal_pattern == 0) {
 			FILE* fp = fopen(active_preset.pattern_name, "rb");
 			int filesize;
 	

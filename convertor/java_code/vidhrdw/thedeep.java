@@ -80,23 +80,23 @@ public class thedeep
 				0)
 	}
 	
-	WRITE_HANDLER( thedeep_vram_0_w )
+	public static WriteHandlerPtr thedeep_vram_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (thedeep_vram_0[offset] != data)
 		{
 			thedeep_vram_0[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_0, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( thedeep_vram_1_w )
+	public static WriteHandlerPtr thedeep_vram_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (thedeep_vram_1[offset] != data)
 		{
 			thedeep_vram_1[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_1, offset / 2);
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -110,9 +110,9 @@ public class thedeep
 		int i;
 		for (i = 0;i < 512;i++)
 		{
-			int b = ((color_prom[0x200 + i] >> 0) & 0xf) * 0x11;
-			int g = ((color_prom[0x400 + i] >> 4) & 0xf) * 0x11;
-			int r = ((color_prom[0x400 + i] >> 0) & 0xf) * 0x11;
+			int b = ((color_prom.read(0x200 + i)>> 0) & 0xf) * 0x11;
+			int g = ((color_prom.read(0x400 + i)>> 4) & 0xf) * 0x11;
+			int r = ((color_prom.read(0x400 + i)>> 0) & 0xf) * 0x11;
 			palette_set_color(i,r,g,b);
 		}
 	}

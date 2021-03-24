@@ -20,35 +20,38 @@ public class minivadr
 {
 	
 	
-	WRITE_HANDLER( minivadr_videoram_w );
 	VIDEO_UPDATE( minivadr );
 	PALETTE_INIT( minivadr );
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x1fff, MRA_ROM },
-		{ 0xa000, 0xbfff, MRA_RAM },
-		{ 0xe008, 0xe008, input_port_0_r },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xa000, 0xbfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe008, 0xe008, input_port_0_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x1fff, MWA_ROM },
-		{ 0xa000, 0xbfff, minivadr_videoram_w, &videoram, &videoram_size },
-		{ 0xe008, 0xe008, MWA_NOP },		// ???
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xa000, 0xbfff, minivadr_videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0xe008, 0xe008, MWA_NOP ),		// ???
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( minivadr )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+	static InputPortPtr input_ports_minivadr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	static MACHINE_DRIVER_START( minivadr )
@@ -81,11 +84,11 @@ public class minivadr
 	
 	***************************************************************************/
 	
-	ROM_START( minivadr )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-		ROM_LOAD( "d26-01.bin",	0x0000, 0x2000, CRC(a96c823d) SHA1(aa9969ff80e94b0fff0f3530863f6b300510162e) )
-	ROM_END
+	static RomLoadPtr rom_minivadr = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
+		ROM_LOAD( "d26-01.bin",	0x0000, 0x2000, CRC(a96c823d);SHA1(aa9969ff80e94b0fff0f3530863f6b300510162e) )
+	ROM_END(); }}; 
 	
 	
-	GAME( 1990, minivadr, 0, minivadr, minivadr, 0, ROT0, "Taito Corporation", "Minivader" )
+	public static GameDriver driver_minivadr	   = new GameDriver("1990"	,"minivadr"	,"minivadr.java"	,rom_minivadr,null	,machine_driver_minivadr	,input_ports_minivadr	,null	,ROT0	,	"Taito Corporation", "Minivader" )
 }

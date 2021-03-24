@@ -116,17 +116,17 @@ public class inufuku
 		}
 	}
 	
-	static WRITE_HANDLER( pending_command_clear_w )
+	public static WriteHandlerPtr pending_command_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pending_command = 0;
-	}
+	} };
 	
-	static WRITE_HANDLER( inufuku_soundrombank_w )
+	public static WriteHandlerPtr inufuku_soundrombank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *ROM = memory_region(REGION_CPU2) + 0x10000;
 	
 		cpu_setbank(1, ROM + (data & 0x03) * 0x8000);
-	}
+	} };
 	
 	
 	/******************************************************************************
@@ -234,33 +234,41 @@ public class inufuku
 	
 	******************************************************************************/
 	
-	static MEMORY_READ_START( inufuku_readmem_sound )
-		{ 0x0000, 0x77ff, MRA_ROM },
-		{ 0x7800, 0x7fff, MRA_RAM },
-		{ 0x8000, 0xffff, MRA_BANK1 },
-	MEMORY_END
+	public static Memory_ReadAddress inufuku_readmem_sound[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x77ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x7800, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_BANK1 ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( inufuku_writemem_sound )
-		{ 0x0000, 0x77ff, MWA_ROM },
-		{ 0x7800, 0x7fff, MWA_RAM },
-		{ 0x8000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress inufuku_writemem_sound[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x77ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x7800, 0x7fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( inufuku_readport_sound )
-		{ 0x04, 0x04, soundlatch_r },
-		{ 0x08, 0x08, YM2610_status_port_0_A_r },
-		{ 0x09, 0x09, YM2610_read_port_0_r },
-		{ 0x0a, 0x0a, YM2610_status_port_0_B_r },
-	PORT_END
+	public static IO_ReadPort inufuku_readport_sound[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x04, 0x04, soundlatch_r ),
+		new IO_ReadPort( 0x08, 0x08, YM2610_status_port_0_A_r ),
+		new IO_ReadPort( 0x09, 0x09, YM2610_read_port_0_r ),
+		new IO_ReadPort( 0x0a, 0x0a, YM2610_status_port_0_B_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( inufuku_writeport_sound )
-		{ 0x00, 0x00, inufuku_soundrombank_w },
-		{ 0x04, 0x04, pending_command_clear_w },
-		{ 0x08, 0x08, YM2610_control_port_0_A_w },
-		{ 0x09, 0x09, YM2610_data_port_0_A_w },
-		{ 0x0a, 0x0a, YM2610_control_port_0_B_w },
-		{ 0x0b, 0x0b, YM2610_data_port_0_B_w },
-	PORT_END
+	public static IO_WritePort inufuku_writeport_sound[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, inufuku_soundrombank_w ),
+		new IO_WritePort( 0x04, 0x04, pending_command_clear_w ),
+		new IO_WritePort( 0x08, 0x08, YM2610_control_port_0_A_w ),
+		new IO_WritePort( 0x09, 0x09, YM2610_data_port_0_A_w ),
+		new IO_WritePort( 0x0a, 0x0a, YM2610_control_port_0_B_w ),
+		new IO_WritePort( 0x0b, 0x0b, YM2610_data_port_0_B_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/******************************************************************************
@@ -269,69 +277,69 @@ public class inufuku
 	
 	******************************************************************************/
 	
-	INPUT_PORTS_START( inufuku )
-		PORT_START	// 0
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER1 )
+	static InputPortPtr input_ports_inufuku = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// 0
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER1 );
 	
-		PORT_START	// 1
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER2 )
+		PORT_START(); 	// 1
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER2 );
 	
-		PORT_START	// 2
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
+		PORT_START(); 	// 2
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
 		PORT_SERVICE_NO_TOGGLE( 0x10, IP_ACTIVE_LOW )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// 3
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER4 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER4 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER4 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER4 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER4 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER4 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER4 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER4 )
+		PORT_START(); 	// 3
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER4 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER4 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER4 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER4 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER4 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER4 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER4 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER4 );
 	
-		PORT_START	// 4
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN4 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START4 )
-		PORT_DIPNAME( 0x10, 0x10, "3P/4P" )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// pending sound command
+		PORT_START(); 	// 4
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN4 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START4 );
+		PORT_DIPNAME( 0x10, 0x10, "3P/4P" );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL );// pending sound command
 	
-		PORT_START	// 5
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER3 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER3 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER3 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER3 )
-	INPUT_PORTS_END
+		PORT_START(); 	// 5
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER3 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER3 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER3 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER3 );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/******************************************************************************
@@ -340,36 +348,36 @@ public class inufuku
 	
 	******************************************************************************/
 	
-	static struct GfxLayout tilelayout =
-	{
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		8, 8,
 		RGN_FRAC(1, 1),
 		8,
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 1*8, 0*8, 3*8, 2*8, 5*8, 4*8, 7*8, 6*8 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 1*8, 0*8, 3*8, 2*8, 5*8, 4*8, 7*8, 6*8 },
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64 },
 		64*8
-	};
+	);
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16, 16,
 		RGN_FRAC(1, 1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
 				10*4, 11*4, 8*4, 9*4, 14*4, 15*4, 12*4, 13*4 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 				8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8
-	};
+	);
 	
-	static struct GfxDecodeInfo inufuku_gfxdecodeinfo[] =
+	static GfxDecodeInfo inufuku_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tilelayout,    0, 256*16 },	// bg
-		{ REGION_GFX2, 0, &tilelayout,    0, 256*16 },	// text
-		{ REGION_GFX3, 0, &spritelayout,  0, 256*16 },	// sprite
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, tilelayout,    0, 256*16 ),	// bg
+		new GfxDecodeInfo( REGION_GFX2, 0, tilelayout,    0, 256*16 ),	// text
+		new GfxDecodeInfo( REGION_GFX3, 0, spritelayout,  0, 256*16 ),	// sprite
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -445,30 +453,30 @@ public class inufuku
 	
 	******************************************************************************/
 	
-	ROM_START( inufuku )
-		ROM_REGION( 0x1000000, REGION_CPU1, 0 )	// main cpu + data
+	static RomLoadPtr rom_inufuku = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x1000000, REGION_CPU1, 0 );// main cpu + data
 		ROM_LOAD16_WORD_SWAP( "u147.bin",     0x0000000, 0x080000, CRC(ab72398c) SHA1(f5dc266ffa936ea6528b46a34113f5e2f8141d71) )
 		ROM_LOAD16_WORD_SWAP( "u146.bin",     0x0080000, 0x080000, CRC(e05e9bd4) SHA1(af0fdf31c2bdf851bf15c9de725dcbbb58464d54) )
 		ROM_LOAD16_WORD_SWAP( "lhmn5l28.148", 0x0800000, 0x400000, CRC(802d17e7) SHA1(43b26efea65fd051c094d19784cb977ced39a1a0) )
 	
-		ROM_REGION( 0x0030000, REGION_CPU2, 0 )	// sound cpu
-		ROM_LOAD( "u107.bin", 0x0000000, 0x020000, CRC(1744ef90) SHA1(e019f4ca83e21aa25710cc0ca40ffe765c7486c9) )
-		ROM_RELOAD( 0x010000, 0x020000 )
+		ROM_REGION( 0x0030000, REGION_CPU2, 0 );// sound cpu
+		ROM_LOAD( "u107.bin", 0x0000000, 0x020000, CRC(1744ef90);SHA1(e019f4ca83e21aa25710cc0ca40ffe765c7486c9) )
+		ROM_RELOAD( 0x010000, 0x020000 );
 	
-		ROM_REGION( 0x0400000, REGION_GFX1, ROMREGION_DISPOSE )	// bg
+		ROM_REGION( 0x0400000, REGION_GFX1, ROMREGION_DISPOSE );// bg
 		ROM_LOAD16_WORD_SWAP( "lhmn5ku8.u40", 0x0000000, 0x400000, CRC(8cbca80a) SHA1(063e9be97f5a1f021f8326f2994b51f9af5e1eaf) )
 	
-		ROM_REGION( 0x0400000, REGION_GFX2, ROMREGION_DISPOSE )	// text
+		ROM_REGION( 0x0400000, REGION_GFX2, ROMREGION_DISPOSE );// text
 		ROM_LOAD16_WORD_SWAP( "lhmn5ku7.u8",  0x0000000, 0x400000, CRC(a6c0f07f) SHA1(971803d1933d8296767d8766ea9f04dcd6ab065c) )
 	
-		ROM_REGION( 0x0c00000, REGION_GFX3, ROMREGION_DISPOSE )	// sprite
+		ROM_REGION( 0x0c00000, REGION_GFX3, ROMREGION_DISPOSE );// sprite
 		ROM_LOAD16_WORD_SWAP( "lhmn5kub.u34", 0x0000000, 0x400000, CRC(7753a7b6) SHA1(a2e8747ce83ea5a57e2fe62f2452de355d7f48b6) )
 		ROM_LOAD16_WORD_SWAP( "lhmn5kua.u36", 0x0400000, 0x400000, CRC(1ac4402a) SHA1(c15acc6fce4fe0b54e92d14c31a1bd78acf2c8fc) )
 		ROM_LOAD16_WORD_SWAP( "lhmn5ku9.u38", 0x0800000, 0x400000, CRC(e4e9b1b6) SHA1(4d4ad85fbe6a442d4f8cafad748bcae4af6245b7) )
 	
-		ROM_REGION( 0x0400000, REGION_SOUND1, 0 )	// adpcm data
-		ROM_LOAD( "lhmn5ku6.u53", 0x0000000, 0x400000, CRC(b320c5c9) SHA1(7c99da2d85597a3c008ed61a3aa5f47ad36186ec) )
-	ROM_END
+		ROM_REGION( 0x0400000, REGION_SOUND1, 0 );// adpcm data
+		ROM_LOAD( "lhmn5ku6.u53", 0x0000000, 0x400000, CRC(b320c5c9);SHA1(7c99da2d85597a3c008ed61a3aa5f47ad36186ec) )
+	ROM_END(); }}; 
 	
 	
 	/******************************************************************************
@@ -477,5 +485,5 @@ public class inufuku
 	
 	******************************************************************************/
 	
-	GAMEX( 1998, inufuku, 0, inufuku, inufuku, inufuku, ROT0, "Video System Co.", "Quiz & Variety Sukusuku Inufuku (Japan)", GAME_NO_COCKTAIL )
+	public static GameDriver driver_inufuku	   = new GameDriver("1998"	,"inufuku"	,"inufuku.java"	,rom_inufuku,null	,machine_driver_inufuku	,input_ports_inufuku	,init_inufuku	,ROT0	,	"Video System Co.", "Quiz & Variety Sukusuku Inufuku (Japan)", GAME_NO_COCKTAIL )
 }

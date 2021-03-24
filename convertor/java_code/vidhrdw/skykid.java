@@ -36,24 +36,24 @@ public class skykid
 		for (i = 0; i < totcolors; i++)
 		{
 			/* red component */
-			bit0 = (color_prom[totcolors*0] >> 0) & 0x01;
-			bit1 = (color_prom[totcolors*0] >> 1) & 0x01;
-			bit2 = (color_prom[totcolors*0] >> 2) & 0x01;
-			bit3 = (color_prom[totcolors*0] >> 3) & 0x01;
+			bit0 = (color_prom.read(totcolors*0)>> 0) & 0x01;
+			bit1 = (color_prom.read(totcolors*0)>> 1) & 0x01;
+			bit2 = (color_prom.read(totcolors*0)>> 2) & 0x01;
+			bit3 = (color_prom.read(totcolors*0)>> 3) & 0x01;
 			r = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			/* green component */
-			bit0 = (color_prom[totcolors*1] >> 0) & 0x01;
-			bit1 = (color_prom[totcolors*1] >> 1) & 0x01;
-			bit2 = (color_prom[totcolors*1] >> 2) & 0x01;
-			bit3 = (color_prom[totcolors*1] >> 3) & 0x01;
+			bit0 = (color_prom.read(totcolors*1)>> 0) & 0x01;
+			bit1 = (color_prom.read(totcolors*1)>> 1) & 0x01;
+			bit2 = (color_prom.read(totcolors*1)>> 2) & 0x01;
+			bit3 = (color_prom.read(totcolors*1)>> 3) & 0x01;
 			g = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			/* blue component */
-			bit0 = (color_prom[totcolors*2] >> 0) & 0x01;
-			bit1 = (color_prom[totcolors*2] >> 1) & 0x01;
-			bit2 = (color_prom[totcolors*2] >> 2) & 0x01;
-			bit3 = (color_prom[totcolors*2] >> 3) & 0x01;
+			bit0 = (color_prom.read(totcolors*2)>> 0) & 0x01;
+			bit1 = (color_prom.read(totcolors*2)>> 1) & 0x01;
+			bit2 = (color_prom.read(totcolors*2)>> 2) & 0x01;
+			bit3 = (color_prom.read(totcolors*2)>> 3) & 0x01;
 			b = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -105,7 +105,7 @@ public class skykid
 	{
 		background = tilemap_create(get_tile_info_bg,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,64,32);
 	
-		if (!background)
+		if (background == 0)
 			return 1;
 	
 		{
@@ -126,41 +126,41 @@ public class skykid
 	
 	***************************************************************************/
 	
-	READ_HANDLER( skykid_videoram_r )
+	public static ReadHandlerPtr skykid_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return skykid_videoram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( skykid_videoram_w )
+	public static WriteHandlerPtr skykid_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (skykid_videoram[offset] != data){
 			skykid_videoram[offset] = data;
 			tilemap_mark_tile_dirty(background,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( skykid_scroll_x_w )
+	public static WriteHandlerPtr skykid_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen)
 			tilemap_set_scrollx(background, 0, (189 - (offset ^ 1)) & 0x1ff);
 		else
 			tilemap_set_scrollx(background, 0, ((offset) + 35) & 0x1ff);
-	}
+	} };
 	
-	WRITE_HANDLER( skykid_scroll_y_w )
+	public static WriteHandlerPtr skykid_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen)
 			tilemap_set_scrolly(background, 0, (261 - offset) & 0xff);
 		else
 			tilemap_set_scrolly(background, 0, (offset + 27) & 0xff);
-	}
+	} };
 	
-	WRITE_HANDLER( skykid_flipscreen_w )
+	public static WriteHandlerPtr skykid_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		priority = data;
 		flipscreen = offset;
 		tilemap_set_flip(background,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -173,12 +173,12 @@ public class skykid
 		int offs;
 	
 		for (offs = 0; offs < spriteram_size; offs += 2){
-			int number = spriteram[offs] | ((spriteram_3[offs] & 0x80) << 1);
-			int color = (spriteram[offs+1] & 0x3f);
-			int sx = (spriteram_2[offs+1]) + 0x100*(spriteram_3[offs+1] & 1) - 72;
-			int sy = 256 - spriteram_2[offs] - 57;
-			int flipy = spriteram_3[offs] & 0x02;
-			int flipx = spriteram_3[offs] & 0x01;
+			int number = spriteram.read(offs)| ((spriteram_3.read(offs)& 0x80) << 1);
+			int color = (spriteram.read(offs+1)& 0x3f);
+			int sx = (spriteram_2.read(offs+1)) + 0x100*(spriteram_3.read(offs+1)& 1) - 72;
+			int sy = 256 - spriteram_2.read(offs)- 57;
+			int flipy = spriteram_3.read(offs)& 0x02;
+			int flipx = spriteram_3.read(offs)& 0x01;
 			int width, height;
 	
 			if (flipscreen){
@@ -188,7 +188,7 @@ public class skykid
 	
 			if (number >= 128*3) continue;
 	
-			switch (spriteram_3[offs] & 0x0c){
+			switch (spriteram_3.read(offs)& 0x0c){
 				case 0x0c:	/* 2x both ways */
 					width = height = 2; number &= (~3); break;
 				case 0x08:	/* 2x vertical */

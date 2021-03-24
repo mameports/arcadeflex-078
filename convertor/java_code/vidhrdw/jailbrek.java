@@ -23,22 +23,22 @@ public class jailbrek
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -54,28 +54,28 @@ public class jailbrek
 			COLOR(1,i) = *color_prom++;
 	}
 	
-	WRITE_HANDLER( jailbrek_videoram_w )
+	public static WriteHandlerPtr jailbrek_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( jailbrek_colorram_w )
+	public static WriteHandlerPtr jailbrek_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0xc0) << 2);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0xc0) << 2);
 		int color = attr & 0x0f;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -86,7 +86,7 @@ public class jailbrek
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -98,13 +98,13 @@ public class jailbrek
 	
 		for (i = 0; i < spriteram_size; i += 4)
 		{
-			int attr = spriteram[i + 1];	// attributes = ?tyxcccc
-			int code = spriteram[i] + ((attr & 0x40) << 2);
+			int attr = spriteram.read(i + 1);	// attributes = ?tyxcccc
+			int code = spriteram.read(i)+ ((attr & 0x40) << 2);
 			int color = attr & 0x0f;
 			int flipx = attr & 0x10;
 			int flipy = attr & 0x20;
-			int sx = spriteram[i + 2] - ((attr & 0x80) << 1);
-			int sy = spriteram[i + 3];
+			int sx = spriteram.read(i + 2)- ((attr & 0x80) << 1);
+			int sy = spriteram.read(i + 3);
 	
 			if (flip_screen)
 			{

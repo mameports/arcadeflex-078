@@ -79,8 +79,8 @@ public class liberate
 	{
 		int tile,color;
 	
-		tile=videoram[tile_index+0x400]+((videoram[tile_index]&0x7)<<8);
-		color=(videoram[tile_index]&0x70)>>4;
+		tile=videoram.read(tile_index+0x400)+((videoram.read(tile_index)&0x7)<<8);
+		color=(videoram.read(tile_index)&0x70)>>4;
 	
 	//if (tile&0x300) tile-=0x000;
 	//else if(tile&0x200) tile-=0x100;
@@ -92,7 +92,7 @@ public class liberate
 	
 	/***************************************************************************/
 	
-	WRITE_HANDLER( deco16_io_w )
+	public static WriteHandlerPtr deco16_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		deco16_io_ram[offset]=data;
 		if (offset>1 && offset<6)
@@ -118,13 +118,13 @@ public class liberate
 				cpu_set_irq_line(1,M6502_IRQ_LINE,HOLD_LINE);
 				break;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( liberate_videoram_w )
+	public static WriteHandlerPtr liberate_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(fix_tilemap,offset&0x3ff);
-	}
+	} };
 	
 	/***************************************************************************/
 	
@@ -170,11 +170,11 @@ public class liberate
 	
 	/***************************************************************************/
 	
-	WRITE_HANDLER( prosport_paletteram_w )
+	public static WriteHandlerPtr prosport_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* RGB output is inverted */
 		paletteram_BBGGGRRR_w(offset,~data);
-	}
+	} };
 	
 	PALETTE_INIT( liberate )
 	{
@@ -217,20 +217,20 @@ public class liberate
 		{
 			int multi,fx,fy,sx,sy,sy2,code,color;
 	
-			code = spriteram[offs+1] + ( ( spriteram[offs+0] & 0x60 ) << 3 );
-			sx = (240 - spriteram[offs+3]);
+			code = spriteram.read(offs+1)+ ( ( spriteram.read(offs+0)& 0x60 ) << 3 );
+			sx = (240 - spriteram.read(offs+3));
 		//if (sx < -7) sx += 256;
 	
-			sy = 240-spriteram[offs+2];
-			color = 0;//(spriteram[offs+1] & 0x03);// + ((spriteram[offs+1] & 0x08) >> 1);
+			sy = 240-spriteram.read(offs+2);
+			color = 0;//(spriteram.read(offs+1)& 0x03);// + ((spriteram.read(offs+1)& 0x08) >> 1);
 	
 	//		if (pri==0 && color!=0) continue;
 	//		if (pri==1 && color==0) continue;
 	
-			fx = spriteram[offs+0] & 0x04;
-			fy = spriteram[offs+0] & 0x08;//2;//8;
+			fx = spriteram.read(offs+0)& 0x04;
+			fy = spriteram.read(offs+0)& 0x08;//2;//8;
 	//if (fy) fy=0; else fy=1;
-			multi = spriteram[offs+0] & 0x10;
+			multi = spriteram.read(offs+0)& 0x10;
 	
 	
 			if (multi) sy-=16;
@@ -265,24 +265,24 @@ public class liberate
 	
 		for (offs = 0x000;offs < 0x800;offs += 4)
 		{
-		//	if ((spriteram[offs+0]&1)!=1) continue;
+		//	if ((spriteram.read(offs+0)&1)!=1) continue;
 	
-			code = spriteram[offs+1] + ((spriteram[offs+0]&0x3)<<8);
+			code = spriteram.read(offs+1)+ ((spriteram.read(offs+0)&0x3)<<8);
 			code2=code+1;
 	
-			multi = spriteram[offs+0] & 0x10;
+			multi = spriteram.read(offs+0)& 0x10;
 	
-			sy=spriteram[offs+2];
+			sy=spriteram.read(offs+2);
 			if (multi) sy+=16;
-			sx = (240 - spriteram[offs+3]);
-	//		sy = (240-spriteram[offs+2]);//-16;
+			sx = (240 - spriteram.read(offs+3));
+	//		sy = (240-spriteram.read(offs+2));//-16;
 			sy = 240-sy;
 	
-			color = 1;//(spriteram[offs+0]&0x4)>>2;
+			color = 1;//(spriteram.read(offs+0)&0x4)>>2;
 	
 			fx = 0;
-			fy = spriteram[offs+0] & 0x04;
-			multi = 0;// spriteram[offs+0] & 0x10;
+			fy = spriteram.read(offs+0)& 0x04;
+			multi = 0;// spriteram.read(offs+0)& 0x10;
 	
 	//		if (multi) sy-=16;
 			if (fy && multi) { code2=code; code++; }
@@ -320,25 +320,25 @@ public class liberate
 	
 		for (offs = 0x000;offs < 0x800;offs += 4)
 		{
-			if ((spriteram[offs+0]&1)!=1) continue;
-			if ((spriteram[offs+0]&0x8)!=pri) continue;
+			if ((spriteram.read(offs+0)&1)!=1) continue;
+			if ((spriteram.read(offs+0)&0x8)!=pri) continue;
 	
-			code = spriteram[offs+1] + ((spriteram[offs+0]&0xe0)<<3);
+			code = spriteram.read(offs+1)+ ((spriteram.read(offs+0)&0xe0)<<3);
 			code2=code+1;
 	
-			multi = spriteram[offs+0] & 0x10;
+			multi = spriteram.read(offs+0)& 0x10;
 	
-			sy=spriteram[offs+2];
+			sy=spriteram.read(offs+2);
 			if (multi) sy+=16;
-			sx = (240 - spriteram[offs+3]);
-	//		sy = (240-spriteram[offs+2]);//-16;
+			sx = (240 - spriteram.read(offs+3));
+	//		sy = (240-spriteram.read(offs+2));//-16;
 			sy = 240-sy;
 	
-			color = (spriteram[offs+0]&0x4)>>2;
+			color = (spriteram.read(offs+0)&0x4)>>2;
 	
 			fx = 0;
-			fy = spriteram[offs+0] & 0x02;
-			multi = spriteram[offs+0] & 0x10;
+			fy = spriteram.read(offs+0)& 0x02;
+			multi = spriteram.read(offs+0)& 0x10;
 	
 	//		if (multi) sy-=16;
 			if (fy && multi) { code2=code; code++; }
@@ -394,13 +394,13 @@ public class liberate
 		prosport_drawsprites(bitmap);
 	
 		for (offs = 0;offs < 0x400;offs++) {
-			tile=videoram[offs+0x400]+((videoram[offs]&0x3)<<8);
+			tile=videoram.read(offs+0x400)+((videoram.read(offs)&0x3)<<8);
 	
 			tile+=((deco16_io_ram[0]&0x30)<<6);
 	
-			if (!tile) continue;
+			if (tile == 0) continue;
 	
-			color=1;//(videoram[offs]&0x70)>>4;
+			color=1;//(videoram.read(offs)&0x70)>>4;
 			my = (offs) % 32;
 			mx = (offs) / 32;
 	
@@ -421,7 +421,7 @@ public class liberate
 			tilemap_draw(bitmap,cliprect,background_tilemap,TILEMAP_BACK,0);
 	
 		boomrang_drawsprites(bitmap,8);
-		if (!background_disable)
+		if (background_disable == 0)
 			tilemap_draw(bitmap,cliprect,background_tilemap,TILEMAP_FRONT,0);
 		boomrang_drawsprites(bitmap,0);
 		tilemap_draw(bitmap,cliprect,fix_tilemap,0,0);

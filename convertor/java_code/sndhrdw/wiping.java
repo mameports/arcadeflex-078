@@ -65,7 +65,7 @@ public class wiping
 	
 		/* allocate memory */
 		mixer_table = auto_malloc(256 * voices * sizeof(INT16));
-		if (!mixer_table)
+		if (mixer_table == 0)
 			return 1;
 	
 		/* find the middle of the table */
@@ -214,7 +214,7 @@ public class wiping
 	
 	/********************************************************************************/
 	
-	WRITE_HANDLER( wiping_sound_w )
+	public static WriteHandlerPtr wiping_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sound_channel *voice;
 		int base;
@@ -258,5 +258,5 @@ public class wiping
 				voice->oneshotplaying = 1;
 			}
 		}
-	}
+	} };
 }

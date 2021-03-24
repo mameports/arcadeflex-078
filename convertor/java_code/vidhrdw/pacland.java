@@ -12,11 +12,11 @@ public class pacland
 	static int palette_bank;
 	static const UINT8 *pacland_color_prom;
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		3*8, 39*8-1,
 		5*8, 29*8-1
-	};
+	);
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
@@ -92,25 +92,25 @@ public class pacland
 		}
 	}
 	
-	WRITE_HANDLER( pacland_videoram_w )
+	public static WriteHandlerPtr pacland_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pacland_videoram2_w )
+	public static WriteHandlerPtr pacland_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (pacland_videoram2[offset] != data)
 		{
 			pacland_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pacland_scroll0_w )
+	public static WriteHandlerPtr pacland_scroll0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int row;
 	
@@ -118,14 +118,14 @@ public class pacland
 		{
 			tilemap_set_scrollx(fg_tilemap, row, data + 256 * offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pacland_scroll1_w )
+	public static WriteHandlerPtr pacland_scroll1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, data + 256 * offset);
-	}
+	} };
 	
-	WRITE_HANDLER( pacland_bankswitch_w )
+	public static WriteHandlerPtr pacland_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		UINT8 *RAM = memory_region(REGION_CPU1);
@@ -148,20 +148,20 @@ public class pacland
 				int bit0,bit1,bit2,bit3;
 				int r,g,b;
 	
-				bit0 = (color_prom[0] >> 0) & 0x01;
-				bit1 = (color_prom[0] >> 1) & 0x01;
-				bit2 = (color_prom[0] >> 2) & 0x01;
-				bit3 = (color_prom[0] >> 3) & 0x01;
+				bit0 = (color_prom.read(0)>> 0) & 0x01;
+				bit1 = (color_prom.read(0)>> 1) & 0x01;
+				bit2 = (color_prom.read(0)>> 2) & 0x01;
+				bit3 = (color_prom.read(0)>> 3) & 0x01;
 				r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-				bit0 = (color_prom[0] >> 4) & 0x01;
-				bit1 = (color_prom[0] >> 5) & 0x01;
-				bit2 = (color_prom[0] >> 6) & 0x01;
-				bit3 = (color_prom[0] >> 7) & 0x01;
+				bit0 = (color_prom.read(0)>> 4) & 0x01;
+				bit1 = (color_prom.read(0)>> 5) & 0x01;
+				bit2 = (color_prom.read(0)>> 6) & 0x01;
+				bit3 = (color_prom.read(0)>> 7) & 0x01;
 				g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-				bit0 = (color_prom[1024] >> 0) & 0x01;
-				bit1 = (color_prom[1024] >> 1) & 0x01;
-				bit2 = (color_prom[1024] >> 2) & 0x01;
-				bit3 = (color_prom[1024] >> 3) & 0x01;
+				bit0 = (color_prom.read(1024)>> 0) & 0x01;
+				bit1 = (color_prom.read(1024)>> 1) & 0x01;
+				bit2 = (color_prom.read(1024)>> 2) & 0x01;
+				bit3 = (color_prom.read(1024)>> 3) & 0x01;
 				b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 				color_prom++;
@@ -169,12 +169,12 @@ public class pacland
 				palette_set_color(i,r,g,b);
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pacland_flipscreen_w )
+	public static WriteHandlerPtr pacland_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(~data & 0xa0);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -190,8 +190,8 @@ public class pacland
 	static void get_fg_tile_info(int tile_index)
 	{
 		int offs = tile_index * 2;
-		int attr = videoram[offs + 1];
-		int code = videoram[offs] + ((attr & 0x01) << 8);
+		int attr = videoram.read(offs + 1);
+		int code = videoram.read(offs)+ ((attr & 0x01) << 8);
 		int color = ((attr & 0x1e) >> 1) + ((code & 0x1e0) >> 1);
 		int flags = ((attr & 0x40) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0);
 	
@@ -205,13 +205,13 @@ public class pacland
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT_COLOR, 8, 8, 64, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scrolldx(bg_tilemap, 0, -22*8);
@@ -234,13 +234,13 @@ public class pacland
 	
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			int sprite = spriteram[offs];
-			int gfx = ( spriteram_3[offs] >> 7 ) & 1;
-			int color = ( spriteram[offs+1] & 0x3f ) + 64 * priority;
-			int x = (spriteram_2[offs+1]) + 0x100*(spriteram_3[offs+1] & 1) - 48;
-			int y = 256 - spriteram_2[offs] - 23;
-			int flipy = spriteram_3[offs] & 2;
-			int flipx = spriteram_3[offs] & 1;
+			int sprite = spriteram.read(offs);
+			int gfx = ( spriteram_3.read(offs)>> 7 ) & 1;
+			int color = ( spriteram.read(offs+1)& 0x3f ) + 64 * priority;
+			int x = (spriteram_2.read(offs+1)) + 0x100*(spriteram_3.read(offs+1)& 1) - 48;
+			int y = 256 - spriteram_2.read(offs)- 23;
+			int flipy = spriteram_3.read(offs)& 2;
+			int flipx = spriteram_3.read(offs)& 1;
 	
 			if (flip_screen)
 			{
@@ -249,7 +249,7 @@ public class pacland
 				flipy = !flipy;
 			}
 	
-			switch ( spriteram_3[offs] & 0x0c )
+			switch ( spriteram_3.read(offs)& 0x0c )
 			{
 				case 0:		/* normal size */
 					DRAW_SPRITE( sprite, x, y )
@@ -257,7 +257,7 @@ public class pacland
 	
 				case 4:		/* 2x horizontal */
 					sprite &= ~1;
-					if (!flipx)
+					if (flipx == 0)
 					{
 						DRAW_SPRITE( sprite, x, y )
 						DRAW_SPRITE( 1+sprite, x+16, y )
@@ -269,7 +269,7 @@ public class pacland
 	
 				case 8:		/* 2x vertical */
 					sprite &= ~2;
-					if (!flipy)
+					if (flipy == 0)
 					{
 						DRAW_SPRITE( sprite, x, y-16 )
 						DRAW_SPRITE( 2+sprite, x, y )

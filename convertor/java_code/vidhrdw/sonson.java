@@ -59,22 +59,22 @@ public class sonson
 	
 	
 			/* red component */
-			bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[i] >> 4) & 0x01;
-			bit1 = (color_prom[i] >> 5) & 0x01;
-			bit2 = (color_prom[i] >> 6) & 0x01;
-			bit3 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 4) & 0x01;
+			bit1 = (color_prom.read(i)>> 5) & 0x01;
+			bit2 = (color_prom.read(i)>> 6) & 0x01;
+			bit3 = (color_prom.read(i)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -92,25 +92,25 @@ public class sonson
 			COLOR(1,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( sonson_videoram_w )
+	public static WriteHandlerPtr sonson_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sonson_colorram_w )
+	public static WriteHandlerPtr sonson_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sonson_scroll_w )
+	public static WriteHandlerPtr sonson_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int row;
 	
@@ -118,21 +118,21 @@ public class sonson
 		{
 			tilemap_set_scrollx(bg_tilemap, row, data);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sonson_flipscreen_w )
+	public static WriteHandlerPtr sonson_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (~data & 0x01))
 		{
 			flip_screen_set(~data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + 256 * (attr & 0x03);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ 256 * (attr & 0x03);
 		int color = attr >> 2;
 		
 		SET_TILE_INFO(0, code, color, 0)
@@ -143,7 +143,7 @@ public class sonson
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -157,12 +157,12 @@ public class sonson
 	
 		for (offs = spriteram_size - 4; offs >= 0; offs -= 4)
 		{
-			int code = spriteram[offs + 2] + ((spriteram[offs + 1] & 0x20) << 3);
-			int color = spriteram[offs + 1] & 0x1f;
-			int flipx = ~spriteram[offs + 1] & 0x40;
-			int flipy = ~spriteram[offs + 1] & 0x80;
-			int sx = spriteram[offs + 3]; 
-			int sy = spriteram[offs + 0];
+			int code = spriteram.read(offs + 2)+ ((spriteram.read(offs + 1)& 0x20) << 3);
+			int color = spriteram.read(offs + 1)& 0x1f;
+			int flipx = ~spriteram.read(offs + 1)& 0x40;
+			int flipy = ~spriteram.read(offs + 1)& 0x80;
+			int sx = spriteram.read(offs + 3); 
+			int sy = spriteram.read(offs + 0);
 	
 			if (flip_screen)
 			{

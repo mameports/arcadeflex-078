@@ -252,7 +252,7 @@ public class ui_text
 	
 		/* allocate the translated text array, and set defaults */
 		trans_text = auto_malloc(sizeof(const char *) * string_count);
-		if (!trans_text)
+		if (trans_text == 0)
 			return 1;
 	
 		/* copy in references to all of the strings */
@@ -266,7 +266,7 @@ public class ui_text
 		memset(&lang, 0, sizeof(lang));
 	
 		/* if no language file, exit */
-		if (!langfile)
+		if (langfile == 0)
 			return 0;
 	
 		while (mame_fgets (curline, sizeof(curline) / sizeof(curline[0]), langfile) != NULL)

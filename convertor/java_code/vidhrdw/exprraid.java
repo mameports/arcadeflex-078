@@ -11,51 +11,51 @@ public class exprraid
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( exprraid_videoram_w )
+	public static WriteHandlerPtr exprraid_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exprraid_colorram_w )
+	public static WriteHandlerPtr exprraid_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exprraid_flipscreen_w )
+	public static WriteHandlerPtr exprraid_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exprraid_bgselect_w )
+	public static WriteHandlerPtr exprraid_bgselect_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bg_index[offset] != data)
 		{
 			bg_index[offset] = data;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exprraid_scrollx_w )
+	public static WriteHandlerPtr exprraid_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, offset, data);
-	}
+	} };
 	
-	WRITE_HANDLER( exprraid_scrolly_w )
+	public static WriteHandlerPtr exprraid_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -86,8 +86,8 @@ public class exprraid
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0x07) << 8);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0x07) << 8);
 		int color = (attr & 0x10) >> 4;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -98,13 +98,13 @@ public class exprraid
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 16, 16, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 2);
@@ -119,13 +119,13 @@ public class exprraid
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			int attr = spriteram[offs + 1];
-			int code = spriteram[offs + 3] + ((attr & 0xe0) << 3);
+			int attr = spriteram.read(offs + 1);
+			int code = spriteram.read(offs + 3)+ ((attr & 0xe0) << 3);
 			int color = (attr & 0x03) + ((attr & 0x08) >> 1);
 			int flipx = (attr & 0x04);
 			int flipy = 0;
-			int sx = ((248 - spriteram[offs + 2]) & 0xff) - 8;
-			int sy = spriteram[offs];
+			int sx = ((248 - spriteram.read(offs + 2)) & 0xff) - 8;
+			int sy = spriteram.read(offs);
 	
 			if (flip_screen)
 			{

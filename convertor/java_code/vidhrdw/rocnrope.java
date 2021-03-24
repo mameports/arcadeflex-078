@@ -77,37 +77,37 @@ public class rocnrope
 			COLOR(0,i) = *(color_prom++) & 0x0f;
 	}
 	
-	WRITE_HANDLER( rocnrope_videoram_w )
+	public static WriteHandlerPtr rocnrope_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rocnrope_colorram_w )
+	public static WriteHandlerPtr rocnrope_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rocnrope_flipscreen_w )
+	public static WriteHandlerPtr rocnrope_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (~data & 0x01))
 		{
 			flip_screen_set(~data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + 2 * (attr & 0x80);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ 2 * (attr & 0x80);
 		int color = attr & 0x0f;
 		int flags = ((attr & 0x40) ? TILE_FLIPX : 0) | ((attr & 0x20) ? TILE_FLIPY : 0);
 	
@@ -119,7 +119,7 @@ public class rocnrope
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 		
 		return 0;
@@ -132,10 +132,10 @@ public class rocnrope
 		for (offs = spriteram_size - 2;offs >= 0;offs -= 2)
 		{
 			drawgfx(bitmap,Machine->gfx[1],
-					spriteram[offs + 1],
-					spriteram_2[offs] & 0x0f,
-					spriteram_2[offs] & 0x40,~spriteram_2[offs] & 0x80,
-					240-spriteram[offs],spriteram_2[offs + 1],
+					spriteram.read(offs + 1),
+					spriteram_2.read(offs)& 0x0f,
+					spriteram_2.read(offs)& 0x40,~spriteram_2.read(offs)& 0x80,
+					240-spriteram.read(offs),spriteram_2.read(offs + 1),
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
 	}

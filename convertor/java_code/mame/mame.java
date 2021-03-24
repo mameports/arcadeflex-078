@@ -209,24 +209,15 @@ public class mame
 	
 	***************************************************************************/
 	
-	static int init_machine(void);
-	static void shutdown_machine(void);
-	static int run_machine(void);
-	static void run_machine_core(void);
-	
+	static static static static 
 	#ifdef MAME_DEBUG
-	static int validitychecks(void);
-	#endif
+	static #endif
 	
 	static void recompute_fps(int skipped_it);
-	static int vh_open(void);
-	static void vh_close(void);
-	static int init_game_options(void);
-	static int decode_graphics(const struct GfxDecodeInfo *gfxdecodeinfo);
+	static static static static int decode_graphics(const struct GfxDecodeInfo *gfxdecodeinfo);
 	static void compute_aspect_ratio(const struct InternalMachineDriver *drv, int *aspect_x, int *aspect_y);
 	static void scale_vectorgames(int gfx_width, int gfx_height, int *width, int *height);
-	static int init_buffered_spriteram(void);
-	
+	static 
 	#ifdef MESS
 	#define handle_user_interface	handle_mess_user_interface
 	#endif
@@ -246,7 +237,7 @@ public class mame
 	
 	INLINE void bail_and_print(const char *message)
 	{
-		if (!bailing)
+		if (bailing == 0)
 		{
 			bailing = 1;
 			printf("%s\n", message);
@@ -1016,7 +1007,7 @@ public class mame
 	
 		/* allocate memory for the back buffer */
 		buffered_spriteram = auto_malloc(spriteram_size);
-		if (!buffered_spriteram)
+		if (buffered_spriteram == 0)
 			return 1;
 	
 		/* register for saving it */
@@ -1027,7 +1018,7 @@ public class mame
 		{
 			/* allocate memory */
 			buffered_spriteram_2 = auto_malloc(spriteram_2_size);
-			if (!buffered_spriteram_2)
+			if (buffered_spriteram_2 == 0)
 				return 1;
 	
 			/* register for saving it */
@@ -1199,7 +1190,7 @@ public class mame
 		/* set the main game bitmap */
 		current_display.game_bitmap = Machine->scrbitmap;
 		current_display.game_bitmap_update = Machine->absolute_visible_area;
-		if (!skipped_it)
+		if (skipped_it == 0)
 			current_display.changed_flags |= GAME_BITMAP_CHANGED;
 	
 		/* set the visible area */
@@ -1261,7 +1252,7 @@ public class mame
 	{
 		/* increment the frame counters */
 		frames_since_last_fps++;
-		if (!skipped_it)
+		if (skipped_it == 0)
 			rendered_frames_since_last_fps++;
 	
 		/* if we didn't skip this frame, we may be able to compute a new FPS */
@@ -1288,8 +1279,7 @@ public class mame
 		{
 	#ifndef MESS
 			/* from vidhrdw/avgdvg.c */
-			extern int vector_updates;
-	
+			
 			performance.vector_updates_last_second = vector_updates;
 			vector_updates = 0;
 	#endif

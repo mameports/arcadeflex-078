@@ -60,12 +60,12 @@ public class skyfox
 	
 	***************************************************************************/
 	
-	READ_HANDLER( skyfox_vregs_r )	// for debug
+	public static ReadHandlerPtr skyfox_vregs_r  = new ReadHandlerPtr() { public int handler(int offset)	// for debug
 	{
 		return vreg[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( skyfox_vregs_w )
+	public static WriteHandlerPtr skyfox_vregs_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vreg[offset] = data;
 	
@@ -80,7 +80,7 @@ public class skyfox
 			case 6:	break;
 			case 7:	break;
 		}
-	}
+	} };
 	
 	
 	
@@ -108,22 +108,22 @@ public class skyfox
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[i + 256] >> 0) & 0x01;
-			bit1 = (color_prom[i + 256] >> 1) & 0x01;
-			bit2 = (color_prom[i + 256] >> 2) & 0x01;
-			bit3 = (color_prom[i + 256] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 256)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 256)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 256)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 256)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[i + 2*256] >> 0) & 0x01;
-			bit1 = (color_prom[i + 2*256] >> 1) & 0x01;
-			bit2 = (color_prom[i + 2*256] >> 2) & 0x01;
-			bit3 = (color_prom[i + 2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 2*256)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -185,9 +185,9 @@ public class skyfox
 			int xinc, yinc, dx, dy;
 			int low_code, high_code, n;
 	
-			int y		=		spriteram[offs+0];
-			int x		=		spriteram[offs+1];
-			int code	=		spriteram[offs+2] + spriteram[offs+3] * 256;
+			int y		=		spriteram.read(offs+0);
+			int x		=		spriteram.read(offs+1);
+			int code	=		spriteram.read(offs+2)+ spriteram.read(offs+3)* 256;
 			int flipx	=		code & 0x2;
 			int flipy	=		code & 0x4;
 	

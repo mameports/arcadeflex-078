@@ -39,14 +39,14 @@ public class dlair
 	
 	static int led0,led1;
 	
-	WRITE_HANDLER( dlair_led0_w )
+	public static WriteHandlerPtr dlair_led0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		led0 = data;
-	}
-	WRITE_HANDLER( dlair_led1_w )
+	} };
+	public static WriteHandlerPtr dlair_led1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		led1 = data;
-	}
+	} };
 	
 	VIDEO_UPDATE( dlair )
 	{
@@ -69,7 +69,7 @@ public class dlair
 				sy = (offs/2) / 32;
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs+1],
+						videoram.read(offs+1),
 						0,
 						0,0,
 						8*sx,16*sy,
@@ -145,70 +145,78 @@ public class dlair
 	}
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0xa000, 0xa7ff, MRA_RAM },
-		{ 0xc000, 0xc7ff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xa000, 0xa7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xc000, 0xc7ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0xa000, 0xa7ff, MWA_RAM },
-		{ 0xc000, 0xc3ff, videoram_w, &videoram, &videoram_size },
-		{ 0xc400, 0xc7ff, MWA_RAM },
-		{ 0xe000, 0xe000, dlair_led0_w },
-		{ 0xe008, 0xe008, dlair_led1_w },
-		{ 0xe030, 0xe030, watchdog_reset_w },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xa000, 0xa7ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xc000, 0xc3ff, videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0xc400, 0xc7ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xe000, 0xe000, dlair_led0_w ),
+		new Memory_WriteAddress( 0xe008, 0xe008, dlair_led1_w ),
+		new Memory_WriteAddress( 0xe030, 0xe030, watchdog_reset_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	static unsigned char pip[4];
-	static READ_HANDLER( pip_r )
+	public static ReadHandlerPtr pip_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	logerror("PC %04x: read I/O port %02x\n",activecpu_get_pc(),offset);
 		return pip[offset];
-	}
-	static WRITE_HANDLER( pip_w )
+	} };
+	public static WriteHandlerPtr pip_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	logerror("PC %04x: write %02x to I/O port %02x\n",activecpu_get_pc(),data,offset);
 		pip[offset] = data;
 	z80ctc_0_w(offset,data);
-	}
+	} };
 	
-	static PORT_READ_START( readport )
-		{ 0x00, 0x03, pip_r },
-	//	{ 0x80, 0x83, z80ctc_0_r },
-	PORT_END
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x03, pip_r ),
+	//	new IO_ReadPort( 0x80, 0x83, z80ctc_0_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport )
-		{ 0x00, 0x03, pip_w },
-	//	{ 0x80, 0x83, z80ctc_0_w },
-	PORT_END
-	
-	
-	
-	INPUT_PORTS_START( dlair )
-		PORT_START
-	INPUT_PORTS_END
-	
-	
-	
-	static struct GfxLayout charlayout =
-	{
-		8,16,
-		512,
-		1,
-		{ 0 },
-		{ 7, 6, 5, 4, 3, 2, 1, 0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-				8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
-		16*8	/* every char takes 8 consecutive bytes */
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x03, pip_w ),
+	//	new IO_WritePort( 0x80, 0x83, z80ctc_0_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
 	};
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	
+	static InputPortPtr input_ports_dlair = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
+		8,16,
+		512,
+		1,
+		new int[] { 0 },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+				8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
+		16*8	/* every char takes 8 consecutive bytes */
+	);
+	
+	
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0x0000, &charlayout,  0, 8 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0x0000, charlayout,  0, 8 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -255,19 +263,19 @@ public class dlair
 	
 	***************************************************************************/
 	
-	ROM_START( dlair )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-		ROM_LOAD( "u45",          0x0000, 0x2000, CRC(329b354a) SHA1(54bbc5aa647d3c20166a57f9d3aa5569e7289af8) )
-		ROM_LOAD( "u46",          0x2000, 0x2000, CRC(8479612b) SHA1(b5543a06928274bde0e1bdda0747d936feaff177) )
-		ROM_LOAD( "u47",          0x4000, 0x2000, CRC(6a66f6b4) SHA1(2bee981870e61977565439c34568952043656cfa) )
-		ROM_LOAD( "u48",          0x6000, 0x2000, CRC(36575106) SHA1(178e26e7d5c7f879bc55c2fb170f3bb47a709610) )
+	static RomLoadPtr rom_dlair = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
+		ROM_LOAD( "u45",          0x0000, 0x2000, CRC(329b354a);SHA1(54bbc5aa647d3c20166a57f9d3aa5569e7289af8) )
+		ROM_LOAD( "u46",          0x2000, 0x2000, CRC(8479612b);SHA1(b5543a06928274bde0e1bdda0747d936feaff177) )
+		ROM_LOAD( "u47",          0x4000, 0x2000, CRC(6a66f6b4);SHA1(2bee981870e61977565439c34568952043656cfa) )
+		ROM_LOAD( "u48",          0x6000, 0x2000, CRC(36575106);SHA1(178e26e7d5c7f879bc55c2fb170f3bb47a709610) )
 	
-		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "u33",          0x0000, 0x2000, CRC(e7506d96) SHA1(610ae25bd8db13b18b9e681e855ffa978043255b) )
-	ROM_END
+		ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "u33",          0x0000, 0x2000, CRC(e7506d96);SHA1(610ae25bd8db13b18b9e681e855ffa978043255b) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX( 1983, dlair, 0, dlair, dlair, 0, ROT0, "Cinematronics", "Dragon's Lair", GAME_NOT_WORKING | GAME_NO_SOUND )
+	public static GameDriver driver_dlair	   = new GameDriver("1983"	,"dlair"	,"dlair.java"	,rom_dlair,null	,machine_driver_dlair	,input_ports_dlair	,null	,ROT0	,	"Cinematronics", "Dragon's Lair", GAME_NOT_WORKING | GAME_NO_SOUND )
 	
 }

@@ -21,23 +21,23 @@ public class bagman
 	static struct tilemap *bg_tilemap;
 	
 	
-	WRITE_HANDLER( bagman_videoram_w )
+	public static WriteHandlerPtr bagman_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bagman_colorram_w )
+	public static WriteHandlerPtr bagman_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -77,38 +77,38 @@ public class bagman
 			int bit0, bit1, bit2, r, g, b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = combine_3_weights(weights_r, bit0, bit1, bit2);
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = combine_3_weights(weights_g, bit0, bit1, bit2);
 			/* blue component */
-			bit0 = (color_prom[i] >> 6) & 0x01;
-			bit1 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 6) & 0x01;
+			bit1 = (color_prom.read(i)>> 7) & 0x01;
 			b = combine_2_weights(weights_b, bit0, bit1);
 	
 			palette_set_color(i,r,g,b);
 		}
 	}
 	
-	WRITE_HANDLER( bagman_flipscreen_w )
+	public static WriteHandlerPtr bagman_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int gfxbank = (Machine->gfx[2] && (colorram[tile_index] & 0x10)) ? 2 : 0;
-		int code = videoram[tile_index] + 8 * (colorram[tile_index] & 0x20);
-		int color = colorram[tile_index] & 0x0f;
+		int gfxbank = (Machine->gfx[2] && (colorram.read(tile_index)& 0x10)) ? 2 : 0;
+		int code = videoram.read(tile_index)+ 8 * (colorram.read(tile_index)& 0x20);
+		int color = colorram.read(tile_index)& 0x0f;
 	
 		SET_TILE_INFO(gfxbank, code, color, 0)
 	}
@@ -118,7 +118,7 @@ public class bagman
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -133,10 +133,10 @@ public class bagman
 			int sx,sy,flipx,flipy;
 	
 	
-			sx = spriteram[offs + 3];
-			sy = 240 - spriteram[offs + 2];
-			flipx = spriteram[offs] & 0x40;
-			flipy = spriteram[offs] & 0x80;
+			sx = spriteram.read(offs + 3);
+			sy = 240 - spriteram.read(offs + 2);
+			flipx = spriteram.read(offs)& 0x40;
+			flipy = spriteram.read(offs)& 0x80;
 			if (flip_screen_x)
 			{
 				sx = 240 - sx +1;	/* compensate misplacement */
@@ -148,10 +148,10 @@ public class bagman
 				flipy = !flipy;
 			}
 	
-			if (spriteram[offs + 2] && spriteram[offs + 3])
+			if (spriteram.read(offs + 2)&& spriteram.read(offs + 3))
 				drawgfx(bitmap,Machine->gfx[1],
-						(spriteram[offs] & 0x3f) + 2 * (spriteram[offs + 1] & 0x20),
-						spriteram[offs + 1] & 0x1f,
+						(spriteram.read(offs)& 0x3f) + 2 * (spriteram.read(offs + 1)& 0x20),
+						spriteram.read(offs + 1)& 0x1f,
 						flipx,flipy,
 						sx,sy+1,	/* compensate misplacement */
 						&Machine->visible_area,TRANSPARENCY_PEN,0);

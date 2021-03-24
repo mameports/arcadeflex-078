@@ -154,156 +154,164 @@ public class ashnojoe
 		return rand();
 	}
 	
-	static WRITE_HANDLER( adpcm_data_w )
+	public static WriteHandlerPtr adpcm_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		MSM5205_data_w(0, data & 0xf);
 		MSM5205_data_w(0, data>>4);
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x5fff, MRA_ROM },
-		{ 0x6000, 0x7fff, MRA_RAM },
-		{ 0x8000, 0xffff, MRA_BANK4 },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x5fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x6000, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_BANK4 ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x5fff, MWA_ROM },
-		{ 0x6000, 0x7fff, MWA_RAM },
-		{ 0x8000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x5fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x6000, 0x7fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( sound_readport )
-		{ 0x00, 0x00, YM2203_status_port_0_r },
-		{ 0x01, 0x01, YM2203_read_port_0_r },
-		{ 0x04, 0x04, soundlatch_r }, //PC: 15D -> cp $7f
-		{ 0x06, 0x06, fake_6_r/*soundlatch_r */}, //PC: 14A -> and $1
-	PORT_END
+	public static IO_ReadPort sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, YM2203_status_port_0_r ),
+		new IO_ReadPort( 0x01, 0x01, YM2203_read_port_0_r ),
+		new IO_ReadPort( 0x04, 0x04, soundlatch_r ), //PC: 15D -> cp $7f
+		new IO_ReadPort( 0x06, 0x06, fake_6_r/*soundlatch_r */), //PC: 14A -> and $1
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( sound_writeport )
-		{ 0x00, 0x00, YM2203_control_port_0_w },
-		{ 0x01, 0x01, YM2203_write_port_0_w },
-		{ 0x02, 0x02, adpcm_data_w },
-	PORT_END
+	public static IO_WritePort sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, YM2203_control_port_0_w ),
+		new IO_WritePort( 0x01, 0x01, YM2203_write_port_0_w ),
+		new IO_WritePort( 0x02, 0x02, adpcm_data_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( ashnojoe )
-		PORT_START	/* player 1 16-bit */
-		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )  // anything else and the controls don't work
-		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	static InputPortPtr input_ports_ashnojoe = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* player 1 16-bit */
+		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN ); // anything else and the controls don't work
+		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_SERVICE1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_START2 )
-		PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_SERVICE1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_START2 );
+		PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START	/* player 2 16-bit */
-		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )  // anything else and the controls don't work
-		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 	/* player 2 16-bit */
+		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN ); // anything else and the controls don't work
+		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
 		/* unused ? */
-		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START	/* 16-bit */
-		PORT_DIPNAME( 0x0001, 0x0000, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Upright ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0x0002, 0x0000, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0002, DEF_STR( On ) )
-		PORT_SERVICE( 0x0004, IP_ACTIVE_HIGH )
-		PORT_DIPNAME( 0x0008, 0x0000, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0030, 0x0000, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0030, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x0040, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0300, 0x0000, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0100, "Easy" )
-		PORT_DIPSETTING(      0x0000, "Normal" )
-		PORT_DIPSETTING(      0x0200, "Medium" )
-		PORT_DIPSETTING(      0x0300, "Hard" )
-		PORT_DIPNAME( 0x0400, 0x0000, "Number of controller" )
-		PORT_DIPSETTING(      0x0000, "2" )
-		PORT_DIPSETTING(      0x0400, "1" )
-		PORT_DIPNAME( 0x0800, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0800, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1000, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x1000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x2000, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x2000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x8000, 0x0000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x8000, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START(); 	/* 16-bit */
+		PORT_DIPNAME( 0x0001, 0x0000, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Upright") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x0002, 0x0000, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "On") );
+		PORT_SERVICE( 0x0004, IP_ACTIVE_HIGH );
+		PORT_DIPNAME( 0x0008, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0030, 0x0000, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0030, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x0040, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0300, 0x0000, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0100, "Easy" );
+		PORT_DIPSETTING(      0x0000, "Normal" );
+		PORT_DIPSETTING(      0x0200, "Medium" );
+		PORT_DIPSETTING(      0x0300, "Hard" );
+		PORT_DIPNAME( 0x0400, 0x0000, "Number of controller" );
+		PORT_DIPSETTING(      0x0000, "2" );
+		PORT_DIPSETTING(      0x0400, "1" );
+		PORT_DIPNAME( 0x0800, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1000, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x2000, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x8000, 0x0000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout tiles8x8_layout =
-	{
+	static GfxLayout tiles8x8_layout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		32*8
-	};
+	);
 	
-	static struct GfxLayout tiles16x16_layout =
-	{
+	static GfxLayout tiles16x16_layout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28,
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28,
 		 32,36,40, 44, 48, 52, 56, 60 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 		  8*64, 9*64,10*64,11*64,12*64,13*64,14*64,15*64 },
 		16*64
-	};
+	);
 	
-	static struct GfxDecodeInfo ashnojoe_gfxdecodeinfo[] =
+	static GfxDecodeInfo ashnojoe_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tiles8x8_layout, 0, 0x100 },
-		{ REGION_GFX2, 0, &tiles8x8_layout, 0, 0x100 },
-		{ REGION_GFX3, 0, &tiles8x8_layout, 0, 0x100 },
-		{ REGION_GFX4, 0, &tiles16x16_layout, 0, 0x100 },
-		{ REGION_GFX5, 0, &tiles16x16_layout, 0, 0x100 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, tiles8x8_layout, 0, 0x100 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, tiles8x8_layout, 0, 0x100 ),
+		new GfxDecodeInfo( REGION_GFX3, 0, tiles8x8_layout, 0, 0x100 ),
+		new GfxDecodeInfo( REGION_GFX4, 0, tiles16x16_layout, 0, 0x100 ),
+		new GfxDecodeInfo( REGION_GFX5, 0, tiles16x16_layout, 0, 0x100 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	static void irqhandler(int irq)
@@ -385,32 +393,32 @@ public class ashnojoe
 		MDRV_SOUND_ADD(MSM5205, msm5205_interface)
 	MACHINE_DRIVER_END
 	
-	ROM_START( ashnojoe )
-		ROM_REGION( 0xc0000, REGION_CPU1, 0 )     /* 68000 code */
-		ROM_LOAD16_BYTE( "5.bin", 0x00000, 0x10000, CRC(c61e1569) SHA1(422c18f5810539b5a9e3a9bd4e3b4d70bde8d1d5) )
-		ROM_LOAD16_BYTE( "6.bin", 0x00001, 0x10000, CRC(c0a16338) SHA1(fb127b9d38f2c9807b6e23ff71935fc8a22a2e8f) )
+	static RomLoadPtr rom_ashnojoe = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0xc0000, REGION_CPU1, 0 );    /* 68000 code */
+		ROM_LOAD16_BYTE( "5.bin", 0x00000, 0x10000, CRC(c61e1569);SHA1(422c18f5810539b5a9e3a9bd4e3b4d70bde8d1d5) )
+		ROM_LOAD16_BYTE( "6.bin", 0x00001, 0x10000, CRC(c0a16338);SHA1(fb127b9d38f2c9807b6e23ff71935fc8a22a2e8f) )
 		ROM_LOAD16_WORD_SWAP( "sj201-nw.bin", 0x80000, 0x40000, CRC(5a64ca42) SHA1(660b8bca21ef3c2230adce7cb7e7d1f018714f23) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 32k for Z80 code */
-		ROM_LOAD( "9.bin", 0x0000, 0x8000, CRC(8767e212) SHA1(13bf927febedff9d7d164fbf0da7fb3a588c2a94) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );    /* 32k for Z80 code */
+		ROM_LOAD( "9.bin", 0x0000, 0x8000, CRC(8767e212);SHA1(13bf927febedff9d7d164fbf0da7fb3a588c2a94) )
 	
-		ROM_REGION( 0x20000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "8.bin", 0x00000, 0x10000, CRC(9bcb160e) SHA1(1677048e5ce26562ff7ba36fcc2d0ed5a652b91e) )
-		ROM_LOAD( "7.bin", 0x10000, 0x10000, CRC(7e1efc42) SHA1(e3c282072fdaa0b98c2a1bf25fd02c680d9ca4d7) )
+		ROM_REGION( 0x20000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "8.bin", 0x00000, 0x10000, CRC(9bcb160e);SHA1(1677048e5ce26562ff7ba36fcc2d0ed5a652b91e) )
+		ROM_LOAD( "7.bin", 0x10000, 0x10000, CRC(7e1efc42);SHA1(e3c282072fdaa0b98c2a1bf25fd02c680d9ca4d7) )
 	
-		ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "4.bin", 0x00000, 0x10000, CRC(aa6336d3) SHA1(43f70cc3223f11d7929dd44b0edf0a31f5fe41c3) )
-		ROM_LOAD( "3.bin", 0x10000, 0x10000, CRC(7e2d86b5) SHA1(8b8d1b9240a700e29afc109eddf6e58a0a7666a4) )
+		ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "4.bin", 0x00000, 0x10000, CRC(aa6336d3);SHA1(43f70cc3223f11d7929dd44b0edf0a31f5fe41c3) )
+		ROM_LOAD( "3.bin", 0x10000, 0x10000, CRC(7e2d86b5);SHA1(8b8d1b9240a700e29afc109eddf6e58a0a7666a4) )
 	
-		ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "2.bin", 0x00000, 0x10000, CRC(c3254938) SHA1(fd57163f740cd4fdecca94cced91314c289741ae) )
-		ROM_LOAD( "1.bin", 0x10000, 0x10000, CRC(1bf585f0) SHA1(4003941636e7fded95e880109c3c9dd1d8f28b07) )
+		ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "2.bin", 0x00000, 0x10000, CRC(c3254938);SHA1(fd57163f740cd4fdecca94cced91314c289741ae) )
+		ROM_LOAD( "1.bin", 0x10000, 0x10000, CRC(1bf585f0);SHA1(4003941636e7fded95e880109c3c9dd1d8f28b07) )
 	
-		ROM_REGION( 0x100000, REGION_GFX4, ROMREGION_DISPOSE )
+		ROM_REGION( 0x100000, REGION_GFX4, ROMREGION_DISPOSE );
 		ROM_LOAD16_WORD_SWAP( "sj402-nw.bin", 0x000000, 0x80000, CRC(b6d33d06) SHA1(688ccf467a5112ec522811894e2626ab5f155903) )
 		ROM_LOAD16_WORD_SWAP( "sj403-nw.bin", 0x080000, 0x80000, CRC(07143f56) SHA1(1b953c8826d3993a486eed6b9d94d37145fd2e79) )
 	
-		ROM_REGION( 0x300000, REGION_GFX5, ROMREGION_DISPOSE )
+		ROM_REGION( 0x300000, REGION_GFX5, ROMREGION_DISPOSE );
 		ROM_LOAD16_WORD_SWAP( "sj404-nw.bin", 0x000000, 0x80000, CRC(8f134128) SHA1(026a6076d54cd5f1d06b29c51031cb79a6b2c11d) )
 		ROM_LOAD16_WORD_SWAP( "sj405-nw.bin", 0x080000, 0x80000, CRC(6fd81699) SHA1(8a4f9e47dd39b4b0213c3682da2221ca53bba658) )
 		ROM_LOAD16_WORD_SWAP( "sj406-nw.bin", 0x100000, 0x80000, CRC(634e33e6) SHA1(1d6a72a4ca80cd1c1fd6ce9359c304b45091cdfe) )
@@ -418,9 +426,9 @@ public class ashnojoe
 		ROM_LOAD16_WORD_SWAP( "sj408-nw.bin", 0x200000, 0x80000, CRC(6a3b1ea1) SHA1(e39a6e52d930f291bf237cf9db3d4b3d2fad53e0) )
 		ROM_LOAD16_WORD_SWAP( "sj409-nw.bin", 0x280000, 0x80000, CRC(d8764213) SHA1(89eadefb956863216c8e3d0380394aba35e8c856) )
 	
-		ROM_REGION( 0x80000, REGION_SOUND1, 0 )   /* samples? */
-		ROM_LOAD( "sj401-nw.bin", 0x00000, 0x80000, CRC(25dfab59) SHA1(7d50159204ba05323a2442778f35192e66117dda) )
-	ROM_END
+		ROM_REGION( 0x80000, REGION_SOUND1, 0 );  /* samples? */
+		ROM_LOAD( "sj401-nw.bin", 0x00000, 0x80000, CRC(25dfab59);SHA1(7d50159204ba05323a2442778f35192e66117dda) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1990, ashnojoe, 0, ashnojoe, ashnojoe, ashnojoe, ROT0, "WAVE / Taito Corporation", "Ashita no Joe (Japan)", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_ashnojoe	   = new GameDriver("1990"	,"ashnojoe"	,"ashnojoe.java"	,rom_ashnojoe,null	,machine_driver_ashnojoe	,input_ports_ashnojoe	,init_ashnojoe	,ROT0	,	"WAVE / Taito Corporation", "Ashita no Joe (Japan)", GAME_IMPERFECT_SOUND )
 }

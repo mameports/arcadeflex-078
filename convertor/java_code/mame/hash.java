@@ -115,7 +115,7 @@
  *   it will automatically compute and add SHA1 checksum for you if
  *   it can find the romset. 
  *
- * - Given a romset (ZIP file), it will prepare a ROM definition 
+ * - Given a romset (ZIP file); it will prepare a ROM definition 
  *   skeleton for a driver, containing already rom names, lengths, and 
  *   checksums (both CRC and SHA1). 
  *
@@ -156,16 +156,13 @@ public class hash
 	
 	} hash_function_desc;
 	
-	static void h_crc_begin(void);
-	static void h_crc_buffer(const void* mem, unsigned long len);
+	static static void h_crc_buffer(const void* mem, unsigned long len);
 	static void h_crc_end(UINT8* chksum);
 	
-	static void h_sha1_begin(void);
-	static void h_sha1_buffer(const void* mem, unsigned long len);
+	static static void h_sha1_buffer(const void* mem, unsigned long len);
 	static void h_sha1_end(UINT8* chksum);
 	
-	static void h_md5_begin(void);
-	static void h_md5_buffer(const void* mem, unsigned long len);
+	static static void h_md5_buffer(const void* mem, unsigned long len);
 	static void h_md5_end(UINT8* chksum);
 	
 	static hash_function_desc hash_descs[HASH_NUM_FUNCTIONS] =
@@ -241,7 +238,7 @@ public class hash
 		// Check if the specified hash function is used within this data
 		res = strstr(data, str);
 	
-		if (!res)
+		if (res == 0)
 			return 0;
 	
 		// Return the offset within the string where the checksum begins
@@ -287,7 +284,7 @@ public class hash
 	
 			if (tolower(c1) != tolower(c2))
 				return 0;
-			if (!c1)
+			if (c1 == 0)
 				return 0;
 		}
 	
@@ -304,7 +301,7 @@ public class hash
 		
 		// If no function is specified, it means we need to check for all
 		//  of them
-		if (!functions)
+		if (functions == 0)
 			functions = ~functions;
 	
 		for (i=1; i != (1<<HASH_NUM_FUNCTIONS); i<<=1)
@@ -334,7 +331,7 @@ public class hash
 			}
 	
 		// If we could not compare any function, return error
-		if (!ok)
+		if (ok == 0)
 			return 0;
 	
 		// Return success code
@@ -351,7 +348,7 @@ public class hash
 		// Check if the hashdata contains the requested function
 		offs = hash_data_has_checksum(data, function);
 		
-		if (!offs)
+		if (offs == 0)
 			return 0;
 		
 		// Move to the beginning of the checksum
@@ -360,7 +357,7 @@ public class hash
 		info = hash_get_function_desc(function);
 	
 		// Return the number of required bytes
-		if (!checksum)
+		if (checksum == 0)
 			return info->size*2+1;
 	
 		// If the terminator is not found at the right position,
@@ -404,7 +401,7 @@ public class hash
 		// Check if the hashdata contains the requested function
 		offs = hash_data_has_checksum(data, function);
 	
-		if (!offs)
+		if (offs == 0)
 			return 0;
 	
 		// Move to the beginning of the checksum
@@ -413,7 +410,7 @@ public class hash
 		info = hash_get_function_desc(function);
 	
 		// Return the number of required bytes
-		if (!checksum)
+		if (checksum == 0)
 			return info->size;
 	
 		// Clear the checksum array
@@ -461,7 +458,7 @@ public class hash
 	{
 		char* res = strstr(data, info_strings[info]);
 	
-		if (!res)
+		if (res == 0)
 			return 0;
 	
 		return 1;
@@ -484,7 +481,7 @@ public class hash
 		int i;
 		unsigned int res = 0;
 	
-		if (!data)
+		if (data == 0)
 			return 0;
 	
 		for (i=0;i<HASH_NUM_FUNCTIONS;i++)
@@ -500,7 +497,7 @@ public class hash
 		
 		offset = hash_data_has_checksum(d, function);
 	
-		if (!offset)
+		if (offset == 0)
 		{
 			d += strlen(d);
 			d += hash_data_add_binary_checksum(d, function, checksum);
@@ -569,7 +566,7 @@ public class hash
 			{
 				char temp[256];
 	
-				if (!first)
+				if (first == 0)
 					strcat(buffer, " ");
 				first = 0;
 				
@@ -590,7 +587,7 @@ public class hash
 	{
 		int len, i;
 	
-		if (!hash)
+		if (hash == 0)
 			return FALSE;
 	
 		while(*hash)

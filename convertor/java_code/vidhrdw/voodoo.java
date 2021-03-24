@@ -254,29 +254,11 @@ public class voodoo
 	
 	
 	
-	static void generic_render_1tmu(void);
-	static void generic_render_2tmu(void);
-	
-	static void render_0c000035_00045119_000b4779_0824101f(void);
-	static void render_0c000035_00045119_000b4779_0824109f(void);
-	static void render_0c000035_00045119_000b4779_082410df(void);
-	static void render_0c000035_00045119_000b4779_082418df(void);
-	
-	static void render_0c600c09_00045119_000b4779_0824100f(void);
-	static void render_0c600c09_00045119_000b4779_0824180f(void);
-	static void render_0c600c09_00045119_000b4779_082418cf(void);
-	static void render_0c480035_00045119_000b4779_082418df(void);
-	static void render_0c480035_00045119_000b4379_082418df(void);
-	
-	static void render_0c000035_00040400_000b4739_0c26180f(void);
-	static void render_0c582c35_00515110_000b4739_0c26180f(void);
-	static void render_0c000035_64040409_000b4739_0c26180f(void);
-	static void render_0c002c35_64515119_000b4799_0c26180f(void);
-	static void render_0c582c35_00515110_000b4739_0c2618cf(void);
-	static void render_0c002c35_40515119_000b4739_0c26180f(void);
-	
-	static void fastfill(void);
-	
+	static static 
+	static static static static 
+	static static static static static 
+	static static static static static static 
+	static 
 	
 	
 	#if DISPLAY_STATISTICS
@@ -736,7 +718,7 @@ public class voodoo
 		if (voodoo2)
 		{
 			cmdfifo = auto_malloc(CMDFIFO_SIZE);
-			if (!cmdfifo)
+			if (cmdfifo == 0)
 				return 1;
 		}
 		
@@ -1054,7 +1036,7 @@ public class voodoo
 				UINT16 *dest = &buffer[(fbz_invert_y ? (inverted_yorigin - y) : y) * FRAMEBUF_WIDTH + sx];
 	
 				/* if not dithered, it's easy */
-				if (!fbz_dithering)
+				if (fbz_dithering == 0)
 				{
 					UINT16 color = dither[0];
 					for (x = sx; x < ex; x++)
@@ -2148,7 +2130,7 @@ public class voodoo
 				fbz_dither_matrix = ((data >> 11) & 1) ? dither_matrix_2x2 : dither_matrix_4x4;
 				fbz_draw_buffer = buffer_access[(data >> 14) & 3];
 				fbz_invert_y = (data >> 17) & 1;
-				if (!voodoo2)
+				if (voodoo2 == 0)
 					voodoo_regs[fbzMode] &= ~(1 << 21);
 				break;
 			
@@ -2652,7 +2634,7 @@ public class voodoo
 				result = 0;
 				
 				/* FIFO free space */
-				if (!blocked_on_swap)
+				if (blocked_on_swap == 0)
 					result |= 0x3f;
 				
 				/* vertical retrace */
@@ -2671,7 +2653,7 @@ public class voodoo
 				result |= (frontbuf == framebuf[1]) << 10;
 				
 				/* memory FIFO free space */
-				if (!blocked_on_swap)
+				if (blocked_on_swap == 0)
 					result |= 0xffff << 12;
 				
 				/* swap buffers pending */
@@ -3024,7 +3006,7 @@ public class voodoo
 	 *
 	 *************************************/
 	
-	static void init_texel_0(int which)
+	public static InitDriverPtr init_texel_0 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 0: 8-bit 3-3-2 */
 		int r, g, b, i;
@@ -3038,10 +3020,10 @@ public class voodoo
 			b = (b << 6) | (b << 4) | (b << 2) | b;
 			texel_lookup[which][0][i] = 0xff000000 | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_1(int which)
+	public static InitDriverPtr init_texel_1 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 1: 8-bit YIQ, NCC table 0 */
 		int r, g, b, i;
@@ -3064,28 +3046,28 @@ public class voodoo
 			
 			texel_lookup[which][1][i] = 0xff000000 | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_2(int which)
+	public static InitDriverPtr init_texel_2 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 2: 8-bit alpha */
 		int i;
 		for (i = 0; i < 256; i++)
 			texel_lookup[which][2][i] = (i << 24) | (i << 16) | (i << 8) | i;
-	}
+	} };
 	
 	
-	static void init_texel_3(int which)
+	public static InitDriverPtr init_texel_3 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 3: 8-bit intensity */
 		int i;
 		for (i = 0; i < 256; i++)
 			texel_lookup[which][3][i] = 0xff000000 | (i << 16) | (i << 8) | i;
-	}
+	} };
 	
 	
-	static void init_texel_4(int which)
+	public static InitDriverPtr init_texel_4 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 4: 8-bit alpha, intensity (4-4) */
 		int a, r, i;
@@ -3097,22 +3079,22 @@ public class voodoo
 			r = (r << 4) | r;
 			texel_lookup[which][4][i] = (a << 24) | (r << 16) | (r << 8) | r;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_5(int which)
+	public static InitDriverPtr init_texel_5 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 5: 8-bit palette -- updated dynamically */
-	}
+	} };
 	
 	
-	static void init_texel_6(int which)
+	public static InitDriverPtr init_texel_6 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 6: 8-bit unused */
-	}
+	} };
 	
 	
-	static void init_texel_7(int which)
+	public static InitDriverPtr init_texel_7 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 7: 8-bit YIQ, NCC table 1 (used internally, not really on the card) */
 		int r, g, b, i;
@@ -3135,10 +3117,10 @@ public class voodoo
 			
 			texel_lookup[which][7][i] = 0xff000000 | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_8(int which)
+	public static InitDriverPtr init_texel_8 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 8: 16-bit ARGB (8-3-3-2) */
 		int a, r, g, b, i;
@@ -3153,10 +3135,10 @@ public class voodoo
 			b = (b << 6) | (b << 4) | (b << 2) | b;
 			texel_lookup[which][8][i] = (a << 24) | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_9(int which)
+	public static InitDriverPtr init_texel_9 = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 9: 16-bit YIQ, NCC table 0 */
 		int a, r, g, b, i;
@@ -3180,10 +3162,10 @@ public class voodoo
 			
 			texel_lookup[which][9][i] = (a << 24) | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_a(int which)
+	public static InitDriverPtr init_texel_a = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 10: 16-bit RGB (5-6-5) */
 		int r, g, b, i;
@@ -3197,10 +3179,10 @@ public class voodoo
 			b = (b << 3) | (b >> 2);
 			texel_lookup[which][10][i] = 0xff000000 | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 			
-	static void init_texel_b(int which)
+	public static InitDriverPtr init_texel_b = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 11: 16-bit ARGB (1-5-5-5) */
 		int a, r, g, b, i;
@@ -3215,10 +3197,10 @@ public class voodoo
 			b = (b << 3) | (b >> 2);
 			texel_lookup[which][11][i] = (a << 24) | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 			
-	static void init_texel_c(int which)
+	public static InitDriverPtr init_texel_c = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 12: 16-bit ARGB (4-4-4-4) */
 		int a, r, g, b, i;
@@ -3234,10 +3216,10 @@ public class voodoo
 			b = (b << 4) | b;
 			texel_lookup[which][12][i] = (a << 24) | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 			
-	static void init_texel_d(int which)
+	public static InitDriverPtr init_texel_d = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 13: 16-bit alpha, intensity */
 		int a, r, i;
@@ -3247,10 +3229,10 @@ public class voodoo
 			r = i & 0xff;
 			texel_lookup[which][13][i] = (a << 24) | (r << 16) | (r << 8) | r;
 		}
-	}
+	} };
 	
 	
-	static void init_texel_e(int which)
+	public static InitDriverPtr init_texel_e = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 14: 16-bit alpha, palette */
 		int a, i;
@@ -3259,10 +3241,10 @@ public class voodoo
 			a = i >> 8;
 			texel_lookup[which][14][i] = (a << 24) | (texel_lookup[which][5][i & 0xff] & 0x00ffffff);
 		}
-	}
+	} };
 	
 	
-	static void init_texel_f(int which)
+	public static InitDriverPtr init_texel_f = new InitDriverPtr() { public void handler() (int which)
 	{
 		/* format 9: 16-bit YIQ, NCC table 1 */
 		int a, r, g, b, i;
@@ -3286,7 +3268,7 @@ public class voodoo
 			
 			texel_lookup[which][15][i] = (a << 24) | (r << 16) | (g << 8) | b;
 		}
-	}
+	} };
 	
 	
 	static void (*update_texel_lookup[16])(int which) =

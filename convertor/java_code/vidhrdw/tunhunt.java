@@ -55,27 +55,27 @@ public class tunhunt
 	
 	/****************************************************************************************/
 	
-	WRITE_HANDLER( tunhunt_videoram_w )
+	public static WriteHandlerPtr tunhunt_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tunhunt_mott_w )
+	public static WriteHandlerPtr tunhunt_mott_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( spriteram[offset]!=data )
+		if( spriteram.read(offset)!=data )
 		{
-			spriteram[offset] = data;
+			spriteram.write(offset,data);
 			dirtybuffer[offset>>4] = 1;
 		}
-	}
+	} };
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int attr = videoram[tile_index];
+		int attr = videoram.read(tile_index);
 		int code = attr & 0x3f;
 		int color = attr >> 6;
 		int flags = color ? TILE_IGNORE_TRANSPARENCY : 0;
@@ -91,18 +91,18 @@ public class tunhunt
 		With max RLE expansion, bitmap size is 256x64.
 		*/
 		dirtybuffer = auto_malloc(64);
-		if (!dirtybuffer)
+		if (dirtybuffer == 0)
 			return 1;
 	
 		memset( dirtybuffer, 1, 64 );
 		tmpbitmap = auto_bitmap_alloc( 256, 64 );
-		if (!tmpbitmap)
+		if (tmpbitmap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_cols, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -184,7 +184,7 @@ public class tunhunt
 	
 		for( i=0; i<16; i++ )
 		{
-			color = paletteram[i];
+			color = paletteram.read(i);
 			shade = 0xf^(color>>4);
 	
 			color &= 0xf; /* hue select */
@@ -250,7 +250,7 @@ public class tunhunt
 			{
 				dirtybuffer[line] = 0;
 				x = 0;
-				source = &spriteram[line*0x10];
+				source = &spriteram.read(line*0x10);
 				for( span=0; span<0x10; span++ )
 				{
 					span_data = source[span];

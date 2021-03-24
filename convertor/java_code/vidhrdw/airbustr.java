@@ -46,7 +46,6 @@ public class airbustr
 	
 	/* Variables defined in drivers */
 	extern unsigned char *spriteram;
-	extern int flipscreen;
 	
 	
 	/***************************************************************************
@@ -91,23 +90,23 @@ public class airbustr
 	}
 	
 	
-	WRITE_HANDLER( airbustr_fgram_w )
+	public static WriteHandlerPtr airbustr_fgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (airbustr_fgram[offset] != data)
 		{
 			airbustr_fgram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( airbustr_bgram_w )
+	public static WriteHandlerPtr airbustr_bgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (airbustr_bgram[offset] != data)
 		{
 			airbustr_bgram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
 		}
-	}
+	} };
 	
 	
 	/*	Scroll Registers
@@ -122,7 +121,7 @@ public class airbustr
 				Bg Y	Bg X	Fg Y	Fg X	<-Scroll High Bits (complemented!)
 	*/
 	
-	WRITE_HANDLER( airbustr_scrollregs_w )
+	public static WriteHandlerPtr airbustr_scrollregs_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	static int bg_scrollx, bg_scrolly, fg_scrollx, fg_scrolly, highbits;
 	int xoffs, yoffs;
@@ -145,7 +144,7 @@ public class airbustr
 		tilemap_set_scrolly(bg_tilemap, 0, ((highbits << 5) & 0x100) + bg_scrolly + yoffs );
 		tilemap_set_scrollx(fg_tilemap, 0, ((highbits << 8) & 0x100) + fg_scrollx + xoffs );
 		tilemap_set_scrolly(fg_tilemap, 0, ((highbits << 7) & 0x100) + fg_scrolly + yoffs );
-	}
+	} };
 	
 	
 	
@@ -181,7 +180,7 @@ public class airbustr
 		/* Let's draw the sprites */
 		for (i = 0 ; i < 2 ; i++)
 		{
-			unsigned char *ram = &spriteram[i * 0x800];
+			unsigned char *ram = &spriteram.read(i * 0x800);
 			int sx = 0;
 			int sy = 0;
 	

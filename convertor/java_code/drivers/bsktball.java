@@ -32,22 +32,12 @@ public class bsktball
 	
 	extern UINT8 *bsktball_motion;
 	
-	extern WRITE_HANDLER( bsktball_videoram_w );
-	
+	extern 
 	extern VIDEO_START( bsktball );
 	extern VIDEO_UPDATE( bsktball );
 	
-	extern WRITE_HANDLER( bsktball_nmion_w );
-	extern INTERRUPT_GEN( bsktball_interrupt );
-	extern WRITE_HANDLER( bsktball_ld1_w );
-	extern WRITE_HANDLER( bsktball_ld2_w );
-	extern READ_HANDLER( bsktball_in0_r );
-	extern WRITE_HANDLER( bsktball_led1_w );
-	extern WRITE_HANDLER( bsktball_led2_w );
-	extern WRITE_HANDLER( bsktball_bounce_w );
-	extern WRITE_HANDLER( bsktball_note_w );
-	extern WRITE_HANDLER( bsktball_noise_reset_w );
-	
+	extern extern INTERRUPT_GEN( bsktball_interrupt );
+	extern extern extern extern extern extern extern extern 
 	/*************************************
 	 *
 	 *	Palette generation
@@ -159,33 +149,37 @@ public class bsktball
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x01ff, MRA_RAM }, /* Zero Page RAM */
-		{ 0x0800, 0x0800, bsktball_in0_r },
-		{ 0x0802, 0x0802, input_port_5_r },
-		{ 0x0803, 0x0803, input_port_6_r },
-		{ 0x1800, 0x1cff, MRA_RAM }, /* video ram */
-		{ 0x2000, 0x3fff, MRA_ROM }, /* PROGRAM */
-		{ 0xfff0, 0xffff, MRA_ROM }, /* PROM8 for 6502 vectors */
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x01ff, MRA_RAM ), /* Zero Page RAM */
+		new Memory_ReadAddress( 0x0800, 0x0800, bsktball_in0_r ),
+		new Memory_ReadAddress( 0x0802, 0x0802, input_port_5_r ),
+		new Memory_ReadAddress( 0x0803, 0x0803, input_port_6_r ),
+		new Memory_ReadAddress( 0x1800, 0x1cff, MRA_RAM ), /* video ram */
+		new Memory_ReadAddress( 0x2000, 0x3fff, MRA_ROM ), /* PROGRAM */
+		new Memory_ReadAddress( 0xfff0, 0xffff, MRA_ROM ), /* PROM8 for 6502 vectors */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x01ff, MWA_RAM }, /* WRAM */
-		{ 0x1000, 0x1000, MWA_NOP }, /* Timer Reset */
-		{ 0x1010, 0x1010, bsktball_bounce_w }, /* Crowd Amp / Bounce */
-		{ 0x1022, 0x1023, MWA_NOP }, /* Coin Counter */
-		{ 0x1024, 0x1025, bsktball_led1_w }, /* LED 1 */
-		{ 0x1026, 0x1027, bsktball_led2_w }, /* LED 2 */
-		{ 0x1028, 0x1029, bsktball_ld1_w }, /* LD 1 */
-		{ 0x102a, 0x102b, bsktball_ld2_w }, /* LD 2 */
-		{ 0x102c, 0x102d, bsktball_noise_reset_w }, /* Noise Reset */
-		{ 0x102e, 0x102f, bsktball_nmion_w }, /* NMI On */
-		{ 0x1030, 0x1030, bsktball_note_w }, /* Music Ckt Note Dvsr */
-		{ 0x1800, 0x1bbf, bsktball_videoram_w, &videoram }, /* DISPLAY */
-		{ 0x1bc0, 0x1bff, MWA_RAM, &bsktball_motion },
-		{ 0x2000, 0x3fff, MWA_ROM }, /* PROM1-PROM8 */
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x01ff, MWA_RAM ), /* WRAM */
+		new Memory_WriteAddress( 0x1000, 0x1000, MWA_NOP ), /* Timer Reset */
+		new Memory_WriteAddress( 0x1010, 0x1010, bsktball_bounce_w ), /* Crowd Amp / Bounce */
+		new Memory_WriteAddress( 0x1022, 0x1023, MWA_NOP ), /* Coin Counter */
+		new Memory_WriteAddress( 0x1024, 0x1025, bsktball_led1_w ), /* LED 1 */
+		new Memory_WriteAddress( 0x1026, 0x1027, bsktball_led2_w ), /* LED 2 */
+		new Memory_WriteAddress( 0x1028, 0x1029, bsktball_ld1_w ), /* LD 1 */
+		new Memory_WriteAddress( 0x102a, 0x102b, bsktball_ld2_w ), /* LD 2 */
+		new Memory_WriteAddress( 0x102c, 0x102d, bsktball_noise_reset_w ), /* Noise Reset */
+		new Memory_WriteAddress( 0x102e, 0x102f, bsktball_nmion_w ), /* NMI On */
+		new Memory_WriteAddress( 0x1030, 0x1030, bsktball_note_w ), /* Music Ckt Note Dvsr */
+		new Memory_WriteAddress( 0x1800, 0x1bbf, bsktball_videoram_w, videoram ), /* DISPLAY */
+		new Memory_WriteAddress( 0x1bc0, 0x1bff, MWA_RAM, bsktball_motion ),
+		new Memory_WriteAddress( 0x2000, 0x3fff, MWA_ROM ), /* PROM1-PROM8 */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -195,63 +189,63 @@ public class bsktball
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( bsktball )
-		PORT_START	/* IN0 */
-		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X, 100, 10, 0, 0 ) /* Sensitivity, clip, min, max */
+	static InputPortPtr input_ports_bsktball = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X, 100, 10, 0, 0 );/* Sensitivity, clip, min, max */
 	
-		PORT_START	/* IN0 */
-		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y, 100, 10, 0, 0 )
+		PORT_START(); 	/* IN0 */
+		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y, 100, 10, 0, 0 );
 	
-		PORT_START	/* IN0 */
-		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X | IPF_PLAYER2, 100, 10, 0, 0 ) /* Sensitivity, clip, min, max */
+		PORT_START(); 	/* IN0 */
+		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X | IPF_PLAYER2, 100, 10, 0, 0 );/* Sensitivity, clip, min, max */
 	
-		PORT_START	/* IN0 */
-		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y | IPF_PLAYER2, 100, 10, 0, 0 )
+		PORT_START(); 	/* IN0 */
+		PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y | IPF_PLAYER2, 100, 10, 0, 0 );
 	
-		PORT_START		/* IN0 */
-		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) /* SPARE */
-		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) /* SPARE */
+		PORT_START(); 		/* IN0 */
+		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 );/* SPARE */
+		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );/* SPARE */
 		/* 0x10 - DR0 = PL2 H DIR */
 		/* 0x20 - DR1 = PL2 V DIR */
 		/* 0x40 - DR2 = PL1 H DIR */
 		/* 0x80 - DR3 = PL1 V DIR */
 	
-		PORT_START		/* IN2 */
-		PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_TILT )
-		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* SPARE */
-		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* TEST STEP */
-		PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
-		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* COIN 0 */
-		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) /* COIN 1 */
-		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) /* COIN 2 */
+		PORT_START(); 		/* IN2 */
+		PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_TILT );
+		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );/* SPARE */
+		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );/* TEST STEP */
+		PORT_SERVICE( 0x10, IP_ACTIVE_LOW );
+		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );/* COIN 0 */
+		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN2 );/* COIN 1 */
+		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN1 );/* COIN 2 */
 	
-		PORT_START		/* DSW */
-		PORT_DIPNAME( 0x07, 0x00, "Play Time per Credit" )
-		PORT_DIPSETTING(	0x07, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(	0x06, "2:30" )
-		PORT_DIPSETTING(	0x05, "2:00" )
-		PORT_DIPSETTING(	0x04, "1:30" )
-		PORT_DIPSETTING(	0x03, "1:15" )
-		PORT_DIPSETTING(	0x02, "0:45" )
-		PORT_DIPSETTING(	0x01, "0:30" )
-		PORT_DIPSETTING(	0x00, "1:00" )
-		PORT_DIPNAME( 0x18, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(	0x10, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(	0x08, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(	0x18, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x20, 0x00, "Cost" )
-		PORT_DIPSETTING(	0x20, "Two Coin Minimum" )
-		PORT_DIPSETTING(	0x00, "One Coin Minimum" )
-		PORT_DIPNAME( 0xC0, 0x00, "Language" )
-		PORT_DIPSETTING(	0xC0, "German" )
-		PORT_DIPSETTING(	0x80, "French" )
-		PORT_DIPSETTING(	0x40, "Spanish" )
-		PORT_DIPSETTING(	0x00, "English" )
-	INPUT_PORTS_END
+		PORT_START(); 		/* DSW */
+		PORT_DIPNAME( 0x07, 0x00, "Play Time per Credit" );
+		PORT_DIPSETTING(	0x07, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(	0x06, "2:30" );
+		PORT_DIPSETTING(	0x05, "2:00" );
+		PORT_DIPSETTING(	0x04, "1:30" );
+		PORT_DIPSETTING(	0x03, "1:15" );
+		PORT_DIPSETTING(	0x02, "0:45" );
+		PORT_DIPSETTING(	0x01, "0:30" );
+		PORT_DIPSETTING(	0x00, "1:00" );
+		PORT_DIPNAME( 0x18, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(	0x10, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(	0x08, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(	0x18, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x20, 0x00, "Cost" );
+		PORT_DIPSETTING(	0x20, "Two Coin Minimum" );
+		PORT_DIPSETTING(	0x00, "One Coin Minimum" );
+		PORT_DIPNAME( 0xC0, 0x00, "Language" );
+		PORT_DIPSETTING(	0xC0, "German" );
+		PORT_DIPSETTING(	0x80, "French" );
+		PORT_DIPSETTING(	0x40, "Spanish" );
+		PORT_DIPSETTING(	0x00, "English" );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -261,38 +255,38 @@ public class bsktball
 	 *
 	 *************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		64,
 		2,
-		{ 0, 8*0x800 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0, 8*0x800 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
 	
-	static struct GfxLayout motionlayout =
-	{
+	static GfxLayout motionlayout = new GfxLayout
+	(
 		8,32,
 		64,
 		2,
-		{ 0, 8*0x800 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{	0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		new int[] { 0, 8*0x800 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] {	0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8,
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
 			24*8, 25*8, 26*8, 27*8, 28*8, 29*8, 30*8, 31*8 },
 		32*8
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0x0600, &charlayout,   0x00, 0x02 },
-		{ REGION_GFX1, 0x0000, &motionlayout, 0x08, 0x40 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0x0600, charlayout,   0x00, 0x02 ),
+		new GfxDecodeInfo( REGION_GFX1, 0x0000, motionlayout, 0x08, 0x40 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -419,18 +413,18 @@ public class bsktball
 	 *
 	 *************************************/
 	
-	ROM_START( bsktball )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
-		ROM_LOAD( "034765.d1",    0x2000, 0x0800, CRC(798cea39) SHA1(b1b709a74258b01b21d7c2038a3b6abe879944c5) )
-		ROM_LOAD( "034764.c1",    0x2800, 0x0800, CRC(a087109e) SHA1(f5d6dcccc4a54db35be3d8997bc51e73892747fb) )
-		ROM_LOAD( "034766.f1",    0x3000, 0x0800, CRC(a82e9a9f) SHA1(9aca236c5145c04a8aaebb316179482bbdc9ddfc) )
-		ROM_LOAD( "034763.b1",    0x3800, 0x0800, CRC(1fc69359) SHA1(a215ba3bb18ea2c57c443dfc4c4a0a3846bbedfe) )
-		ROM_RELOAD(               0xf800, 0x0800 )
+	static RomLoadPtr rom_bsktball = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
+		ROM_LOAD( "034765.d1",    0x2000, 0x0800, CRC(798cea39);SHA1(b1b709a74258b01b21d7c2038a3b6abe879944c5) )
+		ROM_LOAD( "034764.c1",    0x2800, 0x0800, CRC(a087109e);SHA1(f5d6dcccc4a54db35be3d8997bc51e73892747fb) )
+		ROM_LOAD( "034766.f1",    0x3000, 0x0800, CRC(a82e9a9f);SHA1(9aca236c5145c04a8aaebb316179482bbdc9ddfc) )
+		ROM_LOAD( "034763.b1",    0x3800, 0x0800, CRC(1fc69359);SHA1(a215ba3bb18ea2c57c443dfc4c4a0a3846bbedfe) )
+		ROM_RELOAD(               0xf800, 0x0800 );
 	
-		ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "034757.a6",    0x0000, 0x0800, CRC(010e8ad3) SHA1(43ce2c2089ec3011e2d28e8257a35efeed0e71c5) )
-		ROM_LOAD( "034758.b6",    0x0800, 0x0800, CRC(f7bea344) SHA1(df544bff67bb0334f77cef11792199d9c3f5fdf4) )
-	ROM_END
+		ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "034757.a6",    0x0000, 0x0800, CRC(010e8ad3);SHA1(43ce2c2089ec3011e2d28e8257a35efeed0e71c5) )
+		ROM_LOAD( "034758.b6",    0x0800, 0x0800, CRC(f7bea344);SHA1(df544bff67bb0334f77cef11792199d9c3f5fdf4) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -440,5 +434,5 @@ public class bsktball
 	 *
 	 *************************************/
 	
-	GAME( 1979, bsktball, 0, bsktball, bsktball, 0, ROT0, "Atari", "Basketball" )
+	public static GameDriver driver_bsktball	   = new GameDriver("1979"	,"bsktball"	,"bsktball.java"	,rom_bsktball,null	,machine_driver_bsktball	,input_ports_bsktball	,null	,ROT0	,	"Atari", "Basketball" )
 }

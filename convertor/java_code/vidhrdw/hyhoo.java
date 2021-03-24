@@ -34,9 +34,7 @@ public class hyhoo
 	static unsigned char *hyhoo_palette;
 	
 	
-	static void hyhoo_vramflip(void);
-	static void hyhoo_gfxdraw(void);
-	
+	static static 
 	
 	/******************************************************************************
 	
@@ -63,10 +61,10 @@ public class hyhoo
 		}
 	}
 	
-	WRITE_HANDLER( hyhoo_palette_w )
+	public static WriteHandlerPtr hyhoo_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		hyhoo_palette[offset & 0x0f] = (data ^ 0xff);
-	}
+	} };
 	
 	/******************************************************************************
 	

@@ -26,18 +26,18 @@ public class homerun
 	  	tilemap_mark_all_tiles_dirty(homerun_tilemap);
 	
 		data>>=5;
-		if(!data)
+		if (data == 0)
 			cpu_setbank(1, memory_region(REGION_CPU1) );
 		else
 			cpu_setbank(1, memory_region(REGION_CPU1) + 0x10000 + (((data-1)&0x7)*0x4000 ));	
 	}
 	
-	WRITE_HANDLER( homerun_videoram_w )
+	public static WriteHandlerPtr homerun_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 		homerun_videoram[offset]=data;
 		tilemap_mark_tile_dirty(homerun_tilemap,offset&0xfff);
-	}
+	} };
 	
 	WRITE_HANDLER(homerun_color_w)
 	{
@@ -80,12 +80,12 @@ public class homerun
 		for (offs = spriteram_size-4; offs >=0; offs -= 4)
 		{
 			int code,color,sx,sy,flipx,flipy;
-			sx = spriteram[offs+3];
-			sy = spriteram[offs+0]-16;
-			code = (spriteram[offs+1] ) +((spriteram[offs+2]&0x8)<<5 )+(homerun_gfx_ctrl<<9);
-			color = (spriteram[offs+2] & 0x7)+8 ;
-			flipx=(spriteram[offs+2] & 0x40) ;
-			flipy=(spriteram[offs+2] & 0x80) ;
+			sx = spriteram.read(offs+3);
+			sy = spriteram.read(offs+0)-16;
+			code = (spriteram.read(offs+1)) +((spriteram.read(offs+2)&0x8)<<5 )+(homerun_gfx_ctrl<<9);
+			color = (spriteram.read(offs+2)& 0x7)+8 ;
+			flipx=(spriteram.read(offs+2)& 0x40) ;
+			flipy=(spriteram.read(offs+2)& 0x80) ;
 			drawgfx(bitmap,Machine->gfx[1],
 					code,
 					color,

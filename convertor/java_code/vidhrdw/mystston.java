@@ -75,30 +75,30 @@ public class mystston
 		}
 	}
 	
-	WRITE_HANDLER( mystston_videoram_w )
+	public static WriteHandlerPtr mystston_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset & 0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mystston_videoram2_w )
+	public static WriteHandlerPtr mystston_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
 			mystston_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset & 0x1ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mystston_scroll_w )
+	public static WriteHandlerPtr mystston_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( mystston_control_w )
+	public static WriteHandlerPtr mystston_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		// bits 0 and 1 are foreground text color
 		if (mystston_fgcolor != ((data & 0x01) << 1) + ((data & 0x02) >> 1))
@@ -116,7 +116,7 @@ public class mystston
 	
 		// bit 7 is screen flip
 		flip_screen_set((data & 0x80) ^ ((readinputport(3) & 0x20) ? 0x80:0));
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -128,7 +128,7 @@ public class mystston
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((videoram[tile_index + 0x400] & 0x07) << 8);
+		int code = videoram.read(tile_index)+ ((videoram.read(tile_index + 0x400)& 0x07) << 8);
 		int color = mystston_fgcolor;
 		
 		SET_TILE_INFO(0, code, color, 0)
@@ -139,13 +139,13 @@ public class mystston
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols_flip_x, 
 			TILEMAP_OPAQUE, 16, 16, 16, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_cols_flip_x, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -159,16 +159,16 @@ public class mystston
 	
 		for (offs = 0; offs < spriteram_size; offs += 4)
 		{
-			int attr = spriteram[offs];
+			int attr = spriteram.read(offs);
 	
 			if (attr & 0x01)
 			{
-				int code = spriteram[offs + 1] + ((attr & 0x10) << 4);
+				int code = spriteram.read(offs + 1)+ ((attr & 0x10) << 4);
 				int color = (attr & 0x08) >> 3;
 				int flipx = attr & 0x04;
 				int flipy = attr & 0x02;
-				int sx = 240 - spriteram[offs + 3];
-				int sy = (240 - spriteram[offs + 2]) & 0xff;
+				int sx = 240 - spriteram.read(offs + 3);
+				int sy = (240 - spriteram.read(offs + 2)) & 0xff;
 	
 				if (flip_screen)
 				{

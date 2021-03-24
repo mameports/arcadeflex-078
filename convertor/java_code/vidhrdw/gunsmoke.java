@@ -52,20 +52,20 @@ public class gunsmoke
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -83,7 +83,7 @@ public class gunsmoke
 		/* background tiles use colors 0-63 */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
 		{
-			COLOR(1,i) = color_prom[0] + 16 * (color_prom[256] & 0x03);
+			COLOR(1,i) = color_prom.read(0)+ 16 * (color_prom.read(256)& 0x03);
 			color_prom++;
 		}
 		color_prom += TOTAL_COLORS(1);
@@ -91,7 +91,7 @@ public class gunsmoke
 		/* sprites use colors 128-255 */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			COLOR(2,i) = color_prom[0] + 16 * (color_prom[256] & 0x07) + 128;
+			COLOR(2,i) = color_prom.read(0)+ 16 * (color_prom.read(256)& 0x07) + 128;
 			color_prom++;
 		}
 		color_prom += TOTAL_COLORS(2);
@@ -114,7 +114,7 @@ public class gunsmoke
 	
 	
 	
-	WRITE_HANDLER( gunsmoke_c804_w )
+	public static WriteHandlerPtr gunsmoke_c804_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		unsigned char *RAM = memory_region(REGION_CPU1);
@@ -135,11 +135,11 @@ public class gunsmoke
 	
 		/* bit 7 enables characters? */
 		chon = data & 0x80;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( gunsmoke_d806_w )
+	public static WriteHandlerPtr gunsmoke_d806_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0-2 select the sprite 3 bank */
 		sprite3bank = data & 0x07;
@@ -149,7 +149,7 @@ public class gunsmoke
 	
 		/* bit 5 enables sprites? */
 		objon = data & 0x20;
-	}
+	} };
 	
 	
 	
@@ -256,13 +256,13 @@ public class gunsmoke
 				int bank,flipx,flipy;
 	
 	
-				bank = (spriteram[offs + 1] & 0xc0) >> 6;
+				bank = (spriteram.read(offs + 1)& 0xc0) >> 6;
 				if (bank == 3) bank += sprite3bank;
 	
-				sx = spriteram[offs + 3] - ((spriteram[offs + 1] & 0x20) << 3);
-	 			sy = spriteram[offs + 2];
+				sx = spriteram.read(offs + 3)- ((spriteram.read(offs + 1)& 0x20) << 3);
+	 			sy = spriteram.read(offs + 2);
 				flipx = 0;
-				flipy = spriteram[offs + 1] & 0x10;
+				flipy = spriteram.read(offs + 1)& 0x10;
 				if (flip_screen)
 				{
 					sx = 240 - sx;
@@ -272,8 +272,8 @@ public class gunsmoke
 				}
 	
 				drawgfx(bitmap,Machine->gfx[2],
-						spriteram[offs] + 256 * bank,
-						spriteram[offs + 1] & 0x0f,
+						spriteram.read(offs)+ 256 * bank,
+						spriteram.read(offs + 1)& 0x0f,
 						flipx,flipy,
 						sx,sy,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);
@@ -295,8 +295,8 @@ public class gunsmoke
 				}
 	
 				drawgfx(bitmap,Machine->gfx[0],
-						videoram[offs] + ((colorram[offs] & 0xc0) << 2),
-						colorram[offs] & 0x1f,
+						videoram.read(offs)+ ((colorram.read(offs)& 0xc0) << 2),
+						colorram.read(offs)& 0x1f,
 						!flip_screen,!flip_screen,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_COLOR,79);

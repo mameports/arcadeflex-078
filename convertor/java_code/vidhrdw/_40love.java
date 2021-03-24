@@ -43,24 +43,24 @@ public class _40love
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			
 			palette_set_color(i,r,g,b);
@@ -87,8 +87,8 @@ public class _40love
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int tile_number = videoram[tile_index];
-		int tile_attrib = colorram[(tile_index/64)*2];
+		int tile_number = videoram.read(tile_index);
+		int tile_attrib = colorram.read((tile_index/64)*2);
 		int tile_h_bank = (tile_attrib&0x40)<<3;	/* 0x40->0x200 */
 		int tile_l_bank = (tile_attrib&0x18)<<3;	/* 0x10->0x80, 0x08->0x40 */
 	
@@ -140,7 +140,7 @@ public class _40love
 	static void fortyl_set_scroll_x(int offset)
 	{
 		int	i = offset & ~1;
-		int x = ((colorram[i] & 0x80) << 1) | colorram[i+1];	/* 9 bits signed */
+		int x = ((colorram.read(i)& 0x80) << 1) | colorram.read(i+1);	/* 9 bits signed */
 	
 		if (fortyl_flipscreen)
 			x += 0x51;
@@ -153,7 +153,7 @@ public class _40love
 		tilemap_set_scrollx(background, offset/2, x);
 	}
 	
-	WRITE_HANDLER( fortyl_pixram_sel_w )
+	public static WriteHandlerPtr fortyl_pixram_sel_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int offs;
 		int f = data & 0x01;
@@ -169,15 +169,15 @@ public class _40love
 			for (offs=0;offs<32;offs++)
 				fortyl_set_scroll_x(offs*2);
 		}
-	}
+	} };
 	
-	READ_HANDLER( fortyl_pixram_r )
+	public static ReadHandlerPtr fortyl_pixram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (pixram_sel)
 			return fortyl_pixram2[offset];
 		else
 			return fortyl_pixram1[offset];
-	}
+	} };
 	
 	static void fortyl_plot_pix(int offset)
 	{
@@ -208,7 +208,7 @@ public class _40love
 		}
 	}
 	
-	WRITE_HANDLER( fortyl_pixram_w )
+	public static WriteHandlerPtr fortyl_pixram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (pixram_sel)
 			fortyl_pixram2[offset] = data;
@@ -216,39 +216,39 @@ public class _40love
 			fortyl_pixram1[offset] = data;
 	
 		fortyl_plot_pix(offset & 0x1fff);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( fortyl_bg_videoram_w )
+	public static WriteHandlerPtr fortyl_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset]!=data )
+		if( videoram.read(offset)!=data )
 		{
-			videoram[offset]=data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(background,offset);
 		}
-	}
-	READ_HANDLER( fortyl_bg_videoram_r )
+	} };
+	public static ReadHandlerPtr fortyl_bg_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
-	WRITE_HANDLER( fortyl_bg_colorram_w )
+	public static WriteHandlerPtr fortyl_bg_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( colorram[offset]!=data )
+		if( colorram.read(offset)!=data )
 		{
 			int i;
 	
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			for (i=(offset/2)*64; i<(offset/2)*64+64; i++)
 				tilemap_mark_tile_dirty(background,i);
 	
 			fortyl_set_scroll_x(offset);
 		}
-	}
-	READ_HANDLER( fortyl_bg_colorram_r )
+	} };
+	public static ReadHandlerPtr fortyl_bg_colorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return colorram[offset];
-	}
+		return colorram.read(offset);
+	} };
 	
 	/***************************************************************************
 	
@@ -280,20 +280,20 @@ public class _40love
 		{
 			int code,color,sx,sy,flipx,flipy;
 	
-			sx = spriteram[offs+3];
-			sy = spriteram[offs+0] +1;
+			sx = spriteram.read(offs+3);
+			sy = spriteram.read(offs+0)+1;
 	
 			if (fortyl_flipscreen)
 				sx = 240 - sx;
 			else
 				sy = 242 - sy;
 	
-			code = (spriteram[offs+1] & 0x3f) + ((spriteram[offs+2] & 0x18) << 3);
-			flipx = ((spriteram[offs+1] & 0x40) >> 6) ^ fortyl_flipscreen;
-			flipy = ((spriteram[offs+1] & 0x80) >> 7) ^ fortyl_flipscreen;
-			color = (spriteram[offs+2] & 0x07) + 0x08;
+			code = (spriteram.read(offs+1)& 0x3f) + ((spriteram.read(offs+2)& 0x18) << 3);
+			flipx = ((spriteram.read(offs+1)& 0x40) >> 6) ^ fortyl_flipscreen;
+			flipy = ((spriteram.read(offs+1)& 0x80) >> 7) ^ fortyl_flipscreen;
+			color = (spriteram.read(offs+2)& 0x07) + 0x08;
 	
-			if (spriteram[offs+2] & 0xe0)
+			if (spriteram.read(offs+2)& 0xe0)
 				color = rand()&0xf;
 	
 			drawgfx(bitmap,Machine->gfx[1],
@@ -309,20 +309,20 @@ public class _40love
 		{
 			int code,color,sx,sy,flipx,flipy;
 	
-			sx = spriteram_2[offs+3];
-			sy = spriteram_2[offs+0] +1;
+			sx = spriteram_2.read(offs+3);
+			sy = spriteram_2.read(offs+0)+1;
 	
 			if (fortyl_flipscreen)
 				sx = 240 - sx;
 			else
 				sy = 242 - sy;
 	
-			code = (spriteram_2[offs+1] & 0x3f) + ((spriteram_2[offs+2] & 0x18) << 3);
-			flipx = ((spriteram_2[offs+1] & 0x40) >> 6) ^ fortyl_flipscreen;
-			flipy = ((spriteram_2[offs+1] & 0x80) >> 7) ^ fortyl_flipscreen;
-			color = (spriteram_2[offs+2] & 0x07) + 0x08;
+			code = (spriteram_2.read(offs+1)& 0x3f) + ((spriteram_2.read(offs+2)& 0x18) << 3);
+			flipx = ((spriteram_2.read(offs+1)& 0x40) >> 6) ^ fortyl_flipscreen;
+			flipy = ((spriteram_2.read(offs+1)& 0x80) >> 7) ^ fortyl_flipscreen;
+			color = (spriteram_2.read(offs+2)& 0x07) + 0x08;
 	
-			if (spriteram_2[offs+2] & 0xe0)
+			if (spriteram_2.read(offs+2)& 0xe0)
 				color = rand()&0xf;
 	
 			drawgfx(bitmap,Machine->gfx[1],

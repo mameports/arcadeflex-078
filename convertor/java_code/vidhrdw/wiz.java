@@ -16,17 +16,17 @@ public class wiz
 {
 	
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		2*8, 32*8-1,
 		2*8, 30*8-1
-	};
+	);
 	
-	static struct rectangle spritevisibleareaflipx =
-	{
+	static rectangle spritevisibleareaflipx = new rectangle
+	(
 		0*8, 30*8-1,
 		2*8, 30*8-1
-	};
+	);
 	
 	unsigned char *wiz_videoram2;
 	unsigned char *wiz_colorram2;
@@ -79,20 +79,20 @@ public class wiz
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -101,67 +101,67 @@ public class wiz
 		}
 	}
 	
-	WRITE_HANDLER( wiz_attributes_w )
+	public static WriteHandlerPtr wiz_attributes_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 1) && wiz_attributesram[offset] != data)
 		{
 			int i;
 	
 	
-			for (i = offset / 2;i < videoram_size;i += 32)
+			for (i = offset / 2;i < videoram_size[0];i += 32)
 			{
 				dirtybuffer[i] = 1;
 			}
 		}
 	
 		wiz_attributesram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( wiz_palettebank_w )
+	public static WriteHandlerPtr wiz_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (palbank[offset] != (data & 1))
 		{
 			palbank[offset] = data & 1;
 			palette_bank = palbank[0] + 2 * palbank[1];
 	
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wiz_bgcolor_w )
+	public static WriteHandlerPtr wiz_bgcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bgpen = data;
-	}
+	} };
 	
-	WRITE_HANDLER( wiz_char_bank_select_w )
+	public static WriteHandlerPtr wiz_char_bank_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (char_bank[offset] != (data & 1))
 		{
 			char_bank[offset] = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wiz_flipx_w )
+	public static WriteHandlerPtr wiz_flipx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (flipx != data)
 	    {
 			flipx = data;
 	
-			memset(dirtybuffer, 1, videoram_size);
+			memset(dirtybuffer, 1, videoram_size[0]);
 	    }
-	}
+	} };
 	
 	
-	WRITE_HANDLER( wiz_flipy_w )
+	public static WriteHandlerPtr wiz_flipy_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (flipy != data)
 	    {
 			flipy = data;
 	
-			memset(dirtybuffer, 1, videoram_size);
+			memset(dirtybuffer, 1, videoram_size[0]);
 	    }
-	}
+	} };
 	
 	static void draw_background(struct mame_bitmap *bitmap, int bank, int colortype)
 	{
@@ -183,7 +183,7 @@ public class wiz
 			}
 			else
 			{
-				col = (wiz_attributesram[2 * (offs % 32) + 1] & 0x04) + (videoram[offs] & 3);
+				col = (wiz_attributesram[2 * (offs % 32) + 1] & 0x04) + (videoram.read(offs)& 3);
 			}
 	
 			scroll = (8*sy + 256 - wiz_attributesram[2 * sx]) % 256;
@@ -195,7 +195,7 @@ public class wiz
 	
 	
 			drawgfx(bitmap,Machine->gfx[bank],
-				videoram[offs],
+				videoram.read(offs),
 				col + 8 * palette_bank,
 				flipx,flipy,
 				8*sx,scroll,
@@ -258,7 +258,7 @@ public class wiz
 			if (!sx || !sy) continue;
 	
 			if ( flipx) sx = 240 - sx;
-			if (!flipy) sy = 240 - sy;
+			if (flipy == 0) sy = 240 - sy;
 	
 			drawgfx(bitmap,Machine->gfx[bank],
 					sprite_ram[offs + 1],

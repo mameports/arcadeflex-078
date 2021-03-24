@@ -42,22 +42,22 @@ public class gsword
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -92,19 +92,19 @@ public class gsword
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 1;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 1;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 1;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 1;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 1;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 1;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 3) & 1;
-			bit1 = (color_prom[0] >> 0) & 1;
-			bit2 = (color_prom[0] >> 1) & 1;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 3) & 1;
+			bit1 = (color_prom.read(0)>> 0) & 1;
+			bit2 = (color_prom.read(0)>> 1) & 1;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[0] >> 2) & 1;
-			bit2 = (color_prom[0] >> 3) & 1;
+			bit1 = (color_prom.read(0)>> 2) & 1;
+			bit2 = (color_prom.read(0)>> 3) & 1;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -123,25 +123,25 @@ public class gsword
 			COLOR(1,i) = sprite_lookup_table[*(color_prom++)];
 	}
 	
-	WRITE_HANDLER( gsword_videoram_w )
+	public static WriteHandlerPtr gsword_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gsword_charbank_w )
+	public static WriteHandlerPtr gsword_charbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (charbank != data)
 		{
 			charbank = data;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gsword_videoctrl_w )
+	public static WriteHandlerPtr gsword_videoctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data & 0x8f)
 		{
@@ -167,16 +167,16 @@ public class gsword
 		/* bit 0 could be used but unknown */
 	
 		/* other bits unused */
-	}
+	} };
 	
-	WRITE_HANDLER( gsword_scroll_w )
+	public static WriteHandlerPtr gsword_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((charbank & 0x03) << 8);
+		int code = videoram.read(tile_index)+ ((charbank & 0x03) << 8);
 		int color = ((code & 0x3c0) >> 6) + 16 * charpalbank;
 		int flags = flipscreen ? (TILE_FLIPX | TILE_FLIPY) : 0;
 	
@@ -188,7 +188,7 @@ public class gsword
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 64);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;

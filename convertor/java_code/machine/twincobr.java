@@ -23,13 +23,6 @@ public class twincobr
 	data8_t  *wardner_mainram;
 	
 	
-	extern int twincobr_fg_rom_bank;
-	extern int twincobr_bg_ram_bank;
-	extern int twincobr_display_on;
-	extern int twincobr_flip_screen;
-	extern int twincobr_flip_x_base;
-	extern int twincobr_flip_y_base;
-	extern int wardner_sprite_hack;
 	
 	static int dsp_execute;
 	static unsigned int dsp_addr_w, main_ram_seg;
@@ -108,7 +101,7 @@ public class twincobr
 			case 0x50000:	input_data = paletteram16[dsp_addr_w]; break;
 			case 0x7000:	input_data = wardner_mainram[dsp_addr_w*2] + (wardner_mainram[dsp_addr_w*2+1]<<8); break;
 			case 0x8000:	input_data = spriteram16[dsp_addr_w]; break;
-			case 0xa000:	input_data = paletteram[dsp_addr_w*2] + (paletteram[dsp_addr_w*2+1]<<8); break;
+			case 0xa000:	input_data = paletteram.read(dsp_addr_w*2)+ (paletteram.read(dsp_addr_w*2+1)<<8); break;
 			default:		logerror("DSP PC:%04x Warning !!! IO reading from %08x (port 1)\n",activecpu_get_previouspc(),main_ram_seg + dsp_addr_w);
 		}
 	#if LOG_DSP_CALLS
@@ -165,8 +158,8 @@ public class twincobr
 								wardner_mainram[dsp_addr_w*2 + 1] = data >> 8;
 								if ((dsp_addr_w < 2) && (data == 0)) dsp_execute = 1; break;
 				case 0x8000:	spriteram16[dsp_addr_w]=data; break;
-				case 0xa000:	paletteram[dsp_addr_w*2] = data & 0xff;
-								paletteram[dsp_addr_w*2 + 1] = (data >> 8) & 0xff; break;
+				case 0xa000:	paletteram.write(dsp_addr_w*2,data & 0xff);
+								paletteram.write(dsp_addr_w*2 + 1,(data >> 8) & 0xff); break;
 				default:		logerror("DSP PC:%04x Warning !!! IO writing to %08x (port 1)\n",activecpu_get_previouspc(),main_ram_seg + dsp_addr_w);
 			}
 	#if LOG_DSP_CALLS
@@ -224,18 +217,18 @@ public class twincobr
 	}
 	
 	
-	WRITE_HANDLER( wardner_mainram_w )
+	public static WriteHandlerPtr wardner_mainram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	#if 0
 		if ((offset == 4) && (data != 4)) logerror("CPU #0:%04x  Writing %02x to %04x of main RAM (DSP command number)\n",activecpu_get_pc(),data, offset + 0x7000);
 	#endif
 		wardner_mainram[offset] = data;
 	
-	}
-	READ_HANDLER( wardner_mainram_r )
+	} };
+	public static ReadHandlerPtr wardner_mainram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return wardner_mainram[offset];
-	}
+	} };
 	
 	
 	static void toaplan0_control_w(int offset, int data)
@@ -286,10 +279,10 @@ public class twincobr
 			toaplan0_control_w(offset, data & 0xff);
 		}
 	}
-	WRITE_HANDLER( wardner_control_w )
+	public static WriteHandlerPtr wardner_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		toaplan0_control_w(offset, data);
-	}
+	} };
 	
 	
 	READ16_HANDLER( twincobr_sharedram_r )
@@ -345,12 +338,12 @@ public class twincobr
 			toaplan0_coin_dsp_w(offset, data & 0xff);
 		}
 	}
-	WRITE_HANDLER( twincobr_coin_w )
+	public static WriteHandlerPtr twincobr_coin_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		toaplan0_coin_dsp_w(offset, data);
-	}
-	WRITE_HANDLER( wardner_coin_dsp_w )
+	} };
+	public static WriteHandlerPtr wardner_coin_dsp_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		toaplan0_coin_dsp_w(offset, data);
-	}
+	} };
 }

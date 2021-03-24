@@ -297,14 +297,14 @@ public class mazerbla
 	
 	static UINT8 zpu_int_vector;
 	
-	static WRITE_HANDLER( cfb_zpu_int_req_set_w )
+	public static WriteHandlerPtr cfb_zpu_int_req_set_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		zpu_int_vector &= ~2;	/* clear D1 on INTA (interrupt acknowledge) */
 	
 		cpu_set_irq_line(0, 0, ASSERT_LINE);	/* main cpu interrupt (comes from CFB (generated at the start of INT routine on CFB) - vblank?) */
-	}
+	} };
 	
-	static READ_HANDLER( cfb_zpu_int_req_clr )
+	public static ReadHandlerPtr cfb_zpu_int_req_clr  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		zpu_int_vector |= 2;
 	
@@ -313,7 +313,7 @@ public class mazerbla
 			cpu_set_irq_line(0, 0, CLEAR_LINE);
 	
 		return 0;
-	}
+	} };
 	
 	
 	static int irq_callback(int irqline)
@@ -350,13 +350,13 @@ public class mazerbla
 	static UINT8 ls670_0[4];
 	static UINT8 ls670_1[4];
 	
-	static READ_HANDLER( ls670_0_r )
+	public static ReadHandlerPtr ls670_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* set a timer to force synchronization after the read */
 		timer_set(TIME_NOW, 0, NULL);
 	
 		return ls670_0[offset];
-	}
+	} };
 	
 	static void deferred_ls670_0_w(int param )
 	{
@@ -366,21 +366,21 @@ public class mazerbla
 		ls670_0[offset] = data;
 	}
 	
-	static WRITE_HANDLER( ls670_0_w )
+	public static WriteHandlerPtr ls670_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* do this on a timer to let the CPUs synchronize */
 		timer_set(TIME_NOW, (offset<<8) | data, deferred_ls670_0_w);
-	}
+	} };
 	
 	
 	
-	static READ_HANDLER( ls670_1_r )
+	public static ReadHandlerPtr ls670_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* set a timer to force synchronization after the read */
 		timer_set(TIME_NOW, 0, NULL);
 	
 		return ls670_1[offset];
-	}
+	} };
 	
 	static void deferred_ls670_1_w(int param )
 	{
@@ -390,11 +390,11 @@ public class mazerbla
 		ls670_1[offset] = data;
 	}
 	
-	static WRITE_HANDLER( ls670_1_w )
+	public static WriteHandlerPtr ls670_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* do this on a timer to let the CPUs synchronize */
 		timer_set(TIME_NOW, (offset<<8) | data, deferred_ls670_1_w);
-	}
+	} };
 	
 	
 	/* bcd decoder used a input select (a mux) for reads from port 0x62 */
@@ -451,7 +451,7 @@ public class mazerbla
 		bcd_7445 = data & 15;
 	}
 	
-	static READ_HANDLER( zpu_inputs_r )
+	public static ReadHandlerPtr zpu_inputs_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT8 ret = 0;
 	
@@ -460,7 +460,7 @@ public class mazerbla
 			ret = readinputport( bcd_7445 );
 		}
 		return ret;
-	}
+	} };
 	
 	
 	
@@ -487,66 +487,82 @@ public class mazerbla
 		coin_counter_w(offset, (data&0x40)>>6 );
 	}
 	
-	static PORT_READ_START( readport )
-		{ 0x4c, 0x4f, ls670_1_r },
-		{ 0x62, 0x62, zpu_inputs_r },
-	PORT_END
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x4c, 0x4f, ls670_1_r ),
+		new IO_ReadPort( 0x62, 0x62, zpu_inputs_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport )
-		{ 0x4c, 0x4f, ls670_0_w },
-		{ 0x60, 0x60, zpu_bcd_decoder_w },
-		{ 0x68, 0x68, zpu_coin_counter_w },
-		{ 0x6a, 0x6a, zpu_lamps_w },
-		{ 0x6e, 0x6f, zpu_led_w },
-	PORT_END
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x4c, 0x4f, ls670_0_w ),
+		new IO_WritePort( 0x60, 0x60, zpu_bcd_decoder_w ),
+		new IO_WritePort( 0x68, 0x68, zpu_coin_counter_w ),
+		new IO_WritePort( 0x6a, 0x6a, zpu_lamps_w ),
+		new IO_WritePort( 0x6e, 0x6f, zpu_led_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0xc000, 0xc7ff, sharedram_CFB_ZPU_r },
-		{ 0xd800, 0xd800, cfb_zpu_int_req_clr },
-		{ 0xe000, 0xe7ff, MRA_RAM },
-		{ 0xe800, 0xefff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc000, 0xc7ff, sharedram_CFB_ZPU_r ),
+		new Memory_ReadAddress( 0xd800, 0xd800, cfb_zpu_int_req_clr ),
+		new Memory_ReadAddress( 0xe000, 0xe7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe800, 0xefff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0xc000, 0xc7ff, sharedram_CFB_ZPU_w },
-		{ 0xe000, 0xe7ff, MWA_RAM, &videoram, &videoram_size },
-		{ 0xe800, 0xefff, MWA_RAM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xc7ff, sharedram_CFB_ZPU_w ),
+		new Memory_WriteAddress( 0xe000, 0xe7ff, MWA_RAM, videoram, videoram_size ),
+		new Memory_WriteAddress( 0xe800, 0xefff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
 	static UINT8 vsb_ls273;
-	static WRITE_HANDLER( vsb_ls273_audio_control_w )
+	public static WriteHandlerPtr vsb_ls273_audio_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vsb_ls273 = data;
 	
 		/* bit 5 - led on */
 		set_led_status(1,(data&0x20)>>5);
-	}
+	} };
 	
 	
-	static PORT_READ_START( readport_cpu2 )
-		{ 0x80, 0x83, ls670_0_r },
-	PORT_END
+	public static IO_ReadPort readport_cpu2[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x80, 0x83, ls670_0_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport_cpu2 )
-		{ 0x00, 0x00, vsb_ls273_audio_control_w },
-		{ 0x80, 0x83, ls670_1_w },
-	PORT_END
+	public static IO_WritePort writeport_cpu2[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, vsb_ls273_audio_control_w ),
+		new IO_WritePort( 0x80, 0x83, ls670_1_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( readmem_cpu2 )
-		{ 0x0000, 0x1fff, MRA_ROM },
-		{ 0x4000, 0x43ff, MRA_RAM },
-		{ 0x8000, 0x83ff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem_cpu2[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x4000, 0x43ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0x83ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem_cpu2 )
-		{ 0x0000, 0x1fff, MWA_ROM },
-		{ 0x4000, 0x43ff, MWA_RAM }, /* main RAM (stack) */
-		{ 0x8000, 0x83ff, MWA_RAM }, /* waveform ???*/
-	MEMORY_END
+	public static Memory_WriteAddress writemem_cpu2[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x4000, 0x43ff, MWA_RAM ), /* main RAM (stack) */
+		new Memory_WriteAddress( 0x8000, 0x83ff, MWA_RAM ), /* waveform ???*/
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -630,38 +646,44 @@ public class mazerbla
 	
 	/* ????????????? */
 	static UINT8 port02_status = 0;
-	static READ_HANDLER( cfb_port_02_r )
+	public static ReadHandlerPtr cfb_port_02_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		port02_status ^= 0xff;
 		return (port02_status);
-	}
+	} };
 	
-	static PORT_READ_START( readport_cpu3 )
-		{ 0x02, 0x02, cfb_port_02_r },	/* VCU status ? */
-	PORT_END
+	public static IO_ReadPort readport_cpu3[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x02, 0x02, cfb_port_02_r ),	/* VCU status ? */
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport_cpu3_mb )
-		{ 0x01, 0x01, cfb_backgnd_color_w },
-		{ 0x02, 0x02, cfb_led_w },
-		{ 0x03, 0x03, cfb_zpu_int_req_set_w },
-		{ 0x04, 0x04, cfb_rom_bank_sel_w },
-		{ 0x05, 0x05, cfb_vbank_w },	//visible/writable videopage select?
-	PORT_END
+	public static IO_WritePort writeport_cpu3_mb[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x01, 0x01, cfb_backgnd_color_w ),
+		new IO_WritePort( 0x02, 0x02, cfb_led_w ),
+		new IO_WritePort( 0x03, 0x03, cfb_zpu_int_req_set_w ),
+		new IO_WritePort( 0x04, 0x04, cfb_rom_bank_sel_w ),
+		new IO_WritePort( 0x05, 0x05, cfb_vbank_w ),	//visible/writable videopage select?
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	/* Great Guns has a little different banking layout */
-	static PORT_WRITE_START( writeport_cpu3_gg )
-		{ 0x00, 0x00, IOWP_NOP },
-		{ 0x01, 0x01, cfb_backgnd_color_w },
-		{ 0x02, 0x02, cfb_led_w },
-		{ 0x03, 0x03, cfb_zpu_int_req_set_w },
-		{ 0x04, 0x04, cfb_rom_bank_sel_w_gg },
-		{ 0x05, 0x05, cfb_vbank_w },	//visible/writable videopage select?
-	PORT_END
+	public static IO_WritePort writeport_cpu3_gg[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, IOWP_NOP ),
+		new IO_WritePort( 0x01, 0x01, cfb_backgnd_color_w ),
+		new IO_WritePort( 0x02, 0x02, cfb_led_w ),
+		new IO_WritePort( 0x03, 0x03, cfb_zpu_int_req_set_w ),
+		new IO_WritePort( 0x04, 0x04, cfb_rom_bank_sel_w_gg ),
+		new IO_WritePort( 0x05, 0x05, cfb_vbank_w ),	//visible/writable videopage select?
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
 	static UINT8 VCU_video_reg[4];
-	static WRITE_HANDLER( VCU_video_reg_w )
+	public static WriteHandlerPtr VCU_video_reg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (VCU_video_reg[offset] != data)
 		{
@@ -669,9 +691,9 @@ public class mazerbla
 			//usrintf_showmessage("video_reg= %02x %02x %02x %02x", VCU_video_reg[0], VCU_video_reg[1], VCU_video_reg[2], VCU_video_reg[3] );
 			//logerror("video_reg= %02x %02x %02x %02x\n", VCU_video_reg[0], VCU_video_reg[1], VCU_video_reg[2], VCU_video_reg[3] );
 		}
-	}
+	} };
 	
-	static READ_HANDLER( VCU_set_cmd_param_r )
+	public static ReadHandlerPtr VCU_set_cmd_param_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		VCU_gfx_param_addr = offset;
 	
@@ -687,10 +709,10 @@ public class mazerbla
 		plane = mode & 3;
 	
 		return 0;
-	}
+	} };
 	
 	
-	static READ_HANDLER( VCU_set_gfx_addr_r )
+	public static ReadHandlerPtr VCU_set_gfx_addr_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	int offs;
 	int x,y;
@@ -853,9 +875,9 @@ public class mazerbla
 		break;
 		}
 		return 0;
-	}
+	} };
 	
-	static READ_HANDLER( VCU_set_clr_addr_r )
+	public static ReadHandlerPtr VCU_set_clr_addr_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	int offs;
 	int x,y;
@@ -1050,25 +1072,29 @@ public class mazerbla
 		}
 	
 		return 0;
-	}
+	} };
 	
-	static MEMORY_READ_START( readmem_cpu3 )
-		{ 0x0000, 0x37ff, MRA_ROM },
-		{ 0x3800, 0x3fff, sharedram_CFB_ZPU_r },
-		{ 0x4000, 0x5fff, MRA_BANK1 },				/* GFX roms */
-		{ 0x6000, 0x67ff, cfb_ram_r },				/* RAM for VCU commands and parameters */
+	public static Memory_ReadAddress readmem_cpu3[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x37ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x3800, 0x3fff, sharedram_CFB_ZPU_r ),
+		new Memory_ReadAddress( 0x4000, 0x5fff, MRA_BANK1 ),				/* GFX roms */
+		new Memory_ReadAddress( 0x6000, 0x67ff, cfb_ram_r ),				/* RAM for VCU commands and parameters */
 	
-		{ 0xa000, 0xa7ff, VCU_set_cmd_param_r },	/* VCU command and parameters LOAD */
-		{ 0xc000, 0xdfff, VCU_set_gfx_addr_r },		/* gfx LOAD (blit) */
-		{ 0xe000, 0xffff, VCU_set_clr_addr_r },		/* palette? LOAD */
-	MEMORY_END
+		new Memory_ReadAddress( 0xa000, 0xa7ff, VCU_set_cmd_param_r ),	/* VCU command and parameters LOAD */
+		new Memory_ReadAddress( 0xc000, 0xdfff, VCU_set_gfx_addr_r ),		/* gfx LOAD (blit) */
+		new Memory_ReadAddress( 0xe000, 0xffff, VCU_set_clr_addr_r ),		/* palette? LOAD */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem_cpu3 )
-		{ 0x0000, 0x37ff, MWA_ROM },
-		{ 0x3800, 0x3fff, sharedram_CFB_ZPU_w, &cfb_zpu_sharedram },
-		{ 0x4000, 0x4003, VCU_video_reg_w },
-		{ 0x6000, 0x67ff, cfb_ram_w, &cfb_ram },
-	MEMORY_END
+	public static Memory_WriteAddress writemem_cpu3[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x37ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x3800, 0x3fff, sharedram_CFB_ZPU_w, cfb_zpu_sharedram ),
+		new Memory_WriteAddress( 0x4000, 0x4003, VCU_video_reg_w ),
+		new Memory_WriteAddress( 0x6000, 0x67ff, cfb_ram_w, cfb_ram ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -1079,10 +1105,10 @@ public class mazerbla
 	
 	static UINT8 soundlatch;
 	
-	static READ_HANDLER( soundcommand_r )
+	public static ReadHandlerPtr soundcommand_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return soundlatch;
-	}
+	} };
 	
 	static void delayed_sound_w(int param)
 	{
@@ -1093,23 +1119,27 @@ public class mazerbla
 	}
 	
 	
-	static WRITE_HANDLER( main_sound_w )
+	public static WriteHandlerPtr main_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		timer_set(TIME_NOW, data & 0xff, delayed_sound_w);
-	}
+	} };
 	
 	
-	static PORT_READ_START( gg_readport )
-		{ 0x62, 0x62, zpu_inputs_r },
-	PORT_END
-	static PORT_WRITE_START( gg_writeport )
-		{ 0x4c, 0x4c, main_sound_w },
-		{ 0x60, 0x60, zpu_bcd_decoder_w },
-		{ 0x66, 0x66, IOWP_NOP },
-		{ 0x68, 0x68, IOWP_NOP },
+	public static IO_ReadPort gg_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x62, 0x62, zpu_inputs_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
+	public static IO_WritePort gg_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x4c, 0x4c, main_sound_w ),
+		new IO_WritePort( 0x60, 0x60, zpu_bcd_decoder_w ),
+		new IO_WritePort( 0x66, 0x66, IOWP_NOP ),
+		new IO_WritePort( 0x68, 0x68, IOWP_NOP ),
 	
-		{ 0x6e, 0x6f, zpu_led_w },
-	PORT_END
+		new IO_WritePort( 0x6e, 0x6f, zpu_led_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -1120,333 +1150,337 @@ public class mazerbla
 		cpu_set_irq_line(1, 0, ASSERT_LINE);
 	}
 	
-	static WRITE_HANDLER( sound_int_clear_w )
+	public static WriteHandlerPtr sound_int_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(1, 0, CLEAR_LINE);
-	}
-	static WRITE_HANDLER( sound_nmi_clear_w )
+	} };
+	public static WriteHandlerPtr sound_nmi_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_nmi_line(1, CLEAR_LINE);
-	}
+	} };
 	
-	static WRITE_HANDLER( gg_led_ctrl_w )
+	public static WriteHandlerPtr gg_led_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0, bit 1 - led on */
 		set_led_status(1,data&0x01);
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x1fff, MRA_ROM },
-		{ 0x2000, 0x27ff, MRA_RAM },
-		{ 0x4000, 0x4000, AY8910_read_port_0_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x2000, 0x27ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x4000, 0x4000, AY8910_read_port_0_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x1fff, MWA_ROM },
-		{ 0x2000, 0x27ff, MWA_RAM }, /* main RAM (stack) */
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x2000, 0x27ff, MWA_RAM ), /* main RAM (stack) */
 	
-		{ 0x4000, 0x4000, AY8910_control_port_0_w },
-		{ 0x4001, 0x4001, AY8910_write_port_0_w },
-		{ 0x6000, 0x6000, AY8910_control_port_1_w },
-		{ 0x6001, 0x6001, AY8910_write_port_1_w },
+		new Memory_WriteAddress( 0x4000, 0x4000, AY8910_control_port_0_w ),
+		new Memory_WriteAddress( 0x4001, 0x4001, AY8910_write_port_0_w ),
+		new Memory_WriteAddress( 0x6000, 0x6000, AY8910_control_port_1_w ),
+		new Memory_WriteAddress( 0x6001, 0x6001, AY8910_write_port_1_w ),
 	
-		{ 0x8000, 0x8000, sound_int_clear_w },
-		{ 0xa000, 0xa000, sound_nmi_clear_w },
-	MEMORY_END
-	
-	
-	
-	
+		new Memory_WriteAddress( 0x8000, 0x8000, sound_int_clear_w ),
+		new Memory_WriteAddress( 0xa000, 0xa000, sound_nmi_clear_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( mazerbla )
-		PORT_START	/* Strobe 0: ZPU Switches */
-		PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, "ZPU Switch 2" )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	
-		PORT_START	/* Strobe 1: Dip Switches 28-35*/
-		PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
-		PORT_DIPSETTING(	0x03, "6" )
-		PORT_DIPSETTING(	0x02, "5" )
-		PORT_DIPSETTING(	0x01, "4" )
-		PORT_DIPSETTING(	0x00, "3" )
-		PORT_DIPNAME( 0x0c, 0x00, "Freeze Time" )
-		PORT_DIPSETTING(	0x0c, "1.5 seconds" )
-		PORT_DIPSETTING(	0x08, "2.0 seconds" )
-		PORT_DIPSETTING(	0x04, "2.5 seconds" )
-		PORT_DIPSETTING(	0x00, "3.0 seconds" )
-		PORT_DIPNAME( 0x30, 0x00, "Number of points for extra frezze & first life" )
-		PORT_DIPSETTING(	0x30, "20000" )
-		PORT_DIPSETTING(	0x20, "25000" )
-		PORT_DIPSETTING(	0x10, "30000" )
-		PORT_DIPSETTING(	0x00, "35000" )
-		PORT_DIPNAME( 0xc0, 0x00, "Number of points for extra life other than first" )
-		PORT_DIPSETTING(	0xc0, "40000" )
-		PORT_DIPSETTING(	0x80, "50000" )
-		PORT_DIPSETTING(	0x40, "60000" )
-		PORT_DIPSETTING(	0x00, "70000" )
 	
-		PORT_START	/* Strobe 2: Dip Switches 20-27*/
-		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_7C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_7C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x08, "1 Coin/10 Credits" )
-		PORT_DIPSETTING(    0x07, "1 Coin/14 Credits" )
 	
-		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(    0x50, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_7C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 2C_7C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" )
-		PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" )
 	
-		PORT_START	/* Strobe 3: Dip Switches 12-19*/
-		PORT_DIPNAME( 0x01, 0x01, "Service Index" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Switch Test" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, "Player Immortality" )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, "Super Shot" )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	static InputPortPtr input_ports_mazerbla = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Strobe 0: ZPU Switches */
+		PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, "ZPU Switch 2" );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Strobe 4: Dip Switches 4-11 */
-		PORT_DIPNAME( 0x03, 0x02, "Number of Freezes" )
-		PORT_DIPSETTING(	0x03, "4" )
-		PORT_DIPSETTING(	0x02, "3" )
-		PORT_DIPSETTING(	0x01, "2" )
-		PORT_DIPSETTING(	0x00, "1" )
-		PORT_DIPNAME( 0x04, 0x04, "Gun Knocker" )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* Strobe 1: Dip Switches 28-35*/
+		PORT_DIPNAME( 0x03, 0x00, DEF_STR( "Lives") );
+		PORT_DIPSETTING(	0x03, "6" );
+		PORT_DIPSETTING(	0x02, "5" );
+		PORT_DIPSETTING(	0x01, "4" );
+		PORT_DIPSETTING(	0x00, "3" );
+		PORT_DIPNAME( 0x0c, 0x00, "Freeze Time" );
+		PORT_DIPSETTING(	0x0c, "1.5 seconds" );
+		PORT_DIPSETTING(	0x08, "2.0 seconds" );
+		PORT_DIPSETTING(	0x04, "2.5 seconds" );
+		PORT_DIPSETTING(	0x00, "3.0 seconds" );
+		PORT_DIPNAME( 0x30, 0x00, "Number of points for extra frezze & first life" );
+		PORT_DIPSETTING(	0x30, "20000" );
+		PORT_DIPSETTING(	0x20, "25000" );
+		PORT_DIPSETTING(	0x10, "30000" );
+		PORT_DIPSETTING(	0x00, "35000" );
+		PORT_DIPNAME( 0xc0, 0x00, "Number of points for extra life other than first" );
+		PORT_DIPSETTING(	0xc0, "40000" );
+		PORT_DIPSETTING(	0x80, "50000" );
+		PORT_DIPSETTING(	0x40, "60000" );
+		PORT_DIPSETTING(	0x00, "70000" );
+	
+		PORT_START(); 	/* Strobe 2: Dip Switches 20-27*/
+		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0x0f, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_7C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0x0d, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_7C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x0b, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x09, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x08, "1 Coin/10 Credits" );
+		PORT_DIPSETTING(    0x07, "1 Coin/14 Credits" );
+	
+		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0xf0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(    0x50, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_7C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0xd0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "2C_7C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0xb0, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x90, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" );
+		PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" );
+	
+		PORT_START(); 	/* Strobe 3: Dip Switches 12-19*/
+		PORT_DIPNAME( 0x01, 0x01, "Service Index" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Switch Test" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, "Player Immortality" );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, "Super Shot" );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	
+		PORT_START(); 	/* Strobe 4: Dip Switches 4-11 */
+		PORT_DIPNAME( 0x03, 0x02, "Number of Freezes" );
+		PORT_DIPSETTING(	0x03, "4" );
+		PORT_DIPSETTING(	0x02, "3" );
+		PORT_DIPSETTING(	0x01, "2" );
+		PORT_DIPSETTING(	0x00, "1" );
+		PORT_DIPNAME( 0x04, 0x04, "Gun Knocker" );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 		//dips 7-11 - not listed in manual
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Strobe 5: coin1&2, start1&2, fire */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* Strobe 5: coin1&2, start1&2, fire */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* Strobe 6: horizontal movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER1 | IPF_REVERSE, 25, 7, 0, 255)
-		PORT_START	/* Strobe 7: vertical movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER1, 25, 7, 0, 255)
+		PORT_START(); 	/* Strobe 6: horizontal movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER1 | IPF_REVERSE, 25, 7, 0, 255);
+		PORT_START(); 	/* Strobe 7: vertical movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER1, 25, 7, 0, 255);
 	
 	/* Mazer Blazer cabinet has only one gun, really */
-		PORT_START	/* Strobe 8: horizontal movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2 | IPF_REVERSE, 25, 7, 0, 255)
-		PORT_START	/* Strobe 9: vertical movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 25, 7, 0, 255)
-	INPUT_PORTS_END
+		PORT_START(); 	/* Strobe 8: horizontal movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2 | IPF_REVERSE, 25, 7, 0, 255);
+		PORT_START(); 	/* Strobe 9: vertical movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 25, 7, 0, 255);
+	INPUT_PORTS_END(); }}; 
 	
-	INPUT_PORTS_START( greatgun )
-		PORT_START	/* Strobe 0: ZPU Switches */
-		PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, "ZPU Switch 2" )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	static InputPortPtr input_ports_greatgun = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Strobe 0: ZPU Switches */
+		PORT_DIPNAME( 0x40, 0x40, "ZPU Switch 1" );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, "ZPU Switch 2" );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Strobe 1: Dip Switches 28-35*/
-		PORT_DIPNAME( 0x03, 0x00, "Starting Number of Bullets/Credit" )
-		PORT_DIPSETTING(	0x03, "60" )
-		PORT_DIPSETTING(	0x02, "70" )
-		PORT_DIPSETTING(	0x01, "80" )
-		PORT_DIPSETTING(	0x00, "90" )
-		PORT_DIPNAME( 0x0c, 0x00, "Target Size" )
-		PORT_DIPSETTING(	0x0c, "7 x 7" )
-		PORT_DIPSETTING(	0x08, "9 x 9" )
-		PORT_DIPSETTING(	0x04, "11x11" )
-		PORT_DIPSETTING(	0x00, "7 x 7" )
-		PORT_DIPNAME( 0x70, 0x00, "Number of points for extra bullet" )
-		PORT_DIPSETTING(	0x70, "1000" )
-		PORT_DIPSETTING(	0x60, "2000" )
-		PORT_DIPSETTING(	0x50, "3000" )
-		PORT_DIPSETTING(	0x40, "4000" )
-		PORT_DIPSETTING(	0x30, "5000" )
-		PORT_DIPSETTING(	0x20, "6000" )
-		PORT_DIPSETTING(	0x10, "7000" )
-		PORT_DIPSETTING(	0x00, "8000" )
+		PORT_START(); 	/* Strobe 1: Dip Switches 28-35*/
+		PORT_DIPNAME( 0x03, 0x00, "Starting Number of Bullets/Credit" );
+		PORT_DIPSETTING(	0x03, "60" );
+		PORT_DIPSETTING(	0x02, "70" );
+		PORT_DIPSETTING(	0x01, "80" );
+		PORT_DIPSETTING(	0x00, "90" );
+		PORT_DIPNAME( 0x0c, 0x00, "Target Size" );
+		PORT_DIPSETTING(	0x0c, "7 x 7" );
+		PORT_DIPSETTING(	0x08, "9 x 9" );
+		PORT_DIPSETTING(	0x04, "11x11" );
+		PORT_DIPSETTING(	0x00, "7 x 7" );
+		PORT_DIPNAME( 0x70, 0x00, "Number of points for extra bullet" );
+		PORT_DIPSETTING(	0x70, "1000" );
+		PORT_DIPSETTING(	0x60, "2000" );
+		PORT_DIPSETTING(	0x50, "3000" );
+		PORT_DIPSETTING(	0x40, "4000" );
+		PORT_DIPSETTING(	0x30, "5000" );
+		PORT_DIPSETTING(	0x20, "6000" );
+		PORT_DIPSETTING(	0x10, "7000" );
+		PORT_DIPSETTING(	0x00, "8000" );
 		/* from manual:
 			"This switch is used when an optional coin return or ticket dispenser is used"
 		*/
-		PORT_DIPNAME( 0x80, 0x00, "Number of coins or tickets returned" )
-		PORT_DIPSETTING(	0x80, "1" )
-		PORT_DIPSETTING(	0x00, "2" )
+		PORT_DIPNAME( 0x80, 0x00, "Number of coins or tickets returned" );
+		PORT_DIPSETTING(	0x80, "1" );
+		PORT_DIPSETTING(	0x00, "2" );
 	
-		PORT_START	/* Strobe 2: Dip Switches 20-27*/
-		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_7C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_7C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x08, "1 Coin/10 Credits" )
-		PORT_DIPSETTING(    0x07, "1 Coin/14 Credits" )
+		PORT_START(); 	/* Strobe 2: Dip Switches 20-27*/
+		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0x0f, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_7C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0x0d, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_7C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x0b, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x09, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x08, "1 Coin/10 Credits" );
+		PORT_DIPSETTING(    0x07, "1 Coin/14 Credits" );
 	
-		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(    0x50, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_7C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 2C_7C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" )
-		PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" )
+		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0xf0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(    0x50, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_7C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0xd0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "2C_7C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0xb0, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x90, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x80, "1 Coin/10 Credits" );
+		PORT_DIPSETTING(    0x70, "1 Coin/14 Credits" );
 	
-		PORT_START	/* Strobe 3: Dip Switches 12-19*/
-		PORT_DIPNAME( 0x01, 0x01, "Service Index" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Switch Test" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, "Player Immortality" )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, "Rack Advance" )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//probably unused
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* Strobe 3: Dip Switches 12-19*/
+		PORT_DIPNAME( 0x01, 0x01, "Service Index" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Switch Test" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, "Player Immortality" );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, "Rack Advance" );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );	//probably unused
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Strobe 4: Dip Switches 4-11 */
-		PORT_DIPNAME( 0x01, 0x01, "Free game/coin return" )
-		PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+		PORT_START(); 	/* Strobe 4: Dip Switches 4-11 */
+		PORT_DIPNAME( 0x01, 0x01, "Free game/coin return" );
+		PORT_DIPSETTING(	0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "On") );
 		//dips 5-11 - not listed in manual
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(	0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(	0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Strobe 5: coin1&2, start1&2, fire */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )
+		PORT_START(); 	/* Strobe 5: coin1&2, start1&2, fire */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 );
 	
-		PORT_START	/* Strobe 6: horizontal movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER1, 25, 7, 0, 255)
-		PORT_START	/* Strobe 7: vertical movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER1, 25, 7, 0, 255)
+		PORT_START(); 	/* Strobe 6: horizontal movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER1, 25, 7, 0, 255);
+		PORT_START(); 	/* Strobe 7: vertical movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER1, 25, 7, 0, 255);
 	
-		PORT_START	/* Strobe 8: horizontal movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 25, 7, 0, 255)
-		PORT_START	/* Strobe 9: vertical movement of gun */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 25, 7, 0, 255)
-	INPUT_PORTS_END
+		PORT_START(); 	/* Strobe 8: horizontal movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 25, 7, 0, 255);
+		PORT_START(); 	/* Strobe 9: vertical movement of gun */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 25, 7, 0, 255);
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -1477,16 +1511,16 @@ public class mazerbla
 	
 	
 	/* only Great Guns */
-	static struct AY8910interface ay8912_interface =
-	{
+	static AY8910interface ay8912_interface = new AY8910interface
+	(
 		2,	/* 2 chips */
 		14318000 / 8,
-		{ 30, 100 },
-		{ 0, 0 },	/* port Aread */
-		{ soundcommand_r, 0 },	/* port Bread */
-		{ /*ay0_output_ctrl_w*/0,/*ay1_output_ctrl_w*/ 0 },	/* port Awrite */
-		{ 0, gg_led_ctrl_w }	/* port Bwrite */
-	};
+		new int[] { 30, 100 },
+		new ReadHandlerPtr[] { 0, 0 },	/* port Aread */
+		new ReadHandlerPtr[] { soundcommand_r, 0 },	/* port Bread */
+		new WriteHandlerPtr[] { /*ay0_output_ctrl_w*/0,/*ay1_output_ctrl_w*/ 0 },	/* port Awrite */
+		new WriteHandlerPtr[] { 0, gg_led_ctrl_w }	/* port Bwrite */
+	);
 	
 	
 	static MACHINE_DRIVER_START( mazerbla )
@@ -1578,65 +1612,65 @@ public class mazerbla
 	
 	***************************************************************************/
 	
-	ROM_START( mazerbla )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for main CPU (ZPU board) */
-		ROM_LOAD( "mblzpu0.bin",0x0000, 0x2000, CRC(82766187) SHA1(cfc425c87cccb84180f1091998eafeaede126d9d) )
-		ROM_LOAD( "mblzpu1.bin",0x2000, 0x2000, CRC(8ba2b3f9) SHA1(1d203332e434d1d9821f98c6ac959ae65dcc51ef) )
-		ROM_LOAD( "mblzpu2.bin",0x4000, 0x2000, CRC(48e5306c) SHA1(d27cc85d24c7b6c23c5c96be4dad5cae6e8069be) )
-		ROM_LOAD( "mblzpu3.bin",0x6000, 0x2000, CRC(eba91546) SHA1(8c1da4e0d9b562dbbf7c7583dbf567c804eb670f) )
+	static RomLoadPtr rom_mazerbla = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for main CPU (ZPU board) */
+		ROM_LOAD( "mblzpu0.bin",0x0000, 0x2000, CRC(82766187);SHA1(cfc425c87cccb84180f1091998eafeaede126d9d) )
+		ROM_LOAD( "mblzpu1.bin",0x2000, 0x2000, CRC(8ba2b3f9);SHA1(1d203332e434d1d9821f98c6ac959ae65dcc51ef) )
+		ROM_LOAD( "mblzpu2.bin",0x4000, 0x2000, CRC(48e5306c);SHA1(d27cc85d24c7b6c23c5c96be4dad5cae6e8069be) )
+		ROM_LOAD( "mblzpu3.bin",0x6000, 0x2000, CRC(eba91546);SHA1(8c1da4e0d9b562dbbf7c7583dbf567c804eb670f) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for sound CPU (VSB board) */
-		ROM_LOAD( "mblvsb0.bin",0x0000, 0x1000, CRC(0cf7a1c3) SHA1(af27e3a3b51d03d46c62c2797268744d0577d075) )
-		ROM_LOAD( "mblvsb1.bin",0x1000, 0x1000, CRC(0b8d0e43) SHA1(b3ddb7561e715a58ca512fe76e53cda39402a8e4) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );    /* 64k for sound CPU (VSB board) */
+		ROM_LOAD( "mblvsb0.bin",0x0000, 0x1000, CRC(0cf7a1c3);SHA1(af27e3a3b51d03d46c62c2797268744d0577d075) )
+		ROM_LOAD( "mblvsb1.bin",0x1000, 0x1000, CRC(0b8d0e43);SHA1(b3ddb7561e715a58ca512fe76e53cda39402a8e4) )
 	
-		ROM_REGION( 0x18000, REGION_CPU3, 0 )     /* 64k for video CPU (CFB board) */
-		ROM_LOAD( "mblrom0.bin",0x0000, 0x2000, CRC(948a2c5e) SHA1(d693f1b96caf31649f600c5038bb79b0d1d16133) )
+		ROM_REGION( 0x18000, REGION_CPU3, 0 );    /* 64k for video CPU (CFB board) */
+		ROM_LOAD( "mblrom0.bin",0x0000, 0x2000, CRC(948a2c5e);SHA1(d693f1b96caf31649f600c5038bb79b0d1d16133) )
 	
-		ROM_LOAD( "mblrom2.bin",0x10000,0x2000, CRC(36237058) SHA1(9db8fced37a3d40c4ea5b87ea18ac8e75d71e586) )/*banked at 0x4000 (select=0)*/
-		ROM_LOAD( "mblrom3.bin",0x12000,0x2000, CRC(18d75d7f) SHA1(51c35ea4a2127439a1299863eb74e57be833e2e4) )/*banked at 0x4000 (select=1)*/
+		ROM_LOAD( "mblrom2.bin",0x10000,0x2000, CRC(36237058);SHA1(9db8fced37a3d40c4ea5b87ea18ac8e75d71e586) )/*banked at 0x4000 (select=0)*/
+		ROM_LOAD( "mblrom3.bin",0x12000,0x2000, CRC(18d75d7f);SHA1(51c35ea4a2127439a1299863eb74e57be833e2e4) )/*banked at 0x4000 (select=1)*/
 		/* empty socket??? (the *name* of next rom seems good ?) or wrong schematics ?*/
-		ROM_LOAD( "mblrom4.bin",0x16000,0x2000, CRC(1805acdc) SHA1(40b8e70e6ba69ac864af0b276e81218e63e48deb) )/*banked at 0x4000 (select=3)*/
-	ROM_END
+		ROM_LOAD( "mblrom4.bin",0x16000,0x2000, CRC(1805acdc);SHA1(40b8e70e6ba69ac864af0b276e81218e63e48deb) )/*banked at 0x4000 (select=3)*/
+	ROM_END(); }}; 
 	
 	
-	ROM_START( greatgun )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for main CPU (ZPU board) */
-		ROM_LOAD( "zpu0",0x0000, 0x2000, CRC(80cf2cbf) SHA1(ea24b844ea6d8fc54adb2e28be68e1f3e1184b8b) )
-		ROM_LOAD( "zpu1",0x2000, 0x2000, CRC(fc12af94) SHA1(65f5bca2853271c232bd02dfc3467e6a4f7f0a6f) )
-		ROM_LOAD( "zpu2",0x4000, 0x2000, CRC(b34cfa26) SHA1(903adc6de0d34e5bc8fb0f8d3e74ff53204d8c68) )
-		ROM_LOAD( "zpu3",0x6000, 0x2000, CRC(c142ebdf) SHA1(0b87740d26b19a05f65b811225ee0053ddb27d22) )
+	static RomLoadPtr rom_greatgun = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for main CPU (ZPU board) */
+		ROM_LOAD( "zpu0",0x0000, 0x2000, CRC(80cf2cbf);SHA1(ea24b844ea6d8fc54adb2e28be68e1f3e1184b8b) )
+		ROM_LOAD( "zpu1",0x2000, 0x2000, CRC(fc12af94);SHA1(65f5bca2853271c232bd02dfc3467e6a4f7f0a6f) )
+		ROM_LOAD( "zpu2",0x4000, 0x2000, CRC(b34cfa26);SHA1(903adc6de0d34e5bc8fb0f8d3e74ff53204d8c68) )
+		ROM_LOAD( "zpu3",0x6000, 0x2000, CRC(c142ebdf);SHA1(0b87740d26b19a05f65b811225ee0053ddb27d22) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for sound CPU (PSB board) */
-		ROM_LOAD( "psba4",0x0000, 0x2000, CRC(172a793e) SHA1(3618a778af1f4a6267bf7e0786529be731ac9b76) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );    /* 64k for sound CPU (PSB board) */
+		ROM_LOAD( "psba4",0x0000, 0x2000, CRC(172a793e);SHA1(3618a778af1f4a6267bf7e0786529be731ac9b76) )
 	
-		ROM_REGION( 0x38000, REGION_CPU3, 0 )     /* 64k for video CPU (CFB board) */
-		ROM_LOAD( "cfb0",0x0000, 0x2000, CRC(ee372b1f) SHA1(b630fd659d59eb8c2540f18d91ae0d72e859fc4f) )
-		ROM_LOAD( "cfb1",0x2000, 0x2000, CRC(b76d9527) SHA1(8f16b850bd67d553aaaf7e176754e36aba581445) )
+		ROM_REGION( 0x38000, REGION_CPU3, 0 );    /* 64k for video CPU (CFB board) */
+		ROM_LOAD( "cfb0",0x0000, 0x2000, CRC(ee372b1f);SHA1(b630fd659d59eb8c2540f18d91ae0d72e859fc4f) )
+		ROM_LOAD( "cfb1",0x2000, 0x2000, CRC(b76d9527);SHA1(8f16b850bd67d553aaaf7e176754e36aba581445) )
 	
-		ROM_LOAD( "psb00",0x10000,0x2000, CRC(b4956100) SHA1(98baf5c27c76dc5c4eafc44f42705239504637fe) )/*banked at 0x4000*/
-		ROM_LOAD( "psb01",0x12000,0x2000, CRC(acdce2ee) SHA1(96b8961afbd0006b10cfdc825aefe27ec18121ff) )
-		ROM_LOAD( "psb02",0x14000,0x2000, CRC(cb840fc6) SHA1(c30c72d355e1957f3715e9fab701f65b9d7d632a) )
-		ROM_LOAD( "psb03",0x16000,0x2000, CRC(86ea6f99) SHA1(ce5d42557d0a62eebe3d0cee28587d60707573e4) )
-		ROM_LOAD( "psb04",0x18000,0x2000, CRC(65379893) SHA1(84bb755e23d5ce13b1c82e59f24f3890c50697cc) )
-		ROM_LOAD( "psb05",0x1a000,0x2000, CRC(f82245cb) SHA1(fa1cab94a03ce7b8e45ea6eec572b21f268f7547) )
-		ROM_LOAD( "psb06",0x1c000,0x2000, CRC(6b86794f) SHA1(72cf67ecf5a9198ecb44dd846de968e6cdd6458d) )
-		ROM_LOAD( "psb07",0x1e000,0x2000, CRC(60a7abf3) SHA1(44b932d8af29ec706c29d6b71a8bac6318d92315) )
-		ROM_LOAD( "psb08",0x20000,0x2000, CRC(854be14e) SHA1(ae9b1fe2443c87bb4334bc776f7bc7e5fa874f38) )
-		ROM_LOAD( "psb09",0x22000,0x2000, CRC(b2e8afa3) SHA1(30a3d83bf1ec7885549b47f9569e9ae0d05b948d) )
-		ROM_LOAD( "psb10",0x24000,0x2000, CRC(fbfb0aab) SHA1(2eb666a5eff31019b4ffdfc82e242ff47cd59527) )
-		ROM_LOAD( "psb11",0x26000,0x2000, CRC(ddcd3cec) SHA1(7d0c3b4160b11ebe9b097664190d8ae605413baa) )
-		ROM_LOAD( "psb12",0x28000,0x2000, CRC(c6617377) SHA1(29a6fc52e06c41f06ee333aad707c3a1952dff4d) )
-		ROM_LOAD( "psb13",0x2a000,0x2000, CRC(aeab8555) SHA1(c398cac5210022e3c9e25a9f2ef1017b27c21e62) )
-		ROM_LOAD( "psb14",0x2c000,0x2000, CRC(ef35e314) SHA1(2e20517ff89b153fd888cf4eb0404a802e16b1b7) )
-		ROM_LOAD( "psb15",0x2e000,0x2000, CRC(1fafe83d) SHA1(d1d406275f50d87547aabe1295795099f341433d) )
-		ROM_LOAD( "psb16",0x30000,0x2000, CRC(ec49864f) SHA1(7a3b295972b52682406f75c4fe12c29632452491) )
-		ROM_LOAD( "psb17",0x32000,0x2000, CRC(d9778e85) SHA1(2998f0a08cdba8a75e687a54cb9a03edeb4b22cd) )
-		ROM_LOAD( "psb18",0x34000,0x2000, CRC(ef61b6c0) SHA1(7e8a82beefb9fd8e219fc4d7d25a3a43ab8aadf7) )
-		ROM_LOAD( "psb19",0x36000,0x2000, CRC(68752e0d) SHA1(58a4921e4f774af5e1ef7af67f06e9b43643ffab) )
+		ROM_LOAD( "psb00",0x10000,0x2000, CRC(b4956100);SHA1(98baf5c27c76dc5c4eafc44f42705239504637fe) )/*banked at 0x4000*/
+		ROM_LOAD( "psb01",0x12000,0x2000, CRC(acdce2ee);SHA1(96b8961afbd0006b10cfdc825aefe27ec18121ff) )
+		ROM_LOAD( "psb02",0x14000,0x2000, CRC(cb840fc6);SHA1(c30c72d355e1957f3715e9fab701f65b9d7d632a) )
+		ROM_LOAD( "psb03",0x16000,0x2000, CRC(86ea6f99);SHA1(ce5d42557d0a62eebe3d0cee28587d60707573e4) )
+		ROM_LOAD( "psb04",0x18000,0x2000, CRC(65379893);SHA1(84bb755e23d5ce13b1c82e59f24f3890c50697cc) )
+		ROM_LOAD( "psb05",0x1a000,0x2000, CRC(f82245cb);SHA1(fa1cab94a03ce7b8e45ea6eec572b21f268f7547) )
+		ROM_LOAD( "psb06",0x1c000,0x2000, CRC(6b86794f);SHA1(72cf67ecf5a9198ecb44dd846de968e6cdd6458d) )
+		ROM_LOAD( "psb07",0x1e000,0x2000, CRC(60a7abf3);SHA1(44b932d8af29ec706c29d6b71a8bac6318d92315) )
+		ROM_LOAD( "psb08",0x20000,0x2000, CRC(854be14e);SHA1(ae9b1fe2443c87bb4334bc776f7bc7e5fa874f38) )
+		ROM_LOAD( "psb09",0x22000,0x2000, CRC(b2e8afa3);SHA1(30a3d83bf1ec7885549b47f9569e9ae0d05b948d) )
+		ROM_LOAD( "psb10",0x24000,0x2000, CRC(fbfb0aab);SHA1(2eb666a5eff31019b4ffdfc82e242ff47cd59527) )
+		ROM_LOAD( "psb11",0x26000,0x2000, CRC(ddcd3cec);SHA1(7d0c3b4160b11ebe9b097664190d8ae605413baa) )
+		ROM_LOAD( "psb12",0x28000,0x2000, CRC(c6617377);SHA1(29a6fc52e06c41f06ee333aad707c3a1952dff4d) )
+		ROM_LOAD( "psb13",0x2a000,0x2000, CRC(aeab8555);SHA1(c398cac5210022e3c9e25a9f2ef1017b27c21e62) )
+		ROM_LOAD( "psb14",0x2c000,0x2000, CRC(ef35e314);SHA1(2e20517ff89b153fd888cf4eb0404a802e16b1b7) )
+		ROM_LOAD( "psb15",0x2e000,0x2000, CRC(1fafe83d);SHA1(d1d406275f50d87547aabe1295795099f341433d) )
+		ROM_LOAD( "psb16",0x30000,0x2000, CRC(ec49864f);SHA1(7a3b295972b52682406f75c4fe12c29632452491) )
+		ROM_LOAD( "psb17",0x32000,0x2000, CRC(d9778e85);SHA1(2998f0a08cdba8a75e687a54cb9a03edeb4b22cd) )
+		ROM_LOAD( "psb18",0x34000,0x2000, CRC(ef61b6c0);SHA1(7e8a82beefb9fd8e219fc4d7d25a3a43ab8aadf7) )
+		ROM_LOAD( "psb19",0x36000,0x2000, CRC(68752e0d);SHA1(58a4921e4f774af5e1ef7af67f06e9b43643ffab) )
 	
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	GAMEX( 1983, mazerbla, 0, mazerbla,  mazerbla, 0, ROT0, "Stern", "Mazer Blazer", GAME_IMPERFECT_GRAPHICS |GAME_NO_SOUND | GAME_NOT_WORKING )
-	GAMEX( 1983, greatgun, 0, greatgun,  greatgun, 0, ROT0, "Stern", "Great Guns", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_mazerbla	   = new GameDriver("1983"	,"mazerbla"	,"mazerbla.java"	,rom_mazerbla,null	,machine_driver_mazerbla	,input_ports_mazerbla	,null	,ROT0	,	"Stern", "Mazer Blazer", GAME_IMPERFECT_GRAPHICS |GAME_NO_SOUND | GAME_NOT_WORKING )
+	public static GameDriver driver_greatgun	   = new GameDriver("1983"	,"greatgun"	,"mazerbla.java"	,rom_greatgun,null	,machine_driver_greatgun	,input_ports_greatgun	,null	,ROT0	,	"Stern", "Great Guns", GAME_IMPERFECT_GRAPHICS )
 }

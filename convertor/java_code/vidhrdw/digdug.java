@@ -50,17 +50,17 @@ public class digdug
 		{
 			int bit0,bit1,bit2,r,g,b;
 	
-			bit0 = (color_prom[31-i] >> 0) & 0x01;
-			bit1 = (color_prom[31-i] >> 1) & 0x01;
-			bit2 = (color_prom[31-i] >> 2) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 0) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 1) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[31-i] >> 3) & 0x01;
-			bit1 = (color_prom[31-i] >> 4) & 0x01;
-			bit2 = (color_prom[31-i] >> 5) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 3) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 4) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[31-i] >> 6) & 0x01;
-			bit2 = (color_prom[31-i] >> 7) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 6) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
@@ -73,10 +73,10 @@ public class digdug
 		}
 		/* sprites */
 		for (i = 0*4;i < 64*4;i++)
-			colortable[8*2 + i] = 31 - ((color_prom[i + 32] & 0x0f) + 0x10);
+			colortable[8*2 + i] = 31 - ((color_prom.read(i + 32)& 0x0f) + 0x10);
 		/* playfield */
 		for (i = 64*4;i < 128*4;i++)
-			colortable[8*2 + i] = 31 - (color_prom[i + 32] & 0x0f);
+			colortable[8*2 + i] = 31 - (color_prom.read(i + 32)& 0x0f);
 	}
 	
 	
@@ -98,7 +98,7 @@ public class digdug
 	}
 	
 	
-	WRITE_HANDLER( digdug_vh_latch_w )
+	public static WriteHandlerPtr digdug_vh_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset)
 		{
@@ -126,7 +126,7 @@ public class digdug
 				playcolor = (playcolor & ~2) | ((data << 1) & 2);
 				break;
 		}
-	}
+	} };
 	
 	
 	void digdug_draw_sprite(struct mame_bitmap *dest,unsigned int code,unsigned int color,
@@ -138,14 +138,14 @@ public class digdug
 	
 	
 	
-	WRITE_HANDLER( digdug_flipscreen_w )
+	public static WriteHandlerPtr digdug_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -224,7 +224,7 @@ public class digdug
 					sy = 27 - sy;
 				}
 	
-				vrval = videoram[offs];
+				vrval = videoram.read(offs);
 				if (pf)
 				{
 					/* first draw the playfield */
@@ -265,14 +265,14 @@ public class digdug
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
 			/* is it on? */
-			if ((spriteram_3[offs+1] & 2) == 0)
+			if ((spriteram_3.read(offs+1)& 2) == 0)
 			{
-				int sprite = spriteram[offs];
-				int color = spriteram[offs+1];
-				int x = spriteram_2[offs+1]-40;
-				int y = 28*8-spriteram_2[offs];
-				int flipx = spriteram_3[offs] & 1;
-				int flipy = spriteram_3[offs] & 2;
+				int sprite = spriteram.read(offs);
+				int color = spriteram.read(offs+1);
+				int x = spriteram_2.read(offs+1)-40;
+				int y = 28*8-spriteram_2.read(offs);
+				int flipx = spriteram_3.read(offs)& 1;
+				int flipy = spriteram_3.read(offs)& 2;
 	
 				if (flipscreen)
 				{

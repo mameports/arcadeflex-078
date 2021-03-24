@@ -24,10 +24,10 @@ public class cosmic
 	
 	
 	
-	WRITE_HANDLER( cosmic_color_register_w )
+	public static WriteHandlerPtr cosmic_color_register_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		color_registers[offset] = data ? 1 : 0;
-	}
+	} };
 	
 	
 	static pen_t panic_map_color(UINT8 x, UINT8 y)
@@ -257,10 +257,10 @@ public class cosmic
 	}
 	
 	
-	WRITE_HANDLER( cosmic_background_enable_w )
+	public static WriteHandlerPtr cosmic_background_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		background_enable = data;
-	}
+	} };
 	
 	
 	static void draw_bitmap(struct mame_bitmap *bitmap)
@@ -270,7 +270,7 @@ public class cosmic
 	
 		for (offs = 0; offs < videoram_size; offs++)
 		{
-			data8_t data = videoram[offs];
+			data8_t data = videoram.read(offs);
 	
 			if (data != 0)	/* optimization, not absolutely neccessary */
 			{
@@ -306,26 +306,26 @@ public class cosmic
 	
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			if (spriteram[offs] != 0)
+			if (spriteram.read(offs)!= 0)
 	        {
 				int code, color;
 	
-				code  = ~spriteram[offs  ] & 0x3f;
-				color = ~spriteram[offs+3] & color_mask;
+				code  = ~spriteram.read(offs  )& 0x3f;
+				color = ~spriteram.read(offs+3)& color_mask;
 	
 				if (extra_sprites)
 				{
-					code |= (spriteram[offs+3] & 0x08) << 3;
+					code |= (spriteram.read(offs+3)& 0x08) << 3;
 				}
 	
-	            if (spriteram[offs] & 0x80)
+	            if (spriteram.read(offs)& 0x80)
 	            {
 	                /* 16x16 sprite */
 	
 				    drawgfx(bitmap,Machine->gfx[0],
 						    code, color,
-						    0, ~spriteram[offs] & 0x40,
-					    	256-spriteram[offs+2],spriteram[offs+1],
+						    0, ~spriteram.read(offs)& 0x40,
+					    	256-spriteram.read(offs+2),spriteram.read(offs+1),
 					        &Machine->visible_area,TRANSPARENCY_PEN,0);
 	            }
 	            else
@@ -334,8 +334,8 @@ public class cosmic
 	
 				    drawgfx(bitmap,Machine->gfx[1],
 						    code >> 2, color,
-						    0, ~spriteram[offs] & 0x40,
-					    	256-spriteram[offs+2],spriteram[offs+1],
+						    0, ~spriteram.read(offs)& 0x40,
+					    	256-spriteram.read(offs+2),spriteram.read(offs+1),
 					        &Machine->visible_area,TRANSPARENCY_PEN,0);
 	            }
 	        }

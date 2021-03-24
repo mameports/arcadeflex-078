@@ -68,17 +68,17 @@ public class galaga
 			int bit0,bit1,bit2,r,g,b;
 	
 	
-			bit0 = (color_prom[31-i] >> 0) & 0x01;
-			bit1 = (color_prom[31-i] >> 1) & 0x01;
-			bit2 = (color_prom[31-i] >> 2) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 0) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 1) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[31-i] >> 3) & 0x01;
-			bit1 = (color_prom[31-i] >> 4) & 0x01;
-			bit2 = (color_prom[31-i] >> 5) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 3) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 4) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[31-i] >> 6) & 0x01;
-			bit2 = (color_prom[31-i] >> 7) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 6) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
@@ -242,8 +242,8 @@ public class galaga
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs]+galaga_gfxbank*0x100,
-						colorram[offs],
+						videoram.read(offs)+galaga_gfxbank*0x100,
+						colorram.read(offs),
 						flip_screen,flip_screen,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -257,17 +257,17 @@ public class galaga
 		/* Draw the sprites. */
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			if ((spriteram_3[offs + 1] & 2) == 0)
+			if ((spriteram_3.read(offs + 1)& 2) == 0)
 			{
 				int code,color,flipx,flipy,sx,sy,sfa,sfb;
 	
 	
-				code = spriteram[offs];
-				color = spriteram[offs + 1];
-				flipx = spriteram_3[offs] & 1;
-				flipy = spriteram_3[offs] & 2;
-				sx = spriteram_2[offs + 1] - 40 + 0x100*(spriteram_3[offs + 1] & 1);
-				sy = 28*8 - spriteram_2[offs];
+				code = spriteram.read(offs);
+				color = spriteram.read(offs + 1);
+				flipx = spriteram_3.read(offs)& 1;
+				flipy = spriteram_3.read(offs)& 2;
+				sx = spriteram_2.read(offs + 1)- 40 + 0x100*(spriteram_3.read(offs + 1)& 1);
+				sy = 28*8 - spriteram_2.read(offs);
 				sfa = 0;
 				sfb = 16;
 	
@@ -284,7 +284,7 @@ public class galaga
 					sfb = 0;
 				}
 	
-				if ((spriteram_3[offs] & 0x0c) == 0x0c)		/* double width, double height */
+				if ((spriteram_3.read(offs)& 0x0c) == 0x0c)		/* double width, double height */
 				{
 					drawgfx(bitmap,Machine->gfx[1],
 							code+2,color,flipx,flipy,sx+sfa,sy-sfa,
@@ -300,7 +300,7 @@ public class galaga
 							code+1,color,flipx,flipy,sx+sfb,sy-sfb,
 							&Machine->visible_area,TRANSPARENCY_COLOR,0);
 				}
-				else if (spriteram_3[offs] & 8)	/* double width */
+				else if (spriteram_3.read(offs)& 8)	/* double width */
 				{
 					drawgfx(bitmap,Machine->gfx[1],
 							code+2,color,flipx,flipy,sx,sy-sfa,
@@ -309,7 +309,7 @@ public class galaga
 							code,color,flipx,flipy,sx,sy-sfb,
 							&Machine->visible_area,TRANSPARENCY_COLOR,0);
 				}
-				else if (spriteram_3[offs] & 4)	/* double height */
+				else if (spriteram_3.read(offs)& 4)	/* double height */
 				{
 					drawgfx(bitmap,Machine->gfx[1],
 							code,color,flipx,flipy,sx+sfa,sy,

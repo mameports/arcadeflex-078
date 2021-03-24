@@ -31,19 +31,19 @@ public class strvmstr
 	static UINT8 *bg_videoram, *fg_videoram;
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	static WRITE_HANDLER( strvmstr_fg_w )
+	public static WriteHandlerPtr strvmstr_fg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		fg_videoram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset);
-	}
+	} };
 	
-	static WRITE_HANDLER( strvmstr_bg_w )
+	public static WriteHandlerPtr strvmstr_bg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg_videoram[offset] = data;
 		tilemap_mark_tile_dirty(bg_tilemap,offset);
-	}
+	} };
 	
-	static WRITE_HANDLER( strvmstr_control_w )
+	public static WriteHandlerPtr strvmstr_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 	/*
@@ -65,33 +65,33 @@ public class strvmstr
 		{
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	static WRITE_HANDLER( a000_w )
+	public static WriteHandlerPtr a000_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* ? */
-	}
+	} };
 	
 	
-	static READ_HANDLER( strvmstr_question_r )
+	public static ReadHandlerPtr strvmstr_question_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		data8_t *Question = memory_region(REGION_USER1);
 		return Question[offset + 0x10000 * ((strvmstr_control >> 3) & 3)];
-	}
+	} };
 	
 	static int b800_prev,b000_val,b000_ret;
 	
-	static WRITE_HANDLER( b000_w )
+	public static WriteHandlerPtr b000_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		b000_val = data;
-	}
+	} };
 	
-	static READ_HANDLER( b000_r )
+	public static ReadHandlerPtr b000_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return b000_ret;
-	}
+	} };
 	
-	static WRITE_HANDLER( b800_w )
+	public static WriteHandlerPtr b800_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch(data)
 		{
@@ -115,97 +115,103 @@ public class strvmstr
 		}	
 	
 		b800_prev = data;
-	}
+	} };
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0xb000, 0xb000, b000_r },
-		{ 0xc000, 0xc7ff, MRA_RAM },
-		{ 0xe000, 0xe7ff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xb000, 0xb000, b000_r ),
+		new Memory_ReadAddress( 0xc000, 0xc7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe000, 0xe7ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-		{ 0x9000, 0x9000, strvmstr_control_w },
-		{ 0x9800, 0x9800, MWA_NOP }, //always 0
-		{ 0xa000, 0xa000, a000_w }, //bit 8 and 7 always actived? bit 6 actived in message edit (c0, e0, df)
-		{ 0xb000, 0xb000, b000_w },
-		{ 0xb800, 0xb800, b800_w }, //80, 83, 84, 86, 98, 94, 81, e0, a0
-		{ 0xb801, 0xb801, MWA_NOP }, //always 0
-		{ 0xc000, 0xc7ff, strvmstr_fg_w, &fg_videoram },
-		{ 0xe000, 0xe7ff, strvmstr_bg_w, &bg_videoram },	
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM, generic_nvram, generic_nvram_size ),
+		new Memory_WriteAddress( 0x9000, 0x9000, strvmstr_control_w ),
+		new Memory_WriteAddress( 0x9800, 0x9800, MWA_NOP ), //always 0
+		new Memory_WriteAddress( 0xa000, 0xa000, a000_w ), //bit 8 and 7 always actived? bit 6 actived in message edit (c0, e0, df)
+		new Memory_WriteAddress( 0xb000, 0xb000, b000_w ),
+		new Memory_WriteAddress( 0xb800, 0xb800, b800_w ), //80, 83, 84, 86, 98, 94, 81, e0, a0
+		new Memory_WriteAddress( 0xb801, 0xb801, MWA_NOP ), //always 0
+		new Memory_WriteAddress( 0xc000, 0xc7ff, strvmstr_fg_w, fg_videoram ),
+		new Memory_WriteAddress( 0xe000, 0xe7ff, strvmstr_bg_w, bg_videoram ),	
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( readport )
-		{ 0x0000, 0xffff, strvmstr_question_r },
-	PORT_END
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x0000, 0xffff, strvmstr_question_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( strvmstr )
-		PORT_START
-		PORT_SERVICE( 0x01, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
+	static InputPortPtr input_ports_strvmstr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_SERVICE( 0x01, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 );
 	
 		/* cocktail controls? */
-		PORT_START
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 		
-		PORT_START
-		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,2),
 		2,
-		{ RGN_FRAC(0,2), RGN_FRAC(1,2) },
-		{ 7, 6, 5, 4, 3, 2, 1, 0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { RGN_FRAC(0,2), RGN_FRAC(1,2) },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout,   0, 8 },
-		{ REGION_GFX2, 0, &charlayout,   0, 8 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,   0, 8 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, charlayout,   0, 8 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	static void get_tile_info_bg(int tile_index)
@@ -245,16 +251,16 @@ public class strvmstr
 		tilemap_draw(bitmap,cliprect,fg_tilemap,0,0);
 	}
 	
-	static struct AY8910interface ay8912_interface =
-	{
+	static AY8910interface ay8912_interface = new AY8910interface
+	(
 		3,					/* 3 chip */
 		1500000,
-		{ 25, 25, 25 },
-		{ 0, input_port_1_r, input_port_0_r },
-		{ 0, 0, 0 },
-		{ 0, 0, 0 },
-		{ 0, 0, 0 }
-	};
+		new int[] { 25, 25, 25 },
+		new ReadHandlerPtr[] { 0, input_port_1_r, input_port_0_r },
+		new ReadHandlerPtr[] { 0, 0, 0 },
+		new WriteHandlerPtr[] { 0, 0, 0 },
+		new WriteHandlerPtr[] { 0, 0, 0 }
+	);
 	
 	
 	static INTERRUPT_GEN( strvmstr_interrupt )
@@ -298,32 +304,32 @@ public class strvmstr
 		MDRV_SOUND_ADD(AY8910, ay8912_interface)
 	MACHINE_DRIVER_END
 	
-	ROM_START( strvmstr )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "stm16.u16",    0x0000, 0x8000, CRC(ae734db9) SHA1(1bacdfdebaa1f250bfbd49053c3910f1396afe11) ) 
+	static RomLoadPtr rom_strvmstr = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "stm16.u16",    0x0000, 0x8000, CRC(ae734db9);SHA1(1bacdfdebaa1f250bfbd49053c3910f1396afe11) ) 
 		
-		ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "stm44.rom",    0x0000, 0x1000, CRC(e69da710) SHA1(218a9d7600d67858d1f21282a0cebec0ae93e0ff) ) 
-		ROM_LOAD( "stm46.rom",    0x1000, 0x1000, CRC(d927a1f1) SHA1(63a49a61107deaf7a9f28b9653c310c5331f5143) ) 
+		ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "stm44.rom",    0x0000, 0x1000, CRC(e69da710);SHA1(218a9d7600d67858d1f21282a0cebec0ae93e0ff) ) 
+		ROM_LOAD( "stm46.rom",    0x1000, 0x1000, CRC(d927a1f1);SHA1(63a49a61107deaf7a9f28b9653c310c5331f5143) ) 
 	
-		ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "stm48.rom",    0x0000, 0x1000, CRC(51719714) SHA1(fdecbd22ea65eec7b4b5138f89ddc5876b05def6) ) 
-		ROM_LOAD( "stm50.rom",    0x1000, 0x1000, CRC(cfc1a1d1) SHA1(9ef38f12360dd946651e67770742ca72fa6846f1) ) 
+		ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "stm48.rom",    0x0000, 0x1000, CRC(51719714);SHA1(fdecbd22ea65eec7b4b5138f89ddc5876b05def6) ) 
+		ROM_LOAD( "stm50.rom",    0x1000, 0x1000, CRC(cfc1a1d1);SHA1(9ef38f12360dd946651e67770742ca72fa6846f1) ) 
 	
-		ROM_REGION( 0x00200, REGION_PROMS, 0 )
-		ROM_LOAD( "stm63.prm",    0x0000, 0x0100, CRC(305271cf) SHA1(6fd5fe085d79ca7aa57010cffbdb2a85b9c24701) ) 
-		ROM_LOAD( "stm64.prm",    0x0100, 0x0100, CRC(69ebc0b8) SHA1(de2b936e3246e3bfc7e2ff9546c1854ec3504cc2) ) 
+		ROM_REGION( 0x00200, REGION_PROMS, 0 );
+		ROM_LOAD( "stm63.prm",    0x0000, 0x0100, CRC(305271cf);SHA1(6fd5fe085d79ca7aa57010cffbdb2a85b9c24701) ) 
+		ROM_LOAD( "stm64.prm",    0x0100, 0x0100, CRC(69ebc0b8);SHA1(de2b936e3246e3bfc7e2ff9546c1854ec3504cc2) ) 
 	
-		ROM_REGION( 0x40000, REGION_USER1, 0 ) /* Question roms */
-		ROM_LOAD( "sex2.lo0",     0x00000, 0x8000, CRC(9c68b277) SHA1(34bc9d7b973fe482abd5e34a058b72eb5ec8db64) ) 
-		ROM_LOAD( "movies.lo1",   0x08000, 0x8000, CRC(16cba1b7) SHA1(8aa3eff72d1ec8dac906f2e803a88578a9fe763c) ) 
-		ROM_LOAD( "sci-fi.lo2",   0x10000, 0x8000, CRC(b5595f81) SHA1(5e7fa334f6541860a5c04e5f345673ea12efafb4) ) 
-		ROM_LOAD( "potprri.lo3",  0x18000, 0x8000, CRC(427eada9) SHA1(bac29ec637a17db95507c68fd73a8ce52744bf8e) ) 
-		ROM_LOAD( "sports.hi0",   0x20000, 0x8000, CRC(3678fb79) SHA1(4e40cc20707195c0e88e595f752a2982b531b57e) ) 
-		ROM_LOAD( "rock-pop.hi1", 0x28000, 0x8000, CRC(e2954db6) SHA1(d545236a844b63c85937ee8fb8e65bcd74b1bf43) ) 
-		ROM_LOAD( "cars.hi2",     0x30000, 0x8000, CRC(50310557) SHA1(7559c603625e4df442b440b8b08e6efef06e2781) ) 
-		ROM_LOAD( "entrtn.hi3",   0x38000, 0x8000, CRC(a8cf603b) SHA1(6efa5753d8d252452b3f5be8635a28364e4d8de1) ) 
-	ROM_END
+		ROM_REGION( 0x40000, REGION_USER1, 0 );/* Question roms */
+		ROM_LOAD( "sex2.lo0",     0x00000, 0x8000, CRC(9c68b277);SHA1(34bc9d7b973fe482abd5e34a058b72eb5ec8db64) ) 
+		ROM_LOAD( "movies.lo1",   0x08000, 0x8000, CRC(16cba1b7);SHA1(8aa3eff72d1ec8dac906f2e803a88578a9fe763c) ) 
+		ROM_LOAD( "sci-fi.lo2",   0x10000, 0x8000, CRC(b5595f81);SHA1(5e7fa334f6541860a5c04e5f345673ea12efafb4) ) 
+		ROM_LOAD( "potprri.lo3",  0x18000, 0x8000, CRC(427eada9);SHA1(bac29ec637a17db95507c68fd73a8ce52744bf8e) ) 
+		ROM_LOAD( "sports.hi0",   0x20000, 0x8000, CRC(3678fb79);SHA1(4e40cc20707195c0e88e595f752a2982b531b57e) ) 
+		ROM_LOAD( "rock-pop.hi1", 0x28000, 0x8000, CRC(e2954db6);SHA1(d545236a844b63c85937ee8fb8e65bcd74b1bf43) ) 
+		ROM_LOAD( "cars.hi2",     0x30000, 0x8000, CRC(50310557);SHA1(7559c603625e4df442b440b8b08e6efef06e2781) ) 
+		ROM_LOAD( "entrtn.hi3",   0x38000, 0x8000, CRC(a8cf603b);SHA1(6efa5753d8d252452b3f5be8635a28364e4d8de1) ) 
+	ROM_END(); }}; 
 	
-	GAMEX( 1986, strvmstr, 0, strvmstr, strvmstr, 0, ROT90, "Enerdyne Technologies Inc.", "Super Trivia Master", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL )
+	public static GameDriver driver_strvmstr	   = new GameDriver("1986"	,"strvmstr"	,"strvmstr.java"	,rom_strvmstr,null	,machine_driver_strvmstr	,input_ports_strvmstr	,null	,ROT90	,	"Enerdyne Technologies Inc.", "Super Trivia Master", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL )
 }

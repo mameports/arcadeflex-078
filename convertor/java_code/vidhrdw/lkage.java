@@ -35,11 +35,11 @@ public class lkage
 	
 	struct tilemap *bg_tilemap, *fg_tilemap, *tx_tilemap;
 	
-	WRITE_HANDLER( lkage_videoram_w )
+	public static WriteHandlerPtr lkage_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset]!=data )
+		if( videoram.read(offset)!=data )
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 	
 			switch( offset/0x400 )
 			{
@@ -56,13 +56,13 @@ public class lkage
 				break;
 			}
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		SET_TILE_INFO(
 				0,
-				videoram[tile_index + 0x800] + 256 * (bg_tile_bank?5:1),
+				videoram.read(tile_index + 0x800)+ 256 * (bg_tile_bank?5:1),
 				0,
 				0)
 	}
@@ -71,7 +71,7 @@ public class lkage
 	{
 		SET_TILE_INFO(
 				0,
-				videoram[tile_index + 0x400] + 256 * (fg_tile_bank?1:0),
+				videoram.read(tile_index + 0x400)+ 256 * (fg_tile_bank?1:0),
 				1,
 				0)
 	}
@@ -80,7 +80,7 @@ public class lkage
 	{
 		SET_TILE_INFO(
 				0,
-				videoram[tile_index],
+				videoram.read(tile_index),
 				2,
 				0)
 	}
@@ -169,7 +169,7 @@ public class lkage
 	
 	void lkage_set_palette_row( int virtual_row, int logical_row, int len )
 	{
-		unsigned char *source = &paletteram[logical_row*32];
+		unsigned char *source = &paletteram.read(logical_row*32);
 		int indx = virtual_row*16;
 		while( len-- )
 		{

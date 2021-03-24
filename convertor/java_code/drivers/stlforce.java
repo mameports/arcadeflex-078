@@ -124,76 +124,76 @@ public class stlforce
 		{ 0x410000, 0x410001, OKIM6295_data_0_lsb_w },
 	MEMORY_END
 	
-	INPUT_PORTS_START( stlforce )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
+	static InputPortPtr input_ports_stlforce = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_UNUSED )
-		PORT_SERVICE( 0x0008, IP_ACTIVE_LOW )
-		PORT_BIT( 0x0010, IP_ACTIVE_HIGH,IPT_UNKNOWN )		// To be confirmed (see notes)
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )		// To be confirmed (see notes)
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_UNUSED );
+		PORT_SERVICE( 0x0008, IP_ACTIVE_LOW );
+		PORT_BIT( 0x0010, IP_ACTIVE_HIGH,IPT_UNKNOWN );	// To be confirmed (see notes)
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED );	// To be confirmed (see notes)
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout stlforce_bglayout =
-	{
+	static GfxLayout stlforce_bglayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{0,1,2,3},
-		{12,8,4,0,28,24,20,16,16*32+12,16*32+8,16*32+4,16*32+0,16*32+28,16*32+24,16*32+20,16*32+16},
-		{0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,8*32,9*32,10*32,11*32,12*32,13*32,14*32,15*32},
+		new int[] {0,1,2,3},
+		new int[] {12,8,4,0,28,24,20,16,16*32+12,16*32+8,16*32+4,16*32+0,16*32+28,16*32+24,16*32+20,16*32+16},
+		new int[] {0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,8*32,9*32,10*32,11*32,12*32,13*32,14*32,15*32},
 		32*32
-	};
+	);
 	
-	static struct GfxLayout stlforce_txlayout =
-	{
+	static GfxLayout stlforce_txlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{0,1,2,3},
-		{12,8,4,0,28,24,20,16},
-		{0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,},
+		new int[] {0,1,2,3},
+		new int[] {12,8,4,0,28,24,20,16},
+		new int[] {0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,},
 		8*32
-	};
+	);
 	
-	static struct GfxLayout stlforce_splayout =
-	{
+	static GfxLayout stlforce_splayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{0x040000*3*8,0x040000*2*8,0x040000*1*8,0x040000*0*8},
-		{16*8+7,16*8+6,16*8+5,16*8+4,16*8+3,16*8+2,16*8+1,16*8+0,7,6,5,4,3,2,1,0},
-		{0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8},
+		new int[] {0x040000*3*8,0x040000*2*8,0x040000*1*8,0x040000*0*8},
+		new int[] {16*8+7,16*8+6,16*8+5,16*8+4,16*8+3,16*8+2,16*8+1,16*8+0,7,6,5,4,3,2,1,0},
+		new int[] {0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8},
 		32*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &stlforce_bglayout, 0, 256  },
-		{ REGION_GFX1, 0, &stlforce_txlayout, 0, 256  },
-		{ REGION_GFX2, 0, &stlforce_splayout, 0, 256  },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, stlforce_bglayout, 0, 256  ),
+		new GfxDecodeInfo( REGION_GFX1, 0, stlforce_txlayout, 0, 256  ),
+		new GfxDecodeInfo( REGION_GFX2, 0, stlforce_splayout, 0, 256  ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	static struct OKIM6295interface okim6295_interface =
@@ -227,26 +227,26 @@ public class stlforce
 		MDRV_SOUND_ADD(OKIM6295, okim6295_interface) // guess
 	MACHINE_DRIVER_END
 	
-	ROM_START( stlforce )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 code */
-		ROM_LOAD16_BYTE( "stlforce.105", 0x00000, 0x20000, CRC(3ec804ca) SHA1(4efcf3321b7111644ac3ee0a83ad95d0571a4021) )
-		ROM_LOAD16_BYTE( "stlforce.104", 0x00001, 0x20000, CRC(69b5f429) SHA1(5bd20fad91a22f4d62f85a5190d72dd824ee26a5) )
+	static RomLoadPtr rom_stlforce = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );/* 68000 code */
+		ROM_LOAD16_BYTE( "stlforce.105", 0x00000, 0x20000, CRC(3ec804ca);SHA1(4efcf3321b7111644ac3ee0a83ad95d0571a4021) )
+		ROM_LOAD16_BYTE( "stlforce.104", 0x00001, 0x20000, CRC(69b5f429);SHA1(5bd20fad91a22f4d62f85a5190d72dd824ee26a5) )
 	
-		ROM_REGION( 0x80000, REGION_SOUND1, 0 ) /* samples */
-		ROM_LOAD( "stlforce.u1", 0x00000, 0x80000, CRC(0a55edf1) SHA1(091f12e8110c62df22b370a2e710c930ba06e8ca) ) // 1xxxxxxxxxxxxxxxxxx = 0xFF (can probably be cut)
+		ROM_REGION( 0x80000, REGION_SOUND1, 0 );/* samples */
+		ROM_LOAD( "stlforce.u1", 0x00000, 0x80000, CRC(0a55edf1);SHA1(091f12e8110c62df22b370a2e710c930ba06e8ca) ) // 1xxxxxxxxxxxxxxxxxx = 0xFF (can probably be cut)
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 ) /* 16x16 bg tiles & 8x8 tx tiles merged */
-		ROM_LOAD16_BYTE( "stlforce.u27", 0x000001, 0x080000, CRC(c42ef365) SHA1(40e9ee29ea14b3bc2fbfa4e6acb7d680cf72f01a) )
-		ROM_LOAD16_BYTE( "stlforce.u28", 0x000000, 0x080000, CRC(6a4b7c98) SHA1(004d7f3c703c6abc79286fa58a4c6793d66fca39) )
-		ROM_LOAD16_BYTE( "stlforce.u29", 0x100001, 0x080000, CRC(30488f44) SHA1(af0d92d8952ce3cd893ab9569afdda12e17795e7) )
-		ROM_LOAD16_BYTE( "stlforce.u30", 0x100000, 0x080000, CRC(cf19d43a) SHA1(dc04930548ac5b7e2b74c6041325eac06e773ed5) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );/* 16x16 bg tiles & 8x8 tx tiles merged */
+		ROM_LOAD16_BYTE( "stlforce.u27", 0x000001, 0x080000, CRC(c42ef365);SHA1(40e9ee29ea14b3bc2fbfa4e6acb7d680cf72f01a) )
+		ROM_LOAD16_BYTE( "stlforce.u28", 0x000000, 0x080000, CRC(6a4b7c98);SHA1(004d7f3c703c6abc79286fa58a4c6793d66fca39) )
+		ROM_LOAD16_BYTE( "stlforce.u29", 0x100001, 0x080000, CRC(30488f44);SHA1(af0d92d8952ce3cd893ab9569afdda12e17795e7) )
+		ROM_LOAD16_BYTE( "stlforce.u30", 0x100000, 0x080000, CRC(cf19d43a);SHA1(dc04930548ac5b7e2b74c6041325eac06e773ed5) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* 16x16 sprites */
-		ROM_LOAD( "stlforce.u31", 0x40000, 0x40000, CRC(305a8eb5) SHA1(3a8d26f8bc4ec2e8246d1c59115e21cad876630d) )
-		ROM_LOAD( "stlforce.u32", 0x80000, 0x40000, CRC(760e8601) SHA1(a61f1d8566e09ce811382c6e23f3881e6c438f15) )
-		ROM_LOAD( "stlforce.u33", 0xc0000, 0x40000, CRC(19415cf3) SHA1(31490a1f3321558f82667b63f3963b2ec3fa0c59) )
-		ROM_LOAD( "stlforce.u36", 0x00000, 0x40000, CRC(037dfa9f) SHA1(224f5cd1a95d55b065aef5c0bd03b50cabcb619b) )
-	ROM_END
+		ROM_REGION( 0x100000, REGION_GFX2, 0 );/* 16x16 sprites */
+		ROM_LOAD( "stlforce.u31", 0x40000, 0x40000, CRC(305a8eb5);SHA1(3a8d26f8bc4ec2e8246d1c59115e21cad876630d) )
+		ROM_LOAD( "stlforce.u32", 0x80000, 0x40000, CRC(760e8601);SHA1(a61f1d8566e09ce811382c6e23f3881e6c438f15) )
+		ROM_LOAD( "stlforce.u33", 0xc0000, 0x40000, CRC(19415cf3);SHA1(31490a1f3321558f82667b63f3963b2ec3fa0c59) )
+		ROM_LOAD( "stlforce.u36", 0x00000, 0x40000, CRC(037dfa9f);SHA1(224f5cd1a95d55b065aef5c0bd03b50cabcb619b) )
+	ROM_END(); }}; 
 	
-	GAMEX(1994, stlforce, 0, stlforce, stlforce, 0, ROT0, "Electronic Devices Italy / Ecogames S.L. Spain", "Steel Force", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_stlforce	   = new GameDriver("1994"	,"stlforce"	,"stlforce.java"	,rom_stlforce,null	,machine_driver_stlforce	,input_ports_stlforce	,null	,ROT0	,	"Electronic Devices Italy / Ecogames S.L. Spain", "Steel Force", GAME_IMPERFECT_SOUND )
 }

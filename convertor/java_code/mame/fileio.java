@@ -121,7 +121,7 @@ public class fileio
 	
 			/* write-only cases */
 			case FILETYPE_SCREENSHOT:
-				if (!openforwrite)
+				if (openforwrite == 0)
 				{
 					logerror("mame_fopen: type %02x read not supported\n", filetype);
 					return NULL;
@@ -453,7 +453,7 @@ public class fileio
 		file = generic_fopen(FILETYPE_ROM, gamename, filename, hash, FILEFLAG_OPENREAD | FILEFLAG_HASH | FILEFLAG_VERIFY_ONLY);
 	
 		/* if we didn't succeed return -1 */
-		if (!file)
+		if (file == 0)
 			return -1;
 	
 		/* close the file and save the length & checksum */
@@ -980,7 +980,7 @@ public class fileio
 						if (oldnewname)
 							free(oldnewname);
 						oldname = oldnewname = newname;
-						if (!newname)
+						if (newname == 0)
 							break;
 	
 						/* remove any trailing path separator if needed */
@@ -1145,7 +1145,7 @@ public class fileio
 	
 		/* open the file */
 		f = osd_fopen(pathtype, pathindex, file, "rb");
-		if (!f)
+		if (f == 0)
 			return -1;
 	
 		/* determine length of file */
@@ -1164,7 +1164,7 @@ public class fileio
 	
 		/* allocate space for entire file */
 		data = malloc(length);
-		if (!data)
+		if (data == 0)
 		{
 			osd_fclose(f);
 			return -1;

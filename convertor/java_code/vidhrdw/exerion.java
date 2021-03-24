@@ -90,14 +90,14 @@ public class exerion
 	
 		/* fg chars */
 		for (i = 0; i < 256; i++)
-			colortable[i + 0x000] = 16 + (color_prom[(i & 0xc0) | ((i & 3) << 4) | ((i >> 2) & 15)] & 15);
+			colortable[i + 0x000] = 16 + (color_prom.read((i & 0xc0) | ((i & 3) << 4) | ((i >> 2) & 15))& 15);
 		color_prom += 256;
 	
 		/* color_prom now points to the beginning of the sprite lookup table */
 	
 		/* sprites */
 		for (i = 0; i < 256; i++)
-			colortable[i + 0x100] = 16 + (color_prom[(i & 0xc0) | ((i & 3) << 4) | ((i >> 2) & 15)] & 15);
+			colortable[i + 0x100] = 16 + (color_prom.read((i & 0xc0) | ((i & 3) << 4) | ((i >> 2) & 15))& 15);
 		color_prom += 256;
 	
 		/* bg chars (this is not the full story... there are four layers mixed */
@@ -129,7 +129,7 @@ public class exerion
 	
 		/* allocate memory to track the background latches */
 		background_latches = auto_malloc(Machine->drv->screen_height * 16);
-		if (!background_latches)
+		if (background_latches == 0)
 			return 1;
 	
 		/* allocate memory for the decoded background graphics */
@@ -199,7 +199,7 @@ public class exerion
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( exerion_videoreg_w )
+	public static WriteHandlerPtr exerion_videoreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 = flip screen and joystick input multiplexor */
 		exerion_cocktail_flip = data & 1;
@@ -214,10 +214,10 @@ public class exerion
 	
 		/* bits 6-7 sprite lookup table bank */
 		sprite_palette = (data & 0xc0) >> 6;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( exerion_video_latch_w )
+	public static WriteHandlerPtr exerion_video_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int ybeam = cpu_getscanline();
 	
@@ -234,10 +234,10 @@ public class exerion
 		/* modify data on the current scanline */
 		if (offset != -1)
 			current_latches[offset] = data;
-	}
+	} };
 	
 	
-	READ_HANDLER( exerion_video_timing_r )
+	public static ReadHandlerPtr exerion_video_timing_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* bit 1 is VBLANK */
 		/* bit 0 is the SNMI signal, which is low for H >= 0x1c0 and /VBLANK */
@@ -252,7 +252,7 @@ public class exerion
 			result |= 1;
 	
 		return result;
-	}
+	} };
 	
 	
 	/*************************************
@@ -290,7 +290,7 @@ public class exerion
 			pen_t *pens;
 	
 			/* the cocktail flip flag controls whether we count up or down in X */
-			if (!exerion_cocktail_flip)
+			if (exerion_cocktail_flip == 0)
 			{
 				/* skip processing anything that's not visible */
 				for (x = BACKGROUND_X_START; x < cliprect->min_x; x++)
@@ -397,7 +397,7 @@ public class exerion
 			{
 				if (spriteram[i+2] == 0x02)
 				{
-					fprintf (sprite_log, "%02x %02x %02x %02x\n",spriteram[i], spriteram[i+1], spriteram[i+2], spriteram[i+3]);
+					fprintf (sprite_log, "%02x %02x %02x %02x\n",spriteram.read(i), spriteram.read(i+1), spriteram.read(i+2), spriteram.read(i+3));
 				}
 			}
 		}
@@ -406,10 +406,10 @@ public class exerion
 		/* draw sprites */
 		for (i = 0; i < spriteram_size; i += 4)
 		{
-			int flags = spriteram[i + 0];
-			int y = spriteram[i + 1] ^ 255;
-			int code = spriteram[i + 2];
-			int x = spriteram[i + 3] * 2 + 72;
+			int flags = spriteram.read(i + 0);
+			int y = spriteram.read(i + 1)^ 255;
+			int code = spriteram.read(i + 2);
+			int x = spriteram.read(i + 3)* 2 + 72;
 	
 			int xflip = flags & 0x80;
 			int yflip = flags & 0x40;
@@ -455,8 +455,8 @@ public class exerion
 	
 				offs = sx + sy * 64;
 				drawgfx(bitmap, Machine->gfx[0],
-					videoram[offs] + 256 * char_bank,
-					((videoram[offs] & 0xf0) >> 4) + char_palette * 16,
+					videoram.read(offs)+ 256 * char_bank,
+					((videoram.read(offs)& 0xf0) >> 4) + char_palette * 16,
 					exerion_cocktail_flip, exerion_cocktail_flip, x, y,
 					cliprect, TRANSPARENCY_PEN, 0);
 			}

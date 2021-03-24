@@ -373,7 +373,7 @@ public class midwunit
 	 *
 	 *************************************/
 	
-	static void init_wunit_generic(void)
+	public static InitDriverPtr init_wunit_generic = new InitDriverPtr() { public void handler() (void)
 	{
 		UINT8 *base;
 		int i, j;
@@ -397,7 +397,7 @@ public class midwunit
 	
 		/* init sound */
 		dcs_init();
-	}
+	} };
 	
 	
 	
@@ -412,14 +412,14 @@ public class midwunit
 	
 	/********************** Mortal Kombat 3 **********************/
 	
-	static void init_mk3_common(void)
+	public static InitDriverPtr init_mk3_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* common init */
 		init_wunit_generic();
 	
 		/* serial prefixes 439, 528 */
 		midway_serial_pic_init(528);
-	}
+	} };
 	
 	DRIVER_INIT( mk3 )
 	{

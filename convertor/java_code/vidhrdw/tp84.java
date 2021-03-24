@@ -67,22 +67,22 @@ public class tp84
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x42 * bit2 + 0x90 * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -123,93 +123,93 @@ public class tp84
 	}
 	
 	
-	WRITE_HANDLER( tp84_videoram_w )
+	public static WriteHandlerPtr tp84_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_colorram_w )
+	public static WriteHandlerPtr tp84_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_videoram2_w )
+	public static WriteHandlerPtr tp84_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tp84_videoram2[offset] != data)
 		{
 			tp84_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_colorram2_w )
+	public static WriteHandlerPtr tp84_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tp84_colorram2[offset] != data)
 		{
 			tp84_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_scroll_x_w )
+	public static WriteHandlerPtr tp84_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_scroll_y_w )
+	public static WriteHandlerPtr tp84_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_flipscreen_x_w )
+	public static WriteHandlerPtr tp84_flipscreen_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen_x != (data & 0x01))
 		{
 			flip_screen_x_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tp84_flipscreen_y_w )
+	public static WriteHandlerPtr tp84_flipscreen_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen_y != (data & 0x01))
 		{
 			flip_screen_y_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	/*****
 	  col0 is a register to index the color Proms
 	*****/
-	WRITE_HANDLER( tp84_col0_w )
+	public static WriteHandlerPtr tp84_col0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (col0 != data)
 		{
 			col0 = data;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	/* Return the current video scan line */
-	READ_HANDLER( tp84_scanline_r )
+	public static ReadHandlerPtr tp84_scanline_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return scanline;
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		int coloffs = ((col0 & 0x18) << 1) + ((col0 & 0x07) << 6);
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0x30) << 4);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0x30) << 4);
 		int color = (attr & 0x0f) + coloffs;
 		int flags = ((attr & 0x40) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0);
 	
@@ -232,20 +232,20 @@ public class tp84
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
 	
 		sprite_mux_buffer = auto_malloc(256 * spriteram_size);
 	
-		if (!sprite_mux_buffer)
+		if (sprite_mux_buffer == 0)
 			return 1;
 	
 		return 0;

@@ -17,7 +17,6 @@ public class tms34010
 {
 	
 	#ifdef MAME_DEBUG
-	extern int debug_key_pressed;
 	#endif
 	
 	
@@ -171,50 +170,15 @@ public class tms34010
 		NULL				/* no shiftreg functions */
 	};
 	
-	static void check_interrupt(void);
-	static void vsblnk_callback(int cpunum);
+	static static void vsblnk_callback(int cpunum);
 	static void dpyint_callback(int cpunum);
-	static void tms34010_state_presave(void);
-	static void tms34010_state_postload(void);
-	
+	static static 
 	
 	
 	/*###################################################################################################
 	**	FUNCTION TABLES
 	**#################################################################################################*/
 	
-	extern void wfield_01(offs_t offset,data32_t data);
-	extern void wfield_02(offs_t offset,data32_t data);
-	extern void wfield_03(offs_t offset,data32_t data);
-	extern void wfield_04(offs_t offset,data32_t data);
-	extern void wfield_05(offs_t offset,data32_t data);
-	extern void wfield_06(offs_t offset,data32_t data);
-	extern void wfield_07(offs_t offset,data32_t data);
-	extern void wfield_08(offs_t offset,data32_t data);
-	extern void wfield_09(offs_t offset,data32_t data);
-	extern void wfield_10(offs_t offset,data32_t data);
-	extern void wfield_11(offs_t offset,data32_t data);
-	extern void wfield_12(offs_t offset,data32_t data);
-	extern void wfield_13(offs_t offset,data32_t data);
-	extern void wfield_14(offs_t offset,data32_t data);
-	extern void wfield_15(offs_t offset,data32_t data);
-	extern void wfield_16(offs_t offset,data32_t data);
-	extern void wfield_17(offs_t offset,data32_t data);
-	extern void wfield_18(offs_t offset,data32_t data);
-	extern void wfield_19(offs_t offset,data32_t data);
-	extern void wfield_20(offs_t offset,data32_t data);
-	extern void wfield_21(offs_t offset,data32_t data);
-	extern void wfield_22(offs_t offset,data32_t data);
-	extern void wfield_23(offs_t offset,data32_t data);
-	extern void wfield_24(offs_t offset,data32_t data);
-	extern void wfield_25(offs_t offset,data32_t data);
-	extern void wfield_26(offs_t offset,data32_t data);
-	extern void wfield_27(offs_t offset,data32_t data);
-	extern void wfield_28(offs_t offset,data32_t data);
-	extern void wfield_29(offs_t offset,data32_t data);
-	extern void wfield_30(offs_t offset,data32_t data);
-	extern void wfield_31(offs_t offset,data32_t data);
-	extern void wfield_32(offs_t offset,data32_t data);
 	
 	static void (*wfield_functions[32])(offs_t offset,data32_t data) =
 	{
@@ -321,7 +285,7 @@ public class tms34010
 	INLINE tms34010_regs *FINDCONTEXT(int cpu)
 	{
 		tms34010_regs *context = cpunum_get_context_ptr(cpu);
-		if (!context)
+		if (context == 0)
 			context = &state;
 		return context;
 	}
@@ -748,7 +712,7 @@ public class tms34010
 	
 		/* early out if no interrupts pending */
 		irq = IOREG(REG_INTPEND);
-		if (!irq)
+		if (irq == 0)
 			return;
 	
 		/* check for NMI first */
@@ -1274,7 +1238,7 @@ public class tms34010
 	
 		which = (which+1) % 40;
 		buffer[which][0] = '\0';
-		if (!context)
+		if (context == 0)
 			r = &state;
 	
 		switch (regnum)
@@ -1687,7 +1651,7 @@ public class tms34010
 	
 			case REG_HSTCTLL:
 				/* the TMS34010 can change MSGOUT, can set INTOUT, and can clear INTIN */
-				if (!external_host_access)
+				if (external_host_access == 0)
 				{
 					newreg = (oldreg & 0xff8f) | (data & 0x0070);
 					newreg |= data & 0x0080;
@@ -1852,7 +1816,7 @@ public class tms34010
 	
 			case REG020_HSTCTLL:
 				/* the TMS34010 can change MSGOUT, can set INTOUT, and can clear INTIN */
-				if (!external_host_access)
+				if (external_host_access == 0)
 				{
 					newreg = (oldreg & 0xff8f) | (data & 0x0070);
 					newreg |= data & 0x0080;

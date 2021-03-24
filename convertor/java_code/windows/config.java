@@ -40,7 +40,6 @@ public class config
 	#ifdef MESS
 	#endif
 	
-	extern int frontend_help(char *gamename);
 	static int config_handle_arg(char *arg);
 	
 	static FILE *logfile;
@@ -52,13 +51,11 @@ public class config
 	static int showusage;
 	static int readconfig;
 	static int createconfig;
-	extern int verbose;
 	
 	struct rc_struct *rc;
 	
 	/* fix me - need to have the core call osd_set_mastervolume with this value */
 	/* instead of relying on the name of an osd variable */
-	extern int attenuation;
 	
 	static char *debugres;
 	static char *playbackname;
@@ -143,7 +140,7 @@ public class config
 		{
 			logfile = fopen("error.log","wa");
 			curlogsize = 0;
-			if (!logfile)
+			if (logfile == 0)
 			{
 				perror("unable to open log file\n");
 				exit (1);
@@ -259,7 +256,7 @@ public class config
 			if (match != last)
 			{
 				last = match;
-				if (!match)
+				if (match == 0)
 					gaps++;
 			}
 		}
@@ -328,7 +325,7 @@ public class config
 		char buffer[128];
 		int retval = 0;
 	
-		if (!readconfig) return 0;
+		if (readconfig == 0) return 0;
 	
 		if (gamedrv)
 		{
@@ -380,7 +377,7 @@ public class config
 		struct rc_struct *result;
 	
 		result = rc_create();
-		if (!result)
+		if (result == 0)
 			return NULL;
 	
 		if (rc_register(result, opts))
@@ -408,7 +405,7 @@ public class config
 	
 		/* create the rc object */
 		rc = cli_rc_create();
-		if (!rc)
+		if (rc == 0)
 		{
 			fprintf (stderr, "error on rc creation\n");
 			exit(1);
@@ -423,7 +420,7 @@ public class config
 	
 		/* determine global configfile name */
 		cmd_name = win_strip_extension(win_basename(argv[0]));
-		if (!cmd_name)
+		if (cmd_name == 0)
 		{
 			fprintf (stderr, "who am I? cannot determine the name I was called with\n");
 			exit(1);
@@ -640,7 +637,7 @@ public class config
 		options.debug_depth = 8;
 	
 		/* no sound is indicated by a 0 samplerate */
-		if (!enable_sound)
+		if (enable_sound == 0)
 			options.samplerate = 0;
 	
 		/* set the artwork options */
@@ -651,7 +648,7 @@ public class config
 			options.use_artwork &= ~ARTWORK_USE_OVERLAYS;
 		if (use_bezels == 0)
 			options.use_artwork &= ~ARTWORK_USE_BEZELS;
-		if (!use_artwork)
+		if (use_artwork == 0)
 			options.use_artwork = ARTWORK_USE_NONE;
 	
 	{
@@ -808,8 +805,7 @@ public class config
 	
 		if (erroroslog)
 		{
-			//extern int vsnprintf(char *s, size_t maxlen, const char *fmt, va_list _arg);
-			char buffer[2048];
+			//		char buffer[2048];
 			_vsnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]), text, arg);
 			OutputDebugString(buffer);
 		}
@@ -857,7 +853,7 @@ public class config
 		char *c;
 	
 		// NULL begets NULL
-		if (!filename)
+		if (filename == 0)
 			return NULL;
 	
 		// start at the end and return when we hit a slash or colon
@@ -881,12 +877,12 @@ public class config
 		char *c;
 	
 		// NULL begets NULL
-		if (!filename)
+		if (filename == 0)
 			return NULL;
 	
 		// allocate space for it
 		dirname = malloc(strlen(filename) + 1);
-		if (!dirname)
+		if (dirname == 0)
 		{
 			fprintf(stderr, "error: malloc failed in win_dirname\n");
 			return NULL;
@@ -921,12 +917,12 @@ public class config
 		char *c;
 	
 		// NULL begets NULL
-		if (!filename)
+		if (filename == 0)
 			return NULL;
 	
 		// allocate space for it
 		newname = malloc(strlen(filename) + 1);
-		if (!newname)
+		if (newname == 0)
 		{
 			fprintf(stderr, "error: malloc failed in win_strip_extension\n");
 			return NULL;

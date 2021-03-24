@@ -63,14 +63,7 @@ public class atarijsa
 	static UINT8 tms5220_volume;
 	static UINT8 oki6295_volume;
 	
-	static void update_all_volumes(void);
-	
-	static READ_HANDLER( jsa1_io_r );
-	static WRITE_HANDLER( jsa1_io_w );
-	static READ_HANDLER( jsa2_io_r );
-	static WRITE_HANDLER( jsa2_io_w );
-	static READ_HANDLER( jsa3_io_r );
-	static WRITE_HANDLER( jsa3_io_w );
+	static 
 	
 	
 	/*************************************
@@ -170,7 +163,7 @@ public class atarijsa
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( jsa1_io_r )
+	public static ReadHandlerPtr jsa1_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0xff;
 	
@@ -215,10 +208,10 @@ public class atarijsa
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( jsa1_io_w )
+	public static WriteHandlerPtr jsa1_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 0x206)
 		{
@@ -284,7 +277,7 @@ public class atarijsa
 				update_all_volumes();
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -294,7 +287,7 @@ public class atarijsa
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( jsa2_io_r )
+	public static ReadHandlerPtr jsa2_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0xff;
 	
@@ -341,10 +334,10 @@ public class atarijsa
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( jsa2_io_w )
+	public static WriteHandlerPtr jsa2_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 0x206)
 		{
@@ -405,7 +398,7 @@ public class atarijsa
 				update_all_volumes();
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -415,7 +408,7 @@ public class atarijsa
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( jsa3_io_r )
+	public static ReadHandlerPtr jsa3_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0xff;
 	
@@ -460,10 +453,10 @@ public class atarijsa
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( jsa3_io_w )
+	public static WriteHandlerPtr jsa3_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 0x206)
 		{
@@ -536,7 +529,7 @@ public class atarijsa
 				update_all_volumes();
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -546,7 +539,7 @@ public class atarijsa
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( jsa3s_io_r )
+	public static ReadHandlerPtr jsa3s_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0xff;
 	
@@ -596,10 +589,10 @@ public class atarijsa
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( jsa3s_io_w )
+	public static WriteHandlerPtr jsa3s_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 0x206)
 		{
@@ -679,7 +672,7 @@ public class atarijsa
 				update_all_volumes();
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -788,12 +781,12 @@ public class atarijsa
 	};
 	
 	
-	static struct POKEYinterface pokey_interface =
-	{
+	static POKEYinterface pokey_interface = new POKEYinterface
+	(
 		1,			/* 1 chip */
 		ATARI_CLOCK_3MHz/2,
-		{ 40 },
-	};
+		new int[] { 40 },
+	);
 	
 	
 	static struct YM2151interface ym2151_interface =

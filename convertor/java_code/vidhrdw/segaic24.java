@@ -84,25 +84,25 @@ public class segaic24
 	static struct tilemap *sys24_tile_layer[4];
 	
 	#ifdef LSB_FIRST
-	static struct GfxLayout sys24_char_layout = {
+	static GfxLayout sys24_char_layout = new GfxLayout(
 		8, 8,
 		SYS24_TILES,
 		4,
-		{ 0, 1, 2, 3 },
-		{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		8*32
-	};
+	);
 	#else
-	static struct GfxLayout sys24_char_layout = {
+	static GfxLayout sys24_char_layout = new GfxLayout(
 		8, 8,
 		SYS24_TILES,
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		8*32
-	};
+	);
 	#endif
 	
 	static void sys24_tile_info_0s(int tile_index)
@@ -150,17 +150,17 @@ public class segaic24
 			return 1;
 	
 		sys24_char_ram = auto_malloc(0x80000);
-		if(!sys24_char_ram)
+		if (sys24_char_ram == 0)
 			return 1;
 	
 		sys24_tile_ram = auto_malloc(0x10000);
-		if(!sys24_tile_ram) {
+		if (sys24_tile_ram == 0) {
 			free(sys24_char_ram);
 			return 1;
 		}
 	
 		sys24_char_dirtymap = auto_malloc(SYS24_TILES);
-		if(!sys24_char_dirtymap) {
+		if (sys24_char_dirtymap == 0) {
 			free(sys24_tile_ram);
 			free(sys24_char_ram);
 			return 1;
@@ -272,7 +272,7 @@ public class segaic24
 				if(!cur_x && llx>=128) {
 					// Fast paths for the 128-pixels without side clipping case
 	
-					if(!m) {
+					if (m == 0) {
 						// 1- 128 pixels from this layer
 						int x;
 						for(x=0; x<128; x++) {
@@ -315,7 +315,7 @@ public class segaic24
 					// Clipped path
 					int llx1 = llx >= 128 ? 128 : llx;
 	
-					if(!m) {
+					if (m == 0) {
 						// 1- 128 pixels from this layer
 						int x;
 						for(x = cur_x; x<llx1; x++) {
@@ -404,7 +404,7 @@ public class segaic24
 				if(!cur_x && llx>=128) {
 					// Fast paths for the 128-pixels without side clipping case
 	
-					if(!m) {
+					if (m == 0) {
 						// 1- 128 pixels from this layer
 						int x;
 						for(x=0; x<128; x++) {
@@ -440,7 +440,7 @@ public class segaic24
 					// Clipped path
 					int llx1 = llx >= 128 ? 128 : llx;
 	
-					if(!m) {
+					if (m == 0) {
 						// 1- 128 pixels from this layer
 						int x;
 						for(x = cur_x; x<llx1; x++) {
@@ -648,16 +648,16 @@ public class segaic24
 	
 	static UINT16 *sys24_sprite_ram;
 	
-	int sys24_sprite_vh_start(void)
+	public static VhStartPtr sys24_sprite_vh_start = new VhStartPtr() { public int handler() 
 	{
 		sys24_sprite_ram = auto_malloc(0x40000);
-		if(!sys24_sprite_ram)
+		if (sys24_sprite_ram == 0)
 			return 1;
 	
 		state_save_register_UINT16("system24 sprite", 0, "ram", sys24_sprite_ram, 0x20000);
 		//	kc = 0;
 		return 0;
-	}
+	} };
 	
 	/* System24 sprites
 	      Normal sprite:
@@ -766,9 +766,9 @@ public class segaic24
 				zoomx = source[1] >> 8;
 				zoomy = source[1] & 0xff;
 			}
-			if(!zoomx)
+			if (zoomx == 0)
 				zoomx = 0x3f;
-			if(!zoomy)
+			if (zoomy == 0)
 				zoomy = 0x3f;
 	
 			zoomx++;
@@ -885,12 +885,12 @@ public class segaic24
 	
 	static UINT16 sys24_mixer_reg[0x10];
 	
-	int sys24_mixer_vh_start(void)
+	public static VhStartPtr sys24_mixer_vh_start = new VhStartPtr() { public int handler() 
 	{
 		memset(sys24_mixer_reg, 0, sizeof(sys24_mixer_reg));
 		state_save_register_UINT16("system24 mixer", 0, "regs", sys24_mixer_reg, 0x10);
 		return 0;
-	}
+	} };
 	
 	WRITE16_HANDLER (sys24_mixer_w)
 	{

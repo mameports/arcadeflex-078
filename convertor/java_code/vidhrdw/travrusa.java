@@ -67,18 +67,18 @@ public class travrusa
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -94,18 +94,18 @@ public class travrusa
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i+128,r,g,b);
@@ -117,7 +117,7 @@ public class travrusa
 	
 		/* sprite lookup table */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
-			COLOR(1,i) = (color_prom[i] & 0x0f) + 128;
+			COLOR(1,i) = (color_prom.read(i)& 0x0f) + 128;
 	}
 	
 	PALETTE_INIT( shtrider )
@@ -135,18 +135,18 @@ public class travrusa
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 2) & 0x01;
-			bit2 = (color_prom[i] >> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 2) & 0x01;
+			bit2 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i+256] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 0) & 0x01;
-			bit2 = (color_prom[i] >> 1) & 0x01;
+			bit0 = (color_prom.read(i+256)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 0) & 0x01;
+			bit2 = (color_prom.read(i)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[i+256] >> 0) & 0x01;
-			bit1 = (color_prom[i+256] >> 1) & 0x01;
-			bit2 = (color_prom[i+256] >> 2) & 0x01;
+			bit0 = (color_prom.read(i+256)>> 0) & 0x01;
+			bit1 = (color_prom.read(i+256)>> 1) & 0x01;
+			bit2 = (color_prom.read(i+256)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -163,18 +163,18 @@ public class travrusa
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i+128,r,g,b);
@@ -185,7 +185,7 @@ public class travrusa
 	
 		/* sprite lookup table */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
-			COLOR(1,i) = (color_prom[i] & 0x0f) + 128;
+			COLOR(1,i) = (color_prom.read(i)& 0x0f) + 128;
 	}
 	
 	
@@ -219,7 +219,7 @@ public class travrusa
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_SPLIT,8,8,64,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transmask(bg_tilemap,0,0xff,0x00); /* split type 0 is totally transparent in front half */
@@ -238,14 +238,14 @@ public class travrusa
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( travrusa_videoram_w )
+	public static WriteHandlerPtr travrusa_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (travrusa_videoram[offset] != data)
 		{
 			travrusa_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
 	
 	static int scrollx[2];
@@ -259,20 +259,20 @@ public class travrusa
 		tilemap_set_scrollx(bg_tilemap,3,0);
 	}
 	
-	WRITE_HANDLER( travrusa_scroll_x_low_w )
+	public static WriteHandlerPtr travrusa_scroll_x_low_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollx[0] = data;
 		set_scroll();
-	}
+	} };
 	
-	WRITE_HANDLER( travrusa_scroll_x_high_w )
+	public static WriteHandlerPtr travrusa_scroll_x_high_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollx[1] = data;
 		set_scroll();
-	}
+	} };
 	
 	
-	WRITE_HANDLER( travrusa_flipscreen_w )
+	public static WriteHandlerPtr travrusa_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* screen flip is handled both by software and hardware */
 		data ^= ~readinputport(4) & 1;
@@ -281,7 +281,7 @@ public class travrusa
 	
 		coin_counter_w(0,data & 0x02);
 		coin_counter_w(1,data & 0x20);
-	}
+	} };
 	
 	
 	
@@ -294,16 +294,16 @@ public class travrusa
 	static void draw_sprites(struct mame_bitmap *bitmap,const struct rectangle *cliprect)
 	{
 		int offs;
-		static struct rectangle spritevisiblearea =
-		{
+		static rectangle spritevisiblearea = new rectangle
+		(
 			1*8, 31*8-1,
 			0*8, 24*8-1
-		};
-		static struct rectangle spritevisibleareaflip =
-		{
+		);
+		static rectangle spritevisibleareaflip = new rectangle
+		(
 			1*8, 31*8-1,
 			8*8, 32*8-1
-		};
+		);
 		struct rectangle clip = *cliprect;
 		if (flip_screen)
 			sect_rect(&clip, &spritevisibleareaflip);
@@ -313,10 +313,10 @@ public class travrusa
 	
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			int sx = ((spriteram[offs + 3] + 8) & 0xff) - 8;
-			int sy = 240 - spriteram[offs];
-			int code = spriteram[offs + 2];
-			int attr = spriteram[offs + 1];
+			int sx = ((spriteram.read(offs + 3)+ 8) & 0xff) - 8;
+			int sy = 240 - spriteram.read(offs);
+			int code = spriteram.read(offs + 2);
+			int attr = spriteram.read(offs + 1);
 			int flipx = attr & 0x40;
 			int flipy = attr & 0x80;
 	

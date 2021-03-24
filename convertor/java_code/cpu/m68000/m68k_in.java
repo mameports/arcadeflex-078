@@ -102,9 +102,7 @@ M68KMAKE_PROTOTYPE_FOOTER
 
 
 /* Build the opcode handler table */
-void m68ki_build_opcode_table(void);
 
-extern void (*m68ki_instruction_jump_table[0x10000])(void); /* opcode handler jump table */
 extern unsigned char m68ki_cycles[][0x10000];
 
 
@@ -6826,7 +6824,7 @@ public class m68k_in
 					if(CPU_TYPE_IS_EC020_PLUS(CPU_TYPE))
 					{
 						/* we are in supervisor mode so just check for M flag */
-						if(!FLAG_M)
+						if (FLAG_M == 0)
 						{
 							REG_MSP = REG_DA[(word2 >> 12) & 15];
 							return;
@@ -6839,7 +6837,7 @@ public class m68k_in
 				case 0x804:			   /* ISP */
 					if(CPU_TYPE_IS_EC020_PLUS(CPU_TYPE))
 					{
-						if(!FLAG_M)
+						if (FLAG_M == 0)
 						{
 							REG_SP = REG_DA[(word2 >> 12) & 15];
 							return;

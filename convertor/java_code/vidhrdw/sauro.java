@@ -24,51 +24,51 @@ public class sauro
 	
 	/* General */
 	
-	WRITE_HANDLER( tecfri_videoram_w )
+	public static WriteHandlerPtr tecfri_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tecfri_videoram[offset] != data)
 		{
 			tecfri_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tecfri_colorram_w )
+	public static WriteHandlerPtr tecfri_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tecfri_colorram[offset] != data)
 		{
 			tecfri_colorram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tecfri_videoram2_w )
+	public static WriteHandlerPtr tecfri_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tecfri_videoram2[offset] != data)
 		{
 			tecfri_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tecfri_colorram2_w )
+	public static WriteHandlerPtr tecfri_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tecfri_colorram2[offset] != data)
 		{
 			tecfri_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tecfri_scroll_bg_w )
+	public static WriteHandlerPtr tecfri_scroll_bg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( flip_screen_w )
+	public static WriteHandlerPtr flip_screen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data);
-	}
+	} };
 	
 	static void get_tile_info_bg(int tile_index)
 	{
@@ -93,26 +93,26 @@ public class sauro
 	static int scroll2_map     [8] = {2, 1, 4, 3, 6, 5, 0, 7};
 	static int scroll2_map_flip[8] = {0, 7, 2, 1, 4, 3, 6, 5};
 	
-	WRITE_HANDLER( sauro_scroll_fg_w )
+	public static WriteHandlerPtr sauro_scroll_fg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int *map = (flip_screen ? scroll2_map_flip : scroll2_map);
 		int scroll = (data & 0xf8) | map[data & 7];
 	
 		tilemap_set_scrollx(fg_tilemap, 0, scroll);
-	}
+	} };
 	
 	VIDEO_START( sauro )
 	{
 		bg_tilemap = tilemap_create(get_tile_info_bg, tilemap_scan_cols,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 		
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_tile_info_fg, tilemap_scan_cols,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 		
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -126,16 +126,16 @@ public class sauro
 	
 		for (offs = 3;offs < spriteram_size - 1;offs += 4)
 		{
-			sy = spriteram[offs];
+			sy = spriteram.read(offs);
 			if (sy == 0xf8) continue;
 	
-			code = spriteram[offs+1] + ((spriteram[offs+3] & 0x03) << 8);
-			sx = spriteram[offs+2];
+			code = spriteram.read(offs+1)+ ((spriteram.read(offs+3)& 0x03) << 8);
+			sx = spriteram.read(offs+2);
 			sy = 236 - sy;
-			color = (spriteram[offs+3] >> 4) & 0x0f;
+			color = (spriteram.read(offs+3)>> 4) & 0x0f;
 	
 			// I'm not really sure how this bit works
-			if (spriteram[offs+3] & 0x08)
+			if (spriteram.read(offs+3)& 0x08)
 			{
 				if (sx > 0xc0)
 				{
@@ -148,7 +148,7 @@ public class sauro
 				if (sx < 0x40) continue;
 			}
 	
-			flipx = spriteram[offs+3] & 0x04;
+			flipx = spriteram.read(offs+3)& 0x04;
 	
 			if (flip_screen)
 			{
@@ -177,7 +177,7 @@ public class sauro
 	
 	WRITE_HANDLER ( trckydoc_spriteram_mirror_w )
 	{
-		spriteram[offset] = data;
+		spriteram.write(offset,data);
 	}
 	
 	VIDEO_START( trckydoc )
@@ -185,7 +185,7 @@ public class sauro
 		bg_tilemap = tilemap_create(get_tile_info_bg, tilemap_scan_cols,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 		
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -198,23 +198,23 @@ public class sauro
 		/* Weird, sprites entries don't start on DWORD boundary */
 		for (offs = 3;offs < spriteram_size - 1;offs += 4)
 		{
-			sy = spriteram[offs];
+			sy = spriteram.read(offs);
 	
-			if(spriteram[offs+3] & 0x08)
+			if(spriteram.read(offs+3)& 0x08)
 			{
 				/* needed by the elevator cable (2nd stage), balls bouncing (3rd stage) and maybe other things */
 				sy += 6;
 			}
 	
-			code = spriteram[offs+1] + ((spriteram[offs+3] & 0x01) << 8);
+			code = spriteram.read(offs+1)+ ((spriteram.read(offs+3)& 0x01) << 8);
 	
-			sx = spriteram[offs+2]-2;
-			color = (spriteram[offs+3] >> 4) & 0x0f;
+			sx = spriteram.read(offs+2)-2;
+			color = (spriteram.read(offs+3)>> 4) & 0x0f;
 	
 			sy = 236 - sy;
 	
 			/* similar to sauro but different bit is used .. */
-			if (spriteram[offs+3] & 0x02)
+			if (spriteram.read(offs+3)& 0x02)
 			{
 				if (sx > 0xc0)
 				{
@@ -227,7 +227,7 @@ public class sauro
 				if (sx < 0x40) continue;
 			}
 	
-			flipx = spriteram[offs+3] & 0x04;
+			flipx = spriteram.read(offs+3)& 0x04;
 	
 			if (flip_screen)
 			{

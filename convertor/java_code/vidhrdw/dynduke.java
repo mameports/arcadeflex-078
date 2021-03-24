@@ -16,13 +16,13 @@ public class dynduke
 	
 	/******************************************************************************/
 	
-	WRITE_HANDLER( dynduke_paletteram_w )
+	public static WriteHandlerPtr dynduke_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 		int color;
 	
-		paletteram[offset]=data;
-		color=paletteram[offset&0xffe]|(paletteram[offset|1]<<8);
+		paletteram.write(offset,data);
+		color=paletteram.read(offset&0xffe)|(paletteram.read(offset|1)<<8);
 	
 		r = (color >> 0) & 0x0f;
 		g = (color >> 4) & 0x0f;
@@ -40,35 +40,35 @@ public class dynduke
 			palette_set_color(((offset&0x1f)/2) | (offset&0xffe0) | 2048,r,g,b);
 			palette_set_color(((offset&0x1f)/2) | (offset&0xffe0) | 2048 | 16,r,g,b);
 		}
-	}
+	} };
 	
-	READ_HANDLER( dynduke_background_r )
+	public static ReadHandlerPtr dynduke_background_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return dynduke_back_data[offset];
-	}
+	} };
 	
-	READ_HANDLER( dynduke_foreground_r )
+	public static ReadHandlerPtr dynduke_foreground_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return dynduke_fore_data[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( dynduke_background_w )
+	public static WriteHandlerPtr dynduke_background_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dynduke_back_data[offset]=data;
 		tilemap_mark_tile_dirty(bg_layer,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( dynduke_foreground_w )
+	public static WriteHandlerPtr dynduke_foreground_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dynduke_fore_data[offset]=data;
 		tilemap_mark_tile_dirty(fg_layer,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( dynduke_text_w )
+	public static WriteHandlerPtr dynduke_text_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(tx_layer,offset/2);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -100,8 +100,8 @@ public class dynduke
 	
 	static void get_tx_tile_info(int tile_index)
 	{
-		int tile=videoram[2*tile_index]+((videoram[2*tile_index+1]&0xc0)<<2);
-		int color=videoram[2*tile_index+1]&0xf;
+		int tile=videoram.read(2*tile_index)+((videoram.read(2*tile_index+1)&0xc0)<<2);
+		int color=videoram.read(2*tile_index+1)&0xf;
 	
 		SET_TILE_INFO(
 				0,
@@ -124,7 +124,7 @@ public class dynduke
 		return 0;
 	}
 	
-	WRITE_HANDLER( dynduke_gfxbank_w )
+	public static WriteHandlerPtr dynduke_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int old_back,old_fore;
 	
@@ -138,9 +138,9 @@ public class dynduke
 	
 		old_back=back_bankbase;
 		old_fore=fore_bankbase;
-	}
+	} };
 	
-	WRITE_HANDLER( dynduke_control_w )
+	public static WriteHandlerPtr dynduke_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int old_bpal;
 	
@@ -159,13 +159,13 @@ public class dynduke
 		old_bpal=back_palbase;
 		flipscreen=data&0x40;
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-	}
+	} };
 	
 	static void draw_sprites(struct mame_bitmap *bitmap,const struct rectangle *cliprect,int pri)
 	{
 		int offs,fx,fy,x,y,color,sprite;
 	
-		if (!sprite_enable) return;
+		if (sprite_enable == 0) return;
 	
 		for (offs = 0x1000-8;offs >= 0;offs -= 8)
 		{

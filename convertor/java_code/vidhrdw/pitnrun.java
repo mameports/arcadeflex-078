@@ -39,7 +39,7 @@ public class pitnrun
 	static void get_tile_info1(int tile_index)
 	{
 		int code;
-		code = videoram[tile_index];
+		code = videoram.read(tile_index);
 		SET_TILE_INFO(
 			0,
 			code,
@@ -58,44 +58,44 @@ public class pitnrun
 			0)
 	}
 	
-	WRITE_HANDLER( pitnrun_videoram_w )
+	public static WriteHandlerPtr pitnrun_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_all_tiles_dirty( fg );
-	}
+	} };
 	
-	WRITE_HANDLER( pitnrun_videoram2_w )
+	public static WriteHandlerPtr pitnrun_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		videoram2[offset] = data;
 		tilemap_mark_all_tiles_dirty( bg );
-	}
+	} };
 	
 	
-	READ_HANDLER( pitnrun_videoram_r )
+	public static ReadHandlerPtr pitnrun_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
-	READ_HANDLER( pitnrun_videoram2_r )
+	public static ReadHandlerPtr pitnrun_videoram2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return videoram2[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( pitnrun_char_bank_select )
+	public static WriteHandlerPtr pitnrun_char_bank_select = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if(pitnrun_char_bank!=data)
 		{
 			tilemap_mark_all_tiles_dirty( bg );
 			pitnrun_char_bank=data;
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( pitnrun_scroll_w )
+	public static WriteHandlerPtr pitnrun_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pitnrun_scroll = (pitnrun_scroll & (0xff<<((offset)?0:8))) |( data<<((offset)?8:0));
 		tilemap_set_scrollx( bg, 0, pitnrun_scroll);
-	}
+	} };
 	
 	WRITE_HANDLER(pitnrun_ha_w)
 	{
@@ -142,17 +142,17 @@ public class pitnrun
 		int bit0,bit1,bit2,r,g,b;
 		for (i = 0;i < 32*3; i++)
 		{
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -161,17 +161,17 @@ public class pitnrun
 		/* fake bg palette for lightning effect*/
 		for(i=2*16;i<2*16+16;i++)
 		{
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			r/=3;
 			g/=3;
@@ -202,12 +202,12 @@ public class pitnrun
 		for (offs = 0 ; offs < 0x100; offs+=4)
 		{
 			
-			pal=spriteram[offs+2]&0x3;
+			pal=spriteram.read(offs+2)&0x3;
 		
-			sy = 256-spriteram[offs+0]-16;
-			sx = spriteram[offs+3];
-			flipy = (spriteram[offs+1]&0x80)>>7;
-			flipx = (spriteram[offs+1]&0x40)>>6;
+			sy = 256-spriteram.read(offs+0)-16;
+			sx = spriteram.read(offs+3);
+			flipy = (spriteram.read(offs+1)&0x80)>>7;
+			flipx = (spriteram.read(offs+1)&0x40)>>6;
 			
 			if (flip_screen_x)
 			{
@@ -221,7 +221,7 @@ public class pitnrun
 			}
 			
 			drawgfx(bitmap,Machine->gfx[2],
-	 			(spriteram[offs+1]&0x3f)+((spriteram[offs+2]&0x80)>>1)+((spriteram[offs+2]&0x40)<<1),
+	 			(spriteram.read(offs+1)&0x3f)+((spriteram.read(offs+2)&0x80)>>1)+((spriteram.read(offs+2)&0x40)<<1),
 				pal,
 				flipx,flipy,
 				sx,sy,

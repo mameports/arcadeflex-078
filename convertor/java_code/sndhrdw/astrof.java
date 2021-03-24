@@ -72,7 +72,7 @@ public class astrof
 	static int death_playing = 0;
 	static int bosskill_playing = 0;
 	
-	WRITE_HANDLER( astrof_sample1_w )
+	public static WriteHandlerPtr astrof_sample1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int last = 0;
 	
@@ -111,7 +111,7 @@ public class astrof
 		/* Bit 4 - Boss Laser */
 		if ((data & 0x10) && !(last & 0x10))
 		{
-			if (!bosskill_playing)
+			if (bosskill_playing == 0)
 			{
 				sample_start(CHANNEL_BOSSFIRE,SAMPLE_BOSSFIRE,0);
 			}
@@ -120,7 +120,7 @@ public class astrof
 		/* Bit 5 - Fire */
 		if ((data & 0x20) && !(last & 0x20))
 		{
-			if (!bosskill_playing)
+			if (bosskill_playing == 0)
 			{
 				sample_start(CHANNEL_FIRE,SAMPLE_FIRE,0);
 			}
@@ -131,10 +131,10 @@ public class astrof
 		/* Bit 7 - Don't know. Maybe a global sound enable bit? */
 	
 		last = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( astrof_sample2_w )
+	public static WriteHandlerPtr astrof_sample2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int last = 0;
 	
@@ -146,7 +146,7 @@ public class astrof
 				/* This is really a compound effect, made up of I believe 3 sound
 				   effects, but since our sample contains them all, disable playing
 				   the other effects while the explosion is playing */
-				if (!bosskill_playing)
+				if (bosskill_playing == 0)
 				{
 					sample_start(CHANNEL_EXPLOSION,SAMPLE_BOSSKILL,0);
 					bosskill_playing = 1;
@@ -162,7 +162,7 @@ public class astrof
 			}
 			else
 			{
-				if (!death_playing)
+				if (death_playing == 0)
 				{
 					sample_start(CHANNEL_EXPLOSION,SAMPLE_DEATH,0);
 					death_playing = 1;
@@ -179,6 +179,6 @@ public class astrof
 		}
 	
 		last = data;
-	}
+	} };
 	
 }

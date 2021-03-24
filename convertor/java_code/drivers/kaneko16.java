@@ -927,16 +927,16 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	READ_HANDLER( kaneko16_eeprom_r )
+	public static ReadHandlerPtr kaneko16_eeprom_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return EEPROM_read_bit() & 1;
-	}
+	} };
 	
-	WRITE_HANDLER( kaneko16_eeprom_reset_w )
+	public static WriteHandlerPtr kaneko16_eeprom_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		// reset line asserted: reset.
 		EEPROM_set_cs_line((data & 0x01) ? CLEAR_LINE : ASSERT_LINE );
-	}
+	} };
 	
 	WRITE16_HANDLER( kaneko16_eeprom_w )
 	{
@@ -1585,38 +1585,46 @@ public class kaneko16
 	***************************************************************************/
 	
 	#if 0
-	static WRITE_HANDLER( blazeon_bankswitch_w )
+	public static WriteHandlerPtr blazeon_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *RAM = memory_region(REGION_CPU1);
 		int bank = data & 7;
 		cpu_setbank(15, &RAM[bank * 0x10000 + 0x1000]);
-	}
+	} };
 	#endif
 	
-	static MEMORY_READ_START( blazeon_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM					},	// ROM
-		{ 0xc000, 0xdfff, MRA_RAM					},	// RAM
-	MEMORY_END
-	static MEMORY_WRITE_START( blazeon_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM					},	// ROM
-		{ 0xc000, 0xdfff, MWA_RAM					},	// RAM
-	MEMORY_END
+	public static Memory_ReadAddress blazeon_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM					),	// ROM
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM					),	// RAM
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
+	public static Memory_WriteAddress blazeon_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM					),	// ROM
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM					),	// RAM
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( blazeon_sound_readport )
-		{ 0x03, 0x03, YM2151_status_port_0_r	},
-		{ 0x06, 0x06, soundlatch_r				},
-	PORT_END
-	static PORT_WRITE_START( blazeon_sound_writeport )
-		{ 0x02, 0x02, YM2151_register_port_0_w	},
-		{ 0x03, 0x03, YM2151_data_port_0_w		},
-	PORT_END
+	public static IO_ReadPort blazeon_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x03, 0x03, YM2151_status_port_0_r	),
+		new IO_ReadPort( 0x06, 0x06, soundlatch_r				),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
+	public static IO_WritePort blazeon_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x02, 0x02, YM2151_register_port_0_w	),
+		new IO_WritePort( 0x03, 0x03, YM2151_data_port_0_w		),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
 									Sand Scorpion
 	***************************************************************************/
 	
-	WRITE_HANDLER( sandscrp_bankswitch_w )
+	public static WriteHandlerPtr sandscrp_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *RAM = memory_region(REGION_CPU1);
 		int bank = data & 0x07;
@@ -1627,50 +1635,58 @@ public class kaneko16
 		else			RAM = &RAM[0x4000 * (bank-3) + 0x10000];
 	
 		cpu_setbank(1, RAM);
-	}
+	} };
 	
-	static READ_HANDLER( sandscrp_latchstatus_r )
+	public static ReadHandlerPtr sandscrp_latchstatus_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return	(latch2_full ? 0x80 : 0) |	// swapped!?
 				(latch1_full ? 0x40 : 0) ;
-	}
+	} };
 	
-	static READ_HANDLER( sandscrp_soundlatch_r )
+	public static ReadHandlerPtr sandscrp_soundlatch_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		latch1_full = 0;
 		return soundlatch_r(0);
-	}
+	} };
 	
-	static WRITE_HANDLER( sandscrp_soundlatch_w )
+	public static WriteHandlerPtr sandscrp_soundlatch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		latch2_full = 1;
 		soundlatch2_w(0,data);
-	}
+	} };
 	
-	static MEMORY_READ_START( sandscrp_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM					},	// ROM
-		{ 0x8000, 0xbfff, MRA_BANK1					},	// Banked ROM
-		{ 0xc000, 0xdfff, MRA_RAM					},	// RAM
-	MEMORY_END
-	static MEMORY_WRITE_START( sandscrp_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM					},	// ROM
-		{ 0x8000, 0xbfff, MWA_ROM					},	// Banked ROM
-		{ 0xc000, 0xdfff, MWA_RAM					},	// RAM
-	MEMORY_END
+	public static Memory_ReadAddress sandscrp_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM					),	// ROM
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK1					),	// Banked ROM
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM					),	// RAM
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
+	public static Memory_WriteAddress sandscrp_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM					),	// ROM
+		new Memory_WriteAddress( 0x8000, 0xbfff, MWA_ROM					),	// Banked ROM
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM					),	// RAM
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( sandscrp_sound_readport )
-		{ 0x02, 0x02, YM2203_status_port_0_r		},	// YM2203
-		{ 0x03, 0x03, YM2203_read_port_0_r			},	// PORTA/B read
-		{ 0x07, 0x07, sandscrp_soundlatch_r			},	//
-		{ 0x08, 0x08, sandscrp_latchstatus_r		},	//
-	PORT_END
-	static PORT_WRITE_START( sandscrp_sound_writeport )
-		{ 0x00, 0x00, sandscrp_bankswitch_w		},	// ROM Bank
-		{ 0x02, 0x02, YM2203_control_port_0_w	},	// YM2203
-		{ 0x03, 0x03, YM2203_write_port_0_w		},	//
-		{ 0x04, 0x04, OKIM6295_data_0_w			},	// OKIM6295
-		{ 0x06, 0x06, sandscrp_soundlatch_w		},	//
-	PORT_END
+	public static IO_ReadPort sandscrp_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x02, 0x02, YM2203_status_port_0_r		),	// YM2203
+		new IO_ReadPort( 0x03, 0x03, YM2203_read_port_0_r			),	// PORTA/B read
+		new IO_ReadPort( 0x07, 0x07, sandscrp_soundlatch_r			),	//
+		new IO_ReadPort( 0x08, 0x08, sandscrp_latchstatus_r		),	//
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
+	public static IO_WritePort sandscrp_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, sandscrp_bankswitch_w		),	// ROM Bank
+		new IO_WritePort( 0x02, 0x02, YM2203_control_port_0_w	),	// YM2203
+		new IO_WritePort( 0x03, 0x03, YM2203_write_port_0_w		),	//
+		new IO_WritePort( 0x04, 0x04, OKIM6295_data_0_w			),	// OKIM6295
+		new IO_WritePort( 0x06, 0x06, sandscrp_soundlatch_w		),	//
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -1687,164 +1703,164 @@ public class kaneko16
 								Bakuretsu Breaker
 	***************************************************************************/
 	
-	INPUT_PORTS_START( bakubrkr )
-		PORT_START	// IN0 - Player 1 + DSW - e00000.w
-		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x0004, 0x0004, "Unknown 1-2" )
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0008, 0x0008, "Unknown 1-3" )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0010, 0x0010, "Unknown 1-4" )
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0020, 0x0020, "Unknown 1-5" )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0040, 0x0040, "Unknown 1-6" )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0080, 0x0080, "Unknown 1-7" )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
+	static InputPortPtr input_ports_bakubrkr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 + DSW - e00000.w
+		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_SERVICE( 0x0002, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x0004, 0x0004, "Unknown 1-2" );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0008, 0x0008, "Unknown 1-3" );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0010, 0x0010, "Unknown 1-4" );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0020, 0x0020, "Unknown 1-5" );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0040, 0x0040, "Unknown 1-6" );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0080, 0x0080, "Unknown 1-7" );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
 	
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - e00002.b
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - Player 2 - e00002.b
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Coins - e00004.b
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)	// pause
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)
+		PORT_START(); 	// IN2 - Coins - e00004.b
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);// pause
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);
 	
-		PORT_START	// IN3 - Seems unused ! - e00006.b
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN3 - Seems unused ! - e00006.b
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 								The Berlin Wall (set 1)
 	***************************************************************************/
 	
-	INPUT_PORTS_START( berlwall )
-		PORT_START	// IN0 - Player 1 - 680000.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_berlwall = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 - 680000.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - 680002.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - Player 2 - 680002.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Coins - 680004.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)
+		PORT_START(); 	// IN2 - Coins - 680004.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);
 	
-		PORT_START	// IN3 - ? - 680006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - ? - 680006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW 1 - $200018.b <- ! $80001d.b
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Reserved" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x1c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x14, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
+		PORT_START(); 	// IN4 - DSW 1 - $200018.b <- ! $80001d.b
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Reserved" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x1c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x14, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_6C") );
 	
-		PORT_START	// IN5 - DSW 2 - $200019.b <- $80001f.b
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x02, "Easy"    )
-		PORT_DIPSETTING(    0x03, "Normal"  )
-		PORT_DIPSETTING(    0x01, "Hard"    )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )	// 1p lives at 202982.b
-		PORT_DIPSETTING(    0x00, "1" )
-		PORT_DIPSETTING(    0x0c, "2" )
-		PORT_DIPSETTING(    0x08, "3" )
-		PORT_DIPSETTING(    0x04, "5" )
-		PORT_DIPNAME( 0x30, 0x30, "Country"   )
-		PORT_DIPSETTING(    0x30, "England" )
-		PORT_DIPSETTING(    0x20, "Italy"   )
-		PORT_DIPSETTING(    0x10, "Germany" )
-		PORT_DIPSETTING(    0x00, "Freeze Screen" )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN5 - DSW 2 - $200019.b <- $80001f.b
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x02, "Easy"    );
+		PORT_DIPSETTING(    0x03, "Normal"  );
+		PORT_DIPSETTING(    0x01, "Hard"    );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Lives") );	// 1p lives at 202982.b
+		PORT_DIPSETTING(    0x00, "1" );
+		PORT_DIPSETTING(    0x0c, "2" );
+		PORT_DIPSETTING(    0x08, "3" );
+		PORT_DIPSETTING(    0x04, "5" );
+		PORT_DIPNAME( 0x30, 0x30, "Country"   );
+		PORT_DIPSETTING(    0x30, "England" );
+		PORT_DIPSETTING(    0x20, "Italy"   );
+		PORT_DIPSETTING(    0x10, "Germany" );
+		PORT_DIPSETTING(    0x00, "Freeze Screen" );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -1853,678 +1869,678 @@ public class kaneko16
 	
 	//	Same as berlwall, but for a different lives setting
 	
-	INPUT_PORTS_START( berlwalt )
-		PORT_START	// IN0 - Player 1 - 680000.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_berlwalt = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 - 680000.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - 680002.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - Player 2 - 680002.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Coins - 680004.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)
+		PORT_START(); 	// IN2 - Coins - 680004.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);
 	
-		PORT_START	// IN3 - ? - 680006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - ? - 680006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW 1 - $80001d.b
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Reserved" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x1c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x14, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
+		PORT_START(); 	// IN4 - DSW 1 - $80001d.b
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Reserved" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x1c, 0x1c, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x1c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x14, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0xe0, 0xe0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_6C") );
 	
-		PORT_START	// IN5 - DSW 2 - $80001f.b
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x02, "Easy"    )
-		PORT_DIPSETTING(    0x03, "Normal"  )
-		PORT_DIPSETTING(    0x01, "Hard"    )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "7" )
-		PORT_DIPSETTING(    0x04, "5" )
-		PORT_DIPSETTING(    0x0c, "3" )
-		PORT_DIPSETTING(    0x08, "2" )
-		PORT_DIPNAME( 0x30, 0x30, "Country"   )
-		PORT_DIPSETTING(    0x30, "England" )
-		PORT_DIPSETTING(    0x20, "Italy"   )
-		PORT_DIPSETTING(    0x10, "Germany" )
-		PORT_DIPSETTING(    0x00, "Freeze Screen" )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN5 - DSW 2 - $80001f.b
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x02, "Easy"    );
+		PORT_DIPSETTING(    0x03, "Normal"  );
+		PORT_DIPSETTING(    0x01, "Hard"    );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "7" );
+		PORT_DIPSETTING(    0x04, "5" );
+		PORT_DIPSETTING(    0x0c, "3" );
+		PORT_DIPSETTING(    0x08, "2" );
+		PORT_DIPNAME( 0x30, 0x30, "Country"   );
+		PORT_DIPSETTING(    0x30, "England" );
+		PORT_DIPSETTING(    0x20, "Italy"   );
+		PORT_DIPSETTING(    0x10, "Germany" );
+		PORT_DIPSETTING(    0x00, "Freeze Screen" );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 										Blaze On
 	***************************************************************************/
 	
-	INPUT_PORTS_START( blazeon )
-		PORT_START	// IN0 - Player 1 + DSW - c00000.w
-		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0002, "Easy"    )
-		PORT_DIPSETTING(      0x0003, "Normal"  )
-		PORT_DIPSETTING(      0x0001, "Hard"    )
-		PORT_DIPSETTING(      0x0000, "Hardest" )
-		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x0000, "2" )
-		PORT_DIPSETTING(      0x000c, "3" )
-		PORT_DIPSETTING(      0x0008, "4" )
-		PORT_DIPSETTING(      0x0004, "5" )
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, "Unknown 1-5" )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, "Unknown 1-6" )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )
+	static InputPortPtr input_ports_blazeon = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 + DSW - c00000.w
+		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0002, "Easy"    );
+		PORT_DIPSETTING(      0x0003, "Normal"  );
+		PORT_DIPSETTING(      0x0001, "Hard"    );
+		PORT_DIPSETTING(      0x0000, "Hardest" );
+		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x0000, "2" );
+		PORT_DIPSETTING(      0x000c, "3" );
+		PORT_DIPSETTING(      0x0008, "4" );
+		PORT_DIPSETTING(      0x0004, "5" );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, "Unknown 1-5" );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, "Unknown 1-6" );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x0080, IP_ACTIVE_LOW );
 	
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_START1                       )
-		PORT_BIT_IMPULSE( 0x8000, IP_ACTIVE_LOW, IPT_COIN1, 2 )
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_START1                       );
+		PORT_BIT_IMPULSE( 0x8000, IP_ACTIVE_LOW, IPT_COIN1, 2 );
 	
-		PORT_START	// IN1 - Player 2 - c00002.w
-		PORT_DIPNAME( 0x000f, 0x000f, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0007, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0005, "6 Coins/3 Credits" )
-		PORT_DIPSETTING(      0x0009, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(      0x000f, DEF_STR( 1C_1C ) )
-	//	PORT_DIPSETTING(      0x0000, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0003, "5 Coins/6 Credits" )
-		PORT_DIPSETTING(      0x0002, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(      0x0006, DEF_STR( 2C_3C ) )
-	//	PORT_DIPSETTING(      0x0001, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(      0x000e, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x000d, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x000c, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(      0x000b, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(      0x000a, DEF_STR( 1C_6C ) )
+		PORT_START(); 	// IN1 - Player 2 - c00002.w
+		PORT_DIPNAME( 0x000f, 0x000f, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0007, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0005, "6 Coins/3 Credits" );
+		PORT_DIPSETTING(      0x0009, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(      0x000f, DEF_STR( "1C_1C") );
+	//	PORT_DIPSETTING(      0x0000, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0003, "5 Coins/6 Credits" );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(      0x0006, DEF_STR( "2C_3C") );
+	//	PORT_DIPSETTING(      0x0001, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(      0x000e, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x000d, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x000c, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(      0x000b, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(      0x000a, DEF_STR( "1C_6C") );
 	
-		PORT_DIPNAME( 0x00f0, 0x00f0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x0070, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0050, "6 Coins/3 Credits" )
-		PORT_DIPSETTING(      0x0090, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(      0x00f0, DEF_STR( 1C_1C ) )
-	//	PORT_DIPSETTING(      0x0000, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0030, "5 Coins/6 Credits" )
-		PORT_DIPSETTING(      0x0020, DEF_STR( 4C_5C ) )
-		PORT_DIPSETTING(      0x0060, DEF_STR( 2C_3C ) )
-	//	PORT_DIPSETTING(      0x0010, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(      0x00e0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x00d0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x00c0, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(      0x00b0, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(      0x00a0, DEF_STR( 1C_6C ) )
+		PORT_DIPNAME( 0x00f0, 0x00f0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x0070, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0050, "6 Coins/3 Credits" );
+		PORT_DIPSETTING(      0x0090, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(      0x00f0, DEF_STR( "1C_1C") );
+	//	PORT_DIPSETTING(      0x0000, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0030, "5 Coins/6 Credits" );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "4C_5C") );
+		PORT_DIPSETTING(      0x0060, DEF_STR( "2C_3C") );
+	//	PORT_DIPSETTING(      0x0010, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(      0x00e0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x00d0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x00c0, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(      0x00b0, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(      0x00a0, DEF_STR( "1C_6C") );
 	
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_START2                       )
-		PORT_BIT_IMPULSE( 0x8000, IP_ACTIVE_LOW, IPT_COIN2, 2 )
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_START2                       );
+		PORT_BIT_IMPULSE( 0x8000, IP_ACTIVE_LOW, IPT_COIN2, 2 );
 	
-		PORT_START	// IN2 - ? - c00004.w
-		PORT_BIT(  0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN )	// unused?
+		PORT_START(); 	// IN2 - ? - c00004.w
+		PORT_BIT(  0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN );// unused?
 	
-		PORT_START	// IN3 - Other Buttons - c00006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BITX( 0x2000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_TILT  )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN3 - Other Buttons - c00006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BITX( 0x2000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_TILT  );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_SERVICE1 );
+	INPUT_PORTS_END(); }}; 
 	
 	/***************************************************************************
 									Blood Warrior
 	***************************************************************************/
 	
-	INPUT_PORTS_START( bloodwar )
-		PORT_START	// IN0 - Player 2 - b00000.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN		|	IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT		|	IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3			|	IPF_PLAYER1 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON4			|	IPF_PLAYER1 )
+	static InputPortPtr input_ports_bloodwar = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 2 - b00000.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN		|	IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT		|	IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3			|	IPF_PLAYER1 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON4			|	IPF_PLAYER1 );
 	
-		PORT_START	// IN1 - Player 2 - b00002.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN		|	IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT		|	IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3			|	IPF_PLAYER2 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON4			|	IPF_PLAYER2 )
+		PORT_START(); 	// IN1 - Player 2 - b00002.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN		|	IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT		|	IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3			|	IPF_PLAYER2 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON4			|	IPF_PLAYER2 );
 	
-		PORT_START	// IN2 - Coins - b00004.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_SERVICE2	)	// tested
+		PORT_START(); 	// IN2 - Coins - b00004.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_SERVICE2	);// tested
 	
-		PORT_START	// IN3 - ? - b00006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )	// tested
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )	// tested
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - ? - b00006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );// tested
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );// tested
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW from the MCU - $10497e.b <- $208000.b
-		PORT_DIPNAME( 0x0100, 0x0000, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x0200, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x3800, 0x3800, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x3800, "1 Easy" )
-		PORT_DIPSETTING(      0x3000, "2" )
-		PORT_DIPSETTING(      0x2800, "3" )
-		PORT_DIPSETTING(      0x2000, "4" )
-		PORT_DIPSETTING(      0x1800, "5" )
-		PORT_DIPSETTING(      0x1000, "6" )
-		PORT_DIPSETTING(      0x0800, "7" )
-		PORT_DIPSETTING(      0x0000, "8 Hard" )
-		PORT_DIPNAME( 0x4000, 0x4000, "Join During Game" )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x8000, 0x8000, "Allow Continue" )
-		PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN4 - DSW from the MCU - $10497e.b <- $208000.b
+		PORT_DIPNAME( 0x0100, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x0200, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x3800, 0x3800, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x3800, "1 Easy" );
+		PORT_DIPSETTING(      0x3000, "2" );
+		PORT_DIPSETTING(      0x2800, "3" );
+		PORT_DIPSETTING(      0x2000, "4" );
+		PORT_DIPSETTING(      0x1800, "5" );
+		PORT_DIPSETTING(      0x1000, "6" );
+		PORT_DIPSETTING(      0x0800, "7" );
+		PORT_DIPSETTING(      0x0000, "8 Hard" );
+		PORT_DIPNAME( 0x4000, 0x4000, "Join During Game" );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x8000, 0x8000, "Allow Continue" );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 								Great 1000 Miles Rally
 	***************************************************************************/
 	
-	INPUT_PORTS_START( gtmr )
-		PORT_START	// IN0 - Player 1 - b00000.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 ) // swapped for consistency:
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 ) // button1 is usually accel.
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_gtmr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 - b00000.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );// swapped for consistency:
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );// button1 is usually accel.
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - b00002.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 ) // swapped for consistency:
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) // button1 is usually accel.
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - Player 2 - b00002.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );// swapped for consistency:
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );// button1 is usually accel.
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Coins - b00004.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)
+		PORT_START(); 	// IN2 - Coins - b00004.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);
 	
-		PORT_START	// IN3 - Seems unused ! - b00006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - Seems unused ! - b00006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW from the MCU - 101265.b <- 206000.b
-		PORT_SERVICE( 0x0100, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Cabinet )  )
-		PORT_DIPSETTING(      0x0400, DEF_STR( Upright )  )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0x1800, 0x1800, "Controls"    )
-		PORT_DIPSETTING(      0x1800, "1 Joystick"  )
-		PORT_DIPSETTING(      0x0800, "2 Joysticks" )
-		PORT_DIPSETTING(      0x1000, "Wheel (360)" )
-		PORT_DIPSETTING(      0x0000, "Wheel (270)" )
-		PORT_DIPNAME( 0x2000, 0x2000, "Use Brake"    )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x2000, DEF_STR( On )  )
-		PORT_DIPNAME( 0xc000, 0xc000, "National Anthem & Flag" )
-		PORT_DIPSETTING(      0xc000, "Use Memory"  )
-		PORT_DIPSETTING(      0x8000, "Anthem Only" )
-		PORT_DIPSETTING(      0x4000, "Flag Only"   )
-		PORT_DIPSETTING(      0x0000, "None"        )
+		PORT_START(); 	// IN4 - DSW from the MCU - 101265.b <- 206000.b
+		PORT_SERVICE( 0x0100, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( "Cabinet") ); )
+		PORT_DIPSETTING(      0x0400, DEF_STR( "Upright") ); )
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x1800, 0x1800, "Controls"    );
+		PORT_DIPSETTING(      0x1800, "1 Joystick"  );
+		PORT_DIPSETTING(      0x0800, "2 Joysticks" );
+		PORT_DIPSETTING(      0x1000, "Wheel (360); )
+		PORT_DIPSETTING(      0x0000, "Wheel (270); )
+		PORT_DIPNAME( 0x2000, 0x2000, "Use Brake"    );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "On") ); )
+		PORT_DIPNAME( 0xc000, 0xc000, "National Anthem & Flag" );
+		PORT_DIPSETTING(      0xc000, "Use Memory"  );
+		PORT_DIPSETTING(      0x8000, "Anthem Only" );
+		PORT_DIPSETTING(      0x4000, "Flag Only"   );
+		PORT_DIPSETTING(      0x0000, "None"        );
 	
-		PORT_START	// IN5 - Wheel - 100015.b <- ffffe.b
-		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X | IPF_CENTER, 30, 1, 0x00, 0xff )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN5 - Wheel - 100015.b <- ffffe.b
+		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X | IPF_CENTER, 30, 1, 0x00, 0xff );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 								Great 1000 Miles Rally 2
 	***************************************************************************/
 	
-	INPUT_PORTS_START( gtmr2 )
-		PORT_START	// IN0 - Player 1 - 100004.w <- b00000.w (cpl)
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 ) // swapped for consistency:
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 ) // button1 is usually accel.
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_gtmr2 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 - 100004.w <- b00000.w (cpl)
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );// swapped for consistency:
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );// button1 is usually accel.
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - 10000c.w <- b00002.w (cpl) - for "test mode" only
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 ) // swapped for consistency:
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) // button1 is usually accel.
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - Player 2 - 10000c.w <- b00002.w (cpl) - for "test mode" only
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );// swapped for consistency:
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );// button1 is usually accel.
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Coins - 100014.w <- b00004.w (cpl)
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)	// only in "test mode"
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT	)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)
+		PORT_START(); 	// IN2 - Coins - 100014.w <- b00004.w (cpl)
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);// only in "test mode"
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT	);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);
 	
-		PORT_START	// IN3 - 100017.w <- b00006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BITX( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3, "IN 3-6", IP_KEY_DEFAULT, IP_JOY_NONE )	// Code at 0x002236 - Centers 270D wheel ?
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - 100017.w <- b00006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BITX( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3, "IN 3-6", IP_KEY_DEFAULT, IP_JOY_NONE );// Code at 0x002236 - Centers 270D wheel ?
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW from the MCU - 1016f7.b <- 206000.b
-		PORT_DIPNAME( 0x0700, 0x0700, "Communication" )
-		PORT_DIPSETTING(      0x0700, "None" )
-		PORT_DIPSETTING(      0x0600, "Machine 1" )
-		PORT_DIPSETTING(      0x0500, "Machine 2" )
-		PORT_DIPSETTING(      0x0400, "Machine 3" )
-		PORT_DIPSETTING(      0x0300, "Machine 4" )
+		PORT_START(); 	// IN4 - DSW from the MCU - 1016f7.b <- 206000.b
+		PORT_DIPNAME( 0x0700, 0x0700, "Communication" );
+		PORT_DIPSETTING(      0x0700, "None" );
+		PORT_DIPSETTING(      0x0600, "Machine 1" );
+		PORT_DIPSETTING(      0x0500, "Machine 2" );
+		PORT_DIPSETTING(      0x0400, "Machine 3" );
+		PORT_DIPSETTING(      0x0300, "Machine 4" );
 		/* 0x0000 to 0x0200 : "Machine 4"
-		PORT_DIPSETTING(      0x0200, "Machine 4 (0x0200)" )
-		PORT_DIPSETTING(      0x0100, "Machine 4 (0x0100)" )
-		PORT_DIPSETTING(      0x0000, "Machine 4 (0x0000)" )
+		PORT_DIPSETTING(      0x0200, "Machine 4 (0x0200); )
+		PORT_DIPSETTING(      0x0100, "Machine 4 (0x0100); )
+		PORT_DIPSETTING(      0x0000, "Machine 4 (0x0000); )
 		*/
-		PORT_DIPNAME( 0x1800, 0x1800, "Controls" )
-		PORT_DIPSETTING(      0x1800, "Joystick" )
-		PORT_DIPSETTING(      0x0800, "Wheel (360)" )			// Not working correctly in race
-		PORT_DIPSETTING(      0x1000, "Wheel (270D)" )			// Not working correctly !
-		PORT_DIPSETTING(      0x0000, "Wheel (270A)" )			// Not working correctly in race
-		PORT_DIPNAME( 0x2000, 0x2000, "Pedal Function" )
-		PORT_DIPSETTING(      0x2000, "Microswitch" )
-	//	PORT_DIPSETTING(      0x0000, "Potentiometer" )			// Not implemented yet
-		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On )  )
-		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+		PORT_DIPNAME( 0x1800, 0x1800, "Controls" );
+		PORT_DIPSETTING(      0x1800, "Joystick" );
+		PORT_DIPSETTING(      0x0800, "Wheel (360); )			// Not working correctly in race
+		PORT_DIPSETTING(      0x1000, "Wheel (270D); )			// Not working correctly !
+		PORT_DIPSETTING(      0x0000, "Wheel (270A); )			// Not working correctly in race
+		PORT_DIPNAME( 0x2000, 0x2000, "Pedal Function" );
+		PORT_DIPSETTING(      0x2000, "Microswitch" );
+	//	PORT_DIPSETTING(      0x0000, "Potentiometer" );		// Not implemented yet
+		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") ); )
+		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW );
 	
-		PORT_START	// IN5 - Wheel (270A) - 100019.b <- fffff.b
-		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X | IPF_CENTER, 30, 1, 0x00, 0xff )
+		PORT_START(); 	// IN5 - Wheel (270A) - 100019.b <- fffff.b
+		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X | IPF_CENTER, 30, 1, 0x00, 0xff );
 	
-		PORT_START	// IN6 - Wheel (270D) - 100019.b <- ffffe.b
-		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X, 30, 1, 0x00, 0xff )
+		PORT_START(); 	// IN6 - Wheel (270D) - 100019.b <- ffffe.b
+		PORT_ANALOG ( 0x00ff, 0x0080, IPT_AD_STICK_X, 30, 1, 0x00, 0xff );
 	
-		PORT_START	// IN7 - Wheel (360) - 100019.b <- ffffe.b
-		PORT_ANALOGX( 0x00ff, 0x0080, IPT_DIAL, 30, 1, 0, 0, KEYCODE_LEFT, KEYCODE_RIGHT, IP_JOY_NONE, IP_JOY_NONE )
+		PORT_START(); 	// IN7 - Wheel (360) - 100019.b <- ffffe.b
+		PORT_ANALOGX( 0x00ff, 0x0080, IPT_DIAL, 30, 1, 0, 0, KEYCODE_LEFT, KEYCODE_RIGHT, IP_JOY_NONE, IP_JOY_NONE );
 	
-		PORT_START	// Fake IN1 - To be pressed during boot sequence - Code at 0x000c9e
-		PORT_BITX( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON5, "IN 1-0", KEYCODE_H, IP_JOY_NONE )	// "sound test"
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON6, "IN 1-4", KEYCODE_J, IP_JOY_NONE )	// "view tiles"
-		PORT_BITX( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON7, "IN 1-5", KEYCODE_K, IP_JOY_NONE )	// "view memory"
-		PORT_BITX( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON8, "IN 1-6", KEYCODE_L, IP_JOY_NONE )	// "view sprites ?"
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	// Fake IN1 - To be pressed during boot sequence - Code at 0x000c9e
+		PORT_BITX( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON5, "IN 1-0", KEYCODE_H, IP_JOY_NONE );// "sound test"
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON6, "IN 1-4", KEYCODE_J, IP_JOY_NONE );// "view tiles"
+		PORT_BITX( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON7, "IN 1-5", KEYCODE_K, IP_JOY_NONE );// "view memory"
+		PORT_BITX( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON8, "IN 1-6", KEYCODE_L, IP_JOY_NONE );// "view sprites ?"
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 									Magical Crystal
 	***************************************************************************/
 	
-	INPUT_PORTS_START( mgcrystl )
-		PORT_START	// IN0 - Player 1 + DSW - c00000.w
-		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_SERVICE( 0x0002, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )	// TESTED!
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	static InputPortPtr input_ports_mgcrystl = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - Player 1 + DSW - c00000.w
+		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_SERVICE( 0x0002, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( "Unknown") );	// TESTED!
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
 	
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - Player 2 - c00002.b
-		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0002, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+		PORT_START(); 	// IN1 - Player 2 - c00002.b
+		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0002, 0x0002, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0004, 0x0004, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
 	
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Other Buttons - c00004.b
-		PORT_BIT ( 0x00ff, IP_ACTIVE_LOW, IPT_UNKNOWN  )
-		PORT_BIT ( 0x0100, IP_ACTIVE_LOW, IPT_START1   )
-		PORT_BIT ( 0x0200, IP_ACTIVE_LOW, IPT_START2   )
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT ( 0x2000, IP_ACTIVE_LOW, IPT_TILT     )
-		PORT_BIT ( 0x4000, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT ( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN  )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN2 - Other Buttons - c00004.b
+		PORT_BIT ( 0x00ff, IP_ACTIVE_LOW, IPT_UNKNOWN  );
+		PORT_BIT ( 0x0100, IP_ACTIVE_LOW, IPT_START1   );
+		PORT_BIT ( 0x0200, IP_ACTIVE_LOW, IPT_START2   );
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT ( 0x2000, IP_ACTIVE_LOW, IPT_TILT     );
+		PORT_BIT ( 0x4000, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT ( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN  );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 									Sand Scorpion
 	***************************************************************************/
 	
-	INPUT_PORTS_START( sandscrp )
-		PORT_START	// IN0 - $b00000.w
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_sandscrp = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - $b00000.w
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - $b00002.w
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - $b00002.w
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - $b00004.w
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1   )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2   )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN1    )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN2    )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_TILT     )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN  )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN  )
+		PORT_START(); 	// IN2 - $b00004.w
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1   );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2   );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN1    );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN2    );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_TILT     );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN  );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN  );
 	
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN3 - $b00006.w
-		PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - $b00006.w
+		PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW 1 read by the Z80 through the sound chip
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x02, "1" )
-		PORT_DIPSETTING(    0x01, "2" )
-		PORT_DIPSETTING(    0x03, "3" )
-		PORT_DIPSETTING(    0x00, "5" )
-		PORT_DIPNAME( 0x0c, 0x0c, "Bombs" )
-		PORT_DIPSETTING(    0x08, "1" )
-		PORT_DIPSETTING(    0x04, "2" )
-		PORT_DIPSETTING(    0x0c, "3" )
-		PORT_DIPSETTING(    0x00, "5" )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x30, "Easy"    )
-		PORT_DIPSETTING(    0x20, "Normal"  )
-		PORT_DIPSETTING(    0x10, "Hard"    )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x80, "100K, 300K" )
-		PORT_DIPSETTING(    0xc0, "200K, 500K" )
-		PORT_DIPSETTING(    0x40, "500K, 1000K" )
-		PORT_DIPSETTING(    0x00, "1000K, 3000K" )
+		PORT_START(); 	// IN4 - DSW 1 read by the Z80 through the sound chip
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x02, "1" );
+		PORT_DIPSETTING(    0x01, "2" );
+		PORT_DIPSETTING(    0x03, "3" );
+		PORT_DIPSETTING(    0x00, "5" );
+		PORT_DIPNAME( 0x0c, 0x0c, "Bombs" );
+		PORT_DIPSETTING(    0x08, "1" );
+		PORT_DIPSETTING(    0x04, "2" );
+		PORT_DIPSETTING(    0x0c, "3" );
+		PORT_DIPSETTING(    0x00, "5" );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x30, "Easy"    );
+		PORT_DIPSETTING(    0x20, "Normal"  );
+		PORT_DIPSETTING(    0x10, "Hard"    );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x80, "100K, 300K" );
+		PORT_DIPSETTING(    0xc0, "200K, 500K" );
+		PORT_DIPSETTING(    0x40, "500K, 1000K" );
+		PORT_DIPSETTING(    0x00, "1000K, 3000K" );
 	
-		PORT_START	// IN5 - DSW 2 read by the Z80 through the sound chip
-		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 6C_1C ) )
-		PORT_DIPSETTING(    0x0b, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x0d, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 8C_3C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 5C_3C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 3C_2C ) )
-		PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x09, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, "Allow Continue" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN5 - DSW 2 read by the Z80 through the sound chip
+		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "6C_1C") );
+		PORT_DIPSETTING(    0x0b, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x0d, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "8C_3C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "5C_3C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "3C_2C") );
+		PORT_DIPSETTING(    0x0f, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x09, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, "Allow Continue" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
 									Shogun Warriors
 	***************************************************************************/
 	
-	INPUT_PORTS_START( shogwarr )
-		PORT_START	// IN0 - - b80000.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )	// ? tested
+	static InputPortPtr input_ports_shogwarr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - - b80000.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );// ? tested
 	
-		PORT_START	// IN1 - - b80002.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )	// ? tested
+		PORT_START(); 	// IN1 - - b80002.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );// ? tested
 	
-		PORT_START	// IN2 - Coins - b80004.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	)
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	)
-		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		)
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	)
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	)	// ? tested
+		PORT_START(); 	// IN2 - Coins - b80004.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1	);
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_START2	);
+		PORT_BIT_IMPULSE( 0x0400, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE( 0x0800, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BITX( 0x1000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_TILT		);
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_SERVICE1	);
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN	);// ? tested
 	
-		PORT_START	// IN3 - ? - b80006.w
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	// IN3 - ? - b80006.w
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	// IN4 - DSW from the MCU - 102e15.b <- 200059.b
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x02, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-		PORT_DIPNAME( 0x38, 0x38, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x38, "1" )	// easy
-		PORT_DIPSETTING(    0x30, "2" )
-		PORT_DIPSETTING(    0x28, "3" )
-		PORT_DIPSETTING(    0x20, "4" )
-		PORT_DIPSETTING(    0x18, "5" )
-		PORT_DIPSETTING(    0x10, "6" )
-		PORT_DIPSETTING(    0x08, "7" )
-		PORT_DIPSETTING(    0x00, "8" )
-		PORT_DIPNAME( 0x40, 0x40, "Can Join During Game" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )	//	2 credits		winner vs computer
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )	//	1 credit		game over
-		PORT_DIPNAME( 0x80, 0x80, "Special Continue Mode" )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START(); 	// IN4 - DSW from the MCU - 102e15.b <- 200059.b
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x02, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "On") );
+		PORT_DIPNAME( 0x38, 0x38, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x38, "1" );// easy
+		PORT_DIPSETTING(    0x30, "2" );
+		PORT_DIPSETTING(    0x28, "3" );
+		PORT_DIPSETTING(    0x20, "4" );
+		PORT_DIPSETTING(    0x18, "5" );
+		PORT_DIPSETTING(    0x10, "6" );
+		PORT_DIPSETTING(    0x08, "7" );
+		PORT_DIPSETTING(    0x00, "8" );
+		PORT_DIPNAME( 0x40, 0x40, "Can Join During Game" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );	//	2 credits		winner vs computer
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );	//	1 credit		game over
+		PORT_DIPNAME( 0x80, 0x80, "Special Continue Mode" );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -2541,70 +2557,70 @@ public class kaneko16
 		16x16x4 made of 4 8x8x4 blocks arrenged like:		 	01
 	 	(nibbles are swapped for tiles, not for sprites)		23
 	*/
-	static struct GfxLayout layout_16x16x4 =
-	{
+	static GfxLayout layout_16x16x4 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ STEP4(0,1) },
-		{ STEP8(8*8*4*0,4),   STEP8(8*8*4*1,4)   },
-		{ STEP8(8*8*4*0,8*4), STEP8(8*8*4*2,8*4) },
+		new int[] { STEP4(0,1) },
+		new int[] { STEP8(8*8*4*0,4),   STEP8(8*8*4*1,4)   },
+		new int[] { STEP8(8*8*4*0,8*4), STEP8(8*8*4*2,8*4) },
 		16*16*4
-	};
+	);
 	
 	/*
 		16x16x8 made of 4 8x8x8 blocks arrenged like:	01
 														23
 	*/
-	static struct GfxLayout layout_16x16x8 =
-	{
+	static GfxLayout layout_16x16x8 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		8,
-		{ STEP8(0,1) },
-		{ STEP8(0,8),   STEP8(8*8*8*1,8)   },
-		{ STEP8(0,8*8), STEP8(8*8*8*2,8*8) },
+		new int[] { STEP8(0,1) },
+		new int[] { STEP8(0,8),   STEP8(8*8*8*1,8)   },
+		new int[] { STEP8(0,8*8), STEP8(8*8*8*2,8*8) },
 		16*16*8
-	};
+	);
 	
-	static struct GfxDecodeInfo kaneko16_gfx_1x4bit_1x4bit[] =
+	static GfxDecodeInfo kaneko16_gfx_1x4bit_1x4bit[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x4, 0,			0x40 }, // [0] Sprites
-		{ REGION_GFX2, 0, &layout_16x16x4, 0x40 * 16,	0x40 }, // [1] Layers
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x4, 0,			0x40 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_16x16x4, 0x40 * 16,	0x40 ), // [1] Layers
+		new GfxDecodeInfo( -1 )
 	};
-	static struct GfxDecodeInfo kaneko16_gfx_1x4bit_2x4bit[] =
+	static GfxDecodeInfo kaneko16_gfx_1x4bit_2x4bit[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x4, 0,			0x40 }, // [0] Sprites
-		{ REGION_GFX2, 0, &layout_16x16x4, 0x40 * 16,	0x40 }, // [1] Layers
-		{ REGION_GFX3, 0, &layout_16x16x4, 0x40 * 16,	0x40 }, // [2] Layers
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x4, 0,			0x40 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_16x16x4, 0x40 * 16,	0x40 ), // [1] Layers
+		new GfxDecodeInfo( REGION_GFX3, 0, layout_16x16x4, 0x40 * 16,	0x40 ), // [2] Layers
+		new GfxDecodeInfo( -1 )
 	};
-	static struct GfxDecodeInfo kaneko16_gfx_1x8bit_2x4bit[] =
+	static GfxDecodeInfo kaneko16_gfx_1x8bit_2x4bit[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x8,	0x40 * 256,	0x40 }, // [0] Sprites
-		{ REGION_GFX2, 0, &layout_16x16x4,	0,			0x40 }, // [1] Layers
-		{ REGION_GFX3, 0, &layout_16x16x4,	0,			0x40 }, // [2] Layers
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x8,	0x40 * 256,	0x40 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_16x16x4,	0,			0x40 ), // [1] Layers
+		new GfxDecodeInfo( REGION_GFX3, 0, layout_16x16x4,	0,			0x40 ), // [2] Layers
+		new GfxDecodeInfo( -1 )
 	};
 	
 	/* 16x16x4 tiles (made of four 8x8 tiles) */
-	static struct GfxLayout layout_16x16x4_2 =
-	{
+	static GfxLayout layout_16x16x4_2 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ STEP4(0,1) },
-		{ STEP4(8*8*4*0 + 3*4, -4), STEP4(8*8*4*0 + 7*4, -4),
+		new int[] { STEP4(0,1) },
+		new int[] { STEP4(8*8*4*0 + 3*4, -4), STEP4(8*8*4*0 + 7*4, -4),
 		  STEP4(8*8*4*1 + 3*4, -4), STEP4(8*8*4*1 + 7*4, -4) },
-		{ STEP8(8*8*4*0, 8*4),     STEP8(8*8*4*2, 8*4) },
+		new int[] { STEP8(8*8*4*0, 8*4),     STEP8(8*8*4*2, 8*4) },
 		16*16*4
-	};
-	static struct GfxDecodeInfo sandscrp_gfxdecodeinfo[] =
+	);
+	static GfxDecodeInfo sandscrp_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &layout_16x16x4,   0x000, 0x10 }, // [0] Sprites
-		{ REGION_GFX2, 0, &layout_16x16x4_2, 0x400, 0x40 }, // [1] Layers
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_16x16x4,   0x000, 0x10 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, layout_16x16x4_2, 0x400, 0x40 ), // [1] Layers
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -2663,26 +2679,26 @@ public class kaneko16
 		{ 100, 100 }
 	};
 	
-	static struct AY8910interface ay8910_intf_2x1MHz_DSW =
-	{
+	static AY8910interface ay8910_intf_2x1MHz_DSW = new AY8910interface
+	(
 		2,
 		1000000,	/* ? */
-		{ MIXER(100,MIXER_PAN_LEFT), MIXER(100,MIXER_PAN_RIGHT) },
-		{ input_port_4_r, 0 },	/* input A: DSW 1 */
-		{ input_port_5_r, 0 },	/* input B: DSW 2 */
-		{ 0, 0 },
-		{ 0, 0 }
-	};
-	static struct AY8910interface ay8910_intf_2x2MHz_EEPROM =
-	{
+		new int[] { MIXER(100,MIXER_PAN_LEFT), MIXER(100,MIXER_PAN_RIGHT) },
+		new ReadHandlerPtr[] { input_port_4_r, 0 },	/* input A: DSW 1 */
+		new ReadHandlerPtr[] { input_port_5_r, 0 },	/* input B: DSW 2 */
+		new WriteHandlerPtr[] { 0, 0 },
+		new WriteHandlerPtr[] { 0, 0 }
+	);
+	static AY8910interface ay8910_intf_2x2MHz_EEPROM = new AY8910interface
+	(
 		2,
 		2000000,	/* ? */
-		{ MIXER(100,MIXER_PAN_LEFT), MIXER(100,MIXER_PAN_RIGHT) },
-		{ 0, kaneko16_eeprom_r },		/* inputs  A:  0,EEPROM bit read */
-		{ 0, 0 },						/* inputs  B */
-		{ 0, 0 },						/* outputs A */
+		new int[] { MIXER(100,MIXER_PAN_LEFT), MIXER(100,MIXER_PAN_RIGHT) },
+		new ReadHandlerPtr[] { 0, kaneko16_eeprom_r },		/* inputs  A:  0,EEPROM bit read */
+		new WriteHandlerPtr[] { 0, 0 },						/* inputs  B */
+		new WriteHandlerPtr[] { 0, 0 },						/* outputs A */
 		{ 0, kaneko16_eeprom_reset_w }	/* outputs B:  0,EEPROM reset */
-	};
+	);
 	
 	static struct YM2151interface ym2151_intf_blazeon =
 	{
@@ -3133,27 +3149,27 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( bakubrkr )
-	 	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "ts100j.u18", 0x000000, 0x040000, CRC(8cc0a4fd) SHA1(e7e18b5ea236522a79ba9db8f573ac8f7ade504b) )
-		ROM_LOAD16_BYTE( "ts101j.u19", 0x000001, 0x040000, CRC(aea92195) SHA1(e89f964e7e936fd7774f21956eb4ff5c9104837b) )
+	static RomLoadPtr rom_bakubrkr = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x080000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "ts100j.u18", 0x000000, 0x040000, CRC(8cc0a4fd);SHA1(e7e18b5ea236522a79ba9db8f573ac8f7ade504b) )
+		ROM_LOAD16_BYTE( "ts101j.u19", 0x000001, 0x040000, CRC(aea92195);SHA1(e89f964e7e936fd7774f21956eb4ff5c9104837b) )
 	
-		ROM_REGION( 0x240000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "ts001j.u37",  0x000000, 0x080000, CRC(70b66e7e) SHA1(307ba27b623f67ee4b4023179870c270bac8ea22) )
-		ROM_RELOAD(       0x100000, 0x080000             )
-		ROM_LOAD( "ts000j.u38",  0x080000, 0x080000, CRC(a7a94143) SHA1(d811a7597402c161850ddf98cdb00661ea506c7d) )
-		ROM_RELOAD(       0x180000, 0x080000             )
-		ROM_LOAD( "ts002j.u36",  0x200000, 0x040000, CRC(611271e6) SHA1(811c21822b074fbb4bb809fed29d48bbd51d57a0) )
+		ROM_REGION( 0x240000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "ts001j.u37",  0x000000, 0x080000, CRC(70b66e7e);SHA1(307ba27b623f67ee4b4023179870c270bac8ea22) )
+		ROM_RELOAD(       0x100000, 0x080000             );
+		ROM_LOAD( "ts000j.u38",  0x080000, 0x080000, CRC(a7a94143);SHA1(d811a7597402c161850ddf98cdb00661ea506c7d) )
+		ROM_RELOAD(       0x180000, 0x080000             );
+		ROM_LOAD( "ts002j.u36",  0x200000, 0x040000, CRC(611271e6);SHA1(811c21822b074fbb4bb809fed29d48bbd51d57a0) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles */
-		ROM_LOAD( "ts010.u4",  0x000000, 0x100000, CRC(df935324) SHA1(73b7aff8800a4e88a47ad426190b73dabdfbf142) )
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles */
+		ROM_LOAD( "ts010.u4",  0x000000, 0x100000, CRC(df935324);SHA1(73b7aff8800a4e88a47ad426190b73dabdfbf142) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles */
-		ROM_LOAD( "ts020.u33",  0x000000, 0x100000, CRC(eb58c35d) SHA1(762c5219de6f729a0fc1df90fce09cdf711c2a1e) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles */
+		ROM_LOAD( "ts020.u33",  0x000000, 0x100000, CRC(eb58c35d);SHA1(762c5219de6f729a0fc1df90fce09cdf711c2a1e) )
 	
-		ROM_REGION( 0x0100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "ts030.u5",  0x000000, 0x100000, CRC(1d68e9d1) SHA1(aaa64a8e8d7cd7f91d2be346fafb9d1f29b40eda) )
-	ROM_END
+		ROM_REGION( 0x0100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "ts030.u5",  0x000000, 0x100000, CRC(1d68e9d1);SHA1(aaa64a8e8d7cd7f91d2be346fafb9d1f29b40eda) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3189,59 +3205,59 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( berlwall )
-	 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "bw100a", 0x000000, 0x020000, CRC(e6bcb4eb) SHA1(220b8fddc79230b4f6a8cf33e1035355c485e8d1) )
-		ROM_LOAD16_BYTE( "bw101a", 0x000001, 0x020000, CRC(38056fb2) SHA1(48338b9a5ebea872286541a3c45016673c4af76b) )
+	static RomLoadPtr rom_berlwall = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "bw100a", 0x000000, 0x020000, CRC(e6bcb4eb);SHA1(220b8fddc79230b4f6a8cf33e1035355c485e8d1) )
+		ROM_LOAD16_BYTE( "bw101a", 0x000001, 0x020000, CRC(38056fb2);SHA1(48338b9a5ebea872286541a3c45016673c4af76b) )
 	
-		ROM_REGION( 0x120000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "bw001",  0x000000, 0x080000, CRC(bc927260) SHA1(44273a8b6a041504d54da4a7897adf23e3e9db10) )
-		ROM_LOAD( "bw002",  0x080000, 0x080000, CRC(223f5465) SHA1(6ed077514ab4370a215a4a60c3aecc8b72ed1c97) )
-		ROM_LOAD( "bw300",  0x100000, 0x020000, CRC(b258737a) SHA1(b5c8fe44a8dcfc19bccba896bdb73030c5843544) )
+		ROM_REGION( 0x120000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "bw001",  0x000000, 0x080000, CRC(bc927260);SHA1(44273a8b6a041504d54da4a7897adf23e3e9db10) )
+		ROM_LOAD( "bw002",  0x080000, 0x080000, CRC(223f5465);SHA1(6ed077514ab4370a215a4a60c3aecc8b72ed1c97) )
+		ROM_LOAD( "bw300",  0x100000, 0x020000, CRC(b258737a);SHA1(b5c8fe44a8dcfc19bccba896bdb73030c5843544) )
 	
-		ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "bw003",  0x000000, 0x080000, CRC(fbb4b72d) SHA1(07a0590f18b3bba1843ef6a89a5c214e8e605cc3) )
+		ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "bw003",  0x000000, 0x080000, CRC(fbb4b72d);SHA1(07a0590f18b3bba1843ef6a89a5c214e8e605cc3) )
 	
-		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE )	/* High Color Background */
-		ROM_LOAD16_BYTE( "bw004",  0x000000, 0x080000, CRC(5300c34d) SHA1(ccb12ea05f89ef68bcfe003faced2ffea24c4bf0) )
-		ROM_LOAD16_BYTE( "bw008",  0x000001, 0x080000, CRC(9aaf2f2f) SHA1(1352856159e19f07e8e30f9c44b21347103ce024) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw005",  0x100000, 0x080000, CRC(16db6d43) SHA1(0158d0278d085487400ad4384b8cc9618503319e) )
-		ROM_LOAD16_BYTE( "bw009",  0x100001, 0x080000, CRC(1151a0b0) SHA1(584a0da7eb7f06450f95e76faa20d19f053cb74c) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw006",  0x200000, 0x080000, CRC(73a35d1f) SHA1(af919cf858c5923aea45e0d8d91493e6284cb99e) )
-		ROM_LOAD16_BYTE( "bw00a",  0x200001, 0x080000, CRC(f447dfc2) SHA1(1254eafea92e8e416deedf21cb01990ffc4f896c) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw007",  0x300000, 0x080000, CRC(97f85c87) SHA1(865e076e098c49c96639f62be793f2de24b4926b) )
-		ROM_LOAD16_BYTE( "bw00b",  0x300001, 0x080000, CRC(b0a48225) SHA1(de256bb6e2a824114274bff0c6c1234934c31c49) ) // FIXED BITS (xxxxxxx0)
+		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE );/* High Color Background */
+		ROM_LOAD16_BYTE( "bw004",  0x000000, 0x080000, CRC(5300c34d);SHA1(ccb12ea05f89ef68bcfe003faced2ffea24c4bf0) )
+		ROM_LOAD16_BYTE( "bw008",  0x000001, 0x080000, CRC(9aaf2f2f);SHA1(1352856159e19f07e8e30f9c44b21347103ce024) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw005",  0x100000, 0x080000, CRC(16db6d43);SHA1(0158d0278d085487400ad4384b8cc9618503319e) )
+		ROM_LOAD16_BYTE( "bw009",  0x100001, 0x080000, CRC(1151a0b0);SHA1(584a0da7eb7f06450f95e76faa20d19f053cb74c) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw006",  0x200000, 0x080000, CRC(73a35d1f);SHA1(af919cf858c5923aea45e0d8d91493e6284cb99e) )
+		ROM_LOAD16_BYTE( "bw00a",  0x200001, 0x080000, CRC(f447dfc2);SHA1(1254eafea92e8e416deedf21cb01990ffc4f896c) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw007",  0x300000, 0x080000, CRC(97f85c87);SHA1(865e076e098c49c96639f62be793f2de24b4926b) )
+		ROM_LOAD16_BYTE( "bw00b",  0x300001, 0x080000, CRC(b0a48225);SHA1(de256bb6e2a824114274bff0c6c1234934c31c49) ) // FIXED BITS (xxxxxxx0)
 	
-		ROM_REGION( 0x040000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "bw000",  0x000000, 0x040000, CRC(d8fe869d) SHA1(75e9044c4164ca6db9519fcff8eca6c8a2d8d5d1) )
-	ROM_END
+		ROM_REGION( 0x040000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "bw000",  0x000000, 0x040000, CRC(d8fe869d);SHA1(75e9044c4164ca6db9519fcff8eca6c8a2d8d5d1) )
+	ROM_END(); }}; 
 	
-	ROM_START( berlwalt )
-	 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "u23_01.bin", 0x000000, 0x020000, CRC(76b526ce) SHA1(95ba7cccbe88fd695c28b6a7c25a1afd130c1aa6) )
-		ROM_LOAD16_BYTE( "u39_01.bin", 0x000001, 0x020000, CRC(78fa7ef2) SHA1(8392de6e307dcd2bf5bcbeb37d578d33246acfcf) )
+	static RomLoadPtr rom_berlwalt = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "u23_01.bin", 0x000000, 0x020000, CRC(76b526ce);SHA1(95ba7cccbe88fd695c28b6a7c25a1afd130c1aa6) )
+		ROM_LOAD16_BYTE( "u39_01.bin", 0x000001, 0x020000, CRC(78fa7ef2);SHA1(8392de6e307dcd2bf5bcbeb37d578d33246acfcf) )
 	
-		ROM_REGION( 0x120000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "bw001",  0x000000, 0x080000, CRC(bc927260) SHA1(44273a8b6a041504d54da4a7897adf23e3e9db10) )
-		ROM_LOAD( "bw002",  0x080000, 0x080000, CRC(223f5465) SHA1(6ed077514ab4370a215a4a60c3aecc8b72ed1c97) )
-		ROM_LOAD( "bw300",  0x100000, 0x020000, CRC(b258737a) SHA1(b5c8fe44a8dcfc19bccba896bdb73030c5843544) )
+		ROM_REGION( 0x120000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "bw001",  0x000000, 0x080000, CRC(bc927260);SHA1(44273a8b6a041504d54da4a7897adf23e3e9db10) )
+		ROM_LOAD( "bw002",  0x080000, 0x080000, CRC(223f5465);SHA1(6ed077514ab4370a215a4a60c3aecc8b72ed1c97) )
+		ROM_LOAD( "bw300",  0x100000, 0x020000, CRC(b258737a);SHA1(b5c8fe44a8dcfc19bccba896bdb73030c5843544) )
 	
-		ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "bw003",  0x000000, 0x080000, CRC(fbb4b72d) SHA1(07a0590f18b3bba1843ef6a89a5c214e8e605cc3) )
+		ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "bw003",  0x000000, 0x080000, CRC(fbb4b72d);SHA1(07a0590f18b3bba1843ef6a89a5c214e8e605cc3) )
 	
-		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE )	/* High Color Background */
-		ROM_LOAD16_BYTE( "bw004",  0x000000, 0x080000, CRC(5300c34d) SHA1(ccb12ea05f89ef68bcfe003faced2ffea24c4bf0) )
-		ROM_LOAD16_BYTE( "bw008",  0x000001, 0x080000, CRC(9aaf2f2f) SHA1(1352856159e19f07e8e30f9c44b21347103ce024) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw005",  0x100000, 0x080000, CRC(16db6d43) SHA1(0158d0278d085487400ad4384b8cc9618503319e) )
-		ROM_LOAD16_BYTE( "bw009",  0x100001, 0x080000, CRC(1151a0b0) SHA1(584a0da7eb7f06450f95e76faa20d19f053cb74c) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw006",  0x200000, 0x080000, CRC(73a35d1f) SHA1(af919cf858c5923aea45e0d8d91493e6284cb99e) )
-		ROM_LOAD16_BYTE( "bw00a",  0x200001, 0x080000, CRC(f447dfc2) SHA1(1254eafea92e8e416deedf21cb01990ffc4f896c) ) // FIXED BITS (xxxxxxx0)
-		ROM_LOAD16_BYTE( "bw007",  0x300000, 0x080000, CRC(97f85c87) SHA1(865e076e098c49c96639f62be793f2de24b4926b) )
-		ROM_LOAD16_BYTE( "bw00b",  0x300001, 0x080000, CRC(b0a48225) SHA1(de256bb6e2a824114274bff0c6c1234934c31c49) ) // FIXED BITS (xxxxxxx0)
+		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE );/* High Color Background */
+		ROM_LOAD16_BYTE( "bw004",  0x000000, 0x080000, CRC(5300c34d);SHA1(ccb12ea05f89ef68bcfe003faced2ffea24c4bf0) )
+		ROM_LOAD16_BYTE( "bw008",  0x000001, 0x080000, CRC(9aaf2f2f);SHA1(1352856159e19f07e8e30f9c44b21347103ce024) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw005",  0x100000, 0x080000, CRC(16db6d43);SHA1(0158d0278d085487400ad4384b8cc9618503319e) )
+		ROM_LOAD16_BYTE( "bw009",  0x100001, 0x080000, CRC(1151a0b0);SHA1(584a0da7eb7f06450f95e76faa20d19f053cb74c) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw006",  0x200000, 0x080000, CRC(73a35d1f);SHA1(af919cf858c5923aea45e0d8d91493e6284cb99e) )
+		ROM_LOAD16_BYTE( "bw00a",  0x200001, 0x080000, CRC(f447dfc2);SHA1(1254eafea92e8e416deedf21cb01990ffc4f896c) ) // FIXED BITS (xxxxxxx0)
+		ROM_LOAD16_BYTE( "bw007",  0x300000, 0x080000, CRC(97f85c87);SHA1(865e076e098c49c96639f62be793f2de24b4926b) )
+		ROM_LOAD16_BYTE( "bw00b",  0x300001, 0x080000, CRC(b0a48225);SHA1(de256bb6e2a824114274bff0c6c1234934c31c49) ) // FIXED BITS (xxxxxxx0)
 	
-		ROM_REGION( 0x040000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "bw000",  0x000000, 0x040000, CRC(d8fe869d) SHA1(75e9044c4164ca6db9519fcff8eca6c8a2d8d5d1) )
-	ROM_END
+		ROM_REGION( 0x040000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "bw000",  0x000000, 0x040000, CRC(d8fe869d);SHA1(75e9044c4164ca6db9519fcff8eca6c8a2d8d5d1) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3270,21 +3286,21 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( blazeon )
-	 	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "bz_prg1.u80", 0x000000, 0x040000, CRC(8409e31d) SHA1(a9dfc299f4b457df190314401aef309adfaf9bae) )
-		ROM_LOAD16_BYTE( "bz_prg2.u81", 0x000001, 0x040000, CRC(b8a0a08b) SHA1(5f275b98d3e49a834850b45179d26e8c2f9fd604) )
+	static RomLoadPtr rom_blazeon = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x080000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "bz_prg1.u80", 0x000000, 0x040000, CRC(8409e31d);SHA1(a9dfc299f4b457df190314401aef309adfaf9bae) )
+		ROM_LOAD16_BYTE( "bz_prg2.u81", 0x000001, 0x040000, CRC(b8a0a08b);SHA1(5f275b98d3e49a834850b45179d26e8c2f9fd604) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* Z80 Code */
-		ROM_LOAD( "3.u45", 0x000000, 0x020000, CRC(52fe4c94) SHA1(896230e4627503292575bbd84edc3cf9cb18b27e) )	// 1xxxxxxxxxxxxxxxx = 0xFF
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* Z80 Code */
+		ROM_LOAD( "3.u45", 0x000000, 0x020000, CRC(52fe4c94);SHA1(896230e4627503292575bbd84edc3cf9cb18b27e) )	// 1xxxxxxxxxxxxxxxx = 0xFF
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "bz_sp1.u20", 0x000000, 0x100000, CRC(0d5809a1) SHA1(e72669f95b050d1967d10a865bab8f3634c9daad) )
-		ROM_LOAD( "bz_sp2.u21", 0x100000, 0x100000, CRC(56ead2bd) SHA1(463723f3c533603ce3a95310e9ce12b4e582b52d) )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "bz_sp1.u20", 0x000000, 0x100000, CRC(0d5809a1);SHA1(e72669f95b050d1967d10a865bab8f3634c9daad) )
+		ROM_LOAD( "bz_sp2.u21", 0x100000, 0x100000, CRC(56ead2bd);SHA1(463723f3c533603ce3a95310e9ce12b4e582b52d) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "bz_bg.u2", 0x000000, 0x100000, CRC(fc67f19f) SHA1(f5d9e037a736b0932efbfb48587de08bec93df5d) )
-	ROM_END
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "bz_bg.u2", 0x000000, 0x100000, CRC(fc67f19f);SHA1(f5d9e037a736b0932efbfb48587de08bec93df5d) )
+	ROM_END(); }}; 
 	
 	/***************************************************************************
 	
@@ -3361,53 +3377,53 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( bloodwar )
-	 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "pof3.514", 0x000000, 0x080000, CRC(0c93da15) SHA1(65b6b1b4acfc32c551ae4fbe6a13f7f2b8554dbf) )
-		ROM_LOAD16_BYTE( "p1f3.513", 0x000001, 0x080000, CRC(894ecbe5) SHA1(bf403d19e6315266114ac742a08cac903e7b54b5) )
+	static RomLoadPtr rom_bloodwar = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "pof3.514", 0x000000, 0x080000, CRC(0c93da15);SHA1(65b6b1b4acfc32c551ae4fbe6a13f7f2b8554dbf) )
+		ROM_LOAD16_BYTE( "p1f3.513", 0x000001, 0x080000, CRC(894ecbe5);SHA1(bf403d19e6315266114ac742a08cac903e7b54b5) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "dox3.124",  0x000000, 0x020000, CRC(399f2005) SHA1(ff0370724770c35963953fd9596d9f808ba87d8f) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "dox3.124",  0x000000, 0x020000, CRC(399f2005);SHA1(ff0370724770c35963953fd9596d9f808ba87d8f) )
 	
-	 	ROM_REGION16_BE( 0x0080, REGION_USER1, 0 )			/* EEPROM */
-		ROM_LOAD16_WORD( "9346.126",  0x0000, 0x0080, CRC(1579db94) SHA1(acb842676946efea29b73bdc9ecb266f49d2f5a8) )
+	 	ROM_REGION16_BE( 0x0080, REGION_USER1, 0 );		/* EEPROM */
+		ROM_LOAD16_WORD( "9346.126",  0x0000, 0x0080, CRC(1579db94);SHA1(acb842676946efea29b73bdc9ecb266f49d2f5a8) )
 	
-		ROM_REGION( 0x1e00000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD       ( "2000201.8",   0x0000000, 0x200000, CRC(bba63025) SHA1(daec5285469ee953f6f838fe3cb3903524e9ac39) )
-		ROM_LOAD       ( "2010202.9",   0x0200000, 0x200000, CRC(4ffd9ddc) SHA1(62bc8c0ed2efab407fc2956c514c3e732bcc47ee) )
-		ROM_LOAD       ( "2020203.10",  0x0400000, 0x200000, CRC(fbcc5363) SHA1(9eff48c29d5c887d39e4db442c6ee51ec879521e) )
-		ROM_LOAD       ( "2030204.11",  0x0600000, 0x200000, CRC(8e818ce9) SHA1(bc37d35247edfc563400cd67459d455b1fea6eab) )
-		ROM_LOAD       ( "2040205.12",  0x0800000, 0x200000, CRC(70c4a76b) SHA1(01b17bda156f2e6f480bdc976927c8bba47c1186) )
-		ROM_LOAD       ( "2050206.13",  0x0a00000, 0x200000, CRC(80c667bb) SHA1(7edf33c713c8448ff73fa84b9f7684dd4d46eed1) )
-		ROM_LOAD       ( "2060207.14",  0x0c00000, 0x200000, CRC(c2028c97) SHA1(ac3b73ff34f84015432ceb22cf9c57ab0ff07a70) )
-		ROM_LOAD       ( "2070208.15",  0x0e00000, 0x200000, CRC(b1f30c61) SHA1(2ae010c10b7a2ae09df904f7ea81425e80389622) )
-		ROM_LOAD       ( "2080209.28",  0x1000000, 0x200000, CRC(a8f29545) SHA1(5d018147aa71207f679909343104deaa0f08fd9d) )
+		ROM_REGION( 0x1e00000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD       ( "2000201.8",   0x0000000, 0x200000, CRC(bba63025);SHA1(daec5285469ee953f6f838fe3cb3903524e9ac39) )
+		ROM_LOAD       ( "2010202.9",   0x0200000, 0x200000, CRC(4ffd9ddc);SHA1(62bc8c0ed2efab407fc2956c514c3e732bcc47ee) )
+		ROM_LOAD       ( "2020203.10",  0x0400000, 0x200000, CRC(fbcc5363);SHA1(9eff48c29d5c887d39e4db442c6ee51ec879521e) )
+		ROM_LOAD       ( "2030204.11",  0x0600000, 0x200000, CRC(8e818ce9);SHA1(bc37d35247edfc563400cd67459d455b1fea6eab) )
+		ROM_LOAD       ( "2040205.12",  0x0800000, 0x200000, CRC(70c4a76b);SHA1(01b17bda156f2e6f480bdc976927c8bba47c1186) )
+		ROM_LOAD       ( "2050206.13",  0x0a00000, 0x200000, CRC(80c667bb);SHA1(7edf33c713c8448ff73fa84b9f7684dd4d46eed1) )
+		ROM_LOAD       ( "2060207.14",  0x0c00000, 0x200000, CRC(c2028c97);SHA1(ac3b73ff34f84015432ceb22cf9c57ab0ff07a70) )
+		ROM_LOAD       ( "2070208.15",  0x0e00000, 0x200000, CRC(b1f30c61);SHA1(2ae010c10b7a2ae09df904f7ea81425e80389622) )
+		ROM_LOAD       ( "2080209.28",  0x1000000, 0x200000, CRC(a8f29545);SHA1(5d018147aa71207f679909343104deaa0f08fd9d) )
 	
-		ROM_LOAD16_BYTE( "209e0210.16", 0x1800000, 0x080000, CRC(fbdfee1e) SHA1(0d5543e27d15e59c8f51f3458dd5e27b4811aa62) )
-		ROM_LOAD16_BYTE( "20902011.17", 0x1800001, 0x080000, CRC(2baefdb2) SHA1(3fffa276051f0ab490cf60e026d2dfdb6e684ef9) )
-		ROM_LOAD16_BYTE( "210e0212.18", 0x1900000, 0x080000, CRC(d59cb3c0) SHA1(8833e1fd5b69df7515157eb6c15b812e029bc570) )
-		ROM_LOAD16_BYTE( "21000213.19", 0x1900001, 0x080000, CRC(62cb5c8b) SHA1(21e7b7eed074f780ef0d4b85db024a1fe4fd94d3) )
-		ROM_LOAD16_BYTE( "211e0214.20", 0x1a00000, 0x080000, CRC(3305015e) SHA1(b002a8b86a4f79f5266413dcc42368171b90a89e) )
-		ROM_LOAD16_BYTE( "21100215.21", 0x1a00001, 0x080000, CRC(5e3a13bd) SHA1(fd9017c05e1c71e4980e1db48855392f8b888a64) )
-		ROM_LOAD16_BYTE( "212e0216.22", 0x1b00000, 0x080000, CRC(2836073b) SHA1(ccbf4954af86c6ffbdaa122770f64f72d5e23e63) )
-		ROM_LOAD16_BYTE( "21200217.23", 0x1b00001, 0x080000, CRC(267b8ee0) SHA1(4e97a970dcd331016c754753913e07e5cd9be3d3) )
-		ROM_LOAD16_BYTE( "213e0218.24", 0x1c00000, 0x080000, CRC(7b202f6c) SHA1(7acae3a7c8cfa39f49814addc9aec30f18deff0c) )
-		ROM_LOAD16_BYTE( "21300219.25", 0x1c00001, 0x080000, CRC(09f16222) SHA1(5b2789143be84e963ca3b4b1cbab6ab5f9fbcade) )
-		ROM_LOAD16_BYTE( "214e0220.26", 0x1d00000, 0x080000, CRC(bfcb86aa) SHA1(601fa1f4a6fc483befbaefbf97cd7072e1b68c8d) )
-		ROM_LOAD16_BYTE( "21400221.27", 0x1d00001, 0x080000, CRC(90682117) SHA1(93d2036c17bcb4021fb3edbc9e08595059d6295d) )
+		ROM_LOAD16_BYTE( "209e0210.16", 0x1800000, 0x080000, CRC(fbdfee1e);SHA1(0d5543e27d15e59c8f51f3458dd5e27b4811aa62) )
+		ROM_LOAD16_BYTE( "20902011.17", 0x1800001, 0x080000, CRC(2baefdb2);SHA1(3fffa276051f0ab490cf60e026d2dfdb6e684ef9) )
+		ROM_LOAD16_BYTE( "210e0212.18", 0x1900000, 0x080000, CRC(d59cb3c0);SHA1(8833e1fd5b69df7515157eb6c15b812e029bc570) )
+		ROM_LOAD16_BYTE( "21000213.19", 0x1900001, 0x080000, CRC(62cb5c8b);SHA1(21e7b7eed074f780ef0d4b85db024a1fe4fd94d3) )
+		ROM_LOAD16_BYTE( "211e0214.20", 0x1a00000, 0x080000, CRC(3305015e);SHA1(b002a8b86a4f79f5266413dcc42368171b90a89e) )
+		ROM_LOAD16_BYTE( "21100215.21", 0x1a00001, 0x080000, CRC(5e3a13bd);SHA1(fd9017c05e1c71e4980e1db48855392f8b888a64) )
+		ROM_LOAD16_BYTE( "212e0216.22", 0x1b00000, 0x080000, CRC(2836073b);SHA1(ccbf4954af86c6ffbdaa122770f64f72d5e23e63) )
+		ROM_LOAD16_BYTE( "21200217.23", 0x1b00001, 0x080000, CRC(267b8ee0);SHA1(4e97a970dcd331016c754753913e07e5cd9be3d3) )
+		ROM_LOAD16_BYTE( "213e0218.24", 0x1c00000, 0x080000, CRC(7b202f6c);SHA1(7acae3a7c8cfa39f49814addc9aec30f18deff0c) )
+		ROM_LOAD16_BYTE( "21300219.25", 0x1c00001, 0x080000, CRC(09f16222);SHA1(5b2789143be84e963ca3b4b1cbab6ab5f9fbcade) )
+		ROM_LOAD16_BYTE( "214e0220.26", 0x1d00000, 0x080000, CRC(bfcb86aa);SHA1(601fa1f4a6fc483befbaefbf97cd7072e1b68c8d) )
+		ROM_LOAD16_BYTE( "21400221.27", 0x1d00001, 0x080000, CRC(90682117);SHA1(93d2036c17bcb4021fb3edbc9e08595059d6295d) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "3010226.55", 0x000000, 0x100000, CRC(fcf215de) SHA1(83015f10e62b917efd6e3edfbd45fb8f9b35db2b) )
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "3010226.55", 0x000000, 0x100000, CRC(fcf215de);SHA1(83015f10e62b917efd6e3edfbd45fb8f9b35db2b) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "3000225.51", 0x000000, 0x100000, CRC(fbc3c08a) SHA1(0ba52b381e7a10fb1513244b394438b440950af3) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "3000225.51", 0x000000, 0x100000, CRC(fbc3c08a);SHA1(0ba52b381e7a10fb1513244b394438b440950af3) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "101f0223.101", 0x000000, 0x100000, CRC(295f3c93) SHA1(558698f1d04b23dd2a73e2eae5ecce598defb228) )
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "101f0223.101", 0x000000, 0x100000, CRC(295f3c93);SHA1(558698f1d04b23dd2a73e2eae5ecce598defb228) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "1000222.99",   0x000000, 0x100000, CRC(42b12269) SHA1(f9d9c42057e176710f09e8db0bfcbf603c15ca11) )
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "1000222.99",   0x000000, 0x100000, CRC(42b12269);SHA1(f9d9c42057e176710f09e8db0bfcbf603c15ca11) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3501,38 +3517,38 @@ public class kaneko16
 		tb05mm-eu "1000 miglia"
 		master up= 94/07/18 15:12:35			*/
 	
-	ROM_START( gtmr )
-	 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "u2.bin", 0x000000, 0x080000, CRC(031799f7) SHA1(a59a9635002d139247828e3b74f6cf2fbdd5e569) )
-		ROM_LOAD16_BYTE( "u1.bin", 0x000001, 0x080000, CRC(6238790a) SHA1(a137fd581138804534f3193068f117611a982004) )
+	static RomLoadPtr rom_gtmr = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "u2.bin", 0x000000, 0x080000, CRC(031799f7);SHA1(a59a9635002d139247828e3b74f6cf2fbdd5e569) )
+		ROM_LOAD16_BYTE( "u1.bin", 0x000001, 0x080000, CRC(6238790a);SHA1(a137fd581138804534f3193068f117611a982004) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP );
 	
-		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
+		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
 		/* fill the 0x700000-7fffff range first, with the second of the identical halves */
-	//	ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33) SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
-	//	ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca) SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
-		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc) SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
-		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc) SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
-		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3) SHA1(219a86446ce2556682009d8aff837480f040a01e) )
-		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c) SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
+	//	ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33);SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
+	//	ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca);SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
+		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc);SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
+		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc);SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
+		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3);SHA1(219a86446ce2556682009d8aff837480f040a01e) )
+		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c);SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
 		/* codes 6800-7fff are explicitly skipped */
 		/* wrong tiles: 	gtmr	77e0 ; gtmralt	81c4 81e0 81c4 */
-		ROM_LOAD( "sprites",     0x700000, 0x100000, NO_DUMP )
+		ROM_LOAD( "sprites",     0x700000, 0x100000, NO_DUMP );
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee) SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee);SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c) SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c);SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
+	ROM_END(); }}; 
 	
 	
 	/*	This version displays:
@@ -3540,36 +3556,36 @@ public class kaneko16
 		tb05mm-eu "1000 miglia"
 		master up= 94/09/06 14:49:19			*/
 	
-	ROM_START( gtmre )
-	 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "gmmu2.bin", 0x000000, 0x080000, CRC(36dc4aa9) SHA1(0aea4dc169d7aad2ea957a1de698d1fa12c71556) )
-		ROM_LOAD16_BYTE( "gmmu1.bin", 0x000001, 0x080000, CRC(8653c144) SHA1(a253a01327a9443337a55a13c063ea5096444c4c) )
+	static RomLoadPtr rom_gtmre = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "gmmu2.bin", 0x000000, 0x080000, CRC(36dc4aa9);SHA1(0aea4dc169d7aad2ea957a1de698d1fa12c71556) )
+		ROM_LOAD16_BYTE( "gmmu1.bin", 0x000001, 0x080000, CRC(8653c144);SHA1(a253a01327a9443337a55a13c063ea5096444c4c) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP );
 	
-		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
+		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
 		/* fill the 0x700000-7fffff range first, with the second of the identical halves */
-		ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33) SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
-		ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca) SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
-		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc) SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
-		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc) SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
-		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3) SHA1(219a86446ce2556682009d8aff837480f040a01e) )
-		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c) SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
+		ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33);SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
+		ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca);SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
+		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc);SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
+		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc);SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
+		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3);SHA1(219a86446ce2556682009d8aff837480f040a01e) )
+		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c);SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
 		/* codes 6800-6fff are explicitly skipped */
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee) SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee);SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c) SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c);SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
+	ROM_END(); }}; 
 	
 	
 	/*	This version displays:
@@ -3577,36 +3593,36 @@ public class kaneko16
 		tb05mm-eu "1000 miglia"
 		master up= 94/09/06 20:30:39			*/
 	
-	ROM_START( gtmrusa )
-	 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "gtmrusa.u2", 0x000000, 0x080000, CRC(5be615c4) SHA1(c14d11a5bf6e025a65b932039165302ff407c4e1) )
-		ROM_LOAD16_BYTE( "gtmrusa.u1", 0x000001, 0x080000, CRC(ae853e4e) SHA1(31eaa73b0c5ddab1292f521ceec43b202653efe9) )
+	static RomLoadPtr rom_gtmrusa = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "gtmrusa.u2", 0x000000, 0x080000, CRC(5be615c4);SHA1(c14d11a5bf6e025a65b932039165302ff407c4e1) )
+		ROM_LOAD16_BYTE( "gtmrusa.u1", 0x000001, 0x080000, CRC(ae853e4e);SHA1(31eaa73b0c5ddab1292f521ceec43b202653efe9) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
-		ROM_LOAD( "gtmrusa.u12",  0x000000, 0x020000, CRC(2e1a06ff) SHA1(475a7555653eefac84307492a385895b839cab0d) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code? */
+		ROM_LOAD( "gtmrusa.u12",  0x000000, 0x020000, CRC(2e1a06ff);SHA1(475a7555653eefac84307492a385895b839cab0d) )
 	
-		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
+		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
 		/* fill the 0x700000-7fffff range first, with the second of the identical halves */
-		ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33) SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
-		ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca) SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
-		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc) SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
-		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc) SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
-		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3) SHA1(219a86446ce2556682009d8aff837480f040a01e) )
-		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c) SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
+		ROM_LOAD16_BYTE( "gmmu64.bin",  0x600000, 0x100000, CRC(57d77b33);SHA1(f7ae28ae889be4442b7b236705943eaad1f0c84e) )	// HALVES IDENTICAL
+		ROM_LOAD16_BYTE( "gmmu65.bin",  0x600001, 0x100000, CRC(05b8bdca);SHA1(44471d66787d5b48ae8b13676f42f27af44e5c6a) )	// HALVES IDENTICAL
+		ROM_LOAD( "gmmu27.bin",  0x000000, 0x200000, CRC(c0ab3efc);SHA1(e6cd15480977b036234d91e6f3a6e21b7f0a3c3e) )
+		ROM_LOAD( "gmmu28.bin",  0x200000, 0x200000, CRC(cf6b23dc);SHA1(ccfd0b17507e091e55c169361cd6a6b19641b717) )
+		ROM_LOAD( "gmmu29.bin",  0x400000, 0x200000, CRC(8f27f5d3);SHA1(219a86446ce2556682009d8aff837480f040a01e) )
+		ROM_LOAD( "gmmu30.bin",  0x600000, 0x080000, CRC(e9747c8c);SHA1(2507102ec34755c6f110eadb3444e6d3a3474051) )
 		/* codes 6800-6fff are explicitly skipped */
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f) SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
+		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "gmmu52.bin",  0x000000, 0x200000, CRC(b15f6b7f);SHA1(5e84919d788add53fc87f4d85f437df413b1dbc5) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee) SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "gmmu23.bin",  0x000000, 0x100000, CRC(b9cbfbee);SHA1(051d48a68477ef9c29bd5cc0bb7955d513a0ab94) )	// 16 x $10000
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c) SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "gmmu24.bin",  0x000000, 0x100000, CRC(380cdc7c);SHA1(ba7f51201b0f2bf15e66557e45bb2af5cf797779) )	//  2 x $40000 - HALVES IDENTICAL
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3664,39 +3680,39 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( gtmr2 )
-	 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "m2p0x1.u8",  0x000000, 0x080000, CRC(525f6618) SHA1(da8008cc7768b4e8c0091aa3ea21752d0ca33691) )
-		ROM_LOAD16_BYTE( "m2p1x1.u7",  0x000001, 0x080000, CRC(914683e5) SHA1(dbb2140f7de86073647abc6e73ba739ea201dd30) )
+	static RomLoadPtr rom_gtmr2 = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "m2p0x1.u8",  0x000000, 0x080000, CRC(525f6618);SHA1(da8008cc7768b4e8c0091aa3ea21752d0ca33691) )
+		ROM_LOAD16_BYTE( "m2p1x1.u7",  0x000001, 0x080000, CRC(914683e5);SHA1(dbb2140f7de86073647abc6e73ba739ea201dd30) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
-		ROM_LOAD( "m2d0x0.u31",        0x000000, 0x020000, CRC(2e1a06ff) SHA1(475a7555653eefac84307492a385895b839cab0d) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code? */
+		ROM_LOAD( "m2d0x0.u31",        0x000000, 0x020000, CRC(2e1a06ff);SHA1(475a7555653eefac84307492a385895b839cab0d) )
 	
-		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "m2-200-0.u49",      0x000000, 0x400000, CRC(93aafc53) SHA1(1d28b6e3bd61ce9c938fc5303aeabcdefa549852) )
-		ROM_LOAD( "m2-201-0.u50",      0x400000, 0x200000, CRC(39b60a83) SHA1(aa7b37c7c92bbcf685f4fec84cc6d8a77d26433c) )
-		ROM_LOAD( "m2-202-0.u51",      0x600000, 0x200000, CRC(fd06b339) SHA1(5de0af7d23147f6eb403700eabd66794198f3641) )
-		ROM_LOAD16_BYTE( "m2s0x1.u32", 0x700000, 0x080000, CRC(4069d6c7) SHA1(2ed1cbb7ebde8347e0359cd56ee3a0d4d42d551f) )
-		ROM_LOAD16_BYTE( "m2s1x1.u33", 0x700001, 0x080000, CRC(c53fe269) SHA1(e6c485bbaea4b67f074b89e047f686f107805713) )
+		ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "m2-200-0.u49",      0x000000, 0x400000, CRC(93aafc53);SHA1(1d28b6e3bd61ce9c938fc5303aeabcdefa549852) )
+		ROM_LOAD( "m2-201-0.u50",      0x400000, 0x200000, CRC(39b60a83);SHA1(aa7b37c7c92bbcf685f4fec84cc6d8a77d26433c) )
+		ROM_LOAD( "m2-202-0.u51",      0x600000, 0x200000, CRC(fd06b339);SHA1(5de0af7d23147f6eb403700eabd66794198f3641) )
+		ROM_LOAD16_BYTE( "m2s0x1.u32", 0x700000, 0x080000, CRC(4069d6c7);SHA1(2ed1cbb7ebde8347e0359cd56ee3a0d4d42d551f) )
+		ROM_LOAD16_BYTE( "m2s1x1.u33", 0x700001, 0x080000, CRC(c53fe269);SHA1(e6c485bbaea4b67f074b89e047f686f107805713) )
 	
-		ROM_REGION( 0x440000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "m2-300-0.u89",      0x000000, 0x200000, CRC(4dc42fbb) SHA1(f14c287bc60f561eb9a57db4e3390aae9a81c392) )
-		ROM_LOAD( "m2-301-0.u90",      0x200000, 0x200000, CRC(f4e894f2) SHA1(1f983a1d93845fe298afba60d4dacdd1a10cab7f) )
-		ROM_LOAD16_BYTE( "m2b0x0.u93", 0x400000, 0x020000, CRC(e023d51b) SHA1(3c9f591f3ca2ee8e1100b83ae8eb593e11e6eac7) )
-		ROM_LOAD16_BYTE( "m2b1x0.u94", 0x400001, 0x020000, CRC(03c48bdb) SHA1(f5ba45d026530d46f760cf06d02a1ffcca89aa3c) )
+		ROM_REGION( 0x440000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "m2-300-0.u89",      0x000000, 0x200000, CRC(4dc42fbb);SHA1(f14c287bc60f561eb9a57db4e3390aae9a81c392) )
+		ROM_LOAD( "m2-301-0.u90",      0x200000, 0x200000, CRC(f4e894f2);SHA1(1f983a1d93845fe298afba60d4dacdd1a10cab7f) )
+		ROM_LOAD16_BYTE( "m2b0x0.u93", 0x400000, 0x020000, CRC(e023d51b);SHA1(3c9f591f3ca2ee8e1100b83ae8eb593e11e6eac7) )
+		ROM_LOAD16_BYTE( "m2b1x0.u94", 0x400001, 0x020000, CRC(03c48bdb);SHA1(f5ba45d026530d46f760cf06d02a1ffcca89aa3c) )
 	
-		ROM_REGION( 0x440000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "m2-300-0.u89",      0x000000, 0x200000, CRC(4dc42fbb) SHA1(f14c287bc60f561eb9a57db4e3390aae9a81c392) )
-		ROM_LOAD( "m2-301-0.u90",      0x200000, 0x200000, CRC(f4e894f2) SHA1(1f983a1d93845fe298afba60d4dacdd1a10cab7f) )
-		ROM_LOAD16_BYTE( "m2b0x0.u93", 0x400000, 0x020000, CRC(e023d51b) SHA1(3c9f591f3ca2ee8e1100b83ae8eb593e11e6eac7) )
-		ROM_LOAD16_BYTE( "m2b1x0.u94", 0x400001, 0x020000, CRC(03c48bdb) SHA1(f5ba45d026530d46f760cf06d02a1ffcca89aa3c) )
+		ROM_REGION( 0x440000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "m2-300-0.u89",      0x000000, 0x200000, CRC(4dc42fbb);SHA1(f14c287bc60f561eb9a57db4e3390aae9a81c392) )
+		ROM_LOAD( "m2-301-0.u90",      0x200000, 0x200000, CRC(f4e894f2);SHA1(1f983a1d93845fe298afba60d4dacdd1a10cab7f) )
+		ROM_LOAD16_BYTE( "m2b0x0.u93", 0x400000, 0x020000, CRC(e023d51b);SHA1(3c9f591f3ca2ee8e1100b83ae8eb593e11e6eac7) )
+		ROM_LOAD16_BYTE( "m2b1x0.u94", 0x400001, 0x020000, CRC(03c48bdb);SHA1(f5ba45d026530d46f760cf06d02a1ffcca89aa3c) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "m2-100-0.u48",      0x000000, 0x100000, CRC(5250fa45) SHA1(b1ad4660906997faea0aa89866de01a0e9f2b61d) )
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "m2-100-0.u48",      0x000000, 0x100000, CRC(5250fa45);SHA1(b1ad4660906997faea0aa89866de01a0e9f2b61d) )
 	
-		ROM_REGION( 0x080000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "m2w1x0.u47",        0x040000, 0x040000, CRC(1b0513c5) SHA1(8c9ddef19297e1b39d900297005203b7ff28667e) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "m2w1x0.u47",        0x040000, 0x040000, CRC(1b0513c5);SHA1(8c9ddef19297e1b39d900297005203b7ff28667e) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3748,53 +3764,53 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( mgcrystl )
-	 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "magcrstl.u18", 0x000000, 0x020000, CRC(c7456ba7) SHA1(96c25c3432069373fa86d7af3e093e02e39aea34) )
-		ROM_LOAD16_BYTE( "magcrstl.u19", 0x000001, 0x040000, CRC(ea8f9300) SHA1(0cd0d448805aa45986b63befca00b08fe066dbb2) ) //!!
+	static RomLoadPtr rom_mgcrystl = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "magcrstl.u18", 0x000000, 0x020000, CRC(c7456ba7);SHA1(96c25c3432069373fa86d7af3e093e02e39aea34) )
+		ROM_LOAD16_BYTE( "magcrstl.u19", 0x000001, 0x040000, CRC(ea8f9300);SHA1(0cd0d448805aa45986b63befca00b08fe066dbb2) ) //!!
 	
-		ROM_REGION( 0x280000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "mc000.u38",    0x000000, 0x100000, CRC(28acf6f4) SHA1(6647ad90ea580b65ed28772f9d65352b06833d0c) )
-		ROM_LOAD( "mc001.u37",    0x100000, 0x080000, CRC(005bc43d) SHA1(6f6cd99e8e60562fa86581008455a6d9d646fa95) )
-		ROM_RELOAD(               0x180000, 0x080000             )
-		ROM_LOAD( "magcrstl.u36", 0x200000, 0x020000, CRC(22729037) SHA1(de4e1bdab57aa617411b6327f3db4856970e8953) )
-		ROM_RELOAD(               0x220000, 0x020000             )
-		ROM_RELOAD(               0x240000, 0x020000             )
-		ROM_RELOAD(               0x260000, 0x020000             )
+		ROM_REGION( 0x280000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "mc000.u38",    0x000000, 0x100000, CRC(28acf6f4);SHA1(6647ad90ea580b65ed28772f9d65352b06833d0c) )
+		ROM_LOAD( "mc001.u37",    0x100000, 0x080000, CRC(005bc43d);SHA1(6f6cd99e8e60562fa86581008455a6d9d646fa95) )
+		ROM_RELOAD(               0x180000, 0x080000             );
+		ROM_LOAD( "magcrstl.u36", 0x200000, 0x020000, CRC(22729037);SHA1(de4e1bdab57aa617411b6327f3db4856970e8953) )
+		ROM_RELOAD(               0x220000, 0x020000             );
+		ROM_RELOAD(               0x240000, 0x020000             );
+		ROM_RELOAD(               0x260000, 0x020000             );
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "mc010.u04",  0x000000, 0x100000, CRC(85072772) SHA1(25e903cc2c893d61db791d1fe60a1205a4395667) )
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "mc010.u04",  0x000000, 0x100000, CRC(85072772);SHA1(25e903cc2c893d61db791d1fe60a1205a4395667) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "mc020.u34",  0x000000, 0x100000, CRC(1ea92ff1) SHA1(66ec53e664b2a5a751a280a538aaeceafc187ceb) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "mc020.u34",  0x000000, 0x100000, CRC(1ea92ff1);SHA1(66ec53e664b2a5a751a280a538aaeceafc187ceb) )
 	
-		ROM_REGION( 0x040000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "mc030.u32",  0x000000, 0x040000, CRC(c165962e) SHA1(f7e130db387ae9dcb7223f7ad6e51270d3033bc9) )
-	ROM_END
+		ROM_REGION( 0x040000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "mc030.u32",  0x000000, 0x040000, CRC(c165962e);SHA1(f7e130db387ae9dcb7223f7ad6e51270d3033bc9) )
+	ROM_END(); }}; 
 	
-	ROM_START( mgcrystj )
-	 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "mc100j.u18", 0x000000, 0x020000, CRC(afe5882d) SHA1(176e6e12e3df63c08d7aff781f5e5a9bd83ec293) )
-		ROM_LOAD16_BYTE( "mc101j.u19", 0x000001, 0x040000, CRC(60da5492) SHA1(82b90a617d355825624ce9fb30bddf4714bd0d18) )	//!!
+	static RomLoadPtr rom_mgcrystj = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "mc100j.u18", 0x000000, 0x020000, CRC(afe5882d);SHA1(176e6e12e3df63c08d7aff781f5e5a9bd83ec293) )
+		ROM_LOAD16_BYTE( "mc101j.u19", 0x000001, 0x040000, CRC(60da5492);SHA1(82b90a617d355825624ce9fb30bddf4714bd0d18) )	//!!
 	
-		ROM_REGION( 0x280000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "mc000.u38",  0x000000, 0x100000, CRC(28acf6f4) SHA1(6647ad90ea580b65ed28772f9d65352b06833d0c) )
-		ROM_LOAD( "mc001.u37",  0x100000, 0x080000, CRC(005bc43d) SHA1(6f6cd99e8e60562fa86581008455a6d9d646fa95) )
-		ROM_RELOAD(             0x180000, 0x080000             )
-		ROM_LOAD( "mc002j.u36", 0x200000, 0x020000, CRC(27ac1056) SHA1(34b07c1a0d403ca45c9849d3d8d311012f787df6) )
-		ROM_RELOAD(             0x220000, 0x020000             )
-		ROM_RELOAD(             0x240000, 0x020000             )
-		ROM_RELOAD(             0x260000, 0x020000             )
+		ROM_REGION( 0x280000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "mc000.u38",  0x000000, 0x100000, CRC(28acf6f4);SHA1(6647ad90ea580b65ed28772f9d65352b06833d0c) )
+		ROM_LOAD( "mc001.u37",  0x100000, 0x080000, CRC(005bc43d);SHA1(6f6cd99e8e60562fa86581008455a6d9d646fa95) )
+		ROM_RELOAD(             0x180000, 0x080000             );
+		ROM_LOAD( "mc002j.u36", 0x200000, 0x020000, CRC(27ac1056);SHA1(34b07c1a0d403ca45c9849d3d8d311012f787df6) )
+		ROM_RELOAD(             0x220000, 0x020000             );
+		ROM_RELOAD(             0x240000, 0x020000             );
+		ROM_RELOAD(             0x260000, 0x020000             );
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "mc010.u04",  0x000000, 0x100000, CRC(85072772) SHA1(25e903cc2c893d61db791d1fe60a1205a4395667) )
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "mc010.u04",  0x000000, 0x100000, CRC(85072772);SHA1(25e903cc2c893d61db791d1fe60a1205a4395667) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (Scrambled) */
-		ROM_LOAD( "mc020.u34",  0x000000, 0x100000, CRC(1ea92ff1) SHA1(66ec53e664b2a5a751a280a538aaeceafc187ceb) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (Scrambled) */
+		ROM_LOAD( "mc020.u34",  0x000000, 0x100000, CRC(1ea92ff1);SHA1(66ec53e664b2a5a751a280a538aaeceafc187ceb) )
 	
-		ROM_REGION( 0x040000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "mc030.u32",  0x000000, 0x040000, CRC(c165962e) SHA1(f7e130db387ae9dcb7223f7ad6e51270d3033bc9) )
-	ROM_END
+		ROM_REGION( 0x040000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "mc030.u32",  0x000000, 0x040000, CRC(c165962e);SHA1(f7e130db387ae9dcb7223f7ad6e51270d3033bc9) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3818,26 +3834,26 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( sandscrp )
-		ROM_REGION( 0x080000, REGION_CPU1, 0 )		/* 68000 Code */
-		ROM_LOAD16_BYTE( "sandsc11.bin", 0x000000, 0x040000, CRC(9b24ab40) SHA1(3187422dbe8b15d8053be4cb20e56d3e6afbd5f2) )
-		ROM_LOAD16_BYTE( "sandsc12.bin", 0x000001, 0x040000, CRC(ad12caee) SHA1(83267445b89c3cf4dc317106aa68763d2f29eff7) )
+	static RomLoadPtr rom_sandscrp = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x080000, REGION_CPU1, 0 );	/* 68000 Code */
+		ROM_LOAD16_BYTE( "sandsc11.bin", 0x000000, 0x040000, CRC(9b24ab40);SHA1(3187422dbe8b15d8053be4cb20e56d3e6afbd5f2) )
+		ROM_LOAD16_BYTE( "sandsc12.bin", 0x000001, 0x040000, CRC(ad12caee);SHA1(83267445b89c3cf4dc317106aa68763d2f29eff7) )
 	
-		ROM_REGION( 0x24000, REGION_CPU2, 0 )		/* Z80 Code */
-		ROM_LOAD( "sandsc08.bin", 0x00000, 0x0c000, CRC(6f3e9db1) SHA1(06a04fa17f44319986913bff70433510c89e38f1) )
-		ROM_CONTINUE(             0x10000, 0x14000             )
+		ROM_REGION( 0x24000, REGION_CPU2, 0 );	/* Z80 Code */
+		ROM_LOAD( "sandsc08.bin", 0x00000, 0x0c000, CRC(6f3e9db1);SHA1(06a04fa17f44319986913bff70433510c89e38f1) )
+		ROM_CONTINUE(             0x10000, 0x14000             );
 	
-		ROM_REGION( 0x100000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "sandsc05.bin", 0x000000, 0x080000, CRC(9bb675f6) SHA1(c3f6768cfd99a0e19ca2224fff9aa4e27ec0da24) )
-		ROM_LOAD( "sandsc06.bin", 0x080000, 0x080000, CRC(7df2f219) SHA1(e2a59e201bfededa92d6c86f8dc1b212527ef66f) )
+		ROM_REGION( 0x100000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "sandsc05.bin", 0x000000, 0x080000, CRC(9bb675f6);SHA1(c3f6768cfd99a0e19ca2224fff9aa4e27ec0da24) )
+		ROM_LOAD( "sandsc06.bin", 0x080000, 0x080000, CRC(7df2f219);SHA1(e2a59e201bfededa92d6c86f8dc1b212527ef66f) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )	/* Layers */
-		ROM_LOAD16_BYTE( "sandsc04.bin", 0x000000, 0x080000, CRC(b9222ff2) SHA1(a445da3f7f5dea5ff64bb0b048f624f947875a39) )
-		ROM_LOAD16_BYTE( "sandsc03.bin", 0x000001, 0x080000, CRC(adf20fa0) SHA1(67a7a2be774c86916cbb97e4c9b16c2e48125780) )
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );/* Layers */
+		ROM_LOAD16_BYTE( "sandsc04.bin", 0x000000, 0x080000, CRC(b9222ff2);SHA1(a445da3f7f5dea5ff64bb0b048f624f947875a39) )
+		ROM_LOAD16_BYTE( "sandsc03.bin", 0x000001, 0x080000, CRC(adf20fa0);SHA1(67a7a2be774c86916cbb97e4c9b16c2e48125780) )
 	
-		ROM_REGION( 0x040000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "sandsc07.bin", 0x000000, 0x040000, CRC(9870ab12) SHA1(5ea3412cbc57bfaa32a1e2552b2eb46f4ceb5fa8) )
-	ROM_END
+		ROM_REGION( 0x040000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "sandsc07.bin", 0x000000, 0x040000, CRC(9870ab12);SHA1(5ea3412cbc57bfaa32a1e2552b2eb46f4ceb5fa8) )
+	ROM_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -3881,37 +3897,37 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( shogwarr )
-	 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "fb030a.u61", 0x000000, 0x020000, CRC(a04106c6) SHA1(95ab084f2e709be7cec2964cb09bcf5a8d3aacdf) )
-		ROM_LOAD16_BYTE( "fb031a.u62", 0x000001, 0x020000, CRC(d1def5e2) SHA1(f442de4433547e52b483549aca5786e4597a7122) )
+	static RomLoadPtr rom_shogwarr = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "fb030a.u61", 0x000000, 0x020000, CRC(a04106c6);SHA1(95ab084f2e709be7cec2964cb09bcf5a8d3aacdf) )
+		ROM_LOAD16_BYTE( "fb031a.u62", 0x000001, 0x020000, CRC(d1def5e2);SHA1(f442de4433547e52b483549aca5786e4597a7122) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "fb040a.u33",  0x000000, 0x020000, CRC(4b62c4d9) SHA1(35c943dde70438a411714070e42a84366db5ef83) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "fb040a.u33",  0x000000, 0x020000, CRC(4b62c4d9);SHA1(35c943dde70438a411714070e42a84366db5ef83) )
 	
-		ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "fb020a.u1",  0x000000, 0x080000, CRC(da1b7373) SHA1(89510901848f1798fb76dd82d1cd9ac97c41521d) )
-		ROM_LOAD( "fb022a.u5",  0x080000, 0x080000, CRC(60aa1282) SHA1(4648816016e00df3256226ba5134f6e5bb429909) )
-		ROM_LOAD( "fb020b.u2",  0x100000, 0x100000, CRC(276b9d7b) SHA1(7a154f65b4737f2b6ac8effa3352711079f571dc) )
-		ROM_LOAD( "fb021a.u3",  0x200000, 0x100000, CRC(7da15d37) SHA1(345cf2242e8210a697294a45197f2b3b974de885) )
-		ROM_LOAD( "fb021b.u4",  0x300000, 0x100000, CRC(6a512d7b) SHA1(7fc3002d23262a9a590a283ea9e111e38d889ef2) )
-		ROM_LOAD( "fb023.u7",   0x400000, 0x100000, CRC(132794bd) SHA1(bcc73c3183c59a4b66f79d04774773b8a9239501) )
-		ROM_LOAD( "fb022b.u6",  0x500000, 0x080000, CRC(cd05a5c8) SHA1(9f000cca8d31e19fdc4b38c00c3ed13f71e5541c) )
+		ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "fb020a.u1",  0x000000, 0x080000, CRC(da1b7373);SHA1(89510901848f1798fb76dd82d1cd9ac97c41521d) )
+		ROM_LOAD( "fb022a.u5",  0x080000, 0x080000, CRC(60aa1282);SHA1(4648816016e00df3256226ba5134f6e5bb429909) )
+		ROM_LOAD( "fb020b.u2",  0x100000, 0x100000, CRC(276b9d7b);SHA1(7a154f65b4737f2b6ac8effa3352711079f571dc) )
+		ROM_LOAD( "fb021a.u3",  0x200000, 0x100000, CRC(7da15d37);SHA1(345cf2242e8210a697294a45197f2b3b974de885) )
+		ROM_LOAD( "fb021b.u4",  0x300000, 0x100000, CRC(6a512d7b);SHA1(7fc3002d23262a9a590a283ea9e111e38d889ef2) )
+		ROM_LOAD( "fb023.u7",   0x400000, 0x100000, CRC(132794bd);SHA1(bcc73c3183c59a4b66f79d04774773b8a9239501) )
+		ROM_LOAD( "fb022b.u6",  0x500000, 0x080000, CRC(cd05a5c8);SHA1(9f000cca8d31e19fdc4b38c00c3ed13f71e5541c) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "fb010.u65",  0x000000, 0x100000, CRC(296ffd92) SHA1(183a28e4594c428deb4726ed22d5166592b94b60) )
-		ROM_LOAD( "fb011.u66",  0x100000, 0x080000, CRC(500a0367) SHA1(6dc5190f81b21f59ee56a3b2332c8d86d6599782) )	// ?!
-		ROM_LOAD( "rb012.u67",  0x200000, 0x100000, CRC(bfdbe0d1) SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) )
-		ROM_LOAD( "rb013.u68",  0x300000, 0x100000, CRC(28c37fe8) SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) )
+		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "fb010.u65",  0x000000, 0x100000, CRC(296ffd92);SHA1(183a28e4594c428deb4726ed22d5166592b94b60) )
+		ROM_LOAD( "fb011.u66",  0x100000, 0x080000, CRC(500a0367);SHA1(6dc5190f81b21f59ee56a3b2332c8d86d6599782) )	// ?!
+		ROM_LOAD( "rb012.u67",  0x200000, 0x100000, CRC(bfdbe0d1);SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) )
+		ROM_LOAD( "rb013.u68",  0x300000, 0x100000, CRC(28c37fe8);SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "fb000e.u42",  0x000000, 0x080000, CRC(969f1465) SHA1(4f56d1ad341b08f4db41b7ab2498740612ff7c3d) )	// 2 x $40000
-		ROM_LOAD( "fb001e.u43",  0x080000, 0x080000, CRC(f524aaa1) SHA1(006a886f9df2e57c51b61c6cea70a6574fc20304) )	// 2 x $40000
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "fb000e.u42",  0x000000, 0x080000, CRC(969f1465);SHA1(4f56d1ad341b08f4db41b7ab2498740612ff7c3d) )	// 2 x $40000
+		ROM_LOAD( "fb001e.u43",  0x080000, 0x080000, CRC(f524aaa1);SHA1(006a886f9df2e57c51b61c6cea70a6574fc20304) )	// 2 x $40000
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "fb002.u44",   0x000000, 0x080000, CRC(05d7c2a9) SHA1(e34d395985caec10139a22daa179bb185df157d6) )	// 2 x $40000
-		ROM_LOAD( "fb003.u45",   0x080000, 0x080000, CRC(405722e9) SHA1(92e51093d50f74f650ba137f5fc2910e0f85337e) )	// 2 x $40000
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "fb002.u44",   0x000000, 0x080000, CRC(05d7c2a9);SHA1(e34d395985caec10139a22daa179bb185df157d6) )	// 2 x $40000
+		ROM_LOAD( "fb003.u45",   0x080000, 0x080000, CRC(405722e9);SHA1(92e51093d50f74f650ba137f5fc2910e0f85337e) )	// 2 x $40000
+	ROM_END(); }}; 
 	
 	
 	DRIVER_INIT( shogwarr )
@@ -3977,37 +3993,37 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( fjbuster )	// Fujiyama Buster - Japan version of Shogun Warriors
-	 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "fb030j.u61", 0x000000, 0x020000, CRC(32ce7909) SHA1(02d87342706ac9547eb611bd542f8498ba41e34a) )
-		ROM_LOAD16_BYTE( "fb031j.u62", 0x000001, 0x020000, CRC(000c8c08) SHA1(439daac1541c34557b5a4308ed69dfebb93abe13) )
+	static RomLoadPtr rom_fjbuster = new RomLoadPtr(){ public void handler(){ 	// Fujiyama Buster - Japan version of Shogun Warriors
+	 	ROM_REGION( 0x040000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "fb030j.u61", 0x000000, 0x020000, CRC(32ce7909);SHA1(02d87342706ac9547eb611bd542f8498ba41e34a) )
+		ROM_LOAD16_BYTE( "fb031j.u62", 0x000001, 0x020000, CRC(000c8c08);SHA1(439daac1541c34557b5a4308ed69dfebb93abe13) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "fb040j.u33",  0x000000, 0x020000, CRC(299d0746) SHA1(67fe3a47ab01fa02ce2bb5836c2041986c19d875) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "fb040j.u33",  0x000000, 0x020000, CRC(299d0746);SHA1(67fe3a47ab01fa02ce2bb5836c2041986c19d875) )
 	
-		ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "fb020a.u1",  0x000000, 0x080000, CRC(da1b7373) SHA1(89510901848f1798fb76dd82d1cd9ac97c41521d) )
-		ROM_LOAD( "fb022a.u5",  0x080000, 0x080000, CRC(60aa1282) SHA1(4648816016e00df3256226ba5134f6e5bb429909) )
-		ROM_LOAD( "fb020b.u2",  0x100000, 0x100000, CRC(276b9d7b) SHA1(7a154f65b4737f2b6ac8effa3352711079f571dc) )
-		ROM_LOAD( "fb021a.u3",  0x200000, 0x100000, CRC(7da15d37) SHA1(345cf2242e8210a697294a45197f2b3b974de885) )
-		ROM_LOAD( "fb021b.u4",  0x300000, 0x100000, CRC(6a512d7b) SHA1(7fc3002d23262a9a590a283ea9e111e38d889ef2) )
-		ROM_LOAD( "fb023.u7",   0x400000, 0x100000, CRC(132794bd) SHA1(bcc73c3183c59a4b66f79d04774773b8a9239501) )
-		ROM_LOAD( "fb022b.u6",  0x500000, 0x080000, CRC(cd05a5c8) SHA1(9f000cca8d31e19fdc4b38c00c3ed13f71e5541c) )
+		ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "fb020a.u1",  0x000000, 0x080000, CRC(da1b7373);SHA1(89510901848f1798fb76dd82d1cd9ac97c41521d) )
+		ROM_LOAD( "fb022a.u5",  0x080000, 0x080000, CRC(60aa1282);SHA1(4648816016e00df3256226ba5134f6e5bb429909) )
+		ROM_LOAD( "fb020b.u2",  0x100000, 0x100000, CRC(276b9d7b);SHA1(7a154f65b4737f2b6ac8effa3352711079f571dc) )
+		ROM_LOAD( "fb021a.u3",  0x200000, 0x100000, CRC(7da15d37);SHA1(345cf2242e8210a697294a45197f2b3b974de885) )
+		ROM_LOAD( "fb021b.u4",  0x300000, 0x100000, CRC(6a512d7b);SHA1(7fc3002d23262a9a590a283ea9e111e38d889ef2) )
+		ROM_LOAD( "fb023.u7",   0x400000, 0x100000, CRC(132794bd);SHA1(bcc73c3183c59a4b66f79d04774773b8a9239501) )
+		ROM_LOAD( "fb022b.u6",  0x500000, 0x080000, CRC(cd05a5c8);SHA1(9f000cca8d31e19fdc4b38c00c3ed13f71e5541c) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "fb010.u65",  0x000000, 0x100000, CRC(296ffd92) SHA1(183a28e4594c428deb4726ed22d5166592b94b60) )
-		ROM_LOAD( "fb011.u66",  0x100000, 0x080000, CRC(500a0367) SHA1(6dc5190f81b21f59ee56a3b2332c8d86d6599782) )	// ?!
-	//	ROM_LOAD( "rb012.u67",  0x200000, 0x100000, CRC(bfdbe0d1) SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) )	Not used!  No ROMs here
-	//	ROM_LOAD( "rb013.u68",  0x300000, 0x100000, CRC(28c37fe8) SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) )	Not used!  No ROMs here
+		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "fb010.u65",  0x000000, 0x100000, CRC(296ffd92);SHA1(183a28e4594c428deb4726ed22d5166592b94b60) )
+		ROM_LOAD( "fb011.u66",  0x100000, 0x080000, CRC(500a0367);SHA1(6dc5190f81b21f59ee56a3b2332c8d86d6599782) )	// ?!
+	//	ROM_LOAD( "rb012.u67",  0x200000, 0x100000, CRC(bfdbe0d1);SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) )	Not used!  No ROMs here
+	//	ROM_LOAD( "rb013.u68",  0x300000, 0x100000, CRC(28c37fe8);SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) )	Not used!  No ROMs here
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "fb000j.u43",    0x000000, 0x080000, CRC(a7522555) SHA1(ea88d90dda20bc309f98a1924c41551e7708e6af) )	// 2 x $40000
-		ROM_LOAD( "fb001j_u.101",  0x080000, 0x080000, CRC(07d4e8e2) SHA1(0de911f452ddeb54b0b435b9c1cf5d5881175d44) )	// 2 x $40000
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "fb000j.u43",    0x000000, 0x080000, CRC(a7522555);SHA1(ea88d90dda20bc309f98a1924c41551e7708e6af) )	// 2 x $40000
+		ROM_LOAD( "fb001j_u.101",  0x080000, 0x080000, CRC(07d4e8e2);SHA1(0de911f452ddeb54b0b435b9c1cf5d5881175d44) )	// 2 x $40000
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "fb002.u44",   0x000000, 0x080000, CRC(05d7c2a9) SHA1(e34d395985caec10139a22daa179bb185df157d6) )	// 2 x $40000
-		ROM_LOAD( "fb003.u45",   0x080000, 0x080000, CRC(405722e9) SHA1(92e51093d50f74f650ba137f5fc2910e0f85337e) )	// 2 x $40000
-	ROM_END
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "fb002.u44",   0x000000, 0x080000, CRC(05d7c2a9);SHA1(e34d395985caec10139a22daa179bb185df157d6) )	// 2 x $40000
+		ROM_LOAD( "fb003.u45",   0x080000, 0x080000, CRC(405722e9);SHA1(92e51093d50f74f650ba137f5fc2910e0f85337e) )	// 2 x $40000
+	ROM_END(); }}; 
 	
 	DRIVER_INIT( fjbuster )
 	{
@@ -4138,41 +4154,41 @@ public class kaneko16
 	
 	***************************************************************************/
 	
-	ROM_START( brapboys )
-	 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "rb-004.u61", 0x000000, 0x020000, CRC(5432442c) SHA1(f0f7328ece96ef25e6d4fd1958d734f64a9ef371) )
-		ROM_LOAD16_BYTE( "rb-005.u62", 0x000001, 0x020000, CRC(118b3cfb) SHA1(1690ecf5c629879bd97131ff77029e152919e45d) )
+	static RomLoadPtr rom_brapboys = new RomLoadPtr(){ public void handler(){ 
+	 	ROM_REGION( 0x040000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "rb-004.u61", 0x000000, 0x020000, CRC(5432442c);SHA1(f0f7328ece96ef25e6d4fd1958d734f64a9ef371) )
+		ROM_LOAD16_BYTE( "rb-005.u62", 0x000001, 0x020000, CRC(118b3cfb);SHA1(1690ecf5c629879bd97131ff77029e152919e45d) )
 	
-	 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "rb-006.u33",  0x000000, 0x020000, CRC(f1d76b20) SHA1(c571b5f28e529589ee2d7697ef5d4b60ccb66e7a) )
+	 	ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "rb-006.u33",  0x000000, 0x020000, CRC(f1d76b20);SHA1(c571b5f28e529589ee2d7697ef5d4b60ccb66e7a) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
+		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
 		/* order is probably wrong, but until it does more we can't tell */
-		ROM_LOAD( "rb-020.u2",  0x000000, 0x080000, CRC(b038440e) SHA1(9e32cb62358ab846470d9a75d4dab771d608a3cf) )
-		ROM_LOAD( "rb-025.u4",  0x080000, 0x080000, CRC(aa795ba5) SHA1(c5256dcceded2e76f548b60c18e51d0dd0209d81) )
-		ROM_LOAD( "rb-026.u5",  0x100000, 0x080000, CRC(bb7604d4) SHA1(57d51ce4ea2000f9a50bae326cfcb66ec494249f) )
+		ROM_LOAD( "rb-020.u2",  0x000000, 0x080000, CRC(b038440e);SHA1(9e32cb62358ab846470d9a75d4dab771d608a3cf) )
+		ROM_LOAD( "rb-025.u4",  0x080000, 0x080000, CRC(aa795ba5);SHA1(c5256dcceded2e76f548b60c18e51d0dd0209d81) )
+		ROM_LOAD( "rb-026.u5",  0x100000, 0x080000, CRC(bb7604d4);SHA1(57d51ce4ea2000f9a50bae326cfcb66ec494249f) )
 	
-		ROM_LOAD( "rb-021.u76", 0x200000, 0x080000, CRC(b7e2d362) SHA1(7e98e5b3d1ee972fc4cf9bebd33a3ca96a77357c) )
-		ROM_LOAD( "rb-022.u77", 0x280000, 0x080000, CRC(8d40c97a) SHA1(353b0a4a508f2fff8eeed680b1f685c7fdc29a7d) ) // right pos. (text)
-		ROM_LOAD( "rb-023.u78", 0x300000, 0x080000, CRC(dcf11c8d) SHA1(eed801f7cca3d3a941b1a4e4815cac9d20d970f7) )
-		ROM_LOAD( "rb-024.u79", 0x380000, 0x080000, CRC(65fa6447) SHA1(551e540d7bf412753b4a7098e25e6f9d8774bcf4) )
+		ROM_LOAD( "rb-021.u76", 0x200000, 0x080000, CRC(b7e2d362);SHA1(7e98e5b3d1ee972fc4cf9bebd33a3ca96a77357c) )
+		ROM_LOAD( "rb-022.u77", 0x280000, 0x080000, CRC(8d40c97a);SHA1(353b0a4a508f2fff8eeed680b1f685c7fdc29a7d) ) // right pos. (text)
+		ROM_LOAD( "rb-023.u78", 0x300000, 0x080000, CRC(dcf11c8d);SHA1(eed801f7cca3d3a941b1a4e4815cac9d20d970f7) )
+		ROM_LOAD( "rb-024.u79", 0x380000, 0x080000, CRC(65fa6447);SHA1(551e540d7bf412753b4a7098e25e6f9d8774bcf4) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "rb-010.u65",  0x000000, 0x100000, CRC(ffd73f87) SHA1(1a661f71976be61c22d9b962850e738ba17f1d45) )
-		ROM_LOAD( "rb-011.u66",  0x100000, 0x100000, CRC(d9325f78) SHA1(346832608664aa8f3ac9260a549903386b4125a8) )
-		ROM_LOAD( "rb-012.u67",  0x200000, 0x100000, CRC(bfdbe0d1) SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) ) // same as shoggwar
-		ROM_LOAD( "rb-013.u68",  0x300000, 0x100000, CRC(28c37fe8) SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) ) // same as shoggwar
+		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "rb-010.u65",  0x000000, 0x100000, CRC(ffd73f87);SHA1(1a661f71976be61c22d9b962850e738ba17f1d45) )
+		ROM_LOAD( "rb-011.u66",  0x100000, 0x100000, CRC(d9325f78);SHA1(346832608664aa8f3ac9260a549903386b4125a8) )
+		ROM_LOAD( "rb-012.u67",  0x200000, 0x100000, CRC(bfdbe0d1);SHA1(3abc5398ee8ee1871b4d081f9b748539d69bcdba) ) // same as shoggwar
+		ROM_LOAD( "rb-013.u68",  0x300000, 0x100000, CRC(28c37fe8);SHA1(e10dd1a810983077328b44e6e33ce2e899c506d2) ) // same as shoggwar
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* Samples */
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* Samples */
 		/* order is probably wrong, but until it does more we can't tell */
-		ROM_LOAD( "rb-003.101",  0x000000, 0x080000, CRC(2cac25d7) SHA1(0412c317bf650a93051b9304d23035efde0c026a) )
-		ROM_LOAD( "rb-000.u43",  0x080000, 0x040000, CRC(c7c848ac) SHA1(77754efd6efeac50a40dcd530de504090257d8b3) )
+		ROM_LOAD( "rb-003.101",  0x000000, 0x080000, CRC(2cac25d7);SHA1(0412c317bf650a93051b9304d23035efde0c026a) )
+		ROM_LOAD( "rb-000.u43",  0x080000, 0x040000, CRC(c7c848ac);SHA1(77754efd6efeac50a40dcd530de504090257d8b3) )
 	
-		ROM_REGION( 0x100000, REGION_SOUND2, 0 )	/* Samples */
+		ROM_REGION( 0x100000, REGION_SOUND2, 0 );/* Samples */
 		/* order is probably wrong, but until it does more we can't tell */
-		ROM_LOAD( "rb-001.u44",   0x000000, 0x080000, CRC(09c779e3) SHA1(c9c9bf939d58d329b87e0aa08ec3d35f7440d3c7) )
-		ROM_LOAD( "rb-002.u45",   0x080000, 0x080000, CRC(55de7003) SHA1(cc349fd8671926cafed4d86d1a5cb671e591c408) )
-	ROM_END
+		ROM_LOAD( "rb-001.u44",   0x000000, 0x080000, CRC(09c779e3);SHA1(c9c9bf939d58d329b87e0aa08ec3d35f7440d3c7) )
+		ROM_LOAD( "rb-002.u45",   0x080000, 0x080000, CRC(55de7003);SHA1(cc349fd8671926cafed4d86d1a5cb671e591c408) )
+	ROM_END(); }}; 
 	
 	/**********************************************************************
 	
@@ -4224,35 +4240,35 @@ public class kaneko16
 	
 	**********************************************************************/
 	
-	ROM_START( bonkadv )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
-		ROM_LOAD16_BYTE( "prg.8",        0x000000, 0x080000, CRC(af2e60f8) SHA1(406f79e155d1244b84f8c89c25b37188e1b4f4a6) )
-		ROM_LOAD16_BYTE( "prg.7",        0x000001, 0x080000, CRC(a1cc6a78) SHA1(a9cea21a6a0dfd3b0952664681c057190aa27f8c) )
+	static RomLoadPtr rom_bonkadv = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );		/* 68000 Code */
+		ROM_LOAD16_BYTE( "prg.8",        0x000000, 0x080000, CRC(af2e60f8);SHA1(406f79e155d1244b84f8c89c25b37188e1b4f4a6) )
+		ROM_LOAD16_BYTE( "prg.7",        0x000001, 0x080000, CRC(a1cc6a78);SHA1(a9cea21a6a0dfd3b0952664681c057190aa27f8c) )
 	
-		ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
-		ROM_LOAD( "mcu.124",			 0x000000, 0x020000, CRC(9d4e2724) SHA1(9dd43703265e39f876877020a0ac3875de6faa8d) )
+		ROM_REGION( 0x020000, REGION_CPU2, 0 );		/* MCU Code */
+		ROM_LOAD( "mcu.124",			 0x000000, 0x020000, CRC(9d4e2724);SHA1(9dd43703265e39f876877020a0ac3875de6faa8d) )
 	
-		ROM_REGION( 0x700000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "pc100101.37",		 0x000000, 0x200000, CRC(c96e7c10) SHA1(607cc7745abc3ff820047e8a00060ece61646623) )
-		ROM_LOAD( "pc300103.38",		 0x200000, 0x200000, CRC(07692b89) SHA1(ee8175ed90c860bd61ea0f4b7982e6edb4d78bed) )
-		ROM_LOAD( "pc200102.40",		 0x400000, 0x200000, CRC(4268a831) SHA1(1d6a23e74802ceded59bed2814f0826bdcb87fb7) )
-		ROM_LOAD16_BYTE( "pc600106.42",  0x600000, 0x080000, CRC(25877026) SHA1(96814d97e9f9284f98c35edfe5e76677ac50dd97) )
-		ROM_LOAD16_BYTE( "pc700107.43",  0x600001, 0x080000, CRC(bfe21c44) SHA1(9900a6fe4182b720a90d64d368bd0fd08bf936a8) )
+		ROM_REGION( 0x700000, REGION_GFX1, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "pc100101.37",		 0x000000, 0x200000, CRC(c96e7c10);SHA1(607cc7745abc3ff820047e8a00060ece61646623) )
+		ROM_LOAD( "pc300103.38",		 0x200000, 0x200000, CRC(07692b89);SHA1(ee8175ed90c860bd61ea0f4b7982e6edb4d78bed) )
+		ROM_LOAD( "pc200102.40",		 0x400000, 0x200000, CRC(4268a831);SHA1(1d6a23e74802ceded59bed2814f0826bdcb87fb7) )
+		ROM_LOAD16_BYTE( "pc600106.42",  0x600000, 0x080000, CRC(25877026);SHA1(96814d97e9f9284f98c35edfe5e76677ac50dd97) )
+		ROM_LOAD16_BYTE( "pc700107.43",  0x600001, 0x080000, CRC(bfe21c44);SHA1(9900a6fe4182b720a90d64d368bd0fd08bf936a8) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "pc500105.55",		 0x000000, 0x200000, CRC(edd0da94) SHA1(17a1ad957bb12a07010beec74c3e1b59cc0ab397) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "pc500105.55",		 0x000000, 0x200000, CRC(edd0da94);SHA1(17a1ad957bb12a07010beec74c3e1b59cc0ab397) )
 	
-		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles (scrambled) */
-		ROM_LOAD( "pc400104.51",		 0x000000, 0x200000, CRC(3ad3af0f) SHA1(5ac4def8b1a42c13369d3505fa8e1f52f9451cd4) )
+		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE );/* Tiles (scrambled) */
+		ROM_LOAD( "pc400104.51",		 0x000000, 0x200000, CRC(3ad3af0f);SHA1(5ac4def8b1a42c13369d3505fa8e1f52f9451cd4) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "pc601106.99",		 0x000000, 0x100000, CRC(a893651c) SHA1(d221ce89f19a76be497724f6c16fab82c8a52661) )
-		ROM_LOAD( "pc602107.100",		 0x100000, 0x100000, CRC(0fbb23aa) SHA1(69b620375c65246317d7105fbc414f3c36e02b2c) )
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "pc601106.99",		 0x000000, 0x100000, CRC(a893651c);SHA1(d221ce89f19a76be497724f6c16fab82c8a52661) )
+		ROM_LOAD( "pc602107.100",		 0x100000, 0x100000, CRC(0fbb23aa);SHA1(69b620375c65246317d7105fbc414f3c36e02b2c) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND2, 0 )	/* Samples */
-		ROM_LOAD( "pc603108.102",		 0x000000, 0x100000, CRC(58458985) SHA1(9a846d604ba901eb2a59d2b6cd9c42e3b43adb6a) )
-		ROM_LOAD( "pc604109.101",		 0x100000, 0x100000, CRC(76025530) SHA1(e0c8192d783057798eea084aa3e87938f6e01cb7) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND2, 0 );/* Samples */
+		ROM_LOAD( "pc603108.102",		 0x000000, 0x100000, CRC(58458985);SHA1(9a846d604ba901eb2a59d2b6cd9c42e3b43adb6a) )
+		ROM_LOAD( "pc604109.101",		 0x100000, 0x100000, CRC(76025530);SHA1(e0c8192d783057798eea084aa3e87938f6e01cb7) )
+	ROM_END(); }}; 
 	
 	/***************************************************************************
 	
@@ -4264,23 +4280,23 @@ public class kaneko16
 	
 	/* Working games */
 	
-	GAME( 1991, berlwall, 0,        berlwall, berlwall, berlwall, ROT0,  "Kaneko", "The Berlin Wall (set 1)" )
-	GAME( 1991, berlwalt, berlwall, berlwall, berlwalt, berlwall, ROT0,  "Kaneko", "The Berlin Wall (set 2)" )
-	GAME( 1991, mgcrystl, 0,        mgcrystl, mgcrystl, kaneko16, ROT0,  "Kaneko", "Magical Crystals (World)" )
-	GAME( 1991, mgcrystj, mgcrystl, mgcrystl, mgcrystl, kaneko16, ROT0,  "Kaneko (Atlus license)", "Magical Crystals (Japan)" )
-	GAME( 1992, blazeon,  0,        blazeon,  blazeon,  kaneko16, ROT0,  "Atlus",  "Blaze On (Japan)" )
-	GAME( 1992, sandscrp, 0,        sandscrp, sandscrp, 0,        ROT90, "Face",   "Sand Scorpion" )
-	GAME( 1994, gtmr,     0,        gtmr,     gtmr,     kaneko16, ROT0,  "Kaneko", "Great 1000 Miles Rally" )
-	GAME( 1994, gtmre,    gtmr,     gtmr,     gtmr,     kaneko16, ROT0,  "Kaneko", "Great 1000 Miles Rally (Evolution Model)" )
-	GAME( 1994, gtmrusa,  gtmr,     gtmr,     gtmr,     kaneko16, ROT0,  "Kaneko", "Great 1000 Miles Rally (USA)" )
-	GAME( 1995, gtmr2,    0,        gtmr2,    gtmr2,    kaneko16, ROT0,  "Kaneko", "Mille Miglia 2: Great 1000 Miles Rally" )
+	public static GameDriver driver_berlwall	   = new GameDriver("1991"	,"berlwall"	,"kaneko16.java"	,rom_berlwall,null	,machine_driver_berlwall	,input_ports_berlwall	,init_berlwall	,ROT0	,	"Kaneko", "The Berlin Wall (set 1)" )
+	public static GameDriver driver_berlwalt	   = new GameDriver("1991"	,"berlwalt"	,"kaneko16.java"	,rom_berlwalt,driver_berlwall	,machine_driver_berlwall	,input_ports_berlwalt	,init_berlwall	,ROT0	,	"Kaneko", "The Berlin Wall (set 2)" )
+	public static GameDriver driver_mgcrystl	   = new GameDriver("1991"	,"mgcrystl"	,"kaneko16.java"	,rom_mgcrystl,null	,machine_driver_mgcrystl	,input_ports_mgcrystl	,init_kaneko16	,ROT0	,	"Kaneko", "Magical Crystals (World)" )
+	public static GameDriver driver_mgcrystj	   = new GameDriver("1991"	,"mgcrystj"	,"kaneko16.java"	,rom_mgcrystj,driver_mgcrystl	,machine_driver_mgcrystl	,input_ports_mgcrystl	,init_kaneko16	,ROT0	,	"Kaneko (Atlus license)", "Magical Crystals (Japan)" )
+	public static GameDriver driver_blazeon	   = new GameDriver("1992"	,"blazeon"	,"kaneko16.java"	,rom_blazeon,null	,machine_driver_blazeon	,input_ports_blazeon	,init_kaneko16	,ROT0	,	"Atlus",  "Blaze On (Japan)" )
+	public static GameDriver driver_sandscrp	   = new GameDriver("1992"	,"sandscrp"	,"kaneko16.java"	,rom_sandscrp,null	,machine_driver_sandscrp	,input_ports_sandscrp	,null	,ROT90	,	"Face",   "Sand Scorpion" )
+	public static GameDriver driver_gtmr	   = new GameDriver("1994"	,"gtmr"	,"kaneko16.java"	,rom_gtmr,null	,machine_driver_gtmr	,input_ports_gtmr	,init_kaneko16	,ROT0	,	"Kaneko", "Great 1000 Miles Rally" )
+	public static GameDriver driver_gtmre	   = new GameDriver("1994"	,"gtmre"	,"kaneko16.java"	,rom_gtmre,driver_gtmr	,machine_driver_gtmr	,input_ports_gtmr	,init_kaneko16	,ROT0	,	"Kaneko", "Great 1000 Miles Rally (Evolution Model)" )
+	public static GameDriver driver_gtmrusa	   = new GameDriver("1994"	,"gtmrusa"	,"kaneko16.java"	,rom_gtmrusa,driver_gtmr	,machine_driver_gtmr	,input_ports_gtmr	,init_kaneko16	,ROT0	,	"Kaneko", "Great 1000 Miles Rally (USA)" )
+	public static GameDriver driver_gtmr2	   = new GameDriver("1995"	,"gtmr2"	,"kaneko16.java"	,rom_gtmr2,null	,machine_driver_gtmr2	,input_ports_gtmr2	,init_kaneko16	,ROT0	,	"Kaneko", "Mille Miglia 2: Great 1000 Miles Rally" )
 	
 	/* Non-working games (mainly due to protection) */
 	
-	GAMEX(1992, bakubrkr, 0,        bakubrkr, bakubrkr, kaneko16, ROT90, "Kaneko", "Bakuretsu Breaker",       GAME_IMPERFECT_GRAPHICS )
-	GAMEX(1992, shogwarr, 0,        shogwarr, shogwarr, shogwarr, ROT0,  "Kaneko", "Shogun Warriors",         GAME_NOT_WORKING )
-	GAMEX(1992, fjbuster, shogwarr, shogwarr, shogwarr, fjbuster, ROT0,  "Kaneko", "Fujiyama Buster (Japan)", GAME_NOT_WORKING )
-	GAMEX(1992, brapboys, 0,        shogwarr, shogwarr, 0,        ROT0,  "Kaneko", "B.Rap Boys",              GAME_NOT_WORKING )
-	GAMEX(1994, bloodwar, 0,        bloodwar, bloodwar, kaneko16, ROT0,  "Kaneko", "Blood Warrior",           GAME_NOT_WORKING )
-	GAMEX(1994, bonkadv,  0,        bonkadv,  bakubrkr, 0,		  ROT0,  "Kaneko", "Bonks Adventure",		  GAME_NOT_WORKING )
+	public static GameDriver driver_bakubrkr	   = new GameDriver("1992"	,"bakubrkr"	,"kaneko16.java"	,rom_bakubrkr,null	,machine_driver_bakubrkr	,input_ports_bakubrkr	,init_kaneko16	,ROT90	,	"Kaneko", "Bakuretsu Breaker",       GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_shogwarr	   = new GameDriver("1992"	,"shogwarr"	,"kaneko16.java"	,rom_shogwarr,null	,machine_driver_shogwarr	,input_ports_shogwarr	,init_shogwarr	,ROT0	,	"Kaneko", "Shogun Warriors",         GAME_NOT_WORKING )
+	public static GameDriver driver_fjbuster	   = new GameDriver("1992"	,"fjbuster"	,"kaneko16.java"	,rom_fjbuster,driver_shogwarr	,machine_driver_shogwarr	,input_ports_shogwarr	,init_fjbuster	,ROT0	,	"Kaneko", "Fujiyama Buster (Japan)", GAME_NOT_WORKING )
+	public static GameDriver driver_brapboys	   = new GameDriver("1992"	,"brapboys"	,"kaneko16.java"	,rom_brapboys,null	,machine_driver_shogwarr	,input_ports_shogwarr	,null	,ROT0	,	"Kaneko", "B.Rap Boys",              GAME_NOT_WORKING )
+	public static GameDriver driver_bloodwar	   = new GameDriver("1994"	,"bloodwar"	,"kaneko16.java"	,rom_bloodwar,null	,machine_driver_bloodwar	,input_ports_bloodwar	,init_kaneko16	,ROT0	,	"Kaneko", "Blood Warrior",           GAME_NOT_WORKING )
+	public static GameDriver driver_bonkadv	   = new GameDriver("1994"	,"bonkadv"	,"kaneko16.java"	,rom_bonkadv,null	,machine_driver_bonkadv	,input_ports_bakubrkr	,null	,ROT0	,	"Kaneko", "Bonks Adventure",		  GAME_NOT_WORKING )
 }

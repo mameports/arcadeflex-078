@@ -69,14 +69,14 @@ public class wiping
 	
 	
 	
-	WRITE_HANDLER( wiping_flipscreen_w )
+	public static WriteHandlerPtr wiping_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = (data & 1);
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -125,8 +125,8 @@ public class wiping
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipscreen,flipscreen,
 						sx*8,sy*8,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -139,13 +139,13 @@ public class wiping
 		for (offs = 0x0; offs < 128; offs += 2) {
 			int sx,sy,flipx,flipy,otherbank;
 	
-			sx = spriteram[offs+0x100+1] + ((spriteram[offs+0x81] & 0x01) << 8) - 40;
-			sy = 224 - spriteram[offs+0x100];
+			sx = spriteram.read(offs+0x100+1)+ ((spriteram.read(offs+0x81)& 0x01) << 8) - 40;
+			sy = 224 - spriteram.read(offs+0x100);
 	
-			otherbank = spriteram[offs+0x80] & 0x01;
+			otherbank = spriteram.read(offs+0x80)& 0x01;
 	
-			flipy = spriteram[offs] & 0x40;
-			flipx = spriteram[offs] & 0x80;
+			flipy = spriteram.read(offs)& 0x40;
+			flipx = spriteram.read(offs)& 0x80;
 	
 			if (flipscreen)
 			{
@@ -155,8 +155,8 @@ public class wiping
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-				(spriteram[offs] & 0x3f) + 64 * otherbank,
-				spriteram[offs+1] & 0x3f,
+				(spriteram.read(offs)& 0x3f) + 64 * otherbank,
+				spriteram.read(offs+1)& 0x3f,
 				flipx,flipy,
 				sx,sy,
 				&Machine->visible_area,TRANSPARENCY_COLOR,0x1f);
@@ -165,7 +165,7 @@ public class wiping
 		/* redraw high priority chars */
 		for (offs = videoram_size - 1; offs > 0; offs--)
 		{
-			if (colorram[offs] & 0x80)
+			if (colorram.read(offs)& 0x80)
 			{
 				int mx,my,sx,sy;
 	
@@ -195,8 +195,8 @@ public class wiping
 				}
 	
 				drawgfx(bitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipscreen,flipscreen,
 						sx*8,sy*8,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);

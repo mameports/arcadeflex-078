@@ -26,8 +26,6 @@ public class osdependH
 	#endif
 	
 	
-	int osd_init(void);
-	void osd_exit(void);
 	
 	
 	/******************************************************************************
@@ -84,7 +82,6 @@ public class osdependH
 	  Returns 0 on success.
 	*/
 	int osd_create_display(const struct osd_create_params *params, UINT32 *rgb_components);
-	void osd_close_display(void);
 	
 	
 	/*
@@ -97,7 +94,6 @@ public class osdependH
 	  the current one. At the end of osd_update_video_and_audio(), the code must
 	  already know exactly whether the next frame will be skipped or not.
 	*/
-	int osd_skip_this_frame(void);
 	
 	
 	/*
@@ -160,7 +156,6 @@ public class osdependH
 	*/
 	int osd_start_audio_stream(int stereo);
 	int osd_update_audio_stream(INT16 *buffer);
-	void osd_stop_audio_stream(void);
 	
 	/*
 	  control master volume. attenuation is the attenuation in dB (a negative
@@ -170,7 +165,6 @@ public class osdependH
 			volume /= 1.122018454;		//	= (10 ^ (1/20)) = 1dB
 	*/
 	void osd_set_mastervolume(int attenuation);
-	int osd_get_mastervolume(void);
 	
 	void osd_sound_enable(int enable);
 	
@@ -238,16 +232,12 @@ public class osdependH
 	
 	/* Joystick calibration routines BW 19981216 */
 	/* Do we need to calibrate the joystick at all? */
-	int osd_joystick_needs_calibration(void);
 	/* Preprocessing for joystick calibration. Returns 0 on success */
-	void osd_joystick_start_calibration(void);
 	/* Prepare the next calibration step. Return a description of this step. */
 	/* (e.g. "move to upper left") */
 	const char *osd_joystick_calibrate_next(void);
 	/* Get the actual joystick calibration data for the current position */
-	void osd_joystick_calibrate(void);
 	/* Postprocessing (e.g. saving joystick data to config) */
-	void osd_joystick_end_calibration(void);
 	
 	void osd_lightgun_read(int player, int *deltax, int *deltay);
 	void osd_trak_read(int player, int *deltax, int *deltay);
@@ -375,24 +365,16 @@ public class osdependH
 	
 	#if defined MAME_NET || defined XMAME_NET
 	/* network */
-	int osd_net_init(void);
 	#ifdef XMAME_NET
-	int osd_net_active(void);
 	#endif
 	int osd_net_send(int player, unsigned char buf[], int *size);
 	int osd_net_recv(int player, unsigned char buf[], int *size);
 	#ifdef MAME_NET
-	int osd_net_sync(void);
 	#elif defined XMAME_NET
 	void osd_net_sync(unsigned short input_port_values[MAX_INPUT_PORTS],
 			unsigned short input_port_defaults[MAX_INPUT_PORTS]);
 	#endif
-	int osd_net_input_sync(void);
-	int osd_net_exit(void);
-	int osd_net_add_player(void);
 	int osd_net_remove_player(int player);
-	int osd_net_game_init(void);
-	int osd_net_game_exit(void);
 	#endif /* MAME_NET */
 	
 	#ifdef MESS

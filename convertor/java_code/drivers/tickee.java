@@ -52,10 +52,10 @@ public class tickee
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( port1_r )
+	public static ReadHandlerPtr port1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return input_port_1_r(offset) | (ticket_dispenser_0_r(0) >> 5) | (ticket_dispenser_1_r(0) >> 6);
-	}
+	} };
 	
 	
 	
@@ -131,61 +131,61 @@ public class tickee
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( tickee )
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x01, "Game Time/Diff" )
-		PORT_DIPSETTING(    0x03, "Very Fast/Very Easy" )
-		PORT_DIPSETTING(    0x02, "Fast/Easy" )
-		PORT_DIPSETTING(    0x01, "Average/Hard" )
-		PORT_DIPSETTING(    0x00, "Slow/Very Hard" )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ))
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ))
-		PORT_DIPSETTING(    0x00, DEF_STR( On ))
-		PORT_DIPNAME( 0x08, 0x00, "Last Box Tickets" )
-		PORT_DIPSETTING(    0x00, "1" )
-		PORT_DIPSETTING(    0x08, "25" )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Unknown ))
-		PORT_DIPSETTING(    0x30, "0" )
-		PORT_DIPSETTING(    0x20, "1" )
-		PORT_DIPSETTING(    0x10, "2" )
-		PORT_DIPSETTING(    0x00, "3" )
-		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Coinage ))
-		PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ))
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ))
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_2C ))
+	static InputPortPtr input_ports_tickee = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x01, "Game Time/Diff" );
+		PORT_DIPSETTING(    0x03, "Very Fast/Very Easy" );
+		PORT_DIPSETTING(    0x02, "Fast/Easy" );
+		PORT_DIPSETTING(    0x01, "Average/Hard" );
+		PORT_DIPSETTING(    0x00, "Slow/Very Hard" );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x00, "Last Box Tickets" );
+		PORT_DIPSETTING(    0x00, "1" );
+		PORT_DIPSETTING(    0x08, "25" );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x30, "0" );
+		PORT_DIPSETTING(    0x20, "1" );
+		PORT_DIPSETTING(    0x10, "2" );
+		PORT_DIPSETTING(    0x00, "3" );
+		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_2C") );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* right ticket status */
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* left ticket status */
-		PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_SPECIAL );/* right ticket status */
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SPECIAL );/* left ticket status */
+		PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_SERVICE( 0x0001, IP_ACTIVE_LOW )
-		PORT_BIT( 0xfffe, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_SERVICE( 0x0001, IP_ACTIVE_LOW );
+		PORT_BIT( 0xfffe, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START				/* fake analog X */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+		PORT_START(); 				/* fake analog X */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 );
 	
-		PORT_START				/* fake analog Y */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+		PORT_START(); 				/* fake analog Y */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 );
 	
-		PORT_START				/* fake analog X */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 )
+		PORT_START(); 				/* fake analog X */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 );
 	
-		PORT_START				/* fake analog Y */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 )
-	INPUT_PORTS_END
+		PORT_START(); 				/* fake analog Y */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -195,16 +195,16 @@ public class tickee
 	 *
 	 *************************************/
 	
-	static struct AY8910interface ay8910_interface =
-	{
+	static AY8910interface ay8910_interface = new AY8910interface
+	(
 		2,
 		40000000/16,
-		{ 50, 50 },
-		{ input_port_0_r, port1_r },
-		{ input_port_2_r, 0 },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { 50, 50 },
+		new ReadHandlerPtr[] { input_port_0_r, port1_r },
+		new ReadHandlerPtr[] { input_port_2_r, 0 },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
 	
 	
@@ -267,15 +267,15 @@ public class tickee
 	 *
 	 *************************************/
 	
-	ROM_START( tickee )
-		ROM_REGION( TOBYTE(0x800000), REGION_CPU1, 0 )		/* 34010 dummy region */
+	static RomLoadPtr rom_tickee = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( TOBYTE(0x800000); REGION_CPU1, 0 )		/* 34010 dummy region */
 	
-		ROM_REGION16_LE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 34010 code */
-		ROM_LOAD16_BYTE( "3.ic4",  0x000000, 0x80000, CRC(5b1e399c) SHA1(681608f06bbaf3d258e9f4768a8a6c5047ad08ec) )
-		ROM_LOAD16_BYTE( "2.ic3",  0x000001, 0x80000, CRC(1b26d4bb) SHA1(40266ec0fe5897eba85072e5bb39973d34f97546) )
-		ROM_LOAD16_BYTE( "1.ic2",  0x100000, 0x80000, CRC(f7f0309e) SHA1(4a93e0e203f5a340a56b770a40b9ab00e131644d) )
-		ROM_LOAD16_BYTE( "4.ic5",  0x100001, 0x80000, CRC(ceb0f559) SHA1(61923fe09e1dfde1eaae297ccbc672bc74a70397) )
-	ROM_END
+		ROM_REGION16_LE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 34010 code */
+		ROM_LOAD16_BYTE( "3.ic4",  0x000000, 0x80000, CRC(5b1e399c);SHA1(681608f06bbaf3d258e9f4768a8a6c5047ad08ec) )
+		ROM_LOAD16_BYTE( "2.ic3",  0x000001, 0x80000, CRC(1b26d4bb);SHA1(40266ec0fe5897eba85072e5bb39973d34f97546) )
+		ROM_LOAD16_BYTE( "1.ic2",  0x100000, 0x80000, CRC(f7f0309e);SHA1(4a93e0e203f5a340a56b770a40b9ab00e131644d) )
+		ROM_LOAD16_BYTE( "4.ic5",  0x100001, 0x80000, CRC(ceb0f559);SHA1(61923fe09e1dfde1eaae297ccbc672bc74a70397) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -299,5 +299,5 @@ public class tickee
 	 *
 	 *************************************/
 	
-	GAME( 1994, tickee, 0, tickee, tickee, tickee, ROT0, "Raster Elite", "Tickee Tickats" )
+	public static GameDriver driver_tickee	   = new GameDriver("1994"	,"tickee"	,"tickee.java"	,rom_tickee,null	,machine_driver_tickee	,input_ports_tickee	,init_tickee	,ROT0	,	"Raster Elite", "Tickee Tickats" )
 }

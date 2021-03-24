@@ -25,61 +25,61 @@ public class xxmissio
 	static UINT8 xxmissio_bg_redraw;
 	
 	
-	WRITE_HANDLER( xxmissio_scroll_x_w )
+	public static WriteHandlerPtr xxmissio_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		xxmissio_xscroll = data;
-	}
-	WRITE_HANDLER( xxmissio_scroll_y_w )
+	} };
+	public static WriteHandlerPtr xxmissio_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		xxmissio_yscroll = data;
-	}
+	} };
 	
-	WRITE_HANDLER( xxmissio_flipscreen_w )
+	public static WriteHandlerPtr xxmissio_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((data & 0x01) != flipscreen)
 		{
 			flipscreen = data & 0x01;
 			xxmissio_bg_redraw = 1;
 		}
-	}
+	} };
 	
-	READ_HANDLER( xxmissio_fgram_r )
+	public static ReadHandlerPtr xxmissio_fgram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return xxmissio_fgram[offset];
-	}
-	WRITE_HANDLER( xxmissio_fgram_w )
+	} };
+	public static WriteHandlerPtr xxmissio_fgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		xxmissio_fgram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( xxmissio_videoram_w )
+	public static WriteHandlerPtr xxmissio_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int offs = offset & 0x7e0;
 		int x = (offset + (xxmissio_xscroll >> 3) ) & 0x1f;
 		offs |= x;
 	
-		videoram[offs] = data;
+		videoram.write(offs,data);
 		dirtybuffer[offs & 0x3ff] = 1;
-	}
-	READ_HANDLER( xxmissio_videoram_r )
+	} };
+	public static ReadHandlerPtr xxmissio_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int offs = offset & 0x7e0;
 		int x = (offset + (xxmissio_xscroll >> 3) ) & 0x1f;
 		offs |= x;
 	
-		return videoram[offs];
-	}
+		return videoram.read(offs);
+	} };
 	
-	WRITE_HANDLER( xxmissio_paletteram_w )
+	public static WriteHandlerPtr xxmissio_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (paletteram[offset] != data)
+		if (paletteram.read(offset)!= data)
 		{
 			paletteram_BBGGRRII_w(offset,data);
 	
 			if (offset >= 0x200)
 				xxmissio_bg_redraw = 1;
 		}
-	}
+	} };
 	
 	/****************************************************************************/
 	
@@ -112,8 +112,8 @@ public class xxmissio
 					px = x*16;
 					py = y*8;
 	
-					chr = videoram[ offs ] ;
-					col = videoram[ offs + size];
+					chr = videoram.read( offs );
+					col = videoram.read( offs + size);
 					chr = chr + ((col & 0xc0) << 2 );
 					col = col & 0x0f;
 	
@@ -145,14 +145,14 @@ public class xxmissio
 	
 		for (offs=0; offs<spriteram_size; offs +=32)
 		{
-			chr = spriteram[offs];
-			col = spriteram[offs+3];
+			chr = spriteram.read(offs);
+			col = spriteram.read(offs+3);
 	
 			fx = ((col & 0x10) >> 4) ^ flipscreen;
 			fy = ((col & 0x20) >> 5) ^ flipscreen;
 	
-			x = spriteram[offs+1]*2;
-			y = spriteram[offs+2];
+			x = spriteram.read(offs+1)*2;
+			y = spriteram.read(offs+2);
 	
 			chr = chr + ((col & 0x40) << 2);
 			col = col & 0x07;

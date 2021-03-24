@@ -814,8 +814,6 @@ public class memoryH
 	***************************************************************************/
 	
 	/* ----- memory setup function ----- */
-	int			memory_init(void);
-	void		memory_shutdown(void);
 	void		memory_set_context(int activecpu);
 	void		memory_set_unmap_value(data32_t value);
 	

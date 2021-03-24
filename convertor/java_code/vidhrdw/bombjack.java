@@ -19,41 +19,41 @@ public class bombjack
 	
 	static struct tilemap *fg_tilemap, *bg_tilemap;
 	
-	WRITE_HANDLER( bombjack_videoram_w )
+	public static WriteHandlerPtr bombjack_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bombjack_colorram_w )
+	public static WriteHandlerPtr bombjack_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bombjack_background_w )
+	public static WriteHandlerPtr bombjack_background_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (background_image != data)
 		{
 			background_image = data;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bombjack_flipscreen_w )
+	public static WriteHandlerPtr bombjack_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -70,8 +70,8 @@ public class bombjack
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 16 * (colorram[tile_index] & 0x10);
-		int color = colorram[tile_index] & 0x0f;
+		int code = videoram.read(tile_index)+ 16 * (colorram.read(tile_index)& 0x10);
+		int color = colorram.read(tile_index)& 0x0f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -81,13 +81,13 @@ public class bombjack
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 16, 16, 16, 16);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -118,16 +118,16 @@ public class bombjack
 			int sx,sy,flipx,flipy;
 	
 	
-			sx = spriteram[offs+3];
-			if (spriteram[offs] & 0x80)
-				sy = 225-spriteram[offs+2];
+			sx = spriteram.read(offs+3);
+			if (spriteram.read(offs)& 0x80)
+				sy = 225-spriteram.read(offs+2);
 			else
-				sy = 241-spriteram[offs+2];
-			flipx = spriteram[offs+1] & 0x40;
-			flipy =	spriteram[offs+1] & 0x80;
+				sy = 241-spriteram.read(offs+2);
+			flipx = spriteram.read(offs+1)& 0x40;
+			flipy =	spriteram.read(offs+1)& 0x80;
 			if (flip_screen)
 			{
-				if (spriteram[offs+1] & 0x20)
+				if (spriteram.read(offs+1)& 0x20)
 				{
 					sx = 224 - sx;
 					sy = 224 - sy;
@@ -141,9 +141,9 @@ public class bombjack
 				flipy = !flipy;
 			}
 	
-			drawgfx(bitmap,Machine->gfx[(spriteram[offs] & 0x80) ? 3 : 2],
-					spriteram[offs] & 0x7f,
-					spriteram[offs+1] & 0x0f,
+			drawgfx(bitmap,Machine->gfx[(spriteram.read(offs)& 0x80) ? 3 : 2],
+					spriteram.read(offs)& 0x7f,
+					spriteram.read(offs+1)& 0x0f,
 					flipx,flipy,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_PEN,0);

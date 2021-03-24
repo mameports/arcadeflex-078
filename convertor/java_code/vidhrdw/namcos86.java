@@ -69,20 +69,20 @@ public class namcos86
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[totcolors] >> 0) & 0x01;
-			bit1 = (color_prom[totcolors] >> 1) & 0x01;
-			bit2 = (color_prom[totcolors] >> 2) & 0x01;
-			bit3 = (color_prom[totcolors] >> 3) & 0x01;
+			bit0 = (color_prom.read(totcolors)>> 0) & 0x01;
+			bit1 = (color_prom.read(totcolors)>> 1) & 0x01;
+			bit2 = (color_prom.read(totcolors)>> 2) & 0x01;
+			bit3 = (color_prom.read(totcolors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -168,35 +168,35 @@ public class namcos86
 	
 	***************************************************************************/
 	
-	READ_HANDLER( rthunder_videoram1_r )
+	public static ReadHandlerPtr rthunder_videoram1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return rthunder_videoram1[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( rthunder_videoram1_w )
+	public static WriteHandlerPtr rthunder_videoram1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rthunder_videoram1[offset] != data)
 		{
 			rthunder_videoram1[offset] = data;
 			tilemap_mark_tile_dirty(tilemap[offset/0x1000],(offset & 0xfff)/2);
 		}
-	}
+	} };
 	
-	READ_HANDLER( rthunder_videoram2_r )
+	public static ReadHandlerPtr rthunder_videoram2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return rthunder_videoram2[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( rthunder_videoram2_w )
+	public static WriteHandlerPtr rthunder_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rthunder_videoram2[offset] != data)
 		{
 			rthunder_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(tilemap[2+offset/0x1000],(offset & 0xfff)/2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rthunder_tilebank_select_0_w )
+	public static WriteHandlerPtr rthunder_tilebank_select_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tilebank != 0)
 		{
@@ -204,9 +204,9 @@ public class namcos86
 			tilemap_mark_all_tiles_dirty(tilemap[0]);
 			tilemap_mark_all_tiles_dirty(tilemap[1]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rthunder_tilebank_select_1_w )
+	public static WriteHandlerPtr rthunder_tilebank_select_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tilebank != 1)
 		{
@@ -214,7 +214,7 @@ public class namcos86
 			tilemap_mark_all_tiles_dirty(tilemap[0]);
 			tilemap_mark_all_tiles_dirty(tilemap[1]);
 		}
-	}
+	} };
 	
 	static void scroll_w(int layer,int offset,int data)
 	{
@@ -247,28 +247,28 @@ public class namcos86
 		tilemap_set_scrolly(tilemap[layer],0,scrolly+16);
 	}
 	
-	WRITE_HANDLER( rthunder_scroll0_w )
+	public static WriteHandlerPtr rthunder_scroll0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(0,offset,data);
-	}
-	WRITE_HANDLER( rthunder_scroll1_w )
+	} };
+	public static WriteHandlerPtr rthunder_scroll1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(1,offset,data);
-	}
-	WRITE_HANDLER( rthunder_scroll2_w )
+	} };
+	public static WriteHandlerPtr rthunder_scroll2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(2,offset,data);
-	}
-	WRITE_HANDLER( rthunder_scroll3_w )
+	} };
+	public static WriteHandlerPtr rthunder_scroll3_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(3,offset,data);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( rthunder_backcolor_w )
+	public static WriteHandlerPtr rthunder_backcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		backcolor = data;
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -280,11 +280,11 @@ public class namcos86
 	static void draw_sprites( struct mame_bitmap *bitmap, const struct rectangle *cliprect, int sprite_priority )
 	{
 		/* note: sprites don't yet clip at the top of the screen properly */
-		const unsigned char *source = &spriteram[0x1400];
-		const unsigned char *finish = &spriteram[0x1c00-16];	/* the last is NOT a sprite */
+		const unsigned char *source = &spriteram.read(0x1400);
+		const unsigned char *finish = &spriteram.read(0x1c00-16);	/* the last is NOT a sprite */
 	
-		int sprite_xoffs = spriteram[0x1bf5] - 256 * (spriteram[0x1bf4] & 1);
-		int sprite_yoffs = spriteram[0x1bf7] - 256 * (spriteram[0x1bf6] & 1);
+		int sprite_xoffs = spriteram.read(0x1bf5)- 256 * (spriteram.read(0x1bf4)& 1);
+		int sprite_yoffs = spriteram.read(0x1bf7)- 256 * (spriteram.read(0x1bf6)& 1);
 	
 		while( source<finish )
 		{
@@ -319,7 +319,7 @@ public class namcos86
 				if (sy < -209-16) sy += 256;
 	
 				if (flipx && !wide) sx-=16;
-				if (!tall) sy+=16;
+				if (tall == 0) sy+=16;
 	//			if (flipy && !tall) sy+=16;
 	
 				sx += sprite_xoffs;
@@ -365,7 +365,7 @@ public class namcos86
 		int layer;
 	
 		/* this is the global sprite Y offset, actually */
-		flipscreen = spriteram[0x1bf6] & 1;
+		flipscreen = spriteram.read(0x1bf6)& 1;
 	
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	
@@ -388,14 +388,14 @@ public class namcos86
 		char buf[80];
 	int b=keyboard_pressed(KEYCODE_Y)?8:0;
 		sprintf(buf,"%02x %02x %02x %02x %02x %02x %02x %02x",
-				spriteram[0x1bf0+b],
-				spriteram[0x1bf1+b],
-				spriteram[0x1bf2+b],
-				spriteram[0x1bf3+b],
-				spriteram[0x1bf4+b],
-				spriteram[0x1bf5+b],
-				spriteram[0x1bf6+b],
-				spriteram[0x1bf7+b]);
+				spriteram.read(0x1bf0+b),
+				spriteram.read(0x1bf1+b),
+				spriteram.read(0x1bf2+b),
+				spriteram.read(0x1bf3+b),
+				spriteram.read(0x1bf4+b),
+				spriteram.read(0x1bf5+b),
+				spriteram.read(0x1bf6+b),
+				spriteram.read(0x1bf7+b));
 		usrintf_showmessage(buf);
 	}
 	#endif

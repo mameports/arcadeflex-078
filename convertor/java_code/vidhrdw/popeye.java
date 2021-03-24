@@ -23,7 +23,9 @@ public class popeye
 	static struct mame_bitmap *tmpbitmap2;
 	static int invertmask;
 	static int bitmap_type;
-	enum { TYPE_SKYSKIPR, TYPE_POPEYE };
+	public static final int TYPE_SKYSKIPR = 0;
+	public static final int TYPE_POPEYE = 1;
+	
 	
 	#define BGRAM_SIZE 0x2000
 	
@@ -81,19 +83,19 @@ public class popeye
 	
 	
 			/* red component */
-			bit0 = ((color_prom[prom_offs] ^ invertmask) >> 0) & 0x01;
-			bit1 = ((color_prom[prom_offs] ^ invertmask) >> 1) & 0x01;
-			bit2 = ((color_prom[prom_offs] ^ invertmask) >> 2) & 0x01;
+			bit0 = ((color_prom.read(prom_offs)^ invertmask) >> 0) & 0x01;
+			bit1 = ((color_prom.read(prom_offs)^ invertmask) >> 1) & 0x01;
+			bit2 = ((color_prom.read(prom_offs)^ invertmask) >> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = ((color_prom[prom_offs] ^ invertmask) >> 3) & 0x01;
-			bit1 = ((color_prom[prom_offs] ^ invertmask) >> 4) & 0x01;
-			bit2 = ((color_prom[prom_offs] ^ invertmask) >> 5) & 0x01;
+			bit0 = ((color_prom.read(prom_offs)^ invertmask) >> 3) & 0x01;
+			bit1 = ((color_prom.read(prom_offs)^ invertmask) >> 4) & 0x01;
+			bit2 = ((color_prom.read(prom_offs)^ invertmask) >> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = ((color_prom[prom_offs] ^ invertmask) >> 6) & 0x01;
-			bit2 = ((color_prom[prom_offs] ^ invertmask) >> 7) & 0x01;
+			bit1 = ((color_prom.read(prom_offs)^ invertmask) >> 6) & 0x01;
+			bit2 = ((color_prom.read(prom_offs)^ invertmask) >> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(pal_index++,r,g,b);
@@ -108,19 +110,19 @@ public class popeye
 	
 	
 			/* red component */
-			bit0 = ((color_prom[0] ^ invertmask) >> 0) & 0x01;
-			bit1 = ((color_prom[0] ^ invertmask) >> 1) & 0x01;
-			bit2 = ((color_prom[0] ^ invertmask) >> 2) & 0x01;
+			bit0 = ((color_prom.read(0)^ invertmask) >> 0) & 0x01;
+			bit1 = ((color_prom.read(0)^ invertmask) >> 1) & 0x01;
+			bit2 = ((color_prom.read(0)^ invertmask) >> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = ((color_prom[0] ^ invertmask) >> 3) & 0x01;
-			bit1 = ((color_prom[256] ^ invertmask) >> 0) & 0x01;
-			bit2 = ((color_prom[256] ^ invertmask) >> 1) & 0x01;
+			bit0 = ((color_prom.read(0)^ invertmask) >> 3) & 0x01;
+			bit1 = ((color_prom.read(256)^ invertmask) >> 0) & 0x01;
+			bit2 = ((color_prom.read(256)^ invertmask) >> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = ((color_prom[256] ^ invertmask) >> 2) & 0x01;
-			bit2 = ((color_prom[256] ^ invertmask) >> 3) & 0x01;
+			bit1 = ((color_prom.read(256)^ invertmask) >> 2) & 0x01;
+			bit2 = ((color_prom.read(256)^ invertmask) >> 3) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(pal_index++,r,g,b);
@@ -195,25 +197,25 @@ public class popeye
 		}
 	}
 	
-	WRITE_HANDLER( popeye_videoram_w )
+	public static WriteHandlerPtr popeye_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( popeye_colorram_w )
+	public static WriteHandlerPtr popeye_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( popeye_bitmap_w )
+	public static WriteHandlerPtr popeye_bitmap_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int sx,sy,x,y,colour;
 	
@@ -253,21 +255,21 @@ public class popeye
 				}
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( skyskipr_bitmap_w )
+	public static WriteHandlerPtr skyskipr_bitmap_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		offset = ((offset & 0xfc0) << 1) | (offset & 0x03f);
 		if (data & 0x80)
 			offset |= 0x40;
 	
 		popeye_bitmap_w(offset,data);
-	}
+	} };
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index];
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -285,7 +287,7 @@ public class popeye
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 16, 16, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -306,7 +308,7 @@ public class popeye
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 16, 16, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -373,20 +375,20 @@ public class popeye
 			 * bit 0 /
 			 */
 	
-			code = (spriteram[offs + 2] & 0x7f) + ((spriteram[offs + 3] & 0x10) << 3)
-								+ ((spriteram[offs + 3] & 0x04) << 6);
-			color = (spriteram[offs + 3] & 0x07) + 8*(*popeye_palettebank & 0x07);
+			code = (spriteram.read(offs + 2)& 0x7f) + ((spriteram.read(offs + 3)& 0x10) << 3)
+								+ ((spriteram.read(offs + 3)& 0x04) << 6);
+			color = (spriteram.read(offs + 3)& 0x07) + 8*(*popeye_palettebank & 0x07);
 			if (bitmap_type == TYPE_SKYSKIPR)
 			{
 				/* Two of the PROM address pins are tied together and one is not connected... */
 				color = (color & 0x0f) | ((color & 0x08) << 1);
 			}
 	
-			flipx = spriteram[offs + 2] & 0x80;
-			flipy = spriteram[offs + 3] & 0x08;
+			flipx = spriteram.read(offs + 2)& 0x80;
+			flipy = spriteram.read(offs + 3)& 0x08;
 	
-			sx = 2*(spriteram[offs])-8;
-			sy = 2*(256-spriteram[offs + 1]);
+			sx = 2*(spriteram.read(offs))-8;
+			sy = 2*(256-spriteram.read(offs + 1));
 	
 			if (flip_screen)
 			{
@@ -396,7 +398,7 @@ public class popeye
 				sy = 496 - sy;
 			}
 	
-			if (spriteram[offs] != 0)
+			if (spriteram.read(offs)!= 0)
 				drawgfx(bitmap,Machine->gfx[1],
 						code ^ 0x1ff,
 						color,

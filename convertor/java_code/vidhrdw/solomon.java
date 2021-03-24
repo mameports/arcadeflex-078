@@ -12,50 +12,50 @@ public class solomon
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( solomon_videoram_w )
+	public static WriteHandlerPtr solomon_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( solomon_colorram_w )
+	public static WriteHandlerPtr solomon_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( solomon_videoram2_w )
+	public static WriteHandlerPtr solomon_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (solomon_videoram2[offset] != data)
 		{
 			solomon_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( solomon_colorram2_w )
+	public static WriteHandlerPtr solomon_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (solomon_colorram2[offset] != data)
 		{
 			solomon_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( solomon_flipscreen_w )
+	public static WriteHandlerPtr solomon_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -69,8 +69,8 @@ public class solomon
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + 256 * (attr & 0x07);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ 256 * (attr & 0x07);
 		int color = (attr & 0x70) >> 4;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -81,13 +81,13 @@ public class solomon
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -101,12 +101,12 @@ public class solomon
 	
 		for (offs = spriteram_size - 4; offs >= 0; offs -= 4)
 		{
-			int code = spriteram[offs] + 16 * (spriteram[offs + 1] & 0x10);
-			int color = (spriteram[offs + 1] & 0x0e) >> 1;
-			int flipx = spriteram[offs + 1] & 0x40;
-			int flipy =	spriteram[offs + 1] & 0x80;
-			int sx = spriteram[offs + 3];
-			int sy = 241 - spriteram[offs + 2];
+			int code = spriteram.read(offs)+ 16 * (spriteram.read(offs + 1)& 0x10);
+			int color = (spriteram.read(offs + 1)& 0x0e) >> 1;
+			int flipx = spriteram.read(offs + 1)& 0x40;
+			int flipy =	spriteram.read(offs + 1)& 0x80;
+			int sx = spriteram.read(offs + 3);
+			int sy = 241 - spriteram.read(offs + 2);
 	
 			if (flip_screen)
 			{

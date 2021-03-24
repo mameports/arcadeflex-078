@@ -23,24 +23,24 @@ public class sbugger
 		SET_TILE_INFO(0,tileno,color,0)
 	}
 	
-	WRITE_HANDLER( sbugger_videoram_w )
+	public static WriteHandlerPtr sbugger_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sbugger_videoram[offset] = data;
 		tilemap_mark_tile_dirty(sbugger_tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( sbugger_videoram_attr_w )
+	public static WriteHandlerPtr sbugger_videoram_attr_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sbugger_videoram_attr[offset] = data;
 		tilemap_mark_tile_dirty(sbugger_tilemap,offset);
-	}
+	} };
 	
 	VIDEO_START(sbugger)
 	{
 	
 		sbugger_tilemap = tilemap_create(get_sbugger_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE, 8, 16,64,16);
 	
-		if (!sbugger_tilemap)
+		if (sbugger_tilemap == 0)
 			return 1;
 	
 		return 0;

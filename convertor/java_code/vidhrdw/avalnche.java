@@ -14,9 +14,9 @@ public class avalnche
 {
 	
 	
-	WRITE_HANDLER( avalnche_videoram_w )
+	public static WriteHandlerPtr avalnche_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		if (offset >= 0x200)
 		{
@@ -28,7 +28,7 @@ public class avalnche
 			for (i = 0;i < 8;i++)
 				plot_pixel(tmpbitmap,x+7-i,y,Machine->pens[(data >> i) & 1]);
 		}
-	}
+	} };
 	
 	
 	VIDEO_UPDATE( avalnche )
@@ -38,7 +38,7 @@ public class avalnche
 			int offs;
 	
 			for (offs = 0;offs < videoram_size; offs++)
-				avalnche_videoram_w(offs,videoram[offs]);
+				avalnche_videoram_w(offs,videoram.read(offs));
 		}
 	
 		/* copy the character mapped graphics */

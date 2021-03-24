@@ -358,10 +358,6 @@ public class sndintrfH
 	};
 	
 	
-	int sound_start(void);
-	void sound_stop(void);
-	void sound_update(void);
-	void sound_reset(void);
 	
 	/* returns name of the sound system */
 	const char *soundtype_name(int soundtype);
@@ -374,28 +370,16 @@ public class sndintrfH
 	int sound_scalebufferpos(int value);
 	
 	
-	READ_HANDLER( soundlatch_r );
-	READ_HANDLER( soundlatch2_r );
-	READ_HANDLER( soundlatch3_r );
-	READ_HANDLER( soundlatch4_r );
 	READ16_HANDLER( soundlatch_word_r );
 	READ16_HANDLER( soundlatch2_word_r );
 	READ16_HANDLER( soundlatch3_word_r );
 	READ16_HANDLER( soundlatch4_word_r );
 	
-	WRITE_HANDLER( soundlatch_w );
-	WRITE_HANDLER( soundlatch2_w );
-	WRITE_HANDLER( soundlatch3_w );
-	WRITE_HANDLER( soundlatch4_w );
 	WRITE16_HANDLER( soundlatch_word_w );
 	WRITE16_HANDLER( soundlatch2_word_w );
 	WRITE16_HANDLER( soundlatch3_word_w );
 	WRITE16_HANDLER( soundlatch4_word_w );
 	
-	WRITE_HANDLER( soundlatch_clear_w );
-	WRITE_HANDLER( soundlatch2_clear_w );
-	WRITE_HANDLER( soundlatch3_clear_w );
-	WRITE_HANDLER( soundlatch4_clear_w );
 	
 	
 	/* If you're going to use soundlatchX_clear_w, and the cleared value is

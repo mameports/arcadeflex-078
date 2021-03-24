@@ -175,29 +175,29 @@ public class niyanpai
 	}
 	
 	/* CPU interface */
-	static READ_HANDLER( tmpz84c011_0_pa_r ) { return (tmpz84c011_pio_r(0) & ~pio_dir[0]) | (pio_latch[0] & pio_dir[0]); }
-	static READ_HANDLER( tmpz84c011_0_pb_r ) { return (tmpz84c011_pio_r(1) & ~pio_dir[1]) | (pio_latch[1] & pio_dir[1]); }
-	static READ_HANDLER( tmpz84c011_0_pc_r ) { return (tmpz84c011_pio_r(2) & ~pio_dir[2]) | (pio_latch[2] & pio_dir[2]); }
-	static READ_HANDLER( tmpz84c011_0_pd_r ) { return (tmpz84c011_pio_r(3) & ~pio_dir[3]) | (pio_latch[3] & pio_dir[3]); }
-	static READ_HANDLER( tmpz84c011_0_pe_r ) { return (tmpz84c011_pio_r(4) & ~pio_dir[4]) | (pio_latch[4] & pio_dir[4]); }
+	public static ReadHandlerPtr tmpz84c011_0_pa_r  = new ReadHandlerPtr() { public int handler(int offset) { return (tmpz84c011_pio_r(0) & ~pio_dir[0]) | (pio_latch[0] & pio_dir[0]); } };
+	public static ReadHandlerPtr tmpz84c011_0_pb_r  = new ReadHandlerPtr() { public int handler(int offset) { return (tmpz84c011_pio_r(1) & ~pio_dir[1]) | (pio_latch[1] & pio_dir[1]); } };
+	public static ReadHandlerPtr tmpz84c011_0_pc_r  = new ReadHandlerPtr() { public int handler(int offset) { return (tmpz84c011_pio_r(2) & ~pio_dir[2]) | (pio_latch[2] & pio_dir[2]); } };
+	public static ReadHandlerPtr tmpz84c011_0_pd_r  = new ReadHandlerPtr() { public int handler(int offset) { return (tmpz84c011_pio_r(3) & ~pio_dir[3]) | (pio_latch[3] & pio_dir[3]); } };
+	public static ReadHandlerPtr tmpz84c011_0_pe_r  = new ReadHandlerPtr() { public int handler(int offset) { return (tmpz84c011_pio_r(4) & ~pio_dir[4]) | (pio_latch[4] & pio_dir[4]); } };
 	
-	static WRITE_HANDLER( tmpz84c011_0_pa_w ) { pio_latch[0] = data; tmpz84c011_pio_w(0, data); }
-	static WRITE_HANDLER( tmpz84c011_0_pb_w ) { pio_latch[1] = data; tmpz84c011_pio_w(1, data); }
-	static WRITE_HANDLER( tmpz84c011_0_pc_w ) { pio_latch[2] = data; tmpz84c011_pio_w(2, data); }
-	static WRITE_HANDLER( tmpz84c011_0_pd_w ) { pio_latch[3] = data; tmpz84c011_pio_w(3, data); }
-	static WRITE_HANDLER( tmpz84c011_0_pe_w ) { pio_latch[4] = data; tmpz84c011_pio_w(4, data); }
+	public static WriteHandlerPtr tmpz84c011_0_pa_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_latch[0] = data; tmpz84c011_pio_w(0, data); } };
+	public static WriteHandlerPtr tmpz84c011_0_pb_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_latch[1] = data; tmpz84c011_pio_w(1, data); } };
+	public static WriteHandlerPtr tmpz84c011_0_pc_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_latch[2] = data; tmpz84c011_pio_w(2, data); } };
+	public static WriteHandlerPtr tmpz84c011_0_pd_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_latch[3] = data; tmpz84c011_pio_w(3, data); } };
+	public static WriteHandlerPtr tmpz84c011_0_pe_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_latch[4] = data; tmpz84c011_pio_w(4, data); } };
 	
-	static READ_HANDLER( tmpz84c011_0_dir_pa_r ) { return pio_dir[0]; }
-	static READ_HANDLER( tmpz84c011_0_dir_pb_r ) { return pio_dir[1]; }
-	static READ_HANDLER( tmpz84c011_0_dir_pc_r ) { return pio_dir[2]; }
-	static READ_HANDLER( tmpz84c011_0_dir_pd_r ) { return pio_dir[3]; }
-	static READ_HANDLER( tmpz84c011_0_dir_pe_r ) { return pio_dir[4]; }
+	public static ReadHandlerPtr tmpz84c011_0_dir_pa_r  = new ReadHandlerPtr() { public int handler(int offset) { return pio_dir[0]; } };
+	public static ReadHandlerPtr tmpz84c011_0_dir_pb_r  = new ReadHandlerPtr() { public int handler(int offset) { return pio_dir[1]; } };
+	public static ReadHandlerPtr tmpz84c011_0_dir_pc_r  = new ReadHandlerPtr() { public int handler(int offset) { return pio_dir[2]; } };
+	public static ReadHandlerPtr tmpz84c011_0_dir_pd_r  = new ReadHandlerPtr() { public int handler(int offset) { return pio_dir[3]; } };
+	public static ReadHandlerPtr tmpz84c011_0_dir_pe_r  = new ReadHandlerPtr() { public int handler(int offset) { return pio_dir[4]; } };
 	
-	static WRITE_HANDLER( tmpz84c011_0_dir_pa_w ) { pio_dir[0] = data; }
-	static WRITE_HANDLER( tmpz84c011_0_dir_pb_w ) { pio_dir[1] = data; }
-	static WRITE_HANDLER( tmpz84c011_0_dir_pc_w ) { pio_dir[2] = data; }
-	static WRITE_HANDLER( tmpz84c011_0_dir_pd_w ) { pio_dir[3] = data; }
-	static WRITE_HANDLER( tmpz84c011_0_dir_pe_w ) { pio_dir[4] = data; }
+	public static WriteHandlerPtr tmpz84c011_0_dir_pa_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_dir[0] = data; } };
+	public static WriteHandlerPtr tmpz84c011_0_dir_pb_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_dir[1] = data; } };
+	public static WriteHandlerPtr tmpz84c011_0_dir_pc_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_dir[2] = data; } };
+	public static WriteHandlerPtr tmpz84c011_0_dir_pd_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_dir[3] = data; } };
+	public static WriteHandlerPtr tmpz84c011_0_dir_pe_w = new WriteHandlerPtr() {public void handler(int offset, int data) { pio_dir[4] = data; } };
 	
 	
 	static void ctc0_interrupt(int state)
@@ -377,114 +377,122 @@ public class niyanpai
 	MEMORY_END
 	
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x77ff, MRA_ROM },
-		{ 0x7800, 0x7fff, MRA_RAM },
-		{ 0x8000, 0xffff, MRA_BANK1 },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x77ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x7800, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_BANK1 ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x77ff, MWA_ROM },
-		{ 0x7800, 0x7fff, MWA_RAM },
-	MEMORY_END
-	
-	
-	static PORT_READ_START( sound_readport )
-		{ 0x10, 0x13, z80ctc_0_r },
-		{ 0x50, 0x50, tmpz84c011_0_pa_r },
-		{ 0x51, 0x51, tmpz84c011_0_pb_r },
-		{ 0x52, 0x52, tmpz84c011_0_pc_r },
-		{ 0x30, 0x30, tmpz84c011_0_pd_r },
-		{ 0x40, 0x40, tmpz84c011_0_pe_r },
-		{ 0x54, 0x54, tmpz84c011_0_dir_pa_r },
-		{ 0x55, 0x55, tmpz84c011_0_dir_pb_r },
-		{ 0x56, 0x56, tmpz84c011_0_dir_pc_r },
-		{ 0x34, 0x34, tmpz84c011_0_dir_pd_r },
-		{ 0x44, 0x44, tmpz84c011_0_dir_pe_r },
-	PORT_END
-	
-	static PORT_WRITE_START( sound_writeport )
-		{ 0x10, 0x13, z80ctc_0_w },
-		{ 0x50, 0x50, tmpz84c011_0_pa_w },
-		{ 0x51, 0x51, tmpz84c011_0_pb_w },
-		{ 0x52, 0x52, tmpz84c011_0_pc_w },
-		{ 0x30, 0x30, tmpz84c011_0_pd_w },
-		{ 0x40, 0x40, tmpz84c011_0_pe_w },
-		{ 0x54, 0x54, tmpz84c011_0_dir_pa_w },
-		{ 0x55, 0x55, tmpz84c011_0_dir_pb_w },
-		{ 0x56, 0x56, tmpz84c011_0_dir_pc_w },
-		{ 0x34, 0x34, tmpz84c011_0_dir_pd_w },
-		{ 0x44, 0x44, tmpz84c011_0_dir_pe_w },
-		{ 0x80, 0x80, YM3812_control_port_0_w },
-		{ 0x81, 0x81, YM3812_write_port_0_w },
-	PORT_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x77ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x7800, 0x7fff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( niyanpai )
-		PORT_START	/* (0) DIPSW-A */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x03, "1" )
-		PORT_DIPSETTING(    0x02, "2" )
-		PORT_DIPSETTING(    0x01, "3" )
-		PORT_DIPSETTING(    0x00, "4" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_3C ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, "Game Sounds" )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Cocktail ) )
+	public static IO_ReadPort sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x10, 0x13, z80ctc_0_r ),
+		new IO_ReadPort( 0x50, 0x50, tmpz84c011_0_pa_r ),
+		new IO_ReadPort( 0x51, 0x51, tmpz84c011_0_pb_r ),
+		new IO_ReadPort( 0x52, 0x52, tmpz84c011_0_pc_r ),
+		new IO_ReadPort( 0x30, 0x30, tmpz84c011_0_pd_r ),
+		new IO_ReadPort( 0x40, 0x40, tmpz84c011_0_pe_r ),
+		new IO_ReadPort( 0x54, 0x54, tmpz84c011_0_dir_pa_r ),
+		new IO_ReadPort( 0x55, 0x55, tmpz84c011_0_dir_pb_r ),
+		new IO_ReadPort( 0x56, 0x56, tmpz84c011_0_dir_pc_r ),
+		new IO_ReadPort( 0x34, 0x34, tmpz84c011_0_dir_pd_r ),
+		new IO_ReadPort( 0x44, 0x44, tmpz84c011_0_dir_pe_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START	/* (1) DIPSW-B */
-		PORT_DIPNAME( 0x01, 0x00, "Nudity" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_DIPNAME( 0x80, 0x80, "Graphic ROM Test" )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	public static IO_WritePort sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x10, 0x13, z80ctc_0_w ),
+		new IO_WritePort( 0x50, 0x50, tmpz84c011_0_pa_w ),
+		new IO_WritePort( 0x51, 0x51, tmpz84c011_0_pb_w ),
+		new IO_WritePort( 0x52, 0x52, tmpz84c011_0_pc_w ),
+		new IO_WritePort( 0x30, 0x30, tmpz84c011_0_pd_w ),
+		new IO_WritePort( 0x40, 0x40, tmpz84c011_0_pe_w ),
+		new IO_WritePort( 0x54, 0x54, tmpz84c011_0_dir_pa_w ),
+		new IO_WritePort( 0x55, 0x55, tmpz84c011_0_dir_pb_w ),
+		new IO_WritePort( 0x56, 0x56, tmpz84c011_0_dir_pc_w ),
+		new IO_WritePort( 0x34, 0x34, tmpz84c011_0_dir_pd_w ),
+		new IO_WritePort( 0x44, 0x44, tmpz84c011_0_dir_pe_w ),
+		new IO_WritePort( 0x80, 0x80, YM3812_control_port_0_w ),
+		new IO_WritePort( 0x81, 0x81, YM3812_write_port_0_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START	/* (2) PORT 0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )		// COIN1
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )		// COIN2
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 )		// CREDIT CLEAR
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )		// START2
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE2 )		// ANALYZER
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )		// START1
-	//	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE3 )		// MEMORY RESET
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )		// ?
-	 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )			// TEST
 	
-		PORT_START	/* (3) PLAYER-1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_niyanpai = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* (0) DIPSW-A */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x03, "1" );
+		PORT_DIPSETTING(    0x02, "2" );
+		PORT_DIPSETTING(    0x01, "3" );
+		PORT_DIPSETTING(    0x00, "4" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_3C") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, "Game Sounds" );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Upright") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Cocktail") );
 	
-		PORT_START	/* (4) PLAYER-2 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	/* (1) DIPSW-B */
+		PORT_DIPNAME( 0x01, 0x00, "Nudity" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BIT( 0x7e, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_DIPNAME( 0x80, 0x80, "Graphic ROM Test" );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	
+		PORT_START(); 	/* (2) PORT 0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );	// COIN1
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );	// COIN2
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 );	// CREDIT CLEAR
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );	// START2
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE2 );	// ANALYZER
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 );	// START1
+	//	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE3 );	// MEMORY RESET
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );	// ?
+	 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW );		// TEST
+	
+		PORT_START(); 	/* (3) PLAYER-1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* (4) PLAYER-2 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	static INTERRUPT_GEN( niyanpai_interrupt )
@@ -506,11 +514,11 @@ public class niyanpai
 		{ 70 }
 	};
 	
-	static struct DACinterface dac_interface =
-	{
+	static DACinterface dac_interface = new DACinterface
+	(
 		2,				/* 2 channels */
-		{ 50, 75 },
-	};
+		new int[] { 50, 75 },
+	);
 	
 	
 	static MACHINE_DRIVER_START( niyanpai )
@@ -547,25 +555,25 @@ public class niyanpai
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( niyanpai )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 ) /* TMP68301 main program */
-		ROM_LOAD16_BYTE( "npai_01.bin", 0x00000, 0x20000, CRC(a904e8a1) SHA1(77865d7b48cac96af1e3cac4a702f7de4b5ee82b) )
-		ROM_LOAD16_BYTE( "npai_02.bin", 0x00001, 0x20000, CRC(244f9d6f) SHA1(afde18f32c4879a66c0707671d783c21c54cffa4) )
+	static RomLoadPtr rom_niyanpai = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* TMP68301 main program */
+		ROM_LOAD16_BYTE( "npai_01.bin", 0x00000, 0x20000, CRC(a904e8a1);SHA1(77865d7b48cac96af1e3cac4a702f7de4b5ee82b) )
+		ROM_LOAD16_BYTE( "npai_02.bin", 0x00001, 0x20000, CRC(244f9d6f);SHA1(afde18f32c4879a66c0707671d783c21c54cffa4) )
 	
-		ROM_REGION( 0x20000, REGION_CPU2, 0 ) /* TMPZ84C011 sound program */
-		ROM_LOAD( "npai_03.bin", 0x000000, 0x20000, CRC(d154306b) SHA1(3375568a6d387d850b8996b8bad3d0220de13993) )
+		ROM_REGION( 0x20000, REGION_CPU2, 0 );/* TMPZ84C011 sound program */
+		ROM_LOAD( "npai_03.bin", 0x000000, 0x20000, CRC(d154306b);SHA1(3375568a6d387d850b8996b8bad3d0220de13993) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, 0 ) /* gfx */
-		ROM_LOAD( "npai_04.bin", 0x000000, 0x80000, CRC(bec845b5) SHA1(2b00b4fd0bdda84cdc08933e593afdd91dde8d07) )
-		ROM_LOAD( "npai_05.bin", 0x080000, 0x80000, CRC(3300ce07) SHA1(dc2eeb804aaf0aeb6cfee1844260ea24c3164bd9) )
-		ROM_LOAD( "npai_06.bin", 0x100000, 0x80000, CRC(448e4e39) SHA1(63ca27f76a23235d3538d7f6c18dcc309e0f1f1c) )
-		ROM_LOAD( "npai_07.bin", 0x180000, 0x80000, CRC(2ad47e55) SHA1(dbda82e654a85b0d5303bffa3005aaf78bdf0d28) )
-		ROM_LOAD( "npai_08.bin", 0x200000, 0x80000, CRC(2ff980a0) SHA1(055addac657a5f7ec37ba85385834805c7aa0402) )
-		ROM_LOAD( "npai_09.bin", 0x280000, 0x80000, CRC(74037ee3) SHA1(d975e6af962b9c62304ac15adab46c0ce972194b) )
-		ROM_LOAD( "npai_10.bin", 0x300000, 0x80000, CRC(d35a9af6) SHA1(9a41aeea84c59b194bd122e2f102476834303302) )
-		ROM_LOAD( "npai_11.bin", 0x380000, 0x80000, CRC(0748eb73) SHA1(63849f6625928646238a76748fd7903cee3ece2e) )
-	ROM_END
+		ROM_REGION( 0x400000, REGION_GFX1, 0 );/* gfx */
+		ROM_LOAD( "npai_04.bin", 0x000000, 0x80000, CRC(bec845b5);SHA1(2b00b4fd0bdda84cdc08933e593afdd91dde8d07) )
+		ROM_LOAD( "npai_05.bin", 0x080000, 0x80000, CRC(3300ce07);SHA1(dc2eeb804aaf0aeb6cfee1844260ea24c3164bd9) )
+		ROM_LOAD( "npai_06.bin", 0x100000, 0x80000, CRC(448e4e39);SHA1(63ca27f76a23235d3538d7f6c18dcc309e0f1f1c) )
+		ROM_LOAD( "npai_07.bin", 0x180000, 0x80000, CRC(2ad47e55);SHA1(dbda82e654a85b0d5303bffa3005aaf78bdf0d28) )
+		ROM_LOAD( "npai_08.bin", 0x200000, 0x80000, CRC(2ff980a0);SHA1(055addac657a5f7ec37ba85385834805c7aa0402) )
+		ROM_LOAD( "npai_09.bin", 0x280000, 0x80000, CRC(74037ee3);SHA1(d975e6af962b9c62304ac15adab46c0ce972194b) )
+		ROM_LOAD( "npai_10.bin", 0x300000, 0x80000, CRC(d35a9af6);SHA1(9a41aeea84c59b194bd122e2f102476834303302) )
+		ROM_LOAD( "npai_11.bin", 0x380000, 0x80000, CRC(0748eb73);SHA1(63849f6625928646238a76748fd7903cee3ece2e) )
+	ROM_END(); }}; 
 	
 	
-	GAME( 1996, niyanpai, 0, niyanpai, niyanpai, niyanpai, ROT0, "Nichibutsu", "Niyanpai (Japan)" )
+	public static GameDriver driver_niyanpai	   = new GameDriver("1996"	,"niyanpai"	,"niyanpai.java"	,rom_niyanpai,null	,machine_driver_niyanpai	,input_ports_niyanpai	,init_niyanpai	,ROT0	,	"Nichibutsu", "Niyanpai (Japan)" )
 }

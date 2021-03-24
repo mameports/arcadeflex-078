@@ -98,32 +98,32 @@ public class btoads
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( sound_data_w )
+	public static WriteHandlerPtr sound_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sound_to_main_data = data;
 		sound_to_main_ready = 1;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sound_data_r )
+	public static ReadHandlerPtr sound_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		main_to_sound_ready = 0;
 		return main_to_sound_data;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sound_ready_to_send_r )
+	public static ReadHandlerPtr sound_ready_to_send_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return sound_to_main_ready ? 0x00 : 0x80;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sound_data_ready_r )
+	public static ReadHandlerPtr sound_data_ready_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (activecpu_get_pc() == 0xd50 && !main_to_sound_ready)
 			cpu_spinuntil_int();
 		return main_to_sound_ready ? 0x00 : 0x80;
-	}
+	} };
 	
 	
 	
@@ -143,13 +143,13 @@ public class btoads
 	}
 	
 	
-	static WRITE_HANDLER( sound_int_state_w )
+	public static WriteHandlerPtr sound_int_state_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (!(sound_int_state & 0x80) && (data & 0x80))
 			cpu_set_irq_line(1, 0, CLEAR_LINE);
 	
 		sound_int_state = data;
-	}
+	} };
 	
 	
 	
@@ -159,18 +159,18 @@ public class btoads
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( bsmt_ready_r )
+	public static ReadHandlerPtr bsmt_ready_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 0x80;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( bsmt2000_port_w )
+	public static WriteHandlerPtr bsmt2000_port_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT16 reg = offset >> 8;
 		UINT16 val = ((offset & 0xff) << 8) | data;
 		BSMT2000_data_0_w(reg, val, 0);
-	}
+	} };
 	
 	
 	
@@ -246,28 +246,34 @@ public class btoads
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xffff, MRA_RAM },
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
+	
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
+	
+	
+	public static IO_ReadPort sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x8000, 0x8000, sound_data_r ),
+		new IO_ReadPort( 0x8004, 0x8004, sound_data_ready_r ),
+		new IO_ReadPort( 0x8005, 0x8005, sound_ready_to_send_r ),
+		new IO_ReadPort( 0x8006, 0x8006, bsmt_ready_r ),
 	MEMORY_END
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0xffff, MWA_RAM },
-	MEMORY_END
-	
-	
-	static PORT_READ_START( sound_readport )
-		{ 0x8000, 0x8000, sound_data_r },
-		{ 0x8004, 0x8004, sound_data_ready_r },
-		{ 0x8005, 0x8005, sound_ready_to_send_r },
-		{ 0x8006, 0x8006, bsmt_ready_r },
-	MEMORY_END
-	
-	static PORT_WRITE_START( sound_writeport )
-		{ 0x0000, 0x7fff, bsmt2000_port_w },
-		{ 0x8000, 0x8000, sound_data_w },
-		{ 0x8002, 0x8002, sound_int_state_w },
+	public static IO_WritePort sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x0000, 0x7fff, bsmt2000_port_w ),
+		new IO_WritePort( 0x8000, 0x8000, sound_data_w ),
+		new IO_WritePort( 0x8002, 0x8002, sound_int_state_w ),
 	MEMORY_END
 	
 	
@@ -278,74 +284,74 @@ public class btoads
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( btoads )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+	static InputPortPtr input_ports_btoads = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN2, 2 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN2, 2 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER3 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER3 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 )
-		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN3, 2 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START3 )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER3 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER3 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 );
+		PORT_BIT_IMPULSE( 0x0040, IP_ACTIVE_LOW, IPT_COIN3, 2 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START3 );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 
+		PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
+		PORT_START(); 
 		PORT_SERVICE_NO_TOGGLE( 0x0002, IP_ACTIVE_LOW )
-		PORT_BIT( 0xfffd, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0xfffd, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_DIPNAME( 0x0001, 0x0000, DEF_STR( Demo_Sounds ))
-		PORT_DIPSETTING(      0x0001, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0002, 0x0000, "Stereo")
-		PORT_DIPSETTING(      0x0002, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0004, 0x0000, "Common Coin Mech")
-		PORT_DIPSETTING(      0x0004, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0008, 0x0008, "Three Players")
-		PORT_DIPSETTING(      0x0008, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Free_Play ))
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0020, 0x0020, "Blood Free Mode")
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0040, 0x0040, "Credit Retention")
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ))
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ))
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ))
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_DIPNAME( 0x0001, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0002, 0x0000, "Stereo");
+		PORT_DIPSETTING(      0x0002, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0004, 0x0000, "Common Coin Mech");
+		PORT_DIPSETTING(      0x0004, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0008, 0x0008, "Three Players");
+		PORT_DIPSETTING(      0x0008, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, "Blood Free Mode");
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, "Credit Retention");
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -429,19 +435,19 @@ public class btoads
 	 *
 	 *************************************/
 	
-	ROM_START( btoads )
-		ROM_REGION( TOBYTE(0x400000), REGION_CPU1, 0 )		/* 34020 dummy region */
+	static RomLoadPtr rom_btoads = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( TOBYTE(0x400000); REGION_CPU1, 0 )		/* 34020 dummy region */
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* sound program */
-		ROM_LOAD( "btu102.bin", 0x0000, 0x8000, CRC(a90b911a) SHA1(6ec25161e68df1c9870d48cc2b1f85cd1a49aba9) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* sound program */
+		ROM_LOAD( "btu102.bin", 0x0000, 0x8000, CRC(a90b911a);SHA1(6ec25161e68df1c9870d48cc2b1f85cd1a49aba9) )
 	
-		ROM_REGION16_LE( 0x800000, REGION_USER1, ROMREGION_DISPOSE )	/* 34020 code */
-		ROM_LOAD32_WORD( "btu120.bin",  0x000000, 0x400000, CRC(0dfd1e35) SHA1(733a0a4235bebd598c600f187ed2628f28cf9bd0) )
-		ROM_LOAD32_WORD( "btu121.bin",  0x000002, 0x400000, CRC(df7487e1) SHA1(67151b900767bb2653b5261a98c81ff8827222c3) )
+		ROM_REGION16_LE( 0x800000, REGION_USER1, ROMREGION_DISPOSE );/* 34020 code */
+		ROM_LOAD32_WORD( "btu120.bin",  0x000000, 0x400000, CRC(0dfd1e35);SHA1(733a0a4235bebd598c600f187ed2628f28cf9bd0) )
+		ROM_LOAD32_WORD( "btu121.bin",  0x000002, 0x400000, CRC(df7487e1);SHA1(67151b900767bb2653b5261a98c81ff8827222c3) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )	/* BSMT data */
-		ROM_LOAD( "btu109.bin", 0x00000, 0x200000, CRC(d9612ddb) SHA1(f186dfb013e81abf81ba8ac5dc7eb731c1ad82b6) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );/* BSMT data */
+		ROM_LOAD( "btu109.bin", 0x00000, 0x200000, CRC(d9612ddb);SHA1(f186dfb013e81abf81ba8ac5dc7eb731c1ad82b6) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -468,5 +474,5 @@ public class btoads
 	 *
 	 *************************************/
 	
-	GAME( 1994, btoads,   0,         btoads, btoads, btoads, ROT0, "Rare",   "Battle Toads" )
+	public static GameDriver driver_btoads	   = new GameDriver("1994"	,"btoads"	,"btoads.java"	,rom_btoads,null	,machine_driver_btoads	,input_ports_btoads	,init_btoads	,ROT0	,	"Rare",   "Battle Toads" )
 }

@@ -26,51 +26,51 @@ public class munchmo
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[i] >> 6) & 0x01;
-			bit1 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 6) & 0x01;
+			bit1 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x4f * bit0 + 0xa8 * bit1;
 	
 			palette_set_color(i,r,g,b);
 		}
 	}
 	
-	WRITE_HANDLER( mnchmobl_palette_bank_w )
+	public static WriteHandlerPtr mnchmobl_palette_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( mnchmobl_palette_bank!=(data&0x3) )
 		{
 			memset( dirtybuffer, 1, 0x100 );
 			mnchmobl_palette_bank = data&0x3;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mnchmobl_flipscreen_w )
+	public static WriteHandlerPtr mnchmobl_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( flipscreen!=data )
 		{
 			memset( dirtybuffer, 1, 0x100 );
 			flipscreen = data;
 		}
-	}
+	} };
 	
 	
-	READ_HANDLER( mnchmobl_sprite_xpos_r ){ return mnchmobl_sprite_xpos[offset]; }
-	WRITE_HANDLER( mnchmobl_sprite_xpos_w ){ mnchmobl_sprite_xpos[offset] = data; }
+	public static ReadHandlerPtr mnchmobl_sprite_xpos_r  = new ReadHandlerPtr() { public int handler(int offset){ return mnchmobl_sprite_xpos[offset]; } };
+	public static WriteHandlerPtr mnchmobl_sprite_xpos_w = new WriteHandlerPtr() {public void handler(int offset, int data){ mnchmobl_sprite_xpos[offset] = data; } };
 	
-	READ_HANDLER( mnchmobl_sprite_attr_r ){ return mnchmobl_sprite_attr[offset]; }
-	WRITE_HANDLER( mnchmobl_sprite_attr_w ){ mnchmobl_sprite_attr[offset] = data; }
+	public static ReadHandlerPtr mnchmobl_sprite_attr_r  = new ReadHandlerPtr() { public int handler(int offset){ return mnchmobl_sprite_attr[offset]; } };
+	public static WriteHandlerPtr mnchmobl_sprite_attr_w = new WriteHandlerPtr() {public void handler(int offset, int data){ mnchmobl_sprite_attr[offset] = data; } };
 	
-	READ_HANDLER( mnchmobl_sprite_tile_r ){ return mnchmobl_sprite_tile[offset]; }
-	WRITE_HANDLER( mnchmobl_sprite_tile_w ){ mnchmobl_sprite_tile[offset] = data; }
+	public static ReadHandlerPtr mnchmobl_sprite_tile_r  = new ReadHandlerPtr() { public int handler(int offset){ return mnchmobl_sprite_tile[offset]; } };
+	public static WriteHandlerPtr mnchmobl_sprite_tile_w = new WriteHandlerPtr() {public void handler(int offset, int data){ mnchmobl_sprite_tile[offset] = data; } };
 	
 	VIDEO_START( mnchmobl )
 	{
@@ -84,20 +84,20 @@ public class munchmo
 		return 1;
 	}
 	
-	READ_HANDLER( mnchmobl_videoram_r )
+	public static ReadHandlerPtr mnchmobl_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
-	WRITE_HANDLER( mnchmobl_videoram_w )
+	public static WriteHandlerPtr mnchmobl_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		offset = offset&0xff; /* mirror the two banks? */
-		if( videoram[offset]!=data )
+		if( videoram.read(offset)!=data )
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			dirtybuffer[offset] = 1;
 		}
-	}
+	} };
 	
 	static void draw_status( struct mame_bitmap *bitmap )
 	{
@@ -143,7 +143,7 @@ public class munchmo
 			{
 				int sy = (offs%16)*32;
 				int sx = (offs/16)*32;
-				int tile_number = videoram[offs];
+				int tile_number = videoram.read(offs);
 				int row,col;
 				dirtybuffer[offs] = 0;
 				for( row=0; row<4; row++ )

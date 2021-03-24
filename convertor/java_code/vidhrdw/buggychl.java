@@ -50,7 +50,7 @@ public class buggychl
 	
 	
 	
-	WRITE_HANDLER( buggychl_chargen_w )
+	public static WriteHandlerPtr buggychl_chargen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (buggychl_character_ram[offset] != data)
 		{
@@ -58,19 +58,19 @@ public class buggychl
 	
 			dirtychar[(offset / 8) & 0xff] = 1;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( buggychl_sprite_lookup_bank_w )
+	public static WriteHandlerPtr buggychl_sprite_lookup_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sl_bank = (data & 0x10) << 8;
-	}
+	} };
 	
-	WRITE_HANDLER( buggychl_sprite_lookup_w )
+	public static WriteHandlerPtr buggychl_sprite_lookup_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		buggychl_sprite_lookup[offset + sl_bank] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( buggychl_ctrl_w )
+	public static WriteHandlerPtr buggychl_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	/*
 		bit7 = lamp
@@ -92,12 +92,12 @@ public class buggychl
 	
 		coin_lockout_global_w((~data & 0x40) >> 6);
 		set_led_status(0,~data & 0x80);
-	}
+	} };
 	
-	WRITE_HANDLER( buggychl_bg_scrollx_w )
+	public static WriteHandlerPtr buggychl_bg_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg_scrollx = -(data - 0x12);
-	}
+	} };
 	
 	
 	
@@ -123,7 +123,7 @@ public class buggychl
 	
 		for (offs = 0;offs < 0x400;offs++)
 		{
-			int code = videoram[0x400+offs];
+			int code = videoram.read(0x400+offs);
 	
 			if (dirtybuffer[0x400+offs] || dirtychar[code])
 			{
@@ -170,7 +170,7 @@ public class buggychl
 			/* the following line is most likely wrong */
 			int transp = (bg_on && sx >= 22) ? TRANSPARENCY_NONE : TRANSPARENCY_PEN;
 	
-			int code = videoram[offs];
+			int code = videoram.read(offs);
 	
 			if (flip_screen_x) sx = 31 - sx;
 			if (flip_screen_y) sy = 31 - sy;
@@ -198,14 +198,14 @@ public class buggychl
 			const unsigned char *zoomx_rom,*zoomy_rom;
 	
 	
-			sx = spriteram[offs+3] - ((spriteram[offs+2] & 0x80) << 1);
-			sy = 256-64 - spriteram[offs] + ((spriteram[offs+1] & 0x80) << 1);
-			flipy = spriteram[offs+1] & 0x40;
-			zoom = spriteram[offs+1] & 0x3f;
+			sx = spriteram.read(offs+3)- ((spriteram.read(offs+2)& 0x80) << 1);
+			sy = 256-64 - spriteram.read(offs)+ ((spriteram.read(offs+1)& 0x80) << 1);
+			flipy = spriteram.read(offs+1)& 0x40;
+			zoom = spriteram.read(offs+1)& 0x3f;
 			zoomy_rom = memory_region(REGION_GFX2) + (zoom << 6);
 			zoomx_rom = memory_region(REGION_GFX2) + 0x2000 + (zoom << 3);
 	
-			lookup = buggychl_sprite_lookup + ((spriteram[offs+2] & 0x7f) << 6);
+			lookup = buggychl_sprite_lookup + ((spriteram.read(offs+2)& 0x7f) << 6);
 	
 			for (y = 0;y < 64;y++)
 			{

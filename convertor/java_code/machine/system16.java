@@ -57,7 +57,6 @@ public class system16
 	
 	void (*sys16_custom_irq)(void);
 	
-	extern int sys16_wwfix, sys16_alienfix;
 	
 	MACHINE_INIT( sys16_onetime ){
 		sys16_wwfix = sys16_alienfix = 0;
@@ -79,20 +78,20 @@ public class system16
 	#endif
 	}
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,3),
 		3,
-		{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
-	struct GfxDecodeInfo sys16_gfxdecodeinfo[] = {
-		{ REGION_GFX1, 0, &charlayout,	0, 1024 },
-		{ -1 } /* end of array */
+	static GfxDecodeInfo sys16_gfxdecodeinfo[] ={
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,	0, 1024 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	void sys16_interleave_sprite_data( int bank_size )
@@ -2202,11 +2201,11 @@ public class system16
 		{ 0 }
 	};
 	
-	struct DACinterface sys16_7751_dac_interface =
-	{
+	static DACinterface sys16_7751_dac_interface = new DACinterface
+	(
 		1,
-		{ 100 }
-	};
+		new int[] { 100 }
+	);
 	
 	struct UPD7759_interface sys16_upd7759_interface =
 	{

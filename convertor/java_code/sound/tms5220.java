@@ -100,11 +100,9 @@ public class tms5220
 	
 	
 	/* Static function prototypes */
-	static void process_command(void);
-	static int extract_bits(int count);
+	static static int extract_bits(int count);
 	static int parse_frame(int the_first_frame);
-	static void check_buffer_low(void);
-	static void set_interrupt_state(int state);
+	static static void set_interrupt_state(int state);
 	
 	
 	#define DEBUG_5220	0
@@ -261,7 +259,7 @@ public class tms5220
 	    /* update the buffer low state */
 	    check_buffer_low();
 	
-		if (! speak_external)
+		if (speak_external == 0)
 			/* R Nabet : we parse commands at once.  It is necessary for such commands as read. */
 			process_command (/*data*/);
 	}
@@ -681,7 +679,7 @@ public class tms5220
 				}
 				tms5220_speaking = 1;
 				speak_external = 0;
-				if (! last_frame)
+				if (last_frame == 0)
 				{
 					first_frame = 1;
 				}
@@ -697,7 +695,7 @@ public class tms5220
 				RDB_flag = FALSE;
 	
 	            /* according to the datasheet, this will cause an interrupt due to a BE condition */
-	            if (!buffer_empty)
+	            if (buffer_empty == 0)
 	            {
 	                buffer_empty = 1;
 	                set_interrupt_state(1);
@@ -772,7 +770,7 @@ public class tms5220
 		int bits = 0;	/* number of bits in FIFO (speak external only) */
 		int indx, i, rep_flag;
 	
-		if (! the_first_frame)
+		if (the_first_frame == 0)
 		{
 	    /* remember previous frame */
 	    old_energy = new_energy;
@@ -951,7 +949,7 @@ public class tms5220
 	    if (fifo_count <= 8)
 	    {
 	        /* generate an interrupt if necessary */
-	        if (!buffer_low)
+	        if (buffer_low == 0)
 	            set_interrupt_state(1);
 	        buffer_low = 1;
 	

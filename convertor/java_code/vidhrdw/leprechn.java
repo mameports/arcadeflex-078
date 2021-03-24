@@ -45,17 +45,17 @@ public class leprechn
 	
 		/* allocate our own dirty buffer */
 		videoram = auto_malloc(videoram_size);
-		if (!videoram)
+		if (videoram == 0)
 			return 1;
 	
 		return video_start_generic_bitmapped();
 	}
 	
 	
-	WRITE_HANDLER( leprechn_graphics_command_w )
+	public static WriteHandlerPtr leprechn_graphics_command_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    graphics_command = data;
-	}
+	} };
 	
 	
 	static void clear_screen_done_callback(int param)
@@ -65,14 +65,14 @@ public class leprechn
 	}
 	
 	
-	WRITE_HANDLER( leprechn_videoram_w )
+	public static WriteHandlerPtr leprechn_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int sx,sy;
 	
 		if (pending)
 		{
 			plot_pixel(tmpbitmap, x, y, Machine->pens[color]);
-	        videoram[y * Machine->drv->screen_width + x] = color;
+	        videoram.write(y * Machine->drv->screen_width + x,color);
 	
 	        pending = 0;
 	   	}
@@ -116,7 +116,7 @@ public class leprechn
 			// Indicate that the we are busy
 			via_0_ca1_w(0, 1);
 	
-	        memset(videoram, data, videoram_size);
+	        memset(videoram, data, videoram_size[0]);
 	
 	        for (sx = 0; sx < Machine->drv->screen_width; sx++)
 	        {
@@ -137,11 +137,11 @@ public class leprechn
 		    // Doesn't seem to happen.
 		    logerror("Unknown Graphics Command #%2X at %04X\n", graphics_command, activecpu_get_pc());
 	    }
-	}
+	} };
 	
 	
-	READ_HANDLER( leprechn_videoram_r )
+	public static ReadHandlerPtr leprechn_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-	    return videoram[y * Machine->drv->screen_width + x];
-	}
+	    return videoram.read(y * Machine->drv->screen_width + x);
+	} };
 }

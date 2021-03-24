@@ -40,22 +40,22 @@ public class gaplus
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -73,7 +73,7 @@ public class gaplus
 		/* sprites */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			COLOR(2,i) = (color_prom[0] & 0x0f) + ((color_prom[TOTAL_COLORS(2)] & 0x0f) << 4);
+			COLOR(2,i) = (color_prom.read(0)& 0x0f) + ((color_prom.read(TOTAL_COLORS(2))& 0x0f) << 4);
 			color_prom++;
 		}
 	}
@@ -251,9 +251,9 @@ public class gaplus
 		}
 	}
 	
-	WRITE_HANDLER( gaplus_starfield_control_w ) {
+	public static WriteHandlerPtr gaplus_starfield_control_w = new WriteHandlerPtr() {public void handler(int offset, int data) {
 		gaplus_starfield_control[offset] = data;
-	}
+	} };
 	
 	extern unsigned char *gaplus_sharedram;
 	
@@ -280,13 +280,13 @@ public class gaplus
 		int offs;
 	
 		for (offs = 0; offs < spriteram_size; offs += 2){
-	        if ((spriteram_3[offs+1] & 2) == 0){
-				int number = spriteram[offs]+4*(spriteram_3[offs] & 0x40);
-				int color = spriteram[offs+1] & 0x3f;
-	            int sx = (spriteram_2[offs+1]-71) + 0x100*(spriteram_3[offs+1] & 1);
-				int sy = ( Machine->drv->screen_height ) - spriteram_2[offs]-24;
-				int flipy = spriteram_3[offs] & 2;
-				int flipx = spriteram_3[offs] & 1;
+	        if ((spriteram_3.read(offs+1)& 2) == 0){
+				int number = spriteram.read(offs)+4*(spriteram_3.read(offs)& 0x40);
+				int color = spriteram.read(offs+1)& 0x3f;
+	            int sx = (spriteram_2.read(offs+1)-71) + 0x100*(spriteram_3.read(offs+1)& 1);
+				int sy = ( Machine->drv->screen_height ) - spriteram_2.read(offs)-24;
+				int flipy = spriteram_3.read(offs)& 2;
+				int flipx = spriteram_3.read(offs)& 1;
 				int width, height;
 	
 				if (number >= 128*3) continue;
@@ -297,7 +297,7 @@ public class gaplus
 					flipy = !flipy;
 				}
 	
-				if ((spriteram_3[offs] & 0xa8) == 0xa0){ /* draw the sprite twice in a row */
+				if ((spriteram_3.read(offs)& 0xa8) == 0xa0){ /* draw the sprite twice in a row */
 	                    drawgfx(bitmap,Machine->gfx[2+(number >> 7)],
 									number,color,flipx,flipy,sx,sy,
 									&Machine->visible_area,TRANSPARENCY_COLOR,255);
@@ -306,7 +306,7 @@ public class gaplus
 									&Machine->visible_area,TRANSPARENCY_COLOR,255);
 				}
 				else{
-					switch (spriteram_3[offs] & 0x28){
+					switch (spriteram_3.read(offs)& 0x28){
 						case 0x28:	/* 2x both ways */
 							width = height = 2; number &= (~3); break;
 						case 0x20:	/* 2x vertical */
@@ -394,11 +394,11 @@ public class gaplus
 	
 			sx = ( ( Machine->drv->screen_height - 1 ) / 8 ) - sx;
 	
-			bank = ( colorram[offs] & 0x80 ) ? 1 : 0;
+			bank = ( colorram.read(offs)& 0x80 ) ? 1 : 0;
 	
 	        drawgfx(bitmap,Machine->gfx[bank],
-	                videoram[offs],
-	                colorram[offs] & 0x3f,
+	                videoram.read(offs),
+	                colorram.read(offs)& 0x3f,
 	                flip_screen,flip_screen,8*sy,8*sx,
 	                &Machine->visible_area,TRANSPARENCY_PEN,0);
 		}

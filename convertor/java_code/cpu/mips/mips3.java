@@ -314,8 +314,7 @@ public class mips3
 			fprintf(stderr, "Exception: PC=%08X, PPC=%08X\n", mips3.pc, mips3.ppc);
 			#ifdef MAME_DEBUG
 			{
-			extern int debug_key_pressed;
-			debug_key_pressed = 1;
+					debug_key_pressed = 1;
 			}
 			#endif
 		}
@@ -1853,7 +1852,7 @@ public class mips3
 		which = (which + 1) % 16;
 	    buffer[which][0] = '\0';
 	
-		if (!context)
+		if (context == 0)
 			r = &mips3;
 	
 	    switch( regnum )
@@ -1922,7 +1921,7 @@ public class mips3
 		which = (which + 1) % 16;
 	    buffer[which][0] = '\0';
 	
-		if (!context)
+		if (context == 0)
 			r = &mips3;
 	
 	    switch( regnum )
@@ -1944,7 +1943,7 @@ public class mips3
 		which = (which + 1) % 16;
 	    buffer[which][0] = '\0';
 	
-		if (!context)
+		if (context == 0)
 			r = &mips3;
 	
 	    switch( regnum )

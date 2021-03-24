@@ -28,11 +28,11 @@ public class pengo
 	static struct tilemap *tilemap;
 	data8_t *sprite_bank, *tiles_bankram;
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		2*8, 34*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
 	
 	
@@ -177,7 +177,7 @@ public class pengo
 	
 	
 	
-	WRITE_HANDLER( pengo_gfxbank_w )
+	public static WriteHandlerPtr pengo_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* the Pengo hardware can set independently the palette bank, color lookup */
 		/* table, and chars/sprites. However the game always set them together (and */
@@ -186,18 +186,18 @@ public class pengo
 		if (gfx_bank != (data & 1))
 		{
 			gfx_bank = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pengo_flipscreen_w )
+	public static WriteHandlerPtr pengo_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -250,8 +250,8 @@ public class pengo
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[gfx_bank*2],
-						videoram[offs],
-						colorram[offs] & 0x1f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x1f,
 						flipscreen,flipscreen,
 						sx*8,sy*8,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -269,21 +269,21 @@ public class pengo
 				int sx,sy;
 	
 	
-				sx = 272 - spriteram_2[offs + 1];
-				sy = spriteram_2[offs] - 31;
+				sx = 272 - spriteram_2.read(offs + 1);
+				sy = spriteram_2.read(offs)- 31;
 	
 				drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-						spriteram[offs] >> 2,
-						spriteram[offs + 1] & 0x1f,
-						spriteram[offs] & 1,spriteram[offs] & 2,
+						spriteram.read(offs)>> 2,
+						spriteram.read(offs + 1)& 0x1f,
+						spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 						sx,sy,
 						&spriteclip,TRANSPARENCY_COLOR,0);
 	
 				/* also plot the sprite with wraparound (tunnel in Crush Roller) */
 				drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-						spriteram[offs] >> 2,
-						spriteram[offs + 1] & 0x1f,
-						spriteram[offs] & 1,spriteram[offs] & 2,
+						spriteram.read(offs)>> 2,
+						spriteram.read(offs + 1)& 0x1f,
+						spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 						sx - 256,sy,
 						&spriteclip,TRANSPARENCY_COLOR,0);
 			}
@@ -294,21 +294,21 @@ public class pengo
 				int sx,sy;
 	
 	
-				sx = 272 - spriteram_2[offs + 1];
-				sy = spriteram_2[offs] - 31;
+				sx = 272 - spriteram_2.read(offs + 1);
+				sy = spriteram_2.read(offs)- 31;
 	
 				drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-						spriteram[offs] >> 2,
-						spriteram[offs + 1] & 0x1f,
-						spriteram[offs] & 1,spriteram[offs] & 2,
+						spriteram.read(offs)>> 2,
+						spriteram.read(offs + 1)& 0x1f,
+						spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 						sx,sy + xoffsethack,
 						&spriteclip,TRANSPARENCY_COLOR,0);
 	
 				/* also plot the sprite with wraparound (tunnel in Crush Roller) */
 				drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-						spriteram[offs] >> 2,
-						spriteram[offs + 1] & 0x1f,
-						spriteram[offs] & 2,spriteram[offs] & 1,
+						spriteram.read(offs)>> 2,
+						spriteram.read(offs + 1)& 0x1f,
+						spriteram.read(offs)& 2,spriteram.read(offs)& 1,
 						sx - 256,sy + xoffsethack,
 						&spriteclip,TRANSPARENCY_COLOR,0);
 			}
@@ -316,11 +316,11 @@ public class pengo
 	}
 	
 	
-	WRITE_HANDLER( vanvan_bgcolor_w )
+	public static WriteHandlerPtr vanvan_bgcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data & 1) palette_set_color(0,0xaa,0xaa,0xaa);
 		else          palette_set_color(0,0x00,0x00,0x00);
-	}
+	} };
 	
 	
 	VIDEO_UPDATE( vanvan )
@@ -365,8 +365,8 @@ public class pengo
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[gfx_bank*2],
-						videoram[offs],
-						colorram[offs] & 0x1f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x1f,
 						flipscreen,flipscreen,
 						sx*8,sy*8,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -382,21 +382,21 @@ public class pengo
 			int sx,sy;
 	
 	
-			sx = 272 - spriteram_2[offs + 1];
-			sy = spriteram_2[offs] - 31;
+			sx = 272 - spriteram_2.read(offs + 1);
+			sy = spriteram_2.read(offs)- 31;
 	
 			drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-					spriteram[offs] >> 2,
-					spriteram[offs + 1] & 0x1f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					spriteram.read(offs)>> 2,
+					spriteram.read(offs + 1)& 0x1f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy,
 					&spriteclip,TRANSPARENCY_PEN,0);
 	
 	        /* also plot the sprite with wraparound (tunnel in Crush Roller) */
 	        drawgfx(bitmap,Machine->gfx[gfx_bank*2+1],
-					spriteram[offs] >> 2,
-					spriteram[offs + 1] & 0x1f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					spriteram.read(offs)>> 2,
+					spriteram.read(offs + 1)& 0x1f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx - 256,sy,
 					&spriteclip,TRANSPARENCY_PEN,0);
 		}
@@ -409,8 +409,8 @@ public class pengo
 		colbank = tiles_bankram[tile_index & 0x1f] & 0x3;
 	
 	
-		code = videoram[tile_index] + (colbank << 8);
-		attr = colorram[tile_index & 0x1f];
+		code = videoram.read(tile_index)+ (colbank << 8);
+		attr = colorram.read(tile_index & 0x1f);
 	
 		/* remove when we have proms dumps for it */
 		if (!strcmp(Machine->gamedrv->name, "8bpm"))
@@ -421,35 +421,35 @@ public class pengo
 		SET_TILE_INFO(0,code,attr & 0x1f,0)
 	}
 	
-	WRITE_HANDLER( s2650games_videoram_w )
+	public static WriteHandlerPtr s2650games_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( s2650games_colorram_w )
+	public static WriteHandlerPtr s2650games_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
-		colorram[offset & 0x1f] = data;
+		colorram.write(offset & 0x1f,data);
 		for (i = offset; i < 0x0400; i += 32)
 			tilemap_mark_tile_dirty(tilemap, i);
-	}
+	} };
 	
-	WRITE_HANDLER( s2650games_scroll_w )
+	public static WriteHandlerPtr s2650games_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(tilemap, offset, data);
-	}
+	} };
 	
-	WRITE_HANDLER( s2650games_tilesbank_w )
+	public static WriteHandlerPtr s2650games_tilesbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tiles_bankram[offset] = data;
 		tilemap_mark_all_tiles_dirty(tilemap);
-	}
+	} };
 	
-	WRITE_HANDLER( s2650games_flipscreen_w )
+	public static WriteHandlerPtr s2650games_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data);
-	}
+	} };
 	
 	VIDEO_START( s2650games )
 	{
@@ -457,7 +457,7 @@ public class pengo
 	
 		tilemap = tilemap_create( get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32 );
 	
-		if( !tilemap )
+		if (tilemap == 0)
 			return 1;
 	
 		colorram = auto_malloc(0x20);
@@ -478,13 +478,13 @@ public class pengo
 			int sx,sy;
 	
 	
-			sx = 255 - spriteram_2[offs + 1];
-			sy = spriteram_2[offs] - 15;
+			sx = 255 - spriteram_2.read(offs + 1);
+			sy = spriteram_2.read(offs)- 15;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] >> 2) | ((sprite_bank[offs] & 3) << 6),
-					spriteram[offs + 1] & 0x1f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					(spriteram.read(offs)>> 2) | ((sprite_bank[offs] & 3) << 6),
+					spriteram.read(offs + 1)& 0x1f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy,
 					cliprect,TRANSPARENCY_COLOR,0);
 		}
@@ -495,13 +495,13 @@ public class pengo
 			int sx,sy;
 	
 	
-			sx = 255 - spriteram_2[offs + 1];
-			sy = spriteram_2[offs] - 15;
+			sx = 255 - spriteram_2.read(offs + 1);
+			sy = spriteram_2.read(offs)- 15;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] >> 2) | ((sprite_bank[offs] & 3)<<6),
-					spriteram[offs + 1] & 0x1f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					(spriteram.read(offs)>> 2) | ((sprite_bank[offs] & 3)<<6),
+					spriteram.read(offs + 1)& 0x1f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy + xoffsethack,
 					cliprect,TRANSPARENCY_COLOR,0);
 		}

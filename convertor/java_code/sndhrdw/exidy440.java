@@ -123,8 +123,7 @@ public class exidy440
 	static void play_cvsd(int ch);
 	static void stop_cvsd(int ch);
 	
-	static void reset_sound_cache(void);
-	static INT16 *add_to_sound_cache(UINT8 *input, int address, int length, int bits, int frequency);
+	static static INT16 *add_to_sound_cache(UINT8 *input, int address, int length, int bits, int frequency);
 	static INT16 *find_or_add_to_sound_cache(int address, int length, int bits, int frequency);
 	
 	static void decode_and_filter_cvsd(UINT8 *data, int bytes, int maskbits, int frequency, INT16 *dest);
@@ -146,8 +145,7 @@ public class exidy440
 	static int wavlength;
 	
 	static void write_wav_header(int frequency);
-	static void finish_wav_file(void);
-	
+	static 
 	#endif
 	
 	
@@ -190,7 +188,7 @@ public class exidy440
 		/* allocate the sample cache */
 		length = memory_region_length(REGION_SOUND1) * 16 + MAX_CACHE_ENTRIES * sizeof(sound_cache_entry);
 		sound_cache = auto_malloc(length);
-		if (!sound_cache)
+		if (sound_cache == 0)
 			return 1;
 	
 		/* determine the hard end of the cache and reset */
@@ -199,7 +197,7 @@ public class exidy440
 	
 		/* allocate the mixer buffer */
 		mixer_buffer_left = auto_malloc(2 * SAMPLE_RATE_FAST * sizeof(INT32));
-		if (!mixer_buffer_left)
+		if (mixer_buffer_left == 0)
 			return 1;
 		mixer_buffer_right = mixer_buffer_left + SAMPLE_RATE_FAST;
 	
@@ -375,14 +373,14 @@ public class exidy440
 	 *
 	 *************************************/
 	
-	READ_HANDLER( exidy440_sound_command_r )
+	public static ReadHandlerPtr exidy440_sound_command_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* clear the FIRQ that got us here and acknowledge the read to the main CPU */
 		cpu_set_irq_line(1, 1, CLEAR_LINE);
 		exidy440_sound_command_ack = 1;
 	
 		return exidy440_sound_command;
-	}
+	} };
 	
 	
 	
@@ -392,7 +390,7 @@ public class exidy440
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( exidy440_sound_volume_w )
+	public static WriteHandlerPtr exidy440_sound_volume_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (SOUND_LOG && debuglog)
 			fprintf(debuglog, "Volume %02X=%02X\n", offset, data);
@@ -402,7 +400,7 @@ public class exidy440
 	
 		/* set the new volume */
 		exidy440_sound_volume[offset] = ~data;
-	}
+	} };
 	
 	
 	
@@ -412,10 +410,10 @@ public class exidy440
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( exidy440_sound_interrupt_clear_w )
+	public static WriteHandlerPtr exidy440_sound_interrupt_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(1, 0, CLEAR_LINE);
-	}
+	} };
 	
 	
 	
@@ -456,7 +454,7 @@ public class exidy440
 	 *
 	 *************************************/
 	
-	READ_HANDLER( exidy440_m6844_r )
+	public static ReadHandlerPtr exidy440_m6844_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0;
 	
@@ -534,10 +532,10 @@ public class exidy440
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( exidy440_m6844_w )
+	public static WriteHandlerPtr exidy440_m6844_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -634,7 +632,7 @@ public class exidy440
 				m6844_chain = data;
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -715,7 +713,7 @@ public class exidy440
 	
 		/* compute the base address in the converted samples array */
 		base = find_or_add_to_sound_cache(address, length, channel_bits[ch], channel_frequency[ch]);
-		if (!base)
+		if (base == 0)
 			return;
 	
 		/* if the length is 0 or 1, just do an immediate end */

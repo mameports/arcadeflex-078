@@ -47,22 +47,22 @@ public class balsente
 		
 		/* allocate a bitmap */
 		tmpbitmap = auto_bitmap_alloc(Machine->drv->screen_width, Machine->drv->screen_height);
-		if (!tmpbitmap)
+		if (tmpbitmap == 0)
 			return 1;
 	
 		/* allocate a local copy of video RAM */
 		local_videoram = auto_malloc(256 * 256);
-		if (!local_videoram)
+		if (local_videoram == 0)
 			return 1;
 	
 		/* allocate a scanline dirty array */
 		scanline_dirty = auto_malloc(256);
-		if (!scanline_dirty)
+		if (scanline_dirty == 0)
 			return 1;
 	
 		/* allocate a scanline palette array */
 		scanline_palette = auto_malloc(256);
-		if (!scanline_palette)
+		if (scanline_palette == 0)
 			return 1;
 	
 		/* mark everything dirty to start */
@@ -87,9 +87,9 @@ public class balsente
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( balsente_videoram_w )
+	public static WriteHandlerPtr balsente_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		/* expand the two pixel values into two bytes */
 		local_videoram[offset * 2 + 0] = data >> 4;
@@ -97,7 +97,7 @@ public class balsente
 	
 		/* mark the scanline dirty */
 		scanline_dirty[offset / 128] = 1;
-	}
+	} };
 	
 	
 	
@@ -144,7 +144,7 @@ public class balsente
 	}
 	
 	
-	WRITE_HANDLER( balsente_palette_select_w )
+	public static WriteHandlerPtr balsente_palette_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* only update if changed */
 		if (palettebank_vis != (data & 3))
@@ -155,7 +155,7 @@ public class balsente
 		}
 	
 		logerror("balsente_palette_select_w(%d) scanline=%d\n", data & 3, cpu_getscanline());
-	}
+	} };
 	
 	
 	
@@ -165,17 +165,17 @@ public class balsente
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( balsente_paletteram_w )
+	public static WriteHandlerPtr balsente_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
-		paletteram[offset] = data & 0x0f;
+		paletteram.write(offset,data & 0x0f);
 	
-		r = paletteram[(offset & ~3) + 0];
-		g = paletteram[(offset & ~3) + 1];
-		b = paletteram[(offset & ~3) + 2];
+		r = paletteram.read((offset & ~3) + 0);
+		g = paletteram.read((offset & ~3) + 1);
+		b = paletteram.read((offset & ~3) + 2);
 		palette_set_color(offset / 4, (r << 4) | r, (g << 4) | g, (b << 4) | b);
-	}
+	} };
 	
 	
 	
@@ -298,7 +298,7 @@ public class balsente
 	
 		/* draw the sprite images */
 		for (i = 0; i < 40; i++)
-			draw_one_sprite(bitmap, cliprect, &spriteram[(0xe0 + i * 4) & 0xff]);
+			draw_one_sprite(bitmap, cliprect, &spriteram.read((0xe0 + i * 4) & 0xff));
 	
 		/* draw a crosshair */
 		if (balsente_shooter)

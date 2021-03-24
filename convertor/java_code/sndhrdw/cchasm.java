@@ -15,7 +15,7 @@ public class cchasm
 	
 	static int sound_flags;
 	
-	READ_HANDLER( cchasm_snd_io_r )
+	public static ReadHandlerPtr cchasm_snd_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	    int coin;
 	
@@ -43,9 +43,9 @@ public class cchasm
 	        logerror("Read from unmapped internal IO device at 0x%x\n", offset + 0x6000);
 	        return 0;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( cchasm_snd_io_w )
+	public static WriteHandlerPtr cchasm_snd_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    switch (offset & 0x61 )
 	    {
@@ -82,7 +82,7 @@ public class cchasm
 	    default:
 	        logerror("Write %x to unmapped internal IO device at 0x%x\n", data, offset + 0x6000);
 	    }
-	}
+	} };
 	
 	WRITE16_HANDLER( cchasm_io_w )
 	{
@@ -137,7 +137,7 @@ public class cchasm
 		cpu_set_irq_line_and_vector(1, 0, HOLD_LINE, Z80_VECTOR(0,state));
 	}
 	
-	static WRITE_HANDLER( ctc_timer_1_w )
+	public static WriteHandlerPtr ctc_timer_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 	    if (data) /* rising edge */
@@ -146,9 +146,9 @@ public class cchasm
 	        channel_active[0] = 1;
 	        stream_update(channel[0], 0);
 	    }
-	}
+	} };
 	
-	static WRITE_HANDLER( ctc_timer_2_w )
+	public static WriteHandlerPtr ctc_timer_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 	    if (data) /* rising edge */
@@ -157,7 +157,7 @@ public class cchasm
 	        channel_active[1] = 1;
 	        stream_update(channel[1], 0);
 	    }
-	}
+	} };
 	
 	static z80ctc_interface ctc_intf =
 	{

@@ -22,14 +22,14 @@ public class dkong
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( dkong_videoram_w )
+	public static WriteHandlerPtr dkong_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -64,18 +64,18 @@ public class dkong
 	
 	
 			/* red component */
-			bit0 = (color_prom[256] >> 1) & 1;
-			bit1 = (color_prom[256] >> 2) & 1;
-			bit2 = (color_prom[256] >> 3) & 1;
+			bit0 = (color_prom.read(256)>> 1) & 1;
+			bit1 = (color_prom.read(256)>> 2) & 1;
+			bit2 = (color_prom.read(256)>> 3) & 1;
 			r = 255 - (0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2);
 			/* green component */
-			bit0 = (color_prom[0] >> 2) & 1;
-			bit1 = (color_prom[0] >> 3) & 1;
-			bit2 = (color_prom[256] >> 0) & 1;
+			bit0 = (color_prom.read(0)>> 2) & 1;
+			bit1 = (color_prom.read(0)>> 3) & 1;
+			bit2 = (color_prom.read(256)>> 0) & 1;
 			g = 255 - (0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2);
 			/* blue component */
-			bit0 = (color_prom[0] >> 0) & 1;
-			bit1 = (color_prom[0] >> 1) & 1;
+			bit0 = (color_prom.read(0)>> 0) & 1;
+			bit1 = (color_prom.read(0)>> 1) & 1;
 			b = 255 - (0x55 * bit0 + 0xaa * bit1);
 	
 			palette_set_color(i,r,g,b);
@@ -130,22 +130,22 @@ public class dkong
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			r = 255 - (0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3);
 			/* green component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			g = 255 - (0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3);
 			/* blue component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			b = 255 - (0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3);
 	
 			palette_set_color(i,r,g,b);
@@ -159,7 +159,7 @@ public class dkong
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 256 * gfx_bank;
+		int code = videoram.read(tile_index)+ 256 * gfx_bank;
 		int color = (color_codes[tile_index % 32 + 32 * (tile_index / 32 / 4)] & 0x0f) + 0x10 * palette_bank;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -173,32 +173,32 @@ public class dkong
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
 	}
 	
 	
-	WRITE_HANDLER( dkongjr_gfxbank_w )
+	public static WriteHandlerPtr dkongjr_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfx_bank != (data & 0x01))
 		{
 			gfx_bank = data & 0x01;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( dkong3_gfxbank_w )
+	public static WriteHandlerPtr dkong3_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfx_bank != (~data & 0x01))
 		{
 			gfx_bank = ~data & 0x01;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( dkong_palettebank_w )
+	public static WriteHandlerPtr dkong_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int newbank;
 	
@@ -214,14 +214,14 @@ public class dkong
 			palette_bank = newbank;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( radarscp_grid_enable_w )
+	public static WriteHandlerPtr radarscp_grid_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		grid_on = data & 0x01;
-	}
+	} };
 	
-	WRITE_HANDLER( radarscp_grid_color_w )
+	public static WriteHandlerPtr radarscp_grid_color_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 	
@@ -230,12 +230,12 @@ public class dkong
 		b = ((~data >> 2) & 0x01) * 0xff;
 	//	palette_set_color(257,r,g,b);
 		palette_set_color(257,0x00,0x00,0xff);
-	}
+	} };
 	
-	WRITE_HANDLER( dkong_flipscreen_w )
+	public static WriteHandlerPtr dkong_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(~data & 0x01);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -252,18 +252,18 @@ public class dkong
 		/* Draw the sprites. */
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			if (spriteram[offs])
+			if (spriteram.read(offs))
 			{
-				/* spriteram[offs + 2] & 0x40 is used by Donkey Kong 3 only */
-				/* spriteram[offs + 2] & 0x30 don't seem to be used (they are */
+				/* spriteram.read(offs + 2)& 0x40 is used by Donkey Kong 3 only */
+				/* spriteram.read(offs + 2)& 0x30 don't seem to be used (they are */
 				/* probably not part of the color code, since Mario Bros, which */
 				/* has similar hardware, uses a memory mapped port to change */
 				/* palette bank, so it's limited to 16 color codes) */
 	
 				int x,y;
 	
-				x = spriteram[offs + 3] - 8;
-				y = 240 - spriteram[offs] + 7;
+				x = spriteram.read(offs + 3)- 8;
+				y = 240 - spriteram.read(offs)+ 7;
 	
 				if (flip_screen)
 				{
@@ -271,34 +271,34 @@ public class dkong
 					y = 240 - y;
 	
 					drawgfx(bitmap,Machine->gfx[1],
-							(spriteram[offs + 1] & 0x7f) + ((spriteram[offs + 2] & mask_bank) << shift_bits),
-							(spriteram[offs + 2] & 0x0f) + 16 * palette_bank,
-							!(spriteram[offs + 2] & 0x80),!(spriteram[offs + 1] & 0x80),
+							(spriteram.read(offs + 1)& 0x7f) + ((spriteram.read(offs + 2)& mask_bank) << shift_bits),
+							(spriteram.read(offs + 2)& 0x0f) + 16 * palette_bank,
+							!(spriteram.read(offs + 2)& 0x80),!(spriteram.read(offs + 1)& 0x80),
 							x,y,
 							&Machine->visible_area,TRANSPARENCY_PEN,0);
 	
 					/* draw with wrap around - this fixes the 'beheading' bug */
 					drawgfx(bitmap,Machine->gfx[1],
-							(spriteram[offs + 1] & 0x7f) + ((spriteram[offs + 2] & mask_bank) << shift_bits),
-							(spriteram[offs + 2] & 0x0f) + 16 * palette_bank,
-							(spriteram[offs + 2] & 0x80),(spriteram[offs + 1] & 0x80),
+							(spriteram.read(offs + 1)& 0x7f) + ((spriteram.read(offs + 2)& mask_bank) << shift_bits),
+							(spriteram.read(offs + 2)& 0x0f) + 16 * palette_bank,
+							(spriteram.read(offs + 2)& 0x80),(spriteram.read(offs + 1)& 0x80),
 							x-256,y,
 							&Machine->visible_area,TRANSPARENCY_PEN,0);
 				}
 				else
 				{
 					drawgfx(bitmap,Machine->gfx[1],
-							(spriteram[offs + 1] & 0x7f) + ((spriteram[offs + 2] & mask_bank) << shift_bits),
-							(spriteram[offs + 2] & 0x0f) + 16 * palette_bank,
-							(spriteram[offs + 2] & 0x80),(spriteram[offs + 1] & 0x80),
+							(spriteram.read(offs + 1)& 0x7f) + ((spriteram.read(offs + 2)& mask_bank) << shift_bits),
+							(spriteram.read(offs + 2)& 0x0f) + 16 * palette_bank,
+							(spriteram.read(offs + 2)& 0x80),(spriteram.read(offs + 1)& 0x80),
 							x,y,
 							&Machine->visible_area,TRANSPARENCY_PEN,0);
 	
 					/* draw with wrap around - this fixes the 'beheading' bug */
 					drawgfx(bitmap,Machine->gfx[1],
-							(spriteram[offs + 1] & 0x7f) + ((spriteram[offs + 2] & mask_bank) << shift_bits),
-							(spriteram[offs + 2] & 0x0f) + 16 * palette_bank,
-							(spriteram[offs + 2] & 0x80),(spriteram[offs + 1] & 0x80),
+							(spriteram.read(offs + 1)& 0x7f) + ((spriteram.read(offs + 2)& mask_bank) << shift_bits),
+							(spriteram.read(offs + 2)& 0x0f) + 16 * palette_bank,
+							(spriteram.read(offs + 2)& 0x80),(spriteram.read(offs + 1)& 0x80),
 							x+256,y,
 							&Machine->visible_area,TRANSPARENCY_PEN,0);
 				}
@@ -361,13 +361,13 @@ public class dkong
 		/* Draw the sprites. */
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			if (spriteram[offs])
+			if (spriteram.read(offs))
 			{
 				drawgfx(bitmap,Machine->gfx[1],
-						spriteram[offs + 2],
-						(spriteram[offs + 1] & 0x0f) + 16 * palette_bank,
-						spriteram[offs + 1] & 0x80,spriteram[offs + 1] & 0x40,
-						spriteram[offs + 3] - 8,240 - spriteram[offs] + 8,
+						spriteram.read(offs + 2),
+						(spriteram.read(offs + 1)& 0x0f) + 16 * palette_bank,
+						spriteram.read(offs + 1)& 0x80,spriteram.read(offs + 1)& 0x40,
+						spriteram.read(offs + 3)- 8,240 - spriteram.read(offs)+ 8,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);
 			}
 		}
@@ -377,7 +377,7 @@ public class dkong
 	{
 		tilemap_draw(bitmap, &Machine->visible_area, bg_tilemap, 0, 0);
 	
-		/* it uses spriteram[offs + 2] & 0x10 for sprite bank */
+		/* it uses spriteram.read(offs + 2)& 0x10 for sprite bank */
 		draw_sprites(bitmap, 0x10, 3);
 	}
 }

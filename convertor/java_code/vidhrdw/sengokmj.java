@@ -16,49 +16,49 @@ public class sengokmj
 	static struct tilemap *bg_tilemap,*md_tilemap,*tx_tilemap,*fg_tilemap;
 	data8_t *bg_vram,*md_vram,*tx_vram,*fg_vram;
 	
-	READ_HANDLER( sengoku_bg_vram_r )
+	public static ReadHandlerPtr sengoku_bg_vram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return bg_vram[offset];
-	}
+	} };
 	
-	READ_HANDLER( sengoku_md_vram_r )
+	public static ReadHandlerPtr sengoku_md_vram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return md_vram[offset];
-	}
+	} };
 	
-	READ_HANDLER( sengoku_tx_vram_r )
+	public static ReadHandlerPtr sengoku_tx_vram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return tx_vram[offset];
-	}
+	} };
 	
-	READ_HANDLER( sengoku_fg_vram_r )
+	public static ReadHandlerPtr sengoku_fg_vram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return fg_vram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( sengoku_bg_vram_w )
+	public static WriteHandlerPtr sengoku_bg_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg_vram[offset] = data;
 		tilemap_mark_tile_dirty(bg_tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( sengoku_md_vram_w )
+	public static WriteHandlerPtr sengoku_md_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		md_vram[offset] = data;
 		tilemap_mark_tile_dirty(md_tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( sengoku_tx_vram_w )
+	public static WriteHandlerPtr sengoku_tx_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tx_vram[offset] = data;
 		tilemap_mark_tile_dirty(tx_tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( sengoku_fg_vram_w )
+	public static WriteHandlerPtr sengoku_fg_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		fg_vram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset/2);
-	}
+	} };
 	
 	static void sengoku_bg_tile_info(int tile_index)
 	{
@@ -123,28 +123,28 @@ public class sengokmj
 	
 		for (offs = 0x800-8;offs >= 0;offs -= 8)
 		{
-			if ((spriteram[offs+1]&0x80)!=0x80) continue;
-			sprite = (spriteram[offs+2])+(spriteram[offs+3]<<8);
+			if ((spriteram.read(offs+1)&0x80)!=0x80) continue;
+			sprite = (spriteram.read(offs+2))+(spriteram.read(offs+3)<<8);
 			if ((sprite>>14)!=pri) continue;
 			sprite &= 0x1fff;
 	
-			y = (spriteram[offs+6])+(spriteram[offs+7]<<8);
-			x = 128 + (spriteram[offs+4])+(spriteram[offs+5]<<8);
+			y = (spriteram.read(offs+6))+(spriteram.read(offs+7)<<8);
+			x = 128 + (spriteram.read(offs+4))+(spriteram.read(offs+5)<<8);
 	
 			if (x&0x8000) x=0-(0x200-(x&0x1ff));
 			//else x&=0x1ff;
 			if (y&0x8000) y=0-(0x200-(y&0x1ff));
 			//else y&=0x1ff;
 	
-			color = (spriteram[offs+0]&0x3f);
-			fx = spriteram[offs+0]&0x40;
+			color = (spriteram.read(offs+0)&0x3f);
+			fx = spriteram.read(offs+0)&0x40;
 			fy = 0; /* To do - probably 0x2000 */
-			dy=((((spriteram[offs+0])+(spriteram[offs+1]<<8))&0x0380)>>7)+1;
-			dx=((((spriteram[offs+0])+(spriteram[offs+1]<<8))&0x1c00)>>10)+1;
+			dy=((((spriteram.read(offs+0))+(spriteram.read(offs+1)<<8))&0x0380)>>7)+1;
+			dx=((((spriteram.read(offs+0))+(spriteram.read(offs+1)<<8))&0x1c00)>>10)+1;
 	
 			for (ax=0; ax<dx; ax++)
 				for (ay=0; ay<dy; ay++) {
-					if (!fx)
+					if (fx == 0)
 						drawgfx(bitmap,Machine->gfx[0],
 							sprite++,
 							color,fx,fy,x+ax*16,y+ay*16,

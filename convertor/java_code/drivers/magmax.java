@@ -39,24 +39,24 @@ public class magmax
 		}
 	}
 	
-	static READ_HANDLER( magmax_sound_irq_ack )
+	public static ReadHandlerPtr magmax_sound_irq_ack  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		cpu_set_irq_line(1, 0, CLEAR_LINE);
 		return 0;
-	}
+	} };
 	
-	static READ_HANDLER( magmax_sound_r )
+	public static ReadHandlerPtr magmax_sound_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (sound_latch | LS74_q);
-	}
+	} };
 	
-	WRITE_HANDLER( ay8910_portB_0_w )
+	public static WriteHandlerPtr ay8910_portB_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*bit 0 is input to CLR line of the LS74*/
 		LS74_clr = data & 1;
 		if (LS74_clr == 0)
 			LS74_q = 0;
-	}
+	} };
 	
 	static void scanline_callback(int scanline)
 	{
@@ -86,7 +86,7 @@ public class magmax
 	
 	static int gain_control = 0;
 	
-	WRITE_HANDLER( ay8910_portA_0_w )
+	public static WriteHandlerPtr ay8910_portA_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	int percent;
 	
@@ -162,7 +162,7 @@ public class magmax
 		percent = (gain_control & 8) ? 45 : 23;
 		mixer_set_volume(7,percent);
 		mixer_set_volume(8,percent);
-	}
+	} };
 	
 	static WRITE16_HANDLER( magmax_vreg_w )
 	{
@@ -202,152 +202,160 @@ public class magmax
 		{ 0x03001e, 0x03001f, MWA16_NOP },	/* IRQ ack */
 	MEMORY_END
 	
-	static MEMORY_READ_START( magmax_soundreadmem )
-		{ 0x0000, 0x3fff, MRA_ROM },
-		{ 0x4000, 0x4000, magmax_sound_irq_ack },
-		{ 0x6000, 0x67ff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress magmax_soundreadmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x3fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x4000, 0x4000, magmax_sound_irq_ack ),
+		new Memory_ReadAddress( 0x6000, 0x67ff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( magmax_soundwritemem )
-		{ 0x0000, 0x3fff, MWA_ROM },
-		{ 0x6000, 0x67ff, MWA_RAM },
-	MEMORY_END
+	public static Memory_WriteAddress magmax_soundwritemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x3fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x6000, 0x67ff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( magmax_soundreadport )
-		{ 0x06, 0x06, magmax_sound_r },
-	PORT_END
+	public static IO_ReadPort magmax_soundreadport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x06, 0x06, magmax_sound_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( magmax_soundwriteport )
-		{ 0x00, 0x00, AY8910_control_port_0_w },
-		{ 0x01, 0x01, AY8910_write_port_0_w },
-		{ 0x02, 0x02, AY8910_control_port_1_w },
-		{ 0x03, 0x03, AY8910_write_port_1_w },
-		{ 0x04, 0x04, AY8910_control_port_2_w },
-		{ 0x05, 0x05, AY8910_write_port_2_w },
-	PORT_END
-	
-	
-	INPUT_PORTS_START( magmax )
-		PORT_START	/* Player 1 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )	/*Maybe this is just a test button and as such is not available to player*/
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* Player 2 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL  )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* Coin, Start, Test, Dipswitch */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* Dipswitch */
-		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x0003, "3" )
-		PORT_DIPSETTING(      0x0002, "4" )
-		PORT_DIPSETTING(      0x0001, "5" )
-		PORT_DIPSETTING(      0x0000, "6" )
-		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(      0x000c, "30000 every" )
-		PORT_DIPSETTING(      0x0004, "70000 every" )
-		PORT_DIPSETTING(      0x0008, "50000 every" )
-		PORT_DIPSETTING(      0x0000, "90000 every" )
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0000, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Upright ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0100, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0300, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0200, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0400, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(      0x0c00, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0800, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x1000, "Easy" )
-		PORT_DIPSETTING(      0x0000, "Hard" )
-		PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown) )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	INPUT_PORTS_END
+	public static IO_WritePort magmax_soundwriteport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, AY8910_control_port_0_w ),
+		new IO_WritePort( 0x01, 0x01, AY8910_write_port_0_w ),
+		new IO_WritePort( 0x02, 0x02, AY8910_control_port_1_w ),
+		new IO_WritePort( 0x03, 0x03, AY8910_write_port_1_w ),
+		new IO_WritePort( 0x04, 0x04, AY8910_control_port_2_w ),
+		new IO_WritePort( 0x05, 0x05, AY8910_write_port_2_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static struct GfxLayout charlayout =
-	{
+	static InputPortPtr input_ports_magmax = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Player 1 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );/*Maybe this is just a test button and as such is not available to player*/
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* Player 2 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL  );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* Coin, Start, Test, Dipswitch */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_SERVICE( 0x20, IP_ACTIVE_LOW );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* Dipswitch */
+		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x0003, "3" );
+		PORT_DIPSETTING(      0x0002, "4" );
+		PORT_DIPSETTING(      0x0001, "5" );
+		PORT_DIPSETTING(      0x0000, "6" );
+		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(      0x000c, "30000 every" );
+		PORT_DIPSETTING(      0x0004, "70000 every" );
+		PORT_DIPSETTING(      0x0008, "50000 every" );
+		PORT_DIPSETTING(      0x0000, "90000 every" );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0000, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Upright") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0300, 0x0300, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0300, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(      0x0c00, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0800, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x1000, "Easy" );
+		PORT_DIPSETTING(      0x0000, "Hard" );
+		PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( "Unknown"));
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(      0x8000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8, 8,	/* 8*8 characters */
 		256,	/* 256 characters */
 		4,	/* 4 bits per pixel */
-		{ 0, 1, 2, 3 },
-		{ 4, 0, 12, 8, 20, 16, 28, 24 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 4, 0, 12, 8, 20, 16, 28, 24 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		32*8
-	};
+	);
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16, 16,	/* 16*16 characters */
 		512,	/* 512 characters */
 		4,	/* 4 bits per pixel */
-		{ 0, 1, 2, 3 },
-		{ 4, 0, 4+512*64*8, 0+512*64*8, 12, 8, 12+512*64*8, 8+512*64*8,
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 4, 0, 4+512*64*8, 0+512*64*8, 12, 8, 12+512*64*8, 8+512*64*8,
 		  20, 16, 20+512*64*8, 16+512*64*8, 28, 24, 28+512*64*8, 24+512*64*8 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 },
 		64*8
+	);
+	
+	static GfxDecodeInfo gfxdecodeinfo[] =
+	{
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,           0,  1 ), /*no color codes*/
+		new GfxDecodeInfo( REGION_GFX2, 0, spritelayout,      1*16, 16 ), /*16 color codes*/
+		new GfxDecodeInfo( -1 )
 	};
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
-	{
-		{ REGION_GFX1, 0, &charlayout,           0,  1 }, /*no color codes*/
-		{ REGION_GFX2, 0, &spritelayout,      1*16, 16 }, /*16 color codes*/
-		{ -1 }
-	};
 	
-	
-	static struct AY8910interface ay8910_interface =
-	{
+	static AY8910interface ay8910_interface = new AY8910interface
+	(
 		3,			/* 3 chips */
 		10000000/8,		/* 1.25 MHz */
-		{ 40, 40, 40 },
-		{ 0, 0, 0 }, /*read port A*/
-		{ 0, 0, 0 }, /*read port B*/
-		{ ay8910_portA_0_w, 0, 0 }, /*write port A*/
-		{ ay8910_portB_0_w, 0, 0 }  /*write port B*/
-	};
+		new int[] { 40, 40, 40 },
+		new ReadHandlerPtr[] { 0, 0, 0 }, /*read port A*/
+		new ReadHandlerPtr[] { 0, 0, 0 }, /*read port B*/
+		new WriteHandlerPtr[] { ay8910_portA_0_w, 0, 0 }, /*write port A*/
+		new WriteHandlerPtr[] { ay8910_portB_0_w, 0, 0 }  /*write port B*/
+	);
 	
 	
 	static MACHINE_DRIVER_START( magmax )
@@ -385,54 +393,54 @@ public class magmax
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( magmax )
-		ROM_REGION( 0x14000, REGION_CPU1, 0 ) /* 68000 (main) cpu code */
-		ROM_LOAD16_BYTE( "1.3b", 0x00001, 0x4000, CRC(33793cbb) SHA1(a0bc0e4be434d9fc8115de8d63c92e942334bc85) )
-		ROM_LOAD16_BYTE( "6.3d", 0x00000, 0x4000, CRC(677ef450) SHA1(9003ff1c1c455970c1bd036b0b5e44dae2e379a5) )
-		ROM_LOAD16_BYTE( "2.5b", 0x08001, 0x4000, CRC(1a0c84df) SHA1(77ff21de33392a148d7ca69a77acc654260af0db) )
-		ROM_LOAD16_BYTE( "7.5d", 0x08000, 0x4000, CRC(01c35e95) SHA1(4f1a0d0463a956d8f9ed425cbeaed6186eb130a5) )
-		ROM_LOAD16_BYTE( "3.6b", 0x10001, 0x2000, CRC(d06e6cae) SHA1(94047b2bcf030d34295ff8107f95097ce57efe6b) )
-		ROM_LOAD16_BYTE( "8.6d", 0x10000, 0x2000, CRC(790a82be) SHA1(9a25d5a7c87aeef5e736b0f2fb8dde1c9be70039) )
+	static RomLoadPtr rom_magmax = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x14000, REGION_CPU1, 0 );/* 68000 (main) cpu code */
+		ROM_LOAD16_BYTE( "1.3b", 0x00001, 0x4000, CRC(33793cbb);SHA1(a0bc0e4be434d9fc8115de8d63c92e942334bc85) )
+		ROM_LOAD16_BYTE( "6.3d", 0x00000, 0x4000, CRC(677ef450);SHA1(9003ff1c1c455970c1bd036b0b5e44dae2e379a5) )
+		ROM_LOAD16_BYTE( "2.5b", 0x08001, 0x4000, CRC(1a0c84df);SHA1(77ff21de33392a148d7ca69a77acc654260af0db) )
+		ROM_LOAD16_BYTE( "7.5d", 0x08000, 0x4000, CRC(01c35e95);SHA1(4f1a0d0463a956d8f9ed425cbeaed6186eb130a5) )
+		ROM_LOAD16_BYTE( "3.6b", 0x10001, 0x2000, CRC(d06e6cae);SHA1(94047b2bcf030d34295ff8107f95097ce57efe6b) )
+		ROM_LOAD16_BYTE( "8.6d", 0x10000, 0x2000, CRC(790a82be);SHA1(9a25d5a7c87aeef5e736b0f2fb8dde1c9be70039) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* Z80 (sound) cpu code */
-		ROM_LOAD( "15.17b", 0x00000, 0x2000, CRC(19e7b983) SHA1(b1cd0b728e7cce87d9b1039be179d0915d939a4f) )
-		ROM_LOAD( "16.18b", 0x02000, 0x2000, CRC(055e3126) SHA1(8c9b03eb7588512ef17f8c1b731a2fd7cf372bf8) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Z80 (sound) cpu code */
+		ROM_LOAD( "15.17b", 0x00000, 0x2000, CRC(19e7b983);SHA1(b1cd0b728e7cce87d9b1039be179d0915d939a4f) )
+		ROM_LOAD( "16.18b", 0x02000, 0x2000, CRC(055e3126);SHA1(8c9b03eb7588512ef17f8c1b731a2fd7cf372bf8) )
 	
-		ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE ) /* chars */
-		ROM_LOAD( "23.15g", 0x00000, 0x2000, CRC(a7471da2) SHA1(ec2815a5801bc55955e612173a845399fd493eb7) )
+		ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE );/* chars */
+		ROM_LOAD( "23.15g", 0x00000, 0x2000, CRC(a7471da2);SHA1(ec2815a5801bc55955e612173a845399fd493eb7) )
 	
-		ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE ) /* sprites */
-		ROM_LOAD( "17.3e",  0x00000, 0x2000, CRC(8e305b2e) SHA1(74c318089f6bebafbee31c22302e93a09d3ffa32) )
-		ROM_LOAD( "18.5e",  0x02000, 0x2000, CRC(14c55a60) SHA1(fd2a1b434bb65502f0f791995caf1cd869ccd254) )
-		ROM_LOAD( "19.6e",  0x04000, 0x2000, CRC(fa4141d8) SHA1(a5279d1ada5a13df14a8bbc18ceeea79f82a4c23) )
-		ROM_LOAD( "20.3g",  0x08000, 0x2000, CRC(6fa3918b) SHA1(658bdbdc581732922c986b07746a9601d86ec5a2) )
-		ROM_LOAD( "21.5g",  0x0a000, 0x2000, CRC(dd52eda4) SHA1(773e92c918f5b076ce3cae55a33a27c38d958edf) )
-		ROM_LOAD( "22.6g",  0x0c000, 0x2000, CRC(4afc98ff) SHA1(a34d63befdb3c749460d1cfb62e15ced52859b9b) )
+		ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE );/* sprites */
+		ROM_LOAD( "17.3e",  0x00000, 0x2000, CRC(8e305b2e);SHA1(74c318089f6bebafbee31c22302e93a09d3ffa32) )
+		ROM_LOAD( "18.5e",  0x02000, 0x2000, CRC(14c55a60);SHA1(fd2a1b434bb65502f0f791995caf1cd869ccd254) )
+		ROM_LOAD( "19.6e",  0x04000, 0x2000, CRC(fa4141d8);SHA1(a5279d1ada5a13df14a8bbc18ceeea79f82a4c23) )
+		ROM_LOAD( "20.3g",  0x08000, 0x2000, CRC(6fa3918b);SHA1(658bdbdc581732922c986b07746a9601d86ec5a2) )
+		ROM_LOAD( "21.5g",  0x0a000, 0x2000, CRC(dd52eda4);SHA1(773e92c918f5b076ce3cae55a33a27c38d958edf) )
+		ROM_LOAD( "22.6g",  0x0c000, 0x2000, CRC(4afc98ff);SHA1(a34d63befdb3c749460d1cfb62e15ced52859b9b) )
 	
-		ROM_REGION( 0x10000, REGION_USER1, 0 ) /* surface scroll control */
-		ROM_LOAD16_BYTE( "4.18b",  0x00000, 0x2000, CRC(1550942e) SHA1(436424d63ca576d13b0f4a3713f009a38e33f2f3) )
-		ROM_LOAD16_BYTE( "5.20b",  0x00001, 0x2000, CRC(3b93017f) SHA1(b1b67c2050c8033c29bb74ab909075c39e4f7c6a) )
+		ROM_REGION( 0x10000, REGION_USER1, 0 );/* surface scroll control */
+		ROM_LOAD16_BYTE( "4.18b",  0x00000, 0x2000, CRC(1550942e);SHA1(436424d63ca576d13b0f4a3713f009a38e33f2f3) )
+		ROM_LOAD16_BYTE( "5.20b",  0x00001, 0x2000, CRC(3b93017f);SHA1(b1b67c2050c8033c29bb74ab909075c39e4f7c6a) )
 		/* BG control data */
-		ROM_LOAD( "9.18d",  0x04000, 0x2000, CRC(9ecc9ab8) SHA1(ea5fbd9e9ce09e25f532dc74623e0f7e8464b7f3) ) /* surface */
-		ROM_LOAD( "10.20d", 0x06000, 0x2000, CRC(e2ff7293) SHA1(d93c30f7edac53747efcf840325a8ce5f5e47b32) ) /* underground */
+		ROM_LOAD( "9.18d",  0x04000, 0x2000, CRC(9ecc9ab8);SHA1(ea5fbd9e9ce09e25f532dc74623e0f7e8464b7f3) ) /* surface */
+		ROM_LOAD( "10.20d", 0x06000, 0x2000, CRC(e2ff7293);SHA1(d93c30f7edac53747efcf840325a8ce5f5e47b32) ) /* underground */
 		/* background tiles */
-		ROM_LOAD( "11.15f", 0x08000, 0x2000, CRC(91f3edb6) SHA1(64e8008cad0e9c42c2ee972c2ee867c7c51cae27) ) /* surface */
-		ROM_LOAD( "12.17f", 0x0a000, 0x2000, CRC(99771eff) SHA1(5a1e2316b4055a1332d9d1f02edee5bc6aae90ac) ) /* underground */
-		ROM_LOAD( "13.18f", 0x0c000, 0x2000, CRC(75f30159) SHA1(d188ccf926e7a842e90ebc1aad3dc20c37d84b98) ) /* surface of mechanical level */
-		ROM_LOAD( "14.20f", 0x0e000, 0x2000, CRC(96babcba) SHA1(fec58ccc1e5cc2cec56658a412b94fe7b989541d) ) /* underground of mechanical level */
+		ROM_LOAD( "11.15f", 0x08000, 0x2000, CRC(91f3edb6);SHA1(64e8008cad0e9c42c2ee972c2ee867c7c51cae27) ) /* surface */
+		ROM_LOAD( "12.17f", 0x0a000, 0x2000, CRC(99771eff);SHA1(5a1e2316b4055a1332d9d1f02edee5bc6aae90ac) ) /* underground */
+		ROM_LOAD( "13.18f", 0x0c000, 0x2000, CRC(75f30159);SHA1(d188ccf926e7a842e90ebc1aad3dc20c37d84b98) ) /* surface of mechanical level */
+		ROM_LOAD( "14.20f", 0x0e000, 0x2000, CRC(96babcba);SHA1(fec58ccc1e5cc2cec56658a412b94fe7b989541d) ) /* underground of mechanical level */
 	
-		ROM_REGION( 0x0200, REGION_USER2, 0 ) /* BG control data */
-		ROM_LOAD( "mag_b.14d",  0x0000, 0x0100, CRC(a0fb7297) SHA1(e6461050e7e586475343156aae1066b944ceab66) ) /* background control PROM */
-		ROM_LOAD( "mag_c.15d",  0x0100, 0x0100, CRC(d84a6f78) SHA1(f2ce329b1adf39bde6df2eb79be6d144adea65d0) ) /* background control PROM */
+		ROM_REGION( 0x0200, REGION_USER2, 0 );/* BG control data */
+		ROM_LOAD( "mag_b.14d",  0x0000, 0x0100, CRC(a0fb7297);SHA1(e6461050e7e586475343156aae1066b944ceab66) ) /* background control PROM */
+		ROM_LOAD( "mag_c.15d",  0x0100, 0x0100, CRC(d84a6f78);SHA1(f2ce329b1adf39bde6df2eb79be6d144adea65d0) ) /* background control PROM */
 	
-		ROM_REGION( 0x0500, REGION_PROMS, 0 ) /* color PROMs */
-		ROM_LOAD( "mag_e.10f",  0x0000, 0x0100, CRC(75e4f06a) SHA1(cdaccc3e56df4ac9ace04b93b3bab9a62f1ea6f5) ) /* red */
-		ROM_LOAD( "mag_d.10e",  0x0100, 0x0100, CRC(34b6a6e3) SHA1(af254ccf0d38e1f4644375cd357d468ad4efe450) ) /* green */
-		ROM_LOAD( "mag_a.10d",  0x0200, 0x0100, CRC(a7ea7718) SHA1(4789586d6795644517a18f179b4ae5f23737b21d) ) /* blue */
-		ROM_LOAD( "mag_g.2e",   0x0300, 0x0100, CRC(830be358) SHA1(f412587718040a783c4e6453619930c90daf385e) ) /* sprites color lookup table */
-		ROM_LOAD( "mag_f.13b",  0x0400, 0x0100, CRC(4a6f9a6d) SHA1(65f1e0bfacd1f354ece1b18598a551044c27c4d1) ) /* state machine data used for video signals generation (not used in emulation)*/
-	ROM_END
+		ROM_REGION( 0x0500, REGION_PROMS, 0 );/* color PROMs */
+		ROM_LOAD( "mag_e.10f",  0x0000, 0x0100, CRC(75e4f06a);SHA1(cdaccc3e56df4ac9ace04b93b3bab9a62f1ea6f5) ) /* red */
+		ROM_LOAD( "mag_d.10e",  0x0100, 0x0100, CRC(34b6a6e3);SHA1(af254ccf0d38e1f4644375cd357d468ad4efe450) ) /* green */
+		ROM_LOAD( "mag_a.10d",  0x0200, 0x0100, CRC(a7ea7718);SHA1(4789586d6795644517a18f179b4ae5f23737b21d) ) /* blue */
+		ROM_LOAD( "mag_g.2e",   0x0300, 0x0100, CRC(830be358);SHA1(f412587718040a783c4e6453619930c90daf385e) ) /* sprites color lookup table */
+		ROM_LOAD( "mag_f.13b",  0x0400, 0x0100, CRC(4a6f9a6d);SHA1(65f1e0bfacd1f354ece1b18598a551044c27c4d1) ) /* state machine data used for video signals generation (not used in emulation)*/
+	ROM_END(); }}; 
 	
 	
-	GAME( 1985, magmax, 0, magmax, magmax, 0, ROT0, "Nichibutsu", "Mag Max" )
+	public static GameDriver driver_magmax	   = new GameDriver("1985"	,"magmax"	,"magmax.java"	,rom_magmax,null	,machine_driver_magmax	,input_ports_magmax	,null	,ROT0	,	"Nichibutsu", "Mag Max" )
 }

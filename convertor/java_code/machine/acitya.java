@@ -21,7 +21,6 @@ package machine;
 public class acitya
 {
 	
-	void machine_init_pacman(void);
 	
 	static int counter=0;
 	
@@ -164,7 +163,7 @@ public class acitya
 	}
 	
 	
-	READ_HANDLER( acitya_decrypt_rom )
+	public static ReadHandlerPtr acitya_decrypt_rom  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		unsigned char *RAM = memory_region(REGION_CPU1);
 	
@@ -191,7 +190,7 @@ public class acitya
 		}
 	
 		return 0;
-	}
+	} };
 	
 	
 	MACHINE_INIT( acitya )

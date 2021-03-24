@@ -146,7 +146,7 @@ public class atarigt
 	
 		/* initialize the playfield */
 		atarigen_playfield_tilemap = tilemap_create(get_playfield_tile_info, atarigt_playfield_scan, TILEMAP_OPAQUE, 8,8, 128,64);
-		if (!atarigen_playfield_tilemap)
+		if (atarigen_playfield_tilemap == 0)
 			return 1;
 	
 		/* initialize the motion objects */
@@ -155,7 +155,7 @@ public class atarigt
 	
 		/* initialize the alphanumerics */
 		atarigen_alpha_tilemap = tilemap_create(get_alpha_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 8,8, 64,32);
-		if (!atarigen_alpha_tilemap)
+		if (atarigen_alpha_tilemap == 0)
 			return 1;
 	
 		/* allocate temp bitmaps */

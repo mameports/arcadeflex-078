@@ -90,14 +90,14 @@ public class megazone
 			COLOR(0,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( megazone_flipscreen_w )
+	public static WriteHandlerPtr megazone_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	VIDEO_START( megazone )
 	{
@@ -139,8 +139,8 @@ public class megazone
 	
 				sx = offs % 32;
 				sy = offs / 32;
-				flipx = colorram[offs] & (1<<6);
-				flipy = colorram[offs] & (1<<5);
+				flipx = colorram.read(offs)& (1<<6);
+				flipy = colorram.read(offs)& (1<<5);
 				if (flipscreen)
 				{
 					sx = 31 - sx;
@@ -150,8 +150,8 @@ public class megazone
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						((int)videoram[offs]) + ((colorram[offs] & (1<<7) ? 256 : 0) ),
-						(colorram[offs] & 0x0f) + 0x10,
+						((int)videoram.read(offs)) + ((colorram.read(offs)& (1<<7) ? 256 : 0) ),
+						(colorram.read(offs)& 0x0f) + 0x10,
 						flipx,flipy,
 						8*sx,8*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -186,17 +186,17 @@ public class megazone
 				int sx,sy,flipx,flipy;
 	
 	
-				sx = spriteram[offs + 3];
+				sx = spriteram.read(offs + 3);
 				if (flipscreen) sx-=11; else sx+=4*8;   	  // Sprite y-position correction depending on screen flip
-				sy = 255-((spriteram[offs + 1]+16)&0xff);
+				sy = 255-((spriteram.read(offs + 1)+16)&0xff);
 				if (flipscreen) sy+=2; 			  	  // Sprite x-position correction depending on screen flip
 	
-				flipx = ~spriteram[offs+0] & 0x40;
-				flipy = spriteram[offs+0] & 0x80;
+				flipx = ~spriteram.read(offs+0)& 0x40;
+				flipy = spriteram.read(offs+0)& 0x80;
 	
 				drawgfx(bitmap,Machine->gfx[1],
-						spriteram[offs + 2],
-						spriteram[offs + 0] & 0x0f,
+						spriteram.read(offs + 2),
+						spriteram.read(offs + 0)& 0x0f,
 						flipx,flipy,
 						sx,sy,
 						&Machine->visible_area,TRANSPARENCY_COLOR,0);

@@ -93,7 +93,7 @@ public class gyruss
 	{
 		sprite_mux_buffer = auto_malloc(256 * spriteram_size);
 	
-		if (!sprite_mux_buffer)
+		if (sprite_mux_buffer == 0)
 			return 1;
 	
 		return video_start_generic();
@@ -101,22 +101,22 @@ public class gyruss
 	
 	
 	
-	WRITE_HANDLER( gyruss_flipscreen_w )
+	public static WriteHandlerPtr gyruss_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
 	/* Return the current video scan line */
-	READ_HANDLER( gyruss_scanline_r )
+	public static ReadHandlerPtr gyruss_scanline_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return scanline;
-	}
+	} };
 	
 	
 	
@@ -183,8 +183,8 @@ public class gyruss
 	
 				sx = offs % 32;
 				sy = offs / 32;
-				flipx = colorram[offs] & 0x40;
-				flipy = colorram[offs] & 0x80;
+				flipx = colorram.read(offs)& 0x40;
+				flipy = colorram.read(offs)& 0x80;
 				if (flipscreen)
 				{
 					sx = 31 - sx;
@@ -194,8 +194,8 @@ public class gyruss
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs] + 8 * (colorram[offs] & 0x20),
-						colorram[offs] & 0x0f,
+						videoram.read(offs)+ 8 * (colorram.read(offs)& 0x20),
+						colorram.read(offs)& 0x0f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -218,8 +218,8 @@ public class gyruss
 	
 			sx = offs % 32;
 			sy = offs / 32;
-			flipx = colorram[offs] & 0x40;
-			flipy = colorram[offs] & 0x80;
+			flipx = colorram.read(offs)& 0x40;
+			flipy = colorram.read(offs)& 0x80;
 			if (flipscreen)
 			{
 				sx = 31 - sx;
@@ -228,10 +228,10 @@ public class gyruss
 				flipy = !flipy;
 			}
 	
-			if ((colorram[offs] & 0x10) != 0)
+			if ((colorram.read(offs)& 0x10) != 0)
 				drawgfx(bitmap,Machine->gfx[0],
-						videoram[offs] + 8 * (colorram[offs] & 0x20),
-						colorram[offs] & 0x0f,
+						videoram.read(offs)+ 8 * (colorram.read(offs)& 0x20),
+						colorram.read(offs)& 0x0f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);

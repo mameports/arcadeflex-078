@@ -317,43 +317,43 @@ public class commonH
 	***************************************************************************/
 	
 	/* ----- start/stop macros ----- */
-	#define ROM_START(name)								static const struct RomModule rom_##name[] = {
-	#define ROM_END                                      { ROMENTRY_END, 0, 0, 0, NULL } };
+	#define static RomLoadPtr rom_name = new RomLoadPtr(){ public void handler(){ 								static const struct RomModule rom_##name[] = {
+	#define ROM_END(); }};                                       { ROMENTRY_END, 0, 0, 0, NULL } };
 	
 	/* ----- ROM region macros ----- */
-	#define ROM_REGION(length,type,flags)                { ROMENTRY_REGION, 0, length, flags, (const char*)type },
-	#define ROM_REGION16_LE(length,type,flags)			ROM_REGION(length, type, (flags) | ROMREGION_16BIT | ROMREGION_LE)
-	#define ROM_REGION16_BE(length,type,flags)			ROM_REGION(length, type, (flags) | ROMREGION_16BIT | ROMREGION_BE)
-	#define ROM_REGION32_LE(length,type,flags)			ROM_REGION(length, type, (flags) | ROMREGION_32BIT | ROMREGION_LE)
-	#define ROM_REGION32_BE(length,type,flags)			ROM_REGION(length, type, (flags) | ROMREGION_32BIT | ROMREGION_BE)
+	#define ROM_REGION(length,type,flags);               { ROMENTRY_REGION, 0, length, flags, (const char*)type },
+	#define ROM_REGION16_LE(length,type,flags);		ROM_REGION(length, type, (flags);| ROMREGION_16BIT | ROMREGION_LE)
+	#define ROM_REGION16_BE(length,type,flags);		ROM_REGION(length, type, (flags);| ROMREGION_16BIT | ROMREGION_BE)
+	#define ROM_REGION32_LE(length,type,flags);		ROM_REGION(length, type, (flags);| ROMREGION_32BIT | ROMREGION_LE)
+	#define ROM_REGION32_BE(length,type,flags);		ROM_REGION(length, type, (flags);| ROMREGION_32BIT | ROMREGION_BE)
 	
 	/* ----- core ROM loading macros ----- */
 	#define ROMMD5_LOAD(name,offset,length,hash,flags)   { name, offset, length, flags, hash },
 	#define ROMX_LOAD(name,offset,length,hash,flags)     { name, offset, length, flags, hash },
-	#define ROM_LOAD(name,offset,length,hash)            ROMX_LOAD(name, offset, length, hash, 0)
+	#define ROM_LOAD(name,offset,length,hash);           ROMX_LOAD(name, offset, length, hash, 0)
 	#define ROM_LOAD_OPTIONAL(name,offset,length,hash)   ROMX_LOAD(name, offset, length, hash, ROM_OPTIONAL)
-	#define ROM_CONTINUE(offset,length)					ROMX_LOAD(ROMENTRY_CONTINUE, offset, length, 0, ROM_INHERITFLAGS)
-	#define ROM_RELOAD(offset,length)					ROMX_LOAD(ROMENTRY_RELOAD, offset, length, 0, ROM_INHERITFLAGS)
-	#define ROM_FILL(offset,length,value)                ROM_LOAD(ROMENTRY_FILL, offset, length, (const char*)value)
-	#define ROM_COPY(rgn,srcoffset,offset,length)        ROMX_LOAD(ROMENTRY_COPY, offset, length, (const char*)srcoffset, (rgn) << 24)
+	#define ROM_CONTINUE(offset,length);				ROMX_LOAD(ROMENTRY_CONTINUE, offset, length, 0, ROM_INHERITFLAGS)
+	#define ROM_RELOAD(offset,length);				ROMX_LOAD(ROMENTRY_RELOAD, offset, length, 0, ROM_INHERITFLAGS)
+	#define ROM_FILL(offset,length,value);               ROM_LOAD(ROMENTRY_FILL, offset, length, (const char*);alue)
+	#define ROM_COPY(rgn,srcoffset,offset,length);       ROMX_LOAD(ROMENTRY_COPY, offset, length, (const char*)srcoffset, (rgn) << 24)
 	
 	/* ----- nibble loading macros ----- */
-	#define ROM_LOAD_NIB_HIGH(name,offset,length,hash)   ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_HI)
-	#define ROM_LOAD_NIB_LOW(name,offset,length,hash)    ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_LO)
+	#define ROM_LOAD_NIB_HIGH(name,offset,length,hash);  ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_HI)
+	#define ROM_LOAD_NIB_LOW(name,offset,length,hash);   ROMX_LOAD(name, offset, length, hash, ROM_NIBBLE | ROM_SHIFT_NIBBLE_LO)
 	
 	/* ----- new-style 16-bit loading macros ----- */
-	#define ROM_LOAD16_BYTE(name,offset,length,hash)     ROMX_LOAD(name, offset, length, hash, ROM_SKIP(1))
-	#define ROM_LOAD16_WORD(name,offset,length,hash)     ROM_LOAD(name, offset, length, hash)
+	#define ROM_LOAD16_BYTE(name,offset,length,hash);    ROMX_LOAD(name, offset, length, hash, ROM_SKIP(1))
+	#define ROM_LOAD16_WORD(name,offset,length,hash);    ROM_LOAD(name, offset, length, hash);
 	#define ROM_LOAD16_WORD_SWAP(name,offset,length,hash)ROMX_LOAD(name, offset, length, hash, ROM_GROUPWORD | ROM_REVERSE)
 	
 	/* ----- new-style 32-bit loading macros ----- */
-	#define ROM_LOAD32_BYTE(name,offset,length,hash)     ROMX_LOAD(name, offset, length, hash, ROM_SKIP(3))
-	#define ROM_LOAD32_WORD(name,offset,length,hash)     ROMX_LOAD(name, offset, length, hash, ROM_GROUPWORD | ROM_SKIP(2))
-	#define ROM_LOAD32_WORD_SWAP(name,offset,length,hash)ROMX_LOAD(name, offset, length, hash, ROM_GROUPWORD | ROM_REVERSE | ROM_SKIP(2))
+	#define ROM_LOAD32_BYTE(name,offset,length,hash);    ROMX_LOAD(name, offset, length, hash, ROM_SKIP(3))
+	#define ROM_LOAD32_WORD(name,offset,length,hash);    ROMX_LOAD(name, offset, length, hash, ROM_GROUPWORD | ROM_SKIP(2))
+	#define ROM_LOAD32_WORD_SWAP(name,offset,length,hash);OMX_LOAD(name, offset, length, hash, ROM_GROUPWORD | ROM_REVERSE | ROM_SKIP(2))
 	#define ROM_LOAD32_DWORD(name,offset,length,hash)    ROMX_LOAD(name, offset, length, hash, ROM_GROUPDWORD)
 	
 	/* ----- disk loading macros ----- */
-	#define DISK_REGION(type)							ROM_REGION(1, type, ROMREGION_DATATYPEDISK)
+	#define DISK_REGION(type)							ROM_REGION(1, type, ROMREGION_DATATYPEDISK);
 	#define DISK_IMAGE(name,idx,hash)                    ROMMD5_LOAD(name, idx, 0, hash, DISK_READWRITE)
 	#define DISK_IMAGE_READONLY(name,idx,hash)           ROMMD5_LOAD(name, idx, 0, hash, DISK_READONLY)
 	
@@ -391,7 +391,6 @@ public class commonH
 	
 	***************************************************************************/
 	
-	void showdisclaimer(void);
 	
 	/* helper function that reads samples from disk - this can be used by other */
 	/* drivers as well (e.g. a sound chip emulator needing drum samples) */
@@ -417,8 +416,6 @@ public class commonH
 	/* generic NVRAM handler */
 	extern size_t generic_nvram_size;
 	extern data8_t *generic_nvram;
-	extern void nvram_handler_generic_0fill(mame_file *file, int read_or_write);
-	extern void nvram_handler_generic_1fill(mame_file *file, int read_or_write);
 	
 	/* bitmap allocation */
 	struct mame_bitmap *bitmap_alloc(int width,int height);
@@ -426,12 +423,9 @@ public class commonH
 	void bitmap_free(struct mame_bitmap *bitmap);
 	
 	/* automatic resource management */
-	void begin_resource_tracking(void);
-	void end_resource_tracking(void);
 	INLINE int get_resource_tag(void)
 	{
-		extern int resource_tracking_tag;
-		return resource_tracking_tag;
+			return resource_tracking_tag;
 	}
 	
 	/* automatically-freeing memory */

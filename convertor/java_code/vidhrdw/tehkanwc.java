@@ -26,61 +26,61 @@ public class tehkanwc
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( tehkanwc_videoram_w )
+	public static WriteHandlerPtr tehkanwc_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_colorram_w )
+	public static WriteHandlerPtr tehkanwc_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_videoram2_w )
+	public static WriteHandlerPtr tehkanwc_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tehkanwc_videoram2[offset] != data)
 		{
 			tehkanwc_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_scroll_x_w )
+	public static WriteHandlerPtr tehkanwc_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_x[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_scroll_y_w )
+	public static WriteHandlerPtr tehkanwc_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_flipscreen_x_w )
+	public static WriteHandlerPtr tehkanwc_flipscreen_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_x_set(data & 0x40);
-	}
+	} };
 	
-	WRITE_HANDLER( tehkanwc_flipscreen_y_w )
+	public static WriteHandlerPtr tehkanwc_flipscreen_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_y_set(data & 0x40);
-	}
+	} };
 	
-	WRITE_HANDLER( gridiron_led0_w )
+	public static WriteHandlerPtr gridiron_led0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		led0 = data;
-	}
-	WRITE_HANDLER( gridiron_led1_w )
+	} };
+	public static WriteHandlerPtr gridiron_led1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		led1 = data;
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -95,8 +95,8 @@ public class tehkanwc
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0x10) << 4);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0x10) << 4);
 		int color = attr & 0x0f;
 		int flags = ((attr & 0x40) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0);
 	
@@ -110,13 +110,13 @@ public class tehkanwc
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 16, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -185,13 +185,13 @@ public class tehkanwc
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			int attr = spriteram[offs + 1];
-			int code = spriteram[offs] + ((attr & 0x08) << 5);
+			int attr = spriteram.read(offs + 1);
+			int code = spriteram.read(offs)+ ((attr & 0x08) << 5);
 			int color = attr & 0x07;
 			int flipx = attr & 0x40;
 			int flipy = attr & 0x80;
-			int sx = spriteram[offs + 2] + ((attr & 0x20) << 3) - 128;
-			int sy = spriteram[offs + 3];
+			int sx = spriteram.read(offs + 2)+ ((attr & 0x20) << 3) - 128;
+			int sy = spriteram.read(offs + 3);
 	
 			if (flip_screen_x)
 			{

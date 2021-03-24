@@ -72,19 +72,19 @@ public class tankbatt
 		}
 	}
 	
-	WRITE_HANDLER( tankbatt_videoram_w )
+	public static WriteHandlerPtr tankbatt_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = videoram[tile_index] >> 2;
+		int code = videoram.read(tile_index);
+		int color = videoram.read(tile_index)>> 2;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -94,7 +94,7 @@ public class tankbatt
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;

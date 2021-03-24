@@ -80,38 +80,38 @@ public class hyperspt
 			COLOR(0,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( hyperspt_videoram_w )
+	public static WriteHandlerPtr hyperspt_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( hyperspt_colorram_w )
+	public static WriteHandlerPtr hyperspt_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( hyperspt_flipscreen_w )
+	public static WriteHandlerPtr hyperspt_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 0x80) << 1) + ((colorram[tile_index] & 0x40) << 3);
-		int color = colorram[tile_index] & 0x0f;
-		int flags = ((colorram[tile_index] & 0x10) ? TILE_FLIPX : 0) | ((colorram[tile_index] & 0x20) ? TILE_FLIPY : 0);
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x80) << 1) + ((colorram.read(tile_index)& 0x40) << 3);
+		int color = colorram.read(tile_index)& 0x0f;
+		int flags = ((colorram.read(tile_index)& 0x10) ? TILE_FLIPX : 0) | ((colorram.read(tile_index)& 0x20) ? TILE_FLIPY : 0);
 	
 		SET_TILE_INFO(0, code, color, flags)
 	}
@@ -121,7 +121,7 @@ public class hyperspt
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -135,10 +135,10 @@ public class hyperspt
 	
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			int sx = spriteram[offs + 3];
-			int sy = 240 - spriteram[offs + 1];
-			int flipx = ~spriteram[offs] & 0x40;
-			int flipy = spriteram[offs] & 0x80;
+			int sx = spriteram.read(offs + 3);
+			int sy = 240 - spriteram.read(offs + 1);
+			int flipx = ~spriteram.read(offs)& 0x40;
+			int flipy = spriteram.read(offs)& 0x80;
 	
 			if (flip_screen)
 			{
@@ -152,8 +152,8 @@ public class hyperspt
 			sy += 1;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-				spriteram[offs + 2] + 8 * (spriteram[offs] & 0x20),
-				spriteram[offs] & 0x0f,
+				spriteram.read(offs + 2)+ 8 * (spriteram.read(offs)& 0x20),
+				spriteram.read(offs)& 0x0f,
 				flipx, flipy,
 				sx, sy,
 				&Machine->visible_area,
@@ -162,8 +162,8 @@ public class hyperspt
 			/* redraw with wraparound */
 	
 			drawgfx(bitmap,Machine->gfx[1],
-				spriteram[offs + 2] + 8 * (spriteram[offs] & 0x20),
-				spriteram[offs] & 0x0f,
+				spriteram.read(offs + 2)+ 8 * (spriteram.read(offs)& 0x20),
+				spriteram.read(offs)& 0x0f,
 				flipx, flipy,
 				sx - 256, sy,
 				&Machine->visible_area,
@@ -190,9 +190,9 @@ public class hyperspt
 	
 	static void roadf_get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 0x80) << 1) + ((colorram[tile_index] & 0x60) << 4);
-		int color = colorram[tile_index] & 0x0f;
-		int flags = (colorram[tile_index] & 0x10) ? TILE_FLIPX : 0;
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x80) << 1) + ((colorram.read(tile_index)& 0x60) << 4);
+		int color = colorram.read(tile_index)& 0x0f;
+		int flags = (colorram.read(tile_index)& 0x10) ? TILE_FLIPX : 0;
 	
 		SET_TILE_INFO(0, code, color, flags)
 	}
@@ -202,7 +202,7 @@ public class hyperspt
 		bg_tilemap = tilemap_create(roadf_get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);

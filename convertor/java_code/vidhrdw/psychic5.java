@@ -45,20 +45,20 @@ public class psychic5
 		flip_screen_set(0);
 	}
 	
-	WRITE_HANDLER( psychic5_vram_page_select_w )
+	public static WriteHandlerPtr psychic5_vram_page_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ps5_vram_page = data;
-	}
+	} };
 	
-	READ_HANDLER( psychic5_vram_page_select_r )
+	public static ReadHandlerPtr psychic5_vram_page_select_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ps5_vram_page;
-	}
+	} };
 	
-	WRITE_HANDLER( psychic5_title_screen_w )
+	public static WriteHandlerPtr psychic5_title_screen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		title_screen = data & 0x01;
-	}
+	} };
 	
 	void psychic5_paletteram_w(int color_offs, int offset, int data)
 	{
@@ -153,7 +153,7 @@ public class psychic5
 	
 				/* background intensity enable  TO DO BETTER !!! */
 	
-				if (!title_screen)
+				if (title_screen == 0)
 				{
 					r = (r>>4) * ir;
 		 		  	g = (g>>4) * ig;
@@ -165,29 +165,29 @@ public class psychic5
 	}
 	
 	
-	WRITE_HANDLER( psychic5_bg_videoram_w )
+	public static WriteHandlerPtr psychic5_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (psychic5_bg_videoram[offset] != data)
 		{
 			psychic5_bg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( psychic5_fg_videoram_w )
+	public static WriteHandlerPtr psychic5_fg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (psychic5_fg_videoram[offset] != data)
 		{
 			psychic5_fg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	READ_HANDLER( psychic5_paged_ram_r )
+	public static ReadHandlerPtr psychic5_paged_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int val;
 	
-		if (!ps5_vram_page)
+		if (ps5_vram_page == 0)
 		{
 			if (offset < 0x1000)
 				return psychic5_bg_videoram[offset];
@@ -231,11 +231,11 @@ public class psychic5
 			}
 		}
 		return 0;
-	}
+	} };
 	
-	WRITE_HANDLER( psychic5_paged_ram_w )
+	public static WriteHandlerPtr psychic5_paged_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (!ps5_vram_page)
+		if (ps5_vram_page == 0)
 		{
 			if (offset < 0x1000)
 				psychic5_bg_videoram_w(offset,data);
@@ -273,7 +273,7 @@ public class psychic5
 				psychic5_fg_videoram_w(offset & 0xfff, data);
 			}
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
@@ -323,13 +323,13 @@ public class psychic5
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols, 
 			TILEMAP_OPAQUE, 16, 16, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_cols, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 15);
@@ -351,13 +351,13 @@ public class psychic5
 		for (offs = 11; offs < spriteram_size; offs += 16)
 		{
 			int tileofs0, tileofs1, tileofs2, tileofs3, temp1, temp2;
-			int attr = spriteram[offs + 2];
-			int code = spriteram[offs + 3] + ((attr & 0xc0) << 2);
-			int color = spriteram[offs + 4] & 0x0f;
+			int attr = spriteram.read(offs + 2);
+			int code = spriteram.read(offs + 3)+ ((attr & 0xc0) << 2);
+			int color = spriteram.read(offs + 4)& 0x0f;
 			int flipx = attr & 0x10;
 			int flipy = attr & 0x20;
-			int sx = spriteram[offs + 1];
-			int sy = spriteram[offs];
+			int sx = spriteram.read(offs + 1);
+			int sy = spriteram.read(offs);
 			int size32 = attr & 0x08;
 	
 			if (attr & 0x01) sx -= 256;
@@ -423,10 +423,10 @@ public class psychic5
 			{
 				struct rectangle clip = *cliprect;
 	
-				int sx1 = spriteram[12];		/* sprite 0 */
-				int sy1 = spriteram[11];
-				int tile = spriteram[14];
-				int sy2 = spriteram[11+128];	/* sprite 8 */
+				int sx1 = spriteram.read(12);		/* sprite 0 */
+				int sy1 = spriteram.read(11);
+				int tile = spriteram.read(14);
+				int sy2 = spriteram.read(11+128);	/* sprite 8 */
 	
 				if (bg_clip_mode >=0 && bg_clip_mode < 3 && sy1==240) bg_clip_mode = 0;
 				if (bg_clip_mode > 2 && bg_clip_mode < 5 && sy2==240) bg_clip_mode = -10;

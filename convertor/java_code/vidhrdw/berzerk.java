@@ -62,13 +62,13 @@ public class berzerk
 	}
 	
 	
-	WRITE_HANDLER( berzerk_videoram_w )
+	public static WriteHandlerPtr berzerk_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		offs_t coloroffset;
 		UINT8 x, y;
 	
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		/* Get location of color RAM for this offset */
 		coloroffset = ((offset & 0xff80) >> 2) | (offset & 0x1f);
@@ -76,17 +76,17 @@ public class berzerk
 		y = offset >> 5;
 		x = offset << 3;
 	
-	    copy_byte(x, y, data, colorram[coloroffset]);
-	}
+	    copy_byte(x, y, data, colorram.read(coloroffset));
+	} };
 	
 	
-	WRITE_HANDLER( berzerk_colorram_w )
+	public static WriteHandlerPtr berzerk_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		UINT8 x, y;
 	
 	
-		colorram[offset] = data;
+		colorram.write(offset,data);
 	
 		/* Need to change the affected pixels' colors */
 	
@@ -95,14 +95,14 @@ public class berzerk
 	
 		for (i = 0; i < 4; i++, y++)
 		{
-			data8_t byte = videoram[(y << 5) | (x >> 3)];
+			data8_t byte = videoram.read((y << 5) | (x >> 3));
 	
 			copy_byte(x, y, byte, data);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( berzerk_magicram_w )
+	public static WriteHandlerPtr berzerk_magicram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data16_t data2;
 		data8_t data3;
@@ -131,45 +131,45 @@ public class berzerk
 	
 	
 		/* Check for collision */
-		collision |= ((data3 & videoram[offset]) ? 0x80 : 0);
+		collision |= ((data3 & videoram.read(offset)) ? 0x80 : 0);
 	
 	
 		switch (magicram_control & 0xf0)
 		{
 		case 0x00: 										 break;	/* No change */
-		case 0x10: data3 |=  videoram[offset]; 			 break;
-		case 0x20: data3 |= ~videoram[offset]; 			 break;
+		case 0x10: data3 |=  videoram.read(offset); 			 break;
+		case 0x20: data3 |= ~videoram.read(offset); 			 break;
 		case 0x30: data3  = 0xff;  						 break;
-		case 0x40: data3 &=  videoram[offset]; 			 break;
-		case 0x50: data3  =  videoram[offset]; 			 break;
-		case 0x60: data3  = ~(data3 ^ videoram[offset]); break;
-		case 0x70: data3  = ~data3 | videoram[offset]; 	 break;
-		case 0x80: data3 &= ~videoram[offset];			 break;
-		case 0x90: data3 ^=  videoram[offset];			 break;
-		case 0xa0: data3  = ~videoram[offset];			 break;
-		case 0xb0: data3  = ~(data3 & videoram[offset]); break;
+		case 0x40: data3 &=  videoram.read(offset); 			 break;
+		case 0x50: data3  =  videoram.read(offset); 			 break;
+		case 0x60: data3  = ~(data3 ^ videoram.read(offset)); break;
+		case 0x70: data3  = ~data3 | videoram.read(offset); 	 break;
+		case 0x80: data3 &= ~videoram.read(offset);			 break;
+		case 0x90: data3 ^=  videoram.read(offset);			 break;
+		case 0xa0: data3  = ~videoram.read(offset);			 break;
+		case 0xb0: data3  = ~(data3 & videoram.read(offset)); break;
 		case 0xc0: data3  = 0x00; 						 break;
-		case 0xd0: data3  = ~data3 & videoram[offset]; 	 break;
-		case 0xe0: data3  = ~(data3 | videoram[offset]); break;
+		case 0xd0: data3  = ~data3 & videoram.read(offset); 	 break;
+		case 0xe0: data3  = ~(data3 | videoram.read(offset)); break;
 		case 0xf0: data3  = ~data3; 					 break;
 		}
 	
 		berzerk_magicram[offset] = data3;
 	
 		berzerk_videoram_w(offset, data3);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( berzerk_magicram_control_w )
+	public static WriteHandlerPtr berzerk_magicram_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		magicram_control = data;
 		magicram_latch = 0;
 		collision = 0;
-	}
+	} };
 	
 	
-	READ_HANDLER( berzerk_port_4e_r )
+	public static ReadHandlerPtr berzerk_port_4e_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return input_port_3_r(0) | collision;
-	}
+	} };
 }

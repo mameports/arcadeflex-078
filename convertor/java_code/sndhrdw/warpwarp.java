@@ -38,7 +38,7 @@ public class warpwarp
 			sound_volume = 0;
 	}
 	
-	WRITE_HANDLER( warpwarp_sound_w )
+	public static WriteHandlerPtr warpwarp_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		stream_update(channel,0);
 		sound_latch = data;
@@ -71,13 +71,13 @@ public class warpwarp
 	//		timer_adjust(sound_volume_timer, TIME_IN_HZ(32768/7.0290), 0, TIME_IN_HZ(32768/7.0290));
 			timer_adjust(sound_volume_timer, TIME_IN_HZ(32768/1.917), 0, TIME_IN_HZ(32768/1.917));
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( warpwarp_music1_w )
+	public static WriteHandlerPtr warpwarp_music1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    stream_update(channel,0);
 		music1_latch = data & 63;
-	}
+	} };
 	
 	static void music_volume_decay(int param)
 	{
@@ -85,7 +85,7 @@ public class warpwarp
 	        music_volume = 0;
 	}
 	
-	WRITE_HANDLER( warpwarp_music2_w )
+	public static WriteHandlerPtr warpwarp_music2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    stream_update(channel,0);
 		music2_latch = data;
@@ -117,7 +117,7 @@ public class warpwarp
 			timer_adjust(music_volume_timer, TIME_IN_HZ(32768/3.0033), 0, TIME_IN_HZ(32768/3.0033));
 		}
 	
-	}
+	} };
 	
 	static void warpwarp_sound_update(int param, INT16 *buffer, int length)
 	{
@@ -208,7 +208,7 @@ public class warpwarp
 		int i;
 	
 		decay = (INT16 *) auto_malloc(32768 * sizeof(INT16));
-		if( !decay )
+		if (decay == 0)
 			return 1;
 	
 	    for( i = 0; i < 0x8000; i++ )

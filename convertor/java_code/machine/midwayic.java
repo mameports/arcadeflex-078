@@ -320,8 +320,7 @@ public class midwayic
 						pic.index = 0;
 	#ifdef MAME_DEBUG
 	{
-		extern int debug_key_pressed;
-		debug_key_pressed = 1;
+			debug_key_pressed = 1;
 	}
 	#endif
 					}
@@ -465,8 +464,7 @@ public class midwayic
 	static void ioasic_fifo_reset_w(int state);
 	static void ioasic_input_empty(int state);
 	static void ioasic_output_full(int state);
-	static void update_ioasic_irq(void);
-	static void cage_irq_handler(int state);
+	static static void cage_irq_handler(int state);
 	
 	void midway_ioasic_init(int shuffle, int upper, int yearoffs, void (*irq_callback)(int))
 	{

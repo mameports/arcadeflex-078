@@ -47,28 +47,28 @@ public class superpac
 		{
 			int bit0, bit1, bit2, r, g, b;
 	
-			bit0 = (color_prom[31-i] >> 0) & 0x01;
-			bit1 = (color_prom[31-i] >> 1) & 0x01;
-			bit2 = (color_prom[31-i] >> 2) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 0) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 1) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[31-i] >> 3) & 0x01;
-			bit1 = (color_prom[31-i] >> 4) & 0x01;
-			bit2 = (color_prom[31-i] >> 5) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 3) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 4) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[31-i] >> 6) & 0x01;
-			bit2 = (color_prom[31-i] >> 7) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 6) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
 	
 		/* characters */
 		for (i = 0; i < 64*4; i++)
-			colortable[i] = color_prom[i + 32] & 0x0f;
+			colortable[i] = color_prom.read(i + 32)& 0x0f;
 	
 		/* sprites */
 		for (i = 64*4; i < 128*4; i++)
-			colortable[i] = 0x1f - (color_prom[i + 32] & 0x0f);
+			colortable[i] = 0x1f - (color_prom.read(i + 32)& 0x0f);
 	
 		/* for sprites, track which pens for each color map to color 31 */
 		for (i = 0; i < 64; i++)
@@ -81,10 +81,10 @@ public class superpac
 	}
 	
 	
-	WRITE_HANDLER( superpac_flipscreen_w )
+	public static WriteHandlerPtr superpac_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data);
-	}
+	} };
 	
 	
 	
@@ -105,14 +105,14 @@ public class superpac
 		for (offs = 0; offs < spriteram_size; offs += 2)
 		{
 			/* is it on? */
-			if ((spriteram_3[offs+1] & 2) == 0)
+			if ((spriteram_3.read(offs+1)& 2) == 0)
 			{
-				int sprite = spriteram[offs];
-				int color = spriteram[offs+1] & 0x3f;
-				int x = (spriteram_2[offs+1] - 40) + 0x100*(spriteram_3[offs+1] & 1);
-				int y = 28*8 - spriteram_2[offs] + 1;
-				int flipx = spriteram_3[offs] & 1;
-				int flipy = spriteram_3[offs] & 2;
+				int sprite = spriteram.read(offs);
+				int color = spriteram.read(offs+1)& 0x3f;
+				int x = (spriteram_2.read(offs+1)- 40) + 0x100*(spriteram_3.read(offs+1)& 1);
+				int y = 28*8 - spriteram_2.read(offs)+ 1;
+				int flipx = spriteram_3.read(offs)& 1;
+				int flipy = spriteram_3.read(offs)& 2;
 				int pens;
 	
 				if (flip_screen)
@@ -123,7 +123,7 @@ public class superpac
 	
 				pens = (drawmode == TRANSPARENCY_PENS) ? ~color15_mask[color] : 16;
 	
-				switch (spriteram_3[offs] & 0x0c)
+				switch (spriteram_3.read(offs)& 0x0c)
 				{
 					case 0:		/* normal size */
 						drawgfx(bitmap, gfx, sprite, color, flipx, flipy, x, y, clip, drawmode, pens);
@@ -131,7 +131,7 @@ public class superpac
 	
 					case 4:		/* 2x horizontal */
 						sprite &= ~1;
-						if (!flipx)
+						if (flipx == 0)
 						{
 							drawgfx(bitmap, gfx, sprite + 0, color, flipx, flipy, x + 0,  y, clip, drawmode, pens);
 							drawgfx(bitmap, gfx, sprite + 1, color, flipx, flipy, x + 16, y, clip, drawmode, pens);
@@ -145,7 +145,7 @@ public class superpac
 	
 					case 8:		/* 2x vertical */
 						sprite &= ~2;
-						if (!flipy)
+						if (flipy == 0)
 						{
 							drawgfx(bitmap, gfx, sprite + 2, color, flipx, flipy, x, y - 0,  clip, drawmode, pens);
 							drawgfx(bitmap, gfx, sprite + 0, color, flipx, flipy, x, y - 16, clip, drawmode, pens);
@@ -249,7 +249,7 @@ public class superpac
 					sy = 27 - sy;
 				}
 	
-				drawgfx(tmpbitmap, Machine->gfx[0], videoram[offs], colorram[offs],
+				drawgfx(tmpbitmap, Machine->gfx[0], videoram.read(offs), colorram.read(offs),
 						flip_screen, flip_screen, 8 * sx, 8 * sy,
 						&Machine->visible_area, TRANSPARENCY_NONE, 0);
 			}
@@ -262,7 +262,7 @@ public class superpac
 	
 		/* Draw the high priority characters */
 		for (offs = videoram_size - 1;offs >= 0;offs--)
-			if (colorram[offs] & 0x40)
+			if (colorram.read(offs)& 0x40)
 			{
 				int sx, sy, mx, my;
 	
@@ -291,7 +291,7 @@ public class superpac
 					sy = 27 - sy;
 				}
 	
-				drawgfx(bitmap, Machine->gfx[0], videoram[offs], colorram[offs],
+				drawgfx(bitmap, Machine->gfx[0], videoram.read(offs), colorram.read(offs),
 						flip_screen, flip_screen, 8 * sx, 8 * sy,
 						&Machine->visible_area, TRANSPARENCY_COLOR, 31);
 			}

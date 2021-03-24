@@ -102,7 +102,6 @@ public class atarigenH
 	---------------------------------------------------------------*/
 	
 	void atarigen_interrupt_reset(atarigen_int_callback update_int);
-	void atarigen_update_interrupts(void);
 	
 	void atarigen_scanline_int_set(int scanline);
 	INTERRUPT_GEN( atarigen_scanline_int_gen );
@@ -122,7 +121,6 @@ public class atarigenH
 		EEPROM HANDLING
 	---------------------------------------------------------------*/
 	
-	void atarigen_eeprom_reset(void);
 	
 	WRITE16_HANDLER( atarigen_eeprom_enable_w );
 	WRITE16_HANDLER( atarigen_eeprom_w );
@@ -134,7 +132,6 @@ public class atarigenH
 	READ32_HANDLER( atarigen_eeprom_upper32_r );
 	
 	NVRAM_HANDLER( atarigen );
-	void atarigen_hisave(void);
 	
 	
 	/*---------------------------------------------------------------
@@ -142,7 +139,6 @@ public class atarigenH
 	---------------------------------------------------------------*/
 	
 	void atarigen_slapstic_init(int cpunum, int base, int chipnum);
-	void atarigen_slapstic_reset(void);
 	
 	WRITE16_HANDLER( atarigen_slapstic_w );
 	READ16_HANDLER( atarigen_slapstic_r );
@@ -155,8 +151,6 @@ public class atarigenH
 	void atarigen_sound_io_reset(int cpu_num);
 	
 	INTERRUPT_GEN( atarigen_6502_irq_gen );
-	READ_HANDLER( atarigen_6502_irq_ack_r );
-	WRITE_HANDLER( atarigen_6502_irq_ack_w );
 	
 	void atarigen_ym2151_irq_gen(int irq);
 	
@@ -168,10 +162,7 @@ public class atarigenH
 	WRITE32_HANDLER( atarigen_sound_upper32_w );
 	READ32_HANDLER( atarigen_sound_upper32_r );
 	
-	void atarigen_sound_reset(void);
 	WRITE16_HANDLER( atarigen_sound_reset_w );
-	WRITE_HANDLER( atarigen_6502_sound_w );
-	READ_HANDLER( atarigen_6502_sound_r );
 	
 	
 	/*---------------------------------------------------------------
@@ -228,7 +219,6 @@ public class atarigenH
 	---------------------------------------------------------------*/
 	
 	void atarigen_scanline_timer_reset(atarigen_scanline_callback update_graphics, int frequency);
-	int atarigen_get_hblank(void);
 	WRITE16_HANDLER( atarigen_halt_until_hblank_0_w );
 	WRITE16_HANDLER( atarigen_666_paletteram_w );
 	WRITE16_HANDLER( atarigen_expanded_666_paletteram_w );

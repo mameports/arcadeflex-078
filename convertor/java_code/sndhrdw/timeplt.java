@@ -19,8 +19,6 @@ package sndhrdw;
 public class timeplt
 {
 	
-	static READ_HANDLER( timeplt_portB_r );
-	static WRITE_HANDLER( timeplt_filter_w );
 	
 	MEMORY_READ_START( timeplt_sound_readmem )
 		{ 0x0000, 0x1fff, MRA_ROM },
@@ -42,16 +40,16 @@ public class timeplt
 	MEMORY_END
 	
 	
-	struct AY8910interface timeplt_ay8910_interface =
-	{
+	static AY8910interface timeplt_ay8910_interface = new AY8910interface
+	(
 		2,				/* 2 chips */
 		14318180/8,		/* 1.789772727 MHz */
-		{ MIXERG(30,MIXER_GAIN_2x,MIXER_PAN_CENTER), MIXERG(30,MIXER_GAIN_2x,MIXER_PAN_CENTER) },
-		{ soundlatch_r },
-		{ timeplt_portB_r },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { MIXERG(30,MIXER_GAIN_2x,MIXER_PAN_CENTER), MIXERG(30,MIXER_GAIN_2x,MIXER_PAN_CENTER) },
+		new ReadHandlerPtr[] { soundlatch_r },
+		new ReadHandlerPtr[] { timeplt_portB_r },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
 	
 	/* The timer clock which feeds the upper 4 bits of    					*/
@@ -76,7 +74,7 @@ public class timeplt
 		0x00, 0x10, 0x20, 0x30, 0x40, 0x90, 0xa0, 0xb0, 0xa0, 0xd0
 	};
 	
-	static READ_HANDLER( timeplt_portB_r )
+	public static ReadHandlerPtr timeplt_portB_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* need to protect from totalcycles overflow */
 		static int last_totalcycles = 0;
@@ -92,7 +90,7 @@ public class timeplt
 		last_totalcycles = current_totalcycles;
 	
 		return timeplt_timer[clock/512];
-	}
+	} };
 	
 	
 	static void filter_w(int chip, int channel, int data)
@@ -104,7 +102,7 @@ public class timeplt
 		set_RC_filter(3*chip + channel,1000,5100,0,C);
 	}
 	
-	static WRITE_HANDLER( timeplt_filter_w )
+	public static WriteHandlerPtr timeplt_filter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		filter_w(0, 0, (offset >>  6) & 3);
 		filter_w(0, 1, (offset >>  8) & 3);
@@ -112,10 +110,10 @@ public class timeplt
 		filter_w(1, 0, (offset >>  0) & 3);
 		filter_w(1, 1, (offset >>  2) & 3);
 		filter_w(1, 2, (offset >>  4) & 3);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( timeplt_sh_irqtrigger_w )
+	public static WriteHandlerPtr timeplt_sh_irqtrigger_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int last;
 	
@@ -126,6 +124,6 @@ public class timeplt
 		}
 	
 		last = data;
-	}
+	} };
 	
 }

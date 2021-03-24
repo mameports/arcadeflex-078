@@ -204,7 +204,6 @@ public class taito_f3
 	data32_t *f3_vram,*f3_line_ram;
 	data32_t *f3_pf_data,*f3_pivot_ram;
 	
-	extern int f3_game;
 	#if DEBUG_F3
 	static int sprite_pri_word;
 	#endif	//DEBUG_F3
@@ -329,7 +328,7 @@ public class taito_f3
 	static int f3_alpha_level_3bs=127;
 	static int f3_alpha_level_3bd=127;
 	
-	static void init_alpha_blend_func(void);
+	public static InitDriverPtr init_alpha_blend_func = new InitDriverPtr() { public void handler() (void);
 	
 	static int width_mask=0x1ff;
 	static int twidth_mask=0x1f,twidth_mask_bit=5;
@@ -458,7 +457,7 @@ public class taito_f3
 			drawgfx(bitmap,Machine->uifont,buf[j],0,0,0,60+6*j,8*27,0,TRANSPARENCY_NONE,0);
 	
 		Machine->orientation = trueorientation;
-	}
+	} };
 	#endif	//DEBUG_F3
 	
 	/******************************************************************************/
@@ -1291,7 +1290,7 @@ public class taito_f3
 	INLINE void dpix_bg(UINT32 bgcolor)
 	{
 		UINT8 p1 = pval&0xf0;
-		if(!p1)			dval = bgcolor;
+		if (p1 == 0)			dval = bgcolor;
 		else if(p1==0x10)	f3_alpha_blend_1_1(bgcolor);
 		else if(p1==0x20)	f3_alpha_blend_1_2(bgcolor);
 		else if(p1==0x40)	f3_alpha_blend_1_4(bgcolor);
@@ -1304,7 +1303,7 @@ public class taito_f3
 	
 	/******************************************************************************/
 	
-	static void init_alpha_blend_func(void)
+	public static InitDriverPtr init_alpha_blend_func = new InitDriverPtr() { public void handler() (void)
 	{
 		int i,j;
 	
@@ -1447,7 +1446,7 @@ public class taito_f3
 		for(i=0;i<256;i++)
 			for(j=0;j<256;j++)
 				add_sat[i][j] = (i + j < 256) ? i + j : 255;
-	}
+	} };
 	
 	/******************************************************************************/
 	
@@ -1610,7 +1609,7 @@ public class taito_f3
 										}
 										if(dpix_sp[sprite_pri][pval>>4](*dsti)) {*dsti=dval;break;}
 									}
-									if(!bgcolor) {if(!(pval&0xf0)) {*dsti=0;break;}}
+									if (bgcolor == 0) {if(!(pval&0xf0)) {*dsti=0;break;}}
 									else dpix_bg(bgcolor);
 									*dsti=dval;
 						}
@@ -1744,7 +1743,7 @@ public class taito_f3
 	
 				if(alpha_mode==1)
 				{
-					if(!opaque_all) return;
+					if (opaque_all == 0) return;
 				}
 				else
 				{
@@ -1753,7 +1752,7 @@ public class taito_f3
 						if((tile>>(16+9))&1) alpha_type|=2;
 						else				 alpha_type|=1;
 					}
-					else if(!opaque_all) break;
+					else if (opaque_all == 0) break;
 				}
 			}
 			else if(opaque_all) opaque_all=0;
@@ -1897,7 +1896,7 @@ public class taito_f3
 			line_t->alpha_mode[y]=line_enable;
 			line_t->pri[y]=pri;
 	
-			if(!pos)
+			if (pos == 0)
 			{
 				if (y&1)
 				{
@@ -1930,7 +1929,7 @@ public class taito_f3
 			spri_base+=inc;
 			y +=y_inc;
 		}
-		if(!y_zoom) y_zoom=0x10000;
+		if (y_zoom == 0) y_zoom=0x10000;
 	
 	
 	
@@ -2404,7 +2403,7 @@ public class taito_f3
 				line_t[i]=&line_inf[pos];
 	
 				if(sprite[i]&sprite_alpha_check) alpha=1;
-				else if(!alpha) sprite[i]|=0x100;
+				else if (alpha == 0) sprite[i]|=0x100;
 	
 				if(alpha_mode[pos]>1)
 				{
@@ -2422,7 +2421,7 @@ public class taito_f3
 				}
 			}
 			if(sprite[4]&sprite_alpha_check) alpha=1;
-			else if(!alpha) sprite[4]|=0x100;
+			else if (alpha == 0) sprite[4]|=0x100;
 	
 	#if DEBUG_F3
 			if(alpha) deb_alpha_cnt++;
@@ -2494,7 +2493,7 @@ public class taito_f3
 			if (flipscreen) pivot_base-=2; else pivot_base+=2;
 		}
 	
-		if (!flipscreen)
+		if (flipscreen == 0)
 			pixel_layer_clip = pivot_clip;
 	
 		/* Decode chars & mark tilemap dirty */
@@ -2535,7 +2534,7 @@ public class taito_f3
 			fy = tile&0x8000;
 	
 	        tile&=0xff;
-	        if (!tile) continue;
+	        if (tile == 0) continue;
 	
 			/* Graphics flip */
 			if (flipscreen) {
@@ -3104,7 +3103,7 @@ public class taito_f3
 			last_x=x;
 			last_y=y;
 	
-			if (!sprite) continue;
+			if (sprite == 0) continue;
 			if (!x_addition || !y_addition) continue;
 	
 			if (flipscreen)
@@ -3334,7 +3333,7 @@ public class taito_f3
 			if (keyboard_pressed(KEYCODE_LSHIFT) && keyboard_pressed_memory(KEYCODE_F1))
 			{
 				deb_enable=!deb_enable;
-				if(!deb_enable)
+				if (deb_enable == 0)
 				{
 					debdisp = 0;
 					usrintf_showmessage("debug mode:off");

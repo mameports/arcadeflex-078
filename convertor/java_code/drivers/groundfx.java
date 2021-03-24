@@ -83,7 +83,6 @@ public class groundfx
 	WRITE16_HANDLER(es5510_dsp_w);
 	WRITE16_HANDLER(f3_volume_w);
 	WRITE16_HANDLER(f3_es5505_bank_w);
-	void f3_68681_reset(void);
 	extern data32_t *f3_shared_ram;
 	
 	static UINT16 coin_word, frame_counter=0;
@@ -335,95 +334,95 @@ public class groundfx
 				 INPUT PORTS (dips in eprom)
 	***********************************************************/
 	
-	INPUT_PORTS_START( groundfx )
-		PORT_START      /* IN0 */
-		PORT_BIT( 0xffff, IP_ACTIVE_LOW,  IPT_UNUSED )
+	static InputPortPtr input_ports_groundfx = new InputPortPtr(){ public void handler() { 
+		PORT_START();       /* IN0 */
+		PORT_BIT( 0xffff, IP_ACTIVE_LOW,  IPT_UNUSED );
 	
-		PORT_START      /* IN1 */
-		PORT_BIT( 0x0001, IP_ACTIVE_HIGH,  IPT_SPECIAL ) /* Frame counter */
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* reserved for EEROM */
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON3 ) /* shift hi */
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_BUTTON1 ) /* brake */
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 ) /* shift low */
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNUSED )
+		PORT_START();       /* IN1 */
+		PORT_BIT( 0x0001, IP_ACTIVE_HIGH,  IPT_SPECIAL );/* Frame counter */
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL );/* reserved for EEROM */
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON3 );/* shift hi */
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_BUTTON1 );/* brake */
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 );/* shift low */
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNUSED );
 	
-		PORT_START      /* IN2 */
-		PORT_BITX(0x01, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_SERVICE1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_COIN1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_COIN2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNUSED )
+		PORT_START();       /* IN2 */
+		PORT_BITX(0x01, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_SERVICE1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_COIN1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_COIN2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNUSED );
 	
-		PORT_START	/* IN 2, steering wheel */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 25, 15, 0, 0xff )
+		PORT_START(); 	/* IN 2, steering wheel */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 25, 15, 0, 0xff );
 	
-		PORT_START	/* IN 3, accel */
-		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER1, 20, 10, 0, 0xff)
+		PORT_START(); 	/* IN 3, accel */
+		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER1, 20, 10, 0, 0xff);
 	
-		PORT_START	/* IN 4, sound volume */
-		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER2, 20, 10, 0, 0xff)
+		PORT_START(); 	/* IN 4, sound volume */
+		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER2, 20, 10, 0, 0xff);
 	
-		PORT_START	/* IN 5, unknown */
-		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
-	INPUT_PORTS_END
+		PORT_START(); 	/* IN 5, unknown */
+		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff);
+	INPUT_PORTS_END(); }}; 
 	
 	/**********************************************************
 					GFX DECODING
 	**********************************************************/
 	
-	static struct GfxLayout tile16x16_layout =
-	{
+	static GfxLayout tile16x16_layout = new GfxLayout
+	(
 		16,16,	/* 16*16 sprites */
 		RGN_FRAC(1,2),
 		5,	/* 5 bits per pixel */
-		{ RGN_FRAC(1,2), 0, 8, 16, 24,},
-		{ 32, 33, 34, 35, 36, 37, 38, 39, 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*64, 1*64,  2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
+		new int[] { RGN_FRAC(1,2), 0, 8, 16, 24,},
+		new int[] { 32, 33, 34, 35, 36, 37, 38, 39, 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*64, 1*64,  2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
 		  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		64*16	/* every sprite takes 128 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		16,16,    /* 16*16 characters */
 		RGN_FRAC(1,1),
 		4,        /* 4 bits per pixel */
-		{ 0, 1, 2, 3 },
-		{ 1*4, 0*4, 5*4, 4*4, 3*4, 2*4, 7*4, 6*4, 9*4, 8*4, 13*4, 12*4, 11*4, 10*4, 15*4, 14*4 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 1*4, 0*4, 5*4, 4*4, 3*4, 2*4, 7*4, 6*4, 9*4, 8*4, 13*4, 12*4, 11*4, 10*4, 15*4, 14*4 },
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8     /* every sprite takes 128 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout pivlayout =
-	{
+	static GfxLayout pivlayout = new GfxLayout
+	(
 		8,8,    /* 8*8 characters */
 		RGN_FRAC(1,2),
 		6,      /* 4 bits per pixel */
-		{ RGN_FRAC(1,2), RGN_FRAC(1,2)+1, 0, 1, 2, 3 },
-		{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { RGN_FRAC(1,2), RGN_FRAC(1,2)+1, 0, 1, 2, 3 },
+		new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		32*8    /* every sprite takes 32 consecutive bytes */
-	};
+	);
 	
-	static struct GfxDecodeInfo groundfx_gfxdecodeinfo[] =
+	static GfxDecodeInfo groundfx_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX2, 0x0, &tile16x16_layout,  4096, 512 },
-		{ REGION_GFX1, 0x0, &charlayout,        0, 512 },
-		{ REGION_GFX3, 0x0, &pivlayout,         0, 512 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX2, 0x0, tile16x16_layout,  4096, 512 ),
+		new GfxDecodeInfo( REGION_GFX1, 0x0, charlayout,        0, 512 ),
+		new GfxDecodeInfo( REGION_GFX3, 0x0, pivlayout,         0, 512 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -496,41 +495,41 @@ public class groundfx
 						DRIVERS
 	***************************************************************************/
 	
-	ROM_START( groundfx )
-		ROM_REGION( 0x200000, REGION_CPU1, 0 )	/* 2048K for 68020 code (CPU A) */
-		ROM_LOAD32_BYTE( "d51-24.79", 0x00000, 0x80000, CRC(5caaa031) SHA1(03e727e26df701e3f5e16c5f933d5b29a528945a) )
-		ROM_LOAD32_BYTE( "d51-23.61", 0x00001, 0x80000, CRC(462e3c9b) SHA1(7f116ee755748497b911868a948d3e3b5134e475) )
-		ROM_LOAD32_BYTE( "d51-22.77", 0x00002, 0x80000, CRC(b6b04d88) SHA1(58685ee8fd788dcbfe318f1e3c06d93e2128034c) )
-		ROM_LOAD32_BYTE( "d51-21.59", 0x00003, 0x80000, CRC(21ecde2b) SHA1(c6d3738f34c8e24346e7784b14aeff300ae2d225) )
+	static RomLoadPtr rom_groundfx = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x200000, REGION_CPU1, 0 );/* 2048K for 68020 code (CPU A) */
+		ROM_LOAD32_BYTE( "d51-24.79", 0x00000, 0x80000, CRC(5caaa031);SHA1(03e727e26df701e3f5e16c5f933d5b29a528945a) )
+		ROM_LOAD32_BYTE( "d51-23.61", 0x00001, 0x80000, CRC(462e3c9b);SHA1(7f116ee755748497b911868a948d3e3b5134e475) )
+		ROM_LOAD32_BYTE( "d51-22.77", 0x00002, 0x80000, CRC(b6b04d88);SHA1(58685ee8fd788dcbfe318f1e3c06d93e2128034c) )
+		ROM_LOAD32_BYTE( "d51-21.59", 0x00003, 0x80000, CRC(21ecde2b);SHA1(c6d3738f34c8e24346e7784b14aeff300ae2d225) )
 	
-		ROM_REGION( 0x180000, REGION_CPU2, 0 )
-		ROM_LOAD16_BYTE( "d51-29.54", 0x100000, 0x40000,  CRC(4b64f41d) SHA1(040427668d13f7320d23805098d6d0e1aa8d121e) )
-		ROM_LOAD16_BYTE( "d51-30.56", 0x100001, 0x40000,  CRC(45f339fe) SHA1(cc7adfb2b86070f5bb426542e3b7ed2a50b3c39e) )
+		ROM_REGION( 0x180000, REGION_CPU2, 0 );
+		ROM_LOAD16_BYTE( "d51-29.54", 0x100000, 0x40000,  CRC(4b64f41d);SHA1(040427668d13f7320d23805098d6d0e1aa8d121e) )
+		ROM_LOAD16_BYTE( "d51-30.56", 0x100001, 0x40000,  CRC(45f339fe);SHA1(cc7adfb2b86070f5bb426542e3b7ed2a50b3c39e) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD16_BYTE( "d51-08.35", 0x000000, 0x200000, CRC(835b7a0f) SHA1(0131fceabd73b0045b5d4ae0bb2f03efdd407962) )	/* SCR 16x16 tiles */
-		ROM_LOAD16_BYTE( "d51-09.34", 0x000001, 0x200000, CRC(6dabd83d) SHA1(3dbd7ea36b9900faa6420af1f1600efe295db74c) )
+		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD16_BYTE( "d51-08.35", 0x000000, 0x200000, CRC(835b7a0f);SHA1(0131fceabd73b0045b5d4ae0bb2f03efdd407962) )	/* SCR 16x16 tiles */
+		ROM_LOAD16_BYTE( "d51-09.34", 0x000001, 0x200000, CRC(6dabd83d);SHA1(3dbd7ea36b9900faa6420af1f1600efe295db74c) )
 	
-		ROM_REGION( 0x1000000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD32_BYTE( "d51-03.47", 0x800000, 0x200000, CRC(629a5c99) SHA1(cfc1c0b07ecefd6eddb83edcbcf710e8b8de19e4) )	/* OBJ 16x16 tiles */
-		ROM_LOAD32_BYTE( "d51-04.48", 0x000000, 0x200000, CRC(f49b14b7) SHA1(31129771159c1295a074c8311344ece525302289) )
-		ROM_LOAD32_BYTE( "d51-05.49", 0x000001, 0x200000, CRC(3a2e2cbf) SHA1(ed2c1ca9211b1d70b4767a54e08263a3e4867199) )
-		ROM_LOAD32_BYTE( "d51-06.50", 0x000002, 0x200000, CRC(d33ce2a0) SHA1(92c4504344672ea798cd6dd34f4b46848bf9f82b) )
-		ROM_LOAD32_BYTE( "d51-07.51", 0x000003, 0x200000, CRC(24b2f97d) SHA1(6980e67b435d189ce897c0301e0411763410ab47) )
+		ROM_REGION( 0x1000000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD32_BYTE( "d51-03.47", 0x800000, 0x200000, CRC(629a5c99);SHA1(cfc1c0b07ecefd6eddb83edcbcf710e8b8de19e4) )	/* OBJ 16x16 tiles */
+		ROM_LOAD32_BYTE( "d51-04.48", 0x000000, 0x200000, CRC(f49b14b7);SHA1(31129771159c1295a074c8311344ece525302289) )
+		ROM_LOAD32_BYTE( "d51-05.49", 0x000001, 0x200000, CRC(3a2e2cbf);SHA1(ed2c1ca9211b1d70b4767a54e08263a3e4867199) )
+		ROM_LOAD32_BYTE( "d51-06.50", 0x000002, 0x200000, CRC(d33ce2a0);SHA1(92c4504344672ea798cd6dd34f4b46848bf9f82b) )
+		ROM_LOAD32_BYTE( "d51-07.51", 0x000003, 0x200000, CRC(24b2f97d);SHA1(6980e67b435d189ce897c0301e0411763410ab47) )
 	
-		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD16_BYTE( "d51-10.95", 0x000000, 0x100000, CRC(d5910604) SHA1(8efe13884cfdef208394ddfe19f43eb1b9f78ff3) )	/* PIV 8x8 tiles, 6bpp */
-		ROM_LOAD16_BYTE( "d51-11.96", 0x000001, 0x100000, CRC(fee5f5c6) SHA1(1be88747f9c71c348dd61a8f0040007df3a3e6a6) )
-		ROM_LOAD       ( "d51-12.97", 0x300000, 0x100000, CRC(d630287b) SHA1(2fa09e1821b7280d193ca9a2a270759c3c3189d1) )
-		ROM_FILL       (              0x200000, 0x100000, 0 )
+		ROM_REGION( 0x400000, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD16_BYTE( "d51-10.95", 0x000000, 0x100000, CRC(d5910604);SHA1(8efe13884cfdef208394ddfe19f43eb1b9f78ff3) )	/* PIV 8x8 tiles, 6bpp */
+		ROM_LOAD16_BYTE( "d51-11.96", 0x000001, 0x100000, CRC(fee5f5c6);SHA1(1be88747f9c71c348dd61a8f0040007df3a3e6a6) )
+		ROM_LOAD       ( "d51-12.97", 0x300000, 0x100000, CRC(d630287b);SHA1(2fa09e1821b7280d193ca9a2a270759c3c3189d1) )
+		ROM_FILL       (              0x200000, 0x100000, 0 );
 	
-		ROM_REGION16_LE( 0x80000, REGION_USER1, 0 )
-		ROM_LOAD16_WORD( "d51-13.7", 0x00000,  0x80000,  CRC(36921b8b) SHA1(2130120f78a3b984618a53054fc937cf727177b9) )	/* STY, spritemap */
+		ROM_REGION16_LE( 0x80000, REGION_USER1, 0 );
+		ROM_LOAD16_WORD( "d51-13.7", 0x00000,  0x80000,  CRC(36921b8b);SHA1(2130120f78a3b984618a53054fc937cf727177b9) )	/* STY, spritemap */
 	
-		ROM_REGION16_BE( 0x1000000, REGION_SOUND1, ROMREGION_SOUNDONLY | ROMREGION_ERASE00 )
-		ROM_LOAD16_BYTE( "d51-01.73", 0x000000, 0x200000, CRC(92f09155) SHA1(8015e1997818bb480174394eb43840bf26679bcf) )	/* Ensoniq samples */
-		ROM_LOAD16_BYTE( "d51-02.74", 0xc00000, 0x200000, CRC(20a9428f) SHA1(c9033d02a49c72f704808f5f899101617d5814e5) )
-	ROM_END
+		ROM_REGION16_BE( 0x1000000, REGION_SOUND1, ROMREGION_SOUNDONLY | ROMREGION_ERASE00 );
+		ROM_LOAD16_BYTE( "d51-01.73", 0x000000, 0x200000, CRC(92f09155);SHA1(8015e1997818bb480174394eb43840bf26679bcf) )	/* Ensoniq samples */
+		ROM_LOAD16_BYTE( "d51-02.74", 0xc00000, 0x200000, CRC(20a9428f);SHA1(c9033d02a49c72f704808f5f899101617d5814e5) )
+	ROM_END(); }}; 
 	
 	
 	static READ32_HANDLER( irq_speedup_r_groundfx )					
@@ -579,5 +578,5 @@ public class groundfx
 	}
 	
 	
-	GAME( 1992, groundfx, 0, groundfx, groundfx, groundfx, ROT0, "Taito Corporation", "Ground Effects / Super Ground Effects (Japan)" )
+	public static GameDriver driver_groundfx	   = new GameDriver("1992"	,"groundfx"	,"groundfx.java"	,rom_groundfx,null	,machine_driver_groundfx	,input_ports_groundfx	,init_groundfx	,ROT0	,	"Taito Corporation", "Ground Effects / Super Ground Effects (Japan)" )
 }

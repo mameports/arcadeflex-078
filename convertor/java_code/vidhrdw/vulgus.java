@@ -40,20 +40,20 @@ public class vulgus
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -145,20 +145,20 @@ public class vulgus
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( vulgus_fgvideoram_w )
+	public static WriteHandlerPtr vulgus_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vulgus_fgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( vulgus_bgvideoram_w )
+	public static WriteHandlerPtr vulgus_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vulgus_bgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( vulgus_c804_w )
+	public static WriteHandlerPtr vulgus_c804_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0 and 1 are coin counters */
 		coin_counter_w(0, data & 0x01);
@@ -166,17 +166,17 @@ public class vulgus
 	
 		/* bit 7 flips screen */
 		flip_screen_set(data & 0x80);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( vulgus_palette_bank_w )
+	public static WriteHandlerPtr vulgus_palette_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (vulgus_palette_bank != (data & 3))
 		{
 			vulgus_palette_bank = data & 3;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -195,10 +195,10 @@ public class vulgus
 			int code,i,col,sx,sy,dir;
 	
 	
-			code = spriteram[offs];
-			col = spriteram[offs + 1] & 0x0f;
-			sx = spriteram[offs + 3];
-			sy = spriteram[offs + 2];
+			code = spriteram.read(offs);
+			col = spriteram.read(offs + 1)& 0x0f;
+			sx = spriteram.read(offs + 3);
+			sy = spriteram.read(offs + 2);
 			dir = 1;
 			if (flip_screen)
 			{
@@ -207,7 +207,7 @@ public class vulgus
 				dir = -1;
 			}
 	
-			i = (spriteram[offs + 1] & 0xc0) >> 6;
+			i = (spriteram.read(offs + 1)& 0xc0) >> 6;
 			if (i == 2) i = 3;
 	
 			do

@@ -133,10 +133,8 @@ public class unzipH
 		unsigned char **buf, unsigned int *length);
 	int /* error */ checksum_zipped_file (int pathtype, int pathindex, const char *zipfile, const char *filename, unsigned int *length, unsigned int *sum);
 	
-	void unzip_cache_clear(void);
 	
 	/* public globals */
-	extern int	gUnzipQuiet;	/* flag controls error messages */
 	
 	#ifdef __cplusplus
 	}

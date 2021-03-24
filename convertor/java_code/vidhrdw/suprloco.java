@@ -47,19 +47,19 @@ public class suprloco
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -106,7 +106,7 @@ public class suprloco
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap,32);
@@ -122,31 +122,31 @@ public class suprloco
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( suprloco_videoram_w )
+	public static WriteHandlerPtr suprloco_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (suprloco_videoram[offset] != data)
 		{
 			suprloco_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
 	static int suprloco_scrollram[32];
 	
-	WRITE_HANDLER( suprloco_scrollram_w )
+	public static WriteHandlerPtr suprloco_scrollram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int adj = flip_screen ? -8 : 8;
 	
 		suprloco_scrollram[offset] = data;
 		tilemap_set_scrollx(bg_tilemap,offset, data - adj);
-	}
+	} };
 	
-	READ_HANDLER( suprloco_scrollram_r )
+	public static ReadHandlerPtr suprloco_scrollram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return suprloco_scrollram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( suprloco_control_w )
+	public static WriteHandlerPtr suprloco_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* There is probably a palette select in here */
 	
@@ -170,13 +170,13 @@ public class suprloco
 		tilemap_set_scrolly(bg_tilemap,0,flip_screen ? -32 : 0);
 	
 		control = data;
-	}
+	} };
 	
 	
-	READ_HANDLER( suprloco_control_r )
+	public static ReadHandlerPtr suprloco_control_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return control;
-	}
+	} };
 	
 	
 	
@@ -224,7 +224,7 @@ public class suprloco
 		sx = spr_reg[SPR_X];
 		sy = spr_reg[SPR_Y_TOP] + 1;
 	
-		if (!flip_screen)
+		if (flip_screen == 0)
 		{
 			adjy = sy;
 			dy = 1;

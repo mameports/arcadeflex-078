@@ -54,22 +54,22 @@ public class xevious
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*256] >> 0) & 0x01;
-			bit1 = (color_prom[2*256] >> 1) & 0x01;
-			bit2 = (color_prom[2*256] >> 2) & 0x01;
-			bit3 = (color_prom[2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*256)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -86,7 +86,7 @@ public class xevious
 		/* background tiles */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
 		{
-			COLOR(1,i) = (color_prom[0] & 0x0f) | ((color_prom[TOTAL_COLORS(1)] & 0x0f) << 4);
+			COLOR(1,i) = (color_prom.read(0)& 0x0f) | ((color_prom.read(TOTAL_COLORS(1))& 0x0f) << 4);
 	
 			color_prom++;
 		}
@@ -95,7 +95,7 @@ public class xevious
 		/* sprites */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			int c = (color_prom[0] & 0x0f) | ((color_prom[TOTAL_COLORS(2)] & 0x0f) << 4);
+			int c = (color_prom.read(0)& 0x0f) | ((color_prom.read(TOTAL_COLORS(2))& 0x0f) << 4);
 	
 			if (c & 0x80) COLOR(2,i) = c & 0x7f;
 			else COLOR(2,i) = 0x80; /* transparent */
@@ -127,22 +127,22 @@ public class xevious
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*256] >> 0) & 0x01;
-			bit1 = (color_prom[2*256] >> 1) & 0x01;
-			bit2 = (color_prom[2*256] >> 2) & 0x01;
-			bit3 = (color_prom[2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*256)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -159,7 +159,7 @@ public class xevious
 		/* background tiles */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
 		{
-			COLOR(1,i) = (color_prom[0] & 0x0f) | ((color_prom[0x400] & 0x0f) << 4);
+			COLOR(1,i) = (color_prom.read(0)& 0x0f) | ((color_prom.read(0x400)& 0x0f) << 4);
 	
 			color_prom++;
 		}
@@ -168,7 +168,7 @@ public class xevious
 		/* sprites */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			int c = (color_prom[0] & 0x0f) | ((color_prom[0x400] & 0x0f) << 4);
+			int c = (color_prom.read(0)& 0x0f) | ((color_prom.read(0x400)& 0x0f) << 4);
 	
 			if (c & 0x80) COLOR(2,i) = c & 0x7f;
 			else COLOR(2,i) = 0x80; /* transparent */
@@ -244,43 +244,43 @@ public class xevious
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( xevious_fg_videoram_w )
+	public static WriteHandlerPtr xevious_fg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (xevious_fg_videoram[offset] != data)
 		{
 			xevious_fg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( xevious_fg_colorram_w )
+	public static WriteHandlerPtr xevious_fg_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (xevious_fg_colorram[offset] != data)
 		{
 			xevious_fg_colorram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( xevious_bg_videoram_w )
+	public static WriteHandlerPtr xevious_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (xevious_bg_videoram[offset] != data)
 		{
 			xevious_bg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( xevious_bg_colorram_w )
+	public static WriteHandlerPtr xevious_bg_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (xevious_bg_colorram[offset] != data)
 		{
 			xevious_bg_colorram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( xevious_vh_latch_w )
+	public static WriteHandlerPtr xevious_vh_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int reg;
 		int scroll = data + ((offset&0x01)<<8);   /* A0 -> D8 */
@@ -311,7 +311,7 @@ public class xevious
 			   logerror("CRTC WRITE REG: %x  Data: %03x\n",reg, scroll);
 			   break;
 		}
-	}
+	} };
 	
 	
 	
@@ -378,35 +378,35 @@ public class xevious
 	
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			if ((spriteram[offs + 1] & 0x40) == 0)  /* I'm not sure about this one */
+			if ((spriteram.read(offs + 1)& 0x40) == 0)  /* I'm not sure about this one */
 			{
 				int bank,code,color,flipx,flipy;
 	
 	
-				if (spriteram_3[offs] & 0x80)
+				if (spriteram_3.read(offs)& 0x80)
 				{
 					bank = 4;
-					code = spriteram[offs] & 0x3f;
+					code = spriteram.read(offs)& 0x3f;
 				}
 				else
 				{
-					bank = 2 + ((spriteram[offs] & 0x80) >> 7);
-					code = spriteram[offs] & 0x7f;
+					bank = 2 + ((spriteram.read(offs)& 0x80) >> 7);
+					code = spriteram.read(offs)& 0x7f;
 				}
 	
-				color = spriteram[offs + 1] & 0x7f;
-				flipx = spriteram_3[offs] & 4;
-				flipy = spriteram_3[offs] & 8;
+				color = spriteram.read(offs + 1)& 0x7f;
+				flipx = spriteram_3.read(offs)& 4;
+				flipy = spriteram_3.read(offs)& 8;
 				if (flip_screen)
 				{
 					flipx = !flipx;
 					flipy = !flipy;
 				}
-				sx = spriteram_2[offs + 1] - 40 + 0x100*(spriteram_3[offs + 1] & 1);
-				sy = 28*8-spriteram_2[offs]-1;
-				if (spriteram_3[offs] & 2)  /* double height (?) */
+				sx = spriteram_2.read(offs + 1)- 40 + 0x100*(spriteram_3.read(offs + 1)& 1);
+				sy = 28*8-spriteram_2.read(offs)-1;
+				if (spriteram_3.read(offs)& 2)  /* double height (?) */
 				{
-					if (spriteram_3[offs] & 1)  /* double width, double height */
+					if (spriteram_3.read(offs)& 1)  /* double width, double height */
 					{
 						code &= 0x7c;
 						drawgfx(bitmap,Machine->gfx[bank],
@@ -428,7 +428,7 @@ public class xevious
 							flipx ? sx+16 : sx,flipy ? sy : sy-16,
 							cliprect,TRANSPARENCY_COLOR,0x80);
 				}
-				else if (spriteram_3[offs] & 1) /* double width */
+				else if (spriteram_3.read(offs)& 1) /* double width */
 				{
 					code &= 0x7e;
 					drawgfx(bitmap,Machine->gfx[bank],

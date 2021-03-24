@@ -44,31 +44,18 @@ public class genericH
 	
 	VIDEO_START( generic );
 	VIDEO_START( generic_bitmapped );
-	void video_stop_generic(void);
-	void video_stop_generic_bitmapped(void);
 	VIDEO_UPDATE( generic_bitmapped );
 	
-	READ_HANDLER( videoram_r );
-	READ_HANDLER( colorram_r );
-	WRITE_HANDLER( videoram_w );
-	WRITE_HANDLER( colorram_w );
-	READ_HANDLER( spriteram_r );
-	WRITE_HANDLER( spriteram_w );
 	READ16_HANDLER( spriteram16_r );
 	WRITE16_HANDLER( spriteram16_w );
-	READ_HANDLER( spriteram_2_r );
-	WRITE_HANDLER( spriteram_2_w );
-	WRITE_HANDLER( buffer_spriteram_w );
 	WRITE16_HANDLER( buffer_spriteram16_w );
 	WRITE32_HANDLER( buffer_spriteram32_w );
-	WRITE_HANDLER( buffer_spriteram_2_w );
 	WRITE16_HANDLER( buffer_spriteram16_2_w );
 	WRITE32_HANDLER( buffer_spriteram32_2_w );
 	void buffer_spriteram(unsigned char *ptr,int length);
 	void buffer_spriteram_2(unsigned char *ptr,int length);
 	
 	/* screen flipping */
-	extern int flip_screen_x, flip_screen_y;
 	void flip_screen_set(int on);
 	void flip_screen_x_set(int on);
 	void flip_screen_y_set(int on);
@@ -76,7 +63,6 @@ public class genericH
 	
 	/* sets a variable and schedules a full screen refresh if it changed */
 	void set_vh_global_attribute(int *addr, int data);
-	int get_vh_global_attribute_changed(void);
 	
 	
 	#ifdef __cplusplus

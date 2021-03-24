@@ -23,7 +23,6 @@ package sndhrdw;
 public class astinvad
 {
 	
-	extern void astinvad_set_flash(int flag);
 	
 	
 	static const char *astinvad_sample_names[] =
@@ -64,7 +63,7 @@ public class astinvad
 	};
 	
 	
-	WRITE_HANDLER( astinvad_sound1_w )
+	public static WriteHandlerPtr astinvad_sound1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int state;
 	
@@ -85,10 +84,10 @@ public class astinvad
 		astinvad_set_flash(data & 0x04); /* LT 20-3-1998 */
 	
 		state = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( astinvad_sound2_w )
+	public static WriteHandlerPtr astinvad_sound2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int state;
 	
@@ -103,10 +102,10 @@ public class astinvad
 		flip_screen_set(readinputport(3) & data & 0x20);
 	
 		state = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( spaceint_sound1_w )
+	public static WriteHandlerPtr spaceint_sound1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int state;
 	
@@ -128,10 +127,10 @@ public class astinvad
 		if (bitsGoneHi & 0x80) sample_start(5, SND_FLEET4, 0);
 	
 		state = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( spaceint_sound2_w )
+	public static WriteHandlerPtr spaceint_sound2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int state;
 	
@@ -144,5 +143,5 @@ public class astinvad
 		flip_screen_set(readinputport(3) & data & 0x80);
 	
 		state = data;
-	}
+	} };
 }

@@ -285,11 +285,11 @@ public class xexex
 		cpu_setbank(2, memory_region(REGION_CPU2) + 0x10000 + cur_sound_region*0x4000);
 	}
 	
-	static WRITE_HANDLER( sound_bankswitch_w )
+	public static WriteHandlerPtr sound_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cur_sound_region = data & 7;
 		reset_sound_region();
-	}
+	} };
 	
 	static void ym_set_mixing(double left, double right)
 	{
@@ -408,65 +408,69 @@ public class xexex
 		{ 0x1b0000, 0x1b1fff, paletteram16_xrgb_word_w, &paletteram16 },
 	MEMORY_END
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xbfff, MRA_BANK2 },
-		{ 0xc000, 0xdfff, MRA_RAM },
-		{ 0xe000, 0xe22f, K054539_0_r },
-		{ 0xec01, 0xec01, YM2151_status_port_0_r },
-		{ 0xf002, 0xf002, soundlatch_r },
-		{ 0xf003, 0xf003, soundlatch2_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK2 ),
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe000, 0xe22f, K054539_0_r ),
+		new Memory_ReadAddress( 0xec01, 0xec01, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0xf002, 0xf002, soundlatch_r ),
+		new Memory_ReadAddress( 0xf003, 0xf003, soundlatch2_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0xbfff, MWA_ROM },
-		{ 0xc000, 0xdfff, MWA_RAM },
-		{ 0xe000, 0xe22f, K054539_0_w },
-		{ 0xec00, 0xec00, YM2151_register_port_0_w },
-		{ 0xec01, 0xec01, YM2151_data_port_0_w },
-		{ 0xf000, 0xf000, soundlatch3_w },
-		{ 0xf800, 0xf800, sound_bankswitch_w },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM ),
+		new Memory_WriteAddress( 0xe000, 0xe22f, K054539_0_w ),
+		new Memory_WriteAddress( 0xec00, 0xec00, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0xec01, 0xec01, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0xf000, 0xf000, soundlatch3_w ),
+		new Memory_WriteAddress( 0xf800, 0xf800, sound_bankswitch_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( xexex )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_xexex = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* EEPROM data */
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )	/* EEPROM ready (always 1) */
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL );/* EEPROM data */
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL );/* EEPROM ready (always 1) */
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
+	INPUT_PORTS_END(); }}; 
 	
 	static struct YM2151interface ym2151_interface =
 	{
@@ -523,63 +527,63 @@ public class xexex
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( xexex )
-		ROM_REGION( 0x180000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "xex_a01.rom",  0x000000, 0x40000, CRC(3ebcb066) SHA1(83a20433d9fdcc8b8d7133991f9a8164dddb61f3) )
-		ROM_LOAD16_BYTE( "xex_a02.rom",  0x000001, 0x40000, CRC(36ea7a48) SHA1(34f8046d7ecf5ea66c59c5bc0d7627942c28fd3b) )
-		ROM_LOAD16_BYTE( "xex_b03.rom",  0x100000, 0x40000, CRC(97833086) SHA1(a564f7b1b52c774d78a59f4418c7ecccaf94ad41) )
-		ROM_LOAD16_BYTE( "xex_b04.rom",  0x100001, 0x40000, CRC(26ec5dc8) SHA1(9da62683bfa8f16607cbea2d59a1446ec8588c5b) )
+	static RomLoadPtr rom_xexex = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x180000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "xex_a01.rom",  0x000000, 0x40000, CRC(3ebcb066);SHA1(83a20433d9fdcc8b8d7133991f9a8164dddb61f3) )
+		ROM_LOAD16_BYTE( "xex_a02.rom",  0x000001, 0x40000, CRC(36ea7a48);SHA1(34f8046d7ecf5ea66c59c5bc0d7627942c28fd3b) )
+		ROM_LOAD16_BYTE( "xex_b03.rom",  0x100000, 0x40000, CRC(97833086);SHA1(a564f7b1b52c774d78a59f4418c7ecccaf94ad41) )
+		ROM_LOAD16_BYTE( "xex_b04.rom",  0x100001, 0x40000, CRC(26ec5dc8);SHA1(9da62683bfa8f16607cbea2d59a1446ec8588c5b) )
 	
-		ROM_REGION( 0x030000, REGION_CPU2, 0 )
-		ROM_LOAD( "xex_a05.rom", 0x000000, 0x020000, CRC(0e33d6ec) SHA1(4dd68cb78c779e2d035e43fec35a7672ed1c259b) )
-		ROM_RELOAD(              0x010000, 0x020000 )
+		ROM_REGION( 0x030000, REGION_CPU2, 0 );
+		ROM_LOAD( "xex_a05.rom", 0x000000, 0x020000, CRC(0e33d6ec);SHA1(4dd68cb78c779e2d035e43fec35a7672ed1c259b) )
+		ROM_RELOAD(              0x010000, 0x020000 );
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 )
-		ROM_LOAD( "xex_b14.rom", 0x000000, 0x100000, CRC(02a44bfa) SHA1(ad95df4dbf8842820ef20f54407870afb6d0e4a3) )
-		ROM_LOAD( "xex_b13.rom", 0x100000, 0x100000, CRC(633c8eb5) SHA1(a11f78003a1dffe2d8814d368155059719263082) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );
+		ROM_LOAD( "xex_b14.rom", 0x000000, 0x100000, CRC(02a44bfa);SHA1(ad95df4dbf8842820ef20f54407870afb6d0e4a3) )
+		ROM_LOAD( "xex_b13.rom", 0x100000, 0x100000, CRC(633c8eb5);SHA1(a11f78003a1dffe2d8814d368155059719263082) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, 0 )
-		ROM_LOAD( "xex_b12.rom", 0x000000, 0x100000, CRC(08d611b0) SHA1(9cac60131e0411f173acd8ef3f206e5e58a7e5d2) )
-		ROM_LOAD( "xex_b11.rom", 0x100000, 0x100000, CRC(a26f7507) SHA1(6bf717cb9fcad59a2eafda967f14120b9ebbc8c5) )
-		ROM_LOAD( "xex_b10.rom", 0x200000, 0x100000, CRC(ee31db8d) SHA1(c41874fb8b401ea9cdd327ee6239b5925418cf7b) )
-		ROM_LOAD( "xex_b09.rom", 0x300000, 0x100000, CRC(88f072ef) SHA1(7ecc04dbcc29b715117e970cc96e11137a21b83a) )
+		ROM_REGION( 0x400000, REGION_GFX2, 0 );
+		ROM_LOAD( "xex_b12.rom", 0x000000, 0x100000, CRC(08d611b0);SHA1(9cac60131e0411f173acd8ef3f206e5e58a7e5d2) )
+		ROM_LOAD( "xex_b11.rom", 0x100000, 0x100000, CRC(a26f7507);SHA1(6bf717cb9fcad59a2eafda967f14120b9ebbc8c5) )
+		ROM_LOAD( "xex_b10.rom", 0x200000, 0x100000, CRC(ee31db8d);SHA1(c41874fb8b401ea9cdd327ee6239b5925418cf7b) )
+		ROM_LOAD( "xex_b09.rom", 0x300000, 0x100000, CRC(88f072ef);SHA1(7ecc04dbcc29b715117e970cc96e11137a21b83a) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, 0 ) // NOTE: region must be 2xROM size for unpacking
-		ROM_LOAD( "xex_b08.rom", 0x000000, 0x080000, CRC(ca816b7b) SHA1(769ce3700e41200c34adec98598c0fe371fe1e6d) )
+		ROM_REGION( 0x100000, REGION_GFX3, 0 );// NOTE: region must be 2xROM size for unpacking
+		ROM_LOAD( "xex_b08.rom", 0x000000, 0x080000, CRC(ca816b7b);SHA1(769ce3700e41200c34adec98598c0fe371fe1e6d) )
 	
-		ROM_REGION( 0x300000, REGION_SOUND1, 0 )
-		ROM_LOAD( "xex_b06.rom", 0x000000, 0x200000, CRC(3b12fce4) SHA1(c69172d9965b8da8a539812fac92d5f1a3c80d17) )
-		ROM_LOAD( "xex_b07.rom", 0x200000, 0x100000, CRC(ec87fe1b) SHA1(ec9823aea5a1fc5c47c8262e15e10b28be87231c) )
-	ROM_END
+		ROM_REGION( 0x300000, REGION_SOUND1, 0 );
+		ROM_LOAD( "xex_b06.rom", 0x000000, 0x200000, CRC(3b12fce4);SHA1(c69172d9965b8da8a539812fac92d5f1a3c80d17) )
+		ROM_LOAD( "xex_b07.rom", 0x200000, 0x100000, CRC(ec87fe1b);SHA1(ec9823aea5a1fc5c47c8262e15e10b28be87231c) )
+	ROM_END(); }}; 
 	
-	ROM_START( xexexj )
-		ROM_REGION( 0x180000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "067jaa01.16d", 0x000000, 0x40000, CRC(06e99784) SHA1(d53fe3724608992a6938c36aa2719dc545d6b89e) )
-		ROM_LOAD16_BYTE( "067jaa02.16e", 0x000001, 0x40000, CRC(30ae5bc4) SHA1(60491e31eef64a9206d1372afa32d83c6c0968b3) )
-		ROM_LOAD16_BYTE( "xex_b03.rom",  0x100000, 0x40000, CRC(97833086) SHA1(a564f7b1b52c774d78a59f4418c7ecccaf94ad41) )
-		ROM_LOAD16_BYTE( "xex_b04.rom",  0x100001, 0x40000, CRC(26ec5dc8) SHA1(9da62683bfa8f16607cbea2d59a1446ec8588c5b) )
+	static RomLoadPtr rom_xexexj = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x180000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "067jaa01.16d", 0x000000, 0x40000, CRC(06e99784);SHA1(d53fe3724608992a6938c36aa2719dc545d6b89e) )
+		ROM_LOAD16_BYTE( "067jaa02.16e", 0x000001, 0x40000, CRC(30ae5bc4);SHA1(60491e31eef64a9206d1372afa32d83c6c0968b3) )
+		ROM_LOAD16_BYTE( "xex_b03.rom",  0x100000, 0x40000, CRC(97833086);SHA1(a564f7b1b52c774d78a59f4418c7ecccaf94ad41) )
+		ROM_LOAD16_BYTE( "xex_b04.rom",  0x100001, 0x40000, CRC(26ec5dc8);SHA1(9da62683bfa8f16607cbea2d59a1446ec8588c5b) )
 	
-		ROM_REGION( 0x030000, REGION_CPU2, 0 )
-		ROM_LOAD( "067jaa05.4e", 0x000000, 0x020000, CRC(2f4dd0a8) SHA1(bfa76c9c968f1beba648a2911510e3d666a8fe3a) )
-		ROM_RELOAD(              0x010000, 0x020000 )
+		ROM_REGION( 0x030000, REGION_CPU2, 0 );
+		ROM_LOAD( "067jaa05.4e", 0x000000, 0x020000, CRC(2f4dd0a8);SHA1(bfa76c9c968f1beba648a2911510e3d666a8fe3a) )
+		ROM_RELOAD(              0x010000, 0x020000 );
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 )
-		ROM_LOAD( "xex_b14.rom", 0x000000, 0x100000, CRC(02a44bfa) SHA1(ad95df4dbf8842820ef20f54407870afb6d0e4a3) )
-		ROM_LOAD( "xex_b13.rom", 0x100000, 0x100000, CRC(633c8eb5) SHA1(a11f78003a1dffe2d8814d368155059719263082) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );
+		ROM_LOAD( "xex_b14.rom", 0x000000, 0x100000, CRC(02a44bfa);SHA1(ad95df4dbf8842820ef20f54407870afb6d0e4a3) )
+		ROM_LOAD( "xex_b13.rom", 0x100000, 0x100000, CRC(633c8eb5);SHA1(a11f78003a1dffe2d8814d368155059719263082) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, 0 )
-		ROM_LOAD( "xex_b12.rom", 0x000000, 0x100000, CRC(08d611b0) SHA1(9cac60131e0411f173acd8ef3f206e5e58a7e5d2) )
-		ROM_LOAD( "xex_b11.rom", 0x100000, 0x100000, CRC(a26f7507) SHA1(6bf717cb9fcad59a2eafda967f14120b9ebbc8c5) )
-		ROM_LOAD( "xex_b10.rom", 0x200000, 0x100000, CRC(ee31db8d) SHA1(c41874fb8b401ea9cdd327ee6239b5925418cf7b) )
-		ROM_LOAD( "xex_b09.rom", 0x300000, 0x100000, CRC(88f072ef) SHA1(7ecc04dbcc29b715117e970cc96e11137a21b83a) )
+		ROM_REGION( 0x400000, REGION_GFX2, 0 );
+		ROM_LOAD( "xex_b12.rom", 0x000000, 0x100000, CRC(08d611b0);SHA1(9cac60131e0411f173acd8ef3f206e5e58a7e5d2) )
+		ROM_LOAD( "xex_b11.rom", 0x100000, 0x100000, CRC(a26f7507);SHA1(6bf717cb9fcad59a2eafda967f14120b9ebbc8c5) )
+		ROM_LOAD( "xex_b10.rom", 0x200000, 0x100000, CRC(ee31db8d);SHA1(c41874fb8b401ea9cdd327ee6239b5925418cf7b) )
+		ROM_LOAD( "xex_b09.rom", 0x300000, 0x100000, CRC(88f072ef);SHA1(7ecc04dbcc29b715117e970cc96e11137a21b83a) )
 	
-		ROM_REGION( 0x100000, REGION_GFX3, 0 ) // NOTE: region must be 2xROM size for unpacking
-		ROM_LOAD( "xex_b08.rom", 0x000000, 0x080000, CRC(ca816b7b) SHA1(769ce3700e41200c34adec98598c0fe371fe1e6d) )
+		ROM_REGION( 0x100000, REGION_GFX3, 0 );// NOTE: region must be 2xROM size for unpacking
+		ROM_LOAD( "xex_b08.rom", 0x000000, 0x080000, CRC(ca816b7b);SHA1(769ce3700e41200c34adec98598c0fe371fe1e6d) )
 	
-		ROM_REGION( 0x300000, REGION_SOUND1, 0 )
-		ROM_LOAD( "xex_b06.rom", 0x000000, 0x200000, CRC(3b12fce4) SHA1(c69172d9965b8da8a539812fac92d5f1a3c80d17) )
-		ROM_LOAD( "xex_b07.rom", 0x200000, 0x100000, CRC(ec87fe1b) SHA1(ec9823aea5a1fc5c47c8262e15e10b28be87231c) )
-	ROM_END
+		ROM_REGION( 0x300000, REGION_SOUND1, 0 );
+		ROM_LOAD( "xex_b06.rom", 0x000000, 0x200000, CRC(3b12fce4);SHA1(c69172d9965b8da8a539812fac92d5f1a3c80d17) )
+		ROM_LOAD( "xex_b07.rom", 0x200000, 0x100000, CRC(ec87fe1b);SHA1(ec9823aea5a1fc5c47c8262e15e10b28be87231c) )
+	ROM_END(); }}; 
 	
 	MACHINE_INIT( xexex )
 	{
@@ -614,6 +618,6 @@ public class xexex
 	}
 	
 	
-	GAME( 1991, xexex,  0,     xexex, xexex, xexex, ROT0, "Konami", "Xexex (World)" )
-	GAME( 1991, xexexj, xexex, xexex, xexex, xexex, ROT0, "Konami", "Xexex (Japan)" )
+	public static GameDriver driver_xexex	   = new GameDriver("1991"	,"xexex"	,"xexex.java"	,rom_xexex,null	,machine_driver_xexex	,input_ports_xexex	,init_xexex	,ROT0	,	"Konami", "Xexex (World)" )
+	public static GameDriver driver_xexexj	   = new GameDriver("1991"	,"xexexj"	,"xexex.java"	,rom_xexexj,driver_xexex	,machine_driver_xexex	,input_ports_xexex	,init_xexex	,ROT0	,	"Konami", "Xexex (Japan)" )
 }

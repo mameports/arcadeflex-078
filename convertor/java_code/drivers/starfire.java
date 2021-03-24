@@ -57,14 +57,7 @@ public class starfire
 	/* In vidhrdw/starfire.c */
 	VIDEO_UPDATE( starfire );
 	extern VIDEO_START( starfire );
-	extern void starfire_video_update(int scanline, int count);
 	
-	WRITE_HANDLER( starfire_videoram_w );
-	READ_HANDLER( starfire_videoram_r );
-	WRITE_HANDLER( starfire_colorram_w );
-	READ_HANDLER( starfire_colorram_r );
-	WRITE_HANDLER( starfire_vidctrl_w );
-	WRITE_HANDLER( starfire_vidctrl1_w );
 	
 	
 	
@@ -108,7 +101,7 @@ public class starfire
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( starfire_scratch_w )
+	public static WriteHandlerPtr starfire_scratch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* A12 and A3 select video control registers */
 		if ((offset & 0x1008) == 0x1000)
@@ -127,10 +120,10 @@ public class starfire
 		/* convert to a videoram offset */
 		offset = (offset & 0x31f) | ((offset & 0xe0) << 5);
 	    starfire_videoram[offset] = data;
-	}
+	} };
 	
 	
-	static READ_HANDLER( starfire_scratch_r )
+	public static ReadHandlerPtr starfire_scratch_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* A11 selects input ports */
 		if (offset & 0x800)
@@ -139,7 +132,7 @@ public class starfire
 		/* convert to a videoram offset */
 		offset = (offset & 0x31f) | ((offset & 0xe0) << 5);
 	    return starfire_videoram[offset];
-	}
+	} };
 	
 	
 	
@@ -149,7 +142,7 @@ public class starfire
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( starfire_input_r )
+	public static ReadHandlerPtr starfire_input_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (offset & 15)
 		{
@@ -160,10 +153,10 @@ public class starfire
 			case 7:	return input_port_3_r(0);
 			default: return 0xff;
 		}
-	}
+	} };
 	
 	
-	static READ_HANDLER( fireone_input_r )
+	public static ReadHandlerPtr fireone_input_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		static const UINT8 fireone_paddle_map[64] =
 		{
@@ -188,7 +181,7 @@ public class starfire
 				return temp;
 			default: return 0xff;
 		}
-	}
+	} };
 	
 	
 	
@@ -198,19 +191,23 @@ public class starfire
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x9fff, starfire_scratch_r },
-		{ 0xa000, 0xbfff, starfire_colorram_r },
-		{ 0xc000, 0xffff, starfire_videoram_r },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x9fff, starfire_scratch_r ),
+		new Memory_ReadAddress( 0xa000, 0xbfff, starfire_colorram_r ),
+		new Memory_ReadAddress( 0xc000, 0xffff, starfire_videoram_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x9fff, starfire_scratch_w },
-		{ 0xa000, 0xbfff, starfire_colorram_w, &starfire_colorram },
-		{ 0xc000, 0xffff, starfire_videoram_w, &starfire_videoram },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x9fff, starfire_scratch_w ),
+		new Memory_WriteAddress( 0xa000, 0xbfff, starfire_colorram_w, starfire_colorram ),
+		new Memory_WriteAddress( 0xc000, 0xffff, starfire_videoram_w, starfire_videoram ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -220,92 +217,92 @@ public class starfire
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( starfire )
-		PORT_START      /* DSW0 */
-		PORT_DIPNAME( 0x03, 0x00, "Time" )
-		PORT_DIPSETTING(    0x00, "90 Sec" )
-		PORT_DIPSETTING(    0x01, "80 Sec" )
-		PORT_DIPSETTING(    0x02, "70 Sec" )
-		PORT_DIPSETTING(    0x03, "60 Sec" )
-		PORT_DIPNAME( 0x04, 0x00, "Coin(s) to Start" )
-		PORT_DIPSETTING(    0x00, "1" )
-		PORT_DIPSETTING(    0x04, "2" )
-		PORT_DIPNAME( 0x08, 0x00, "Fuel per Coin" )
-		PORT_DIPSETTING(    0x00, "300" )
-		PORT_DIPSETTING(    0x08, "600" )
-		PORT_DIPNAME( 0x30, 0x00, "Bonus" )
-		PORT_DIPSETTING(    0x00, "300 points" )
-		PORT_DIPSETTING(    0x10, "500 points" )
-		PORT_DIPSETTING(    0x20, "700 points" )
-		PORT_DIPSETTING(    0x30, "None" )
-		PORT_DIPNAME( 0x40, 0x00, "Score Table Hold" )
-		PORT_DIPSETTING(    0x00, "fixed length" )
-		PORT_DIPSETTING(    0x40, "fixed length+fire" )
-		PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
+	static InputPortPtr input_ports_starfire = new InputPortPtr(){ public void handler() { 
+		PORT_START();       /* DSW0 */
+		PORT_DIPNAME( 0x03, 0x00, "Time" );
+		PORT_DIPSETTING(    0x00, "90 Sec" );
+		PORT_DIPSETTING(    0x01, "80 Sec" );
+		PORT_DIPSETTING(    0x02, "70 Sec" );
+		PORT_DIPSETTING(    0x03, "60 Sec" );
+		PORT_DIPNAME( 0x04, 0x00, "Coin(s);to Start" )
+		PORT_DIPSETTING(    0x00, "1" );
+		PORT_DIPSETTING(    0x04, "2" );
+		PORT_DIPNAME( 0x08, 0x00, "Fuel per Coin" );
+		PORT_DIPSETTING(    0x00, "300" );
+		PORT_DIPSETTING(    0x08, "600" );
+		PORT_DIPNAME( 0x30, 0x00, "Bonus" );
+		PORT_DIPSETTING(    0x00, "300 points" );
+		PORT_DIPSETTING(    0x10, "500 points" );
+		PORT_DIPSETTING(    0x20, "700 points" );
+		PORT_DIPSETTING(    0x30, "None" );
+		PORT_DIPNAME( 0x40, 0x00, "Score Table Hold" );
+		PORT_DIPSETTING(    0x00, "fixed length" );
+		PORT_DIPSETTING(    0x40, "fixed length+fire" );
+		PORT_SERVICE( 0x80, IP_ACTIVE_HIGH );
 	
-		PORT_START      /* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START();       /* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START  /* IN2 */
-		PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X, 100, 10, 0, 255 )
+		PORT_START();   /* IN2 */
+		PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X, 100, 10, 0, 255 );
 	
-		PORT_START  /* IN3 */
-		PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE, 100, 10, 0, 255 )
+		PORT_START();   /* IN3 */
+		PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE, 100, 10, 0, 255 );
 	
-		PORT_START /* Throttle (IN4) [not really player 2, but we need to separate it out] */
-		PORT_ANALOG( 0xff, 0x80, IPT_PADDLE_V | IPF_REVERSE | IPF_PLAYER2, 100, 10, 0, 255 )
-	INPUT_PORTS_END
+		PORT_START();  /* Throttle (IN4) [not really player 2, but we need to separate it out] */
+		PORT_ANALOG( 0xff, 0x80, IPT_PADDLE_V | IPF_REVERSE | IPF_PLAYER2, 100, 10, 0, 255 );
+	INPUT_PORTS_END(); }}; 
 	
 	
-	INPUT_PORTS_START( fireone )
-		PORT_START      /* DSW0 */
-		PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x03, "2 Coins/1 Player" )
-		PORT_DIPSETTING(    0x02, "2 Coins/1 or 2 Players" )
-		PORT_DIPSETTING(    0x00, "1 Coin/1 Player" )
-		PORT_DIPSETTING(    0x01, "1 Coin/1 or 2 Players" )
-		PORT_DIPNAME( 0x0c, 0x0c, "Time" )
-		PORT_DIPSETTING(    0x00, "75 Sec" )
-		PORT_DIPSETTING(    0x04, "90 Sec" )
-		PORT_DIPSETTING(    0x08, "105 Sec" )
-		PORT_DIPSETTING(    0x0c, "120 Sec" )
-		PORT_DIPNAME( 0x30, 0x00, "Bonus difficulty" )
-		PORT_DIPSETTING(    0x00, "Easy" )
-		PORT_DIPSETTING(    0x10, "Normal" )
-		PORT_DIPSETTING(    0x20, "Hard" )
-		PORT_DIPSETTING(    0x30, "Very hard" )
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )
+	static InputPortPtr input_ports_fireone = new InputPortPtr(){ public void handler() { 
+		PORT_START();       /* DSW0 */
+		PORT_DIPNAME( 0x03, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x03, "2 Coins/1 Player" );
+		PORT_DIPSETTING(    0x02, "2 Coins/1 or 2 Players" );
+		PORT_DIPSETTING(    0x00, "1 Coin/1 Player" );
+		PORT_DIPSETTING(    0x01, "1 Coin/1 or 2 Players" );
+		PORT_DIPNAME( 0x0c, 0x0c, "Time" );
+		PORT_DIPSETTING(    0x00, "75 Sec" );
+		PORT_DIPSETTING(    0x04, "90 Sec" );
+		PORT_DIPSETTING(    0x08, "105 Sec" );
+		PORT_DIPSETTING(    0x0c, "120 Sec" );
+		PORT_DIPNAME( 0x30, 0x00, "Bonus difficulty" );
+		PORT_DIPSETTING(    0x00, "Easy" );
+		PORT_DIPSETTING(    0x10, "Normal" );
+		PORT_DIPSETTING(    0x20, "Hard" );
+		PORT_DIPSETTING(    0x30, "Very hard" );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_HIGH );
 	
-		PORT_START      /* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
-		PORT_BIT_IMPULSE( 0x04, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START();       /* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 );
+		PORT_BIT_IMPULSE( 0x04, IP_ACTIVE_HIGH, IPT_COIN1, 1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START  /* IN2 */
-		PORT_ANALOG( 0x3f, 0x20, IPT_PADDLE | IPF_PLAYER1, 50, 1, 0, 63 )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
+		PORT_START();   /* IN2 */
+		PORT_ANALOG( 0x3f, 0x20, IPT_PADDLE | IPF_PLAYER1, 50, 1, 0, 63 );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 );
 	
-		PORT_START  /* IN3 */
-		PORT_ANALOG( 0x3f, 0x20, IPT_PADDLE | IPF_PLAYER2, 50, 1, 0, 63 )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
-	INPUT_PORTS_END
+		PORT_START();   /* IN3 */
+		PORT_ANALOG( 0x3f, 0x20, IPT_PADDLE | IPF_PLAYER2, 50, 1, 0, 63 );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -347,52 +344,52 @@ public class starfire
 	 *
 	 *************************************/
 	
-	ROM_START( starfire )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-		ROM_LOAD( "sfire.1a",     0x0000, 0x0800, CRC(9990af64) SHA1(05eccf1084ace55be9d6cf0fccddcaa18fa5487a) )
-		ROM_LOAD( "sfire.2a",     0x0800, 0x0800, CRC(6e17ba33) SHA1(59433696f56018a7b253491b1db3ff45546dcd46) )
-		ROM_LOAD( "sfire.1b",     0x1000, 0x0800, CRC(946175d0) SHA1(6a55d9f6031b96e9e05d61d59a23d4fc6df724bf) )
-		ROM_LOAD( "sfire.2b",     0x1800, 0x0800, CRC(67be4275) SHA1(dd6232e034030e0c2b4d866fda36cbe22d8518f7) )
-		ROM_LOAD( "sfire.1c",     0x2000, 0x0800, CRC(c56b4e07) SHA1(e55ae84c484a78372180783df37750cdad8b04a2) )
-		ROM_LOAD( "sfire.2c",     0x2800, 0x0800, CRC(b4b9d3a7) SHA1(8f3e0d67d1e94f6b1c41a78e59ac81f021aa827a) )
-		ROM_LOAD( "sfire.1d",     0x3000, 0x0800, CRC(fd52ffb5) SHA1(c1ba2ffb7de0301a962cca2e693bfbbd9838b852) )
-		ROM_LOAD( "sfire.2d",     0x3800, 0x0800, CRC(51c69fe3) SHA1(33159cb3ea5029d395fc20916899aa05139c2d51) )
-		ROM_LOAD( "sfire.1e",     0x4000, 0x0800, CRC(01994ec8) SHA1(db694f922a98bb0fc585cad83bee8a88d72fca8f) )
-		ROM_LOAD( "sfire.2e",     0x4800, 0x0800, CRC(ef3d1b71) SHA1(ca427209194f519b1ac5b94d29c2789445303dc1) )
-		ROM_LOAD( "sfire.1f",     0x5000, 0x0800, CRC(af31dc39) SHA1(0dfeff6973fd03e85b08e70c77d212f0bb60121d) )
-	ROM_END
+	static RomLoadPtr rom_starfire = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for code */
+		ROM_LOAD( "sfire.1a",     0x0000, 0x0800, CRC(9990af64);SHA1(05eccf1084ace55be9d6cf0fccddcaa18fa5487a) )
+		ROM_LOAD( "sfire.2a",     0x0800, 0x0800, CRC(6e17ba33);SHA1(59433696f56018a7b253491b1db3ff45546dcd46) )
+		ROM_LOAD( "sfire.1b",     0x1000, 0x0800, CRC(946175d0);SHA1(6a55d9f6031b96e9e05d61d59a23d4fc6df724bf) )
+		ROM_LOAD( "sfire.2b",     0x1800, 0x0800, CRC(67be4275);SHA1(dd6232e034030e0c2b4d866fda36cbe22d8518f7) )
+		ROM_LOAD( "sfire.1c",     0x2000, 0x0800, CRC(c56b4e07);SHA1(e55ae84c484a78372180783df37750cdad8b04a2) )
+		ROM_LOAD( "sfire.2c",     0x2800, 0x0800, CRC(b4b9d3a7);SHA1(8f3e0d67d1e94f6b1c41a78e59ac81f021aa827a) )
+		ROM_LOAD( "sfire.1d",     0x3000, 0x0800, CRC(fd52ffb5);SHA1(c1ba2ffb7de0301a962cca2e693bfbbd9838b852) )
+		ROM_LOAD( "sfire.2d",     0x3800, 0x0800, CRC(51c69fe3);SHA1(33159cb3ea5029d395fc20916899aa05139c2d51) )
+		ROM_LOAD( "sfire.1e",     0x4000, 0x0800, CRC(01994ec8);SHA1(db694f922a98bb0fc585cad83bee8a88d72fca8f) )
+		ROM_LOAD( "sfire.2e",     0x4800, 0x0800, CRC(ef3d1b71);SHA1(ca427209194f519b1ac5b94d29c2789445303dc1) )
+		ROM_LOAD( "sfire.1f",     0x5000, 0x0800, CRC(af31dc39);SHA1(0dfeff6973fd03e85b08e70c77d212f0bb60121d) )
+	ROM_END(); }}; 
 	
-	ROM_START( starfira )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-		ROM_LOAD( "starfire.1a",  0x0000, 0x0800, CRC(6adcd7e7) SHA1(a931fb80e48db3050ce3bc39f455961c0c7c56ce) )
-		ROM_LOAD( "starfire.2a",  0x0800, 0x0800, CRC(835c70ea) SHA1(36828735aa48de5e3e973ca1f42ef08537e1c6ce) )
-		ROM_LOAD( "starfire.1b",  0x1000, 0x0800, CRC(377afbef) SHA1(97cb5a20aeb8c70670d6db8f41b2abcb181755c6) )
-		ROM_LOAD( "starfire.2b",  0x1800, 0x0800, CRC(f3a833cb) SHA1(d2e01806ead71b0946347fd9668fd3f24524734e) )
-		ROM_LOAD( "starfire.1c",  0x2000, 0x0800, CRC(db625c1d) SHA1(5d0307258a73b4b82fbe7b10634076412f4ab3c7) )
-		ROM_LOAD( "starfire.2c",  0x2800, 0x0800, CRC(68fa2ce6) SHA1(2b32df960bc4ec38f50f0d23ab96becb68bc4034) )
-		ROM_LOAD( "starfire.1d",  0x3000, 0x0800, CRC(c6b5f1d1) SHA1(85a3f7ce7a51597609c762c9a809b84922f8a6e5) )
-		ROM_LOAD( "starfire.2d",  0x3800, 0x0800, CRC(ab2a36a5) SHA1(debd9503246b4d27c8136bfb60cdffd9107ad95e) )
-		ROM_LOAD( "starfire.1e",  0x4000, 0x0800, CRC(1ac8ba8c) SHA1(90c5a8a943edad74141b15e1f145598abce8cb75) )
-		ROM_LOAD( "starfire.2e",  0x4800, 0x0800, CRC(ba8434c5) SHA1(1831b291dfe3e4b081e66caa909b8c727bfffa7b) )
-	ROM_END
+	static RomLoadPtr rom_starfira = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for code */
+		ROM_LOAD( "starfire.1a",  0x0000, 0x0800, CRC(6adcd7e7);SHA1(a931fb80e48db3050ce3bc39f455961c0c7c56ce) )
+		ROM_LOAD( "starfire.2a",  0x0800, 0x0800, CRC(835c70ea);SHA1(36828735aa48de5e3e973ca1f42ef08537e1c6ce) )
+		ROM_LOAD( "starfire.1b",  0x1000, 0x0800, CRC(377afbef);SHA1(97cb5a20aeb8c70670d6db8f41b2abcb181755c6) )
+		ROM_LOAD( "starfire.2b",  0x1800, 0x0800, CRC(f3a833cb);SHA1(d2e01806ead71b0946347fd9668fd3f24524734e) )
+		ROM_LOAD( "starfire.1c",  0x2000, 0x0800, CRC(db625c1d);SHA1(5d0307258a73b4b82fbe7b10634076412f4ab3c7) )
+		ROM_LOAD( "starfire.2c",  0x2800, 0x0800, CRC(68fa2ce6);SHA1(2b32df960bc4ec38f50f0d23ab96becb68bc4034) )
+		ROM_LOAD( "starfire.1d",  0x3000, 0x0800, CRC(c6b5f1d1);SHA1(85a3f7ce7a51597609c762c9a809b84922f8a6e5) )
+		ROM_LOAD( "starfire.2d",  0x3800, 0x0800, CRC(ab2a36a5);SHA1(debd9503246b4d27c8136bfb60cdffd9107ad95e) )
+		ROM_LOAD( "starfire.1e",  0x4000, 0x0800, CRC(1ac8ba8c);SHA1(90c5a8a943edad74141b15e1f145598abce8cb75) )
+		ROM_LOAD( "starfire.2e",  0x4800, 0x0800, CRC(ba8434c5);SHA1(1831b291dfe3e4b081e66caa909b8c727bfffa7b) )
+	ROM_END(); }}; 
 	
-	ROM_START( fireone )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-		ROM_LOAD( "fo-ic13.7b",     0x0000, 0x0800, CRC(f927f086) SHA1(509db84d781dd2d5aaefd561539738f0db7c4ca5) )
-		ROM_LOAD( "fo-ic24.7c",     0x0800, 0x0800, CRC(0d2d8723) SHA1(e9bb2092ce7786016f15e42916ad48ef12735e9c) )
-		ROM_LOAD( "fo-ic12.6b",     0x1000, 0x0800, CRC(ac7783d9) SHA1(8bcfcc5d3126382f4ec8904e0435de0931abc41e) )
-		ROM_LOAD( "fo-ic23.6c",     0x1800, 0x0800, CRC(15c74ee7) SHA1(0adb87c2471ecbbd18d10579043765ce877dbde7) )
-		ROM_LOAD( "fo-ic11.5b",     0x2000, 0x0800, CRC(721930a1) SHA1(826245ffbd399056a74ccd14cd2bd4acd2fb2d24) )
-		ROM_LOAD( "fo-ic22.5c",     0x2800, 0x0800, CRC(f0c965b4) SHA1(ffe96e636720325d9a40b729128730446b74435b) )
-		ROM_LOAD( "fo-ic10.4b",     0x3000, 0x0800, CRC(27a7b2c0) SHA1(7a8c70e565bdcb6e085e4d283f41c92758640055) )
-		ROM_LOAD( "fo-ic21.4c",     0x3800, 0x0800, CRC(b142c857) SHA1(609fbd0c0b5833807fd606284c26ad7cb7e4d742) )
-		ROM_LOAD( "fo-ic09.3b",     0x4000, 0x0800, CRC(1c076b1b) SHA1(874c09c81e90e1be869902057b7359e71f77db52) )
-		ROM_LOAD( "fo-ic20.3c",     0x4800, 0x0800, CRC(b4ac6e71) SHA1(4731dd6865929b8c9c33cbe4cf1dde23046d6914) )
-		ROM_LOAD( "fo-ic08.2b",     0x5000, 0x0800, CRC(5839e2ff) SHA1(9d8a17c5b64cdf5bf222f4dbca48f0210b18e403) )
-		ROM_LOAD( "fo-ic19.2c",     0x5800, 0x0800, CRC(9fd85e11) SHA1(f8264357a63f757bc58f3703e60e219d67d0d081) )
-		ROM_LOAD( "fo-ic07.1b",     0x6000, 0x0800, CRC(b90baae1) SHA1(c7dedf38e5a1977234f1f745a7aa443f6bf7db52) )
-		ROM_LOAD( "fo-ic18.1c",     0x6800, 0x0800, CRC(771ee5ba) SHA1(6577e219386de594dbde8a54d5f5f9657419061a) )
-	ROM_END
+	static RomLoadPtr rom_fireone = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for code */
+		ROM_LOAD( "fo-ic13.7b",     0x0000, 0x0800, CRC(f927f086);SHA1(509db84d781dd2d5aaefd561539738f0db7c4ca5) )
+		ROM_LOAD( "fo-ic24.7c",     0x0800, 0x0800, CRC(0d2d8723);SHA1(e9bb2092ce7786016f15e42916ad48ef12735e9c) )
+		ROM_LOAD( "fo-ic12.6b",     0x1000, 0x0800, CRC(ac7783d9);SHA1(8bcfcc5d3126382f4ec8904e0435de0931abc41e) )
+		ROM_LOAD( "fo-ic23.6c",     0x1800, 0x0800, CRC(15c74ee7);SHA1(0adb87c2471ecbbd18d10579043765ce877dbde7) )
+		ROM_LOAD( "fo-ic11.5b",     0x2000, 0x0800, CRC(721930a1);SHA1(826245ffbd399056a74ccd14cd2bd4acd2fb2d24) )
+		ROM_LOAD( "fo-ic22.5c",     0x2800, 0x0800, CRC(f0c965b4);SHA1(ffe96e636720325d9a40b729128730446b74435b) )
+		ROM_LOAD( "fo-ic10.4b",     0x3000, 0x0800, CRC(27a7b2c0);SHA1(7a8c70e565bdcb6e085e4d283f41c92758640055) )
+		ROM_LOAD( "fo-ic21.4c",     0x3800, 0x0800, CRC(b142c857);SHA1(609fbd0c0b5833807fd606284c26ad7cb7e4d742) )
+		ROM_LOAD( "fo-ic09.3b",     0x4000, 0x0800, CRC(1c076b1b);SHA1(874c09c81e90e1be869902057b7359e71f77db52) )
+		ROM_LOAD( "fo-ic20.3c",     0x4800, 0x0800, CRC(b4ac6e71);SHA1(4731dd6865929b8c9c33cbe4cf1dde23046d6914) )
+		ROM_LOAD( "fo-ic08.2b",     0x5000, 0x0800, CRC(5839e2ff);SHA1(9d8a17c5b64cdf5bf222f4dbca48f0210b18e403) )
+		ROM_LOAD( "fo-ic19.2c",     0x5800, 0x0800, CRC(9fd85e11);SHA1(f8264357a63f757bc58f3703e60e219d67d0d081) )
+		ROM_LOAD( "fo-ic07.1b",     0x6000, 0x0800, CRC(b90baae1);SHA1(c7dedf38e5a1977234f1f745a7aa443f6bf7db52) )
+		ROM_LOAD( "fo-ic18.1c",     0x6800, 0x0800, CRC(771ee5ba);SHA1(6577e219386de594dbde8a54d5f5f9657419061a) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -420,7 +417,7 @@ public class starfire
 	 *
 	 *************************************/
 	
-	GAMEX( 1979, starfire, 0,        starfire, starfire, starfire, ROT0, "Exidy", "Star Fire (set 1)", GAME_NO_SOUND )
-	GAMEX( 1979, starfira, starfire, starfire, starfire, starfire, ROT0, "Exidy", "Star Fire (set 2)", GAME_NO_SOUND )
-	GAMEX( 1979, fireone,  0,        starfire, fireone,  fireone,  ROT0, "Exidy", "Fire One", GAME_NO_SOUND )
+	public static GameDriver driver_starfire	   = new GameDriver("1979"	,"starfire"	,"starfire.java"	,rom_starfire,null	,machine_driver_starfire	,input_ports_starfire	,init_starfire	,ROT0	,	"Exidy", "Star Fire (set 1)", GAME_NO_SOUND )
+	public static GameDriver driver_starfira	   = new GameDriver("1979"	,"starfira"	,"starfire.java"	,rom_starfira,driver_starfire	,machine_driver_starfire	,input_ports_starfire	,init_starfire	,ROT0	,	"Exidy", "Star Fire (set 2)", GAME_NO_SOUND )
+	public static GameDriver driver_fireone	   = new GameDriver("1979"	,"fireone"	,"starfire.java"	,rom_fireone,null	,machine_driver_starfire	,input_ports_fireone	,init_fireone	,ROT0	,	"Exidy", "Fire One", GAME_NO_SOUND )
 }

@@ -17,26 +17,26 @@ public class nitedrvr
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( nitedrvr_videoram_w )
+	public static WriteHandlerPtr nitedrvr_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( nitedrvr_hvc_w )
+	public static WriteHandlerPtr nitedrvr_hvc_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		nitedrvr_hvc[offset & 0x3f] = data;
 	
 	//	if ((offset & 0x30) == 0x30)
 	//		;		/* Watchdog called here */
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] & 0x3f;
+		int code = videoram.read(tile_index)& 0x3f;
 	
 		SET_TILE_INFO(0, code, 0, 0)
 	}
@@ -46,7 +46,7 @@ public class nitedrvr
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -89,9 +89,7 @@ public class nitedrvr
 	{
 		int offs;
 	
-		extern int nitedrvr_gear;
-		extern int nitedrvr_track;
-	
+			
 		char gear_buf[] =  {0x07,0x05,0x01,0x12,0x00,0x00}; /* "GEAR  " */
 		char track_buf[] = {0x0e,0x0f,0x16,0x09,0x03,0x05, /* "NOVICE" */
 							0x05,0x18,0x10,0x05,0x12,0x14, /* "EXPERT" */

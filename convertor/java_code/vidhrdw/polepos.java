@@ -65,24 +65,24 @@ public class polepos
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* Sheet 15B: 136014-0137 red component */
-			bit0 = (color_prom[0x000 + i] >> 0) & 1;
-			bit1 = (color_prom[0x000 + i] >> 1) & 1;
-			bit2 = (color_prom[0x000 + i] >> 2) & 1;
-			bit3 = (color_prom[0x000 + i] >> 3) & 1;
+			bit0 = (color_prom.read(0x000 + i)>> 0) & 1;
+			bit1 = (color_prom.read(0x000 + i)>> 1) & 1;
+			bit2 = (color_prom.read(0x000 + i)>> 2) & 1;
+			bit3 = (color_prom.read(0x000 + i)>> 3) & 1;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			/* Sheet 15B: 136014-0138 green component */
-			bit0 = (color_prom[0x100 + i] >> 0) & 1;
-			bit1 = (color_prom[0x100 + i] >> 1) & 1;
-			bit2 = (color_prom[0x100 + i] >> 2) & 1;
-			bit3 = (color_prom[0x100 + i] >> 3) & 1;
+			bit0 = (color_prom.read(0x100 + i)>> 0) & 1;
+			bit1 = (color_prom.read(0x100 + i)>> 1) & 1;
+			bit2 = (color_prom.read(0x100 + i)>> 2) & 1;
+			bit3 = (color_prom.read(0x100 + i)>> 3) & 1;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			/* Sheet 15B: 136014-0139 blue component */
-			bit0 = (color_prom[0x200 + i] >> 0) & 1;
-			bit1 = (color_prom[0x200 + i] >> 1) & 1;
-			bit2 = (color_prom[0x200 + i] >> 2) & 1;
-			bit3 = (color_prom[0x200 + i] >> 3) & 1;
+			bit0 = (color_prom.read(0x200 + i)>> 0) & 1;
+			bit1 = (color_prom.read(0x200 + i)>> 1) & 1;
+			bit2 = (color_prom.read(0x200 + i)>> 2) & 1;
+			bit3 = (color_prom.read(0x200 + i)>> 3) & 1;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			
 			palette_set_color(i,r,g,b);
@@ -95,7 +95,7 @@ public class polepos
 		 *******************************************************/
 		for (i = 0; i < 64*4; i++)
 		{
-			int color = color_prom[0x300 + i];
+			int color = color_prom.read(0x300 + i);
 			colortable[0x0000 + i] = (color != 15) ? (0x020 + color) : 0;
 			colortable[0x0100 + i] = (color != 15) ? (0x060 + color) : 0;
 		}
@@ -107,7 +107,7 @@ public class polepos
 		 *******************************************************/
 		for (i = 0; i < 64*4; i++)
 		{
-			int color = color_prom[0x400 + i];
+			int color = color_prom.read(0x400 + i);
 			colortable[0x0200 + i] = 0x000 + color;
 			colortable[0x0300 + i] = 0x040 + color;
 		}
@@ -119,7 +119,7 @@ public class polepos
 		 *******************************************************/
 		for (i = 0; i < 64*16; i++)
 		{
-			int color = color_prom[0xc00 + i];
+			int color = color_prom.read(0xc00 + i);
 			colortable[0x0400 + i] = (color != 15) ? (0x010 + color) : 0;
 			colortable[0x0800 + i] = (color != 15) ? (0x050 + color) : 0;
 		}
@@ -131,7 +131,7 @@ public class polepos
 		 *******************************************************/
 		for (i = 0; i < 64*16; i++)
 		{
-			int color = color_prom[0x800 + i];
+			int color = color_prom.read(0x800 + i);
 			colortable[0x0c00 + i] = 0x000 + color;
 			colortable[0x1000 + i] = 0x040 + color;
 		}
@@ -139,13 +139,13 @@ public class polepos
 		/* 136014-142, 136014-143, 136014-144 Vertical position modifiers */
 		for (i = 0; i < 256; i++)
 		{
-			j = color_prom[0x500 + i] + (color_prom[0x600 + i] << 4) + (color_prom[0x700 + i] << 8);
+			j = color_prom.read(0x500 + i)+ (color_prom.read(0x600 + i)<< 4) + (color_prom.read(0x700 + i)<< 8);
 			polepos_vertical_position_modifier[i] = j;
 		}
 	
-		road_control = &color_prom[0x2000];
-		road_bits1 = &color_prom[0x4000];
-		road_bits2 = &color_prom[0x6000];
+		road_control = &color_prom.read(0x2000);
+		road_bits1 = &color_prom.read(0x4000);
+		road_bits2 = &color_prom.read(0x6000);
 	}
 	
 	
@@ -159,12 +159,12 @@ public class polepos
 	{
 		/* allocate view bitmap */
 		view_bitmap = auto_bitmap_alloc(64*8, 16*8);
-		if (!view_bitmap)
+		if (view_bitmap == 0)
 			return 1;
 	
 		/* allocate view dirty buffer */
 		view_dirty = auto_malloc(64*16);
-		if (!view_dirty)
+		if (view_dirty == 0)
 			return 1;
 	
 		return 0;
@@ -187,15 +187,15 @@ public class polepos
 		COMBINE_DATA(&polepos_sprite16_memory[offset]);
 	}
 	
-	READ_HANDLER( polepos_sprite_r )
+	public static ReadHandlerPtr polepos_sprite_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return polepos_sprite16_memory[offset] & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( polepos_sprite_w )
+	public static WriteHandlerPtr polepos_sprite_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		polepos_sprite16_memory[offset] = (polepos_sprite16_memory[offset] & 0xff00) | data;
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -214,15 +214,15 @@ public class polepos
 		COMBINE_DATA(&polepos_road16_memory[offset]);
 	}
 	
-	READ_HANDLER( polepos_road_r )
+	public static ReadHandlerPtr polepos_road_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return polepos_road16_memory[offset] & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( polepos_road_w )
+	public static WriteHandlerPtr polepos_road_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		polepos_road16_memory[offset] = (polepos_road16_memory[offset] & 0xff00) | data;
-	}
+	} };
 	
 	WRITE16_HANDLER( polepos_road16_vscroll_w )
 	{
@@ -252,12 +252,12 @@ public class polepos
 		}
 	}
 	
-	READ_HANDLER( polepos_view_r )
+	public static ReadHandlerPtr polepos_view_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return polepos_view16_memory[offset] & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( polepos_view_w )
+	public static WriteHandlerPtr polepos_view_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data16_t oldword = polepos_view16_memory[offset];
 		polepos_view16_memory[offset] = (polepos_view16_memory[offset] & 0xff00) | data;
@@ -266,7 +266,7 @@ public class polepos
 			if (offset < 0x400)
 				view_dirty[offset] = 1;
 		}
-	}
+	} };
 	
 	WRITE16_HANDLER( polepos_view16_hscroll_w )
 	{
@@ -290,15 +290,15 @@ public class polepos
 		COMBINE_DATA(&polepos_alpha16_memory[offset]);
 	}
 	
-	READ_HANDLER( polepos_alpha_r )
+	public static ReadHandlerPtr polepos_alpha_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return polepos_alpha16_memory[offset] & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( polepos_alpha_w )
+	public static WriteHandlerPtr polepos_alpha_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		polepos_alpha16_memory[offset] = (polepos_alpha16_memory[offset] & 0xff00) | data;
-	}
+	} };
 	
 	
 	/***************************************************************************

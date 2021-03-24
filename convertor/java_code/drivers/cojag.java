@@ -105,7 +105,7 @@ public class cojag
 	static MACHINE_INIT( cojag )
 	{
 		/* 68020 only: copy the interrupt vectors into RAM */
-		if (!cojag_is_r3000)
+		if (cojag_is_r3000 == 0)
 			memcpy(jaguar_shared_ram, rom_base, 0x10);
 	
 		/* set up main CPU RAM/ROM banks */
@@ -669,94 +669,94 @@ public class cojag
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( area51 )
-		PORT_START
-		PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0xfe00, IP_ACTIVE_LOW, IPT_UNUSED )
+	static InputPortPtr input_ports_area51 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0xfe00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0xfe00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0xfe00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN4 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	// volume down
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	// volume up
-		PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )			// s-test
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_SPECIAL )	// vsyncneq
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN4 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL );// volume down
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL );// volume up
+		PORT_SERVICE( 0x0040, IP_ACTIVE_LOW );		// s-test
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_SPECIAL );// vsyncneq
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START				/* fake analog X */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+		PORT_START(); 				/* fake analog X */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 );
 	
-		PORT_START				/* fake analog Y */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+		PORT_START(); 				/* fake analog Y */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 );
 	
-		PORT_START				/* fake analog X */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 )
+		PORT_START(); 				/* fake analog X */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 );
 	
-		PORT_START				/* fake analog Y */
-		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 )
+		PORT_START(); 				/* fake analog Y */
+		PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 );
 	
-		PORT_START				/* gun triggers */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_SPECIAL )	// gun data valid
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_SPECIAL )	// gun data valid
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0xfff0, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 				/* gun triggers */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_SPECIAL );// gun data valid
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_SPECIAL );// gun data valid
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0xfff0, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
-	INPUT_PORTS_START( vcircle )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 )
-		PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
+	static InputPortPtr input_ports_vcircle = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 );
+		PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
-		PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 );
+		PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN4 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	// volume down
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	// volume up
-		PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )			// s-test
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_SPECIAL )	// vsyncneq
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN4 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL );// volume down
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL );// volume up
+		PORT_SERVICE( 0x0040, IP_ACTIVE_LOW );		// s-test
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_SPECIAL );// vsyncneq
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START
-		PORT_BIT( 0x000f, IP_ACTIVE_HIGH, IPT_SPECIAL )	// coin returns
-		PORT_BIT( 0x00f0, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x000f, IP_ACTIVE_HIGH, IPT_SPECIAL );// coin returns
+		PORT_BIT( 0x00f0, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -766,11 +766,11 @@ public class cojag
 	 *
 	 *************************************/
 	
-	static struct DACinterface dac_interface =
-	{
+	static DACinterface dac_interface = new DACinterface
+	(
 		2,
-		{ MIXER(100, MIXER_PAN_LEFT), MIXER(100, MIXER_PAN_RIGHT) }
-	};
+		new int[] { MIXER(100, MIXER_PAN_LEFT), MIXER(100, MIXER_PAN_RIGHT) }
+	);
 	
 	
 	
@@ -892,88 +892,88 @@ public class cojag
 	 *
 	 *************************************/
 	
-	ROM_START( area51 ) /* 68020 based, Area51 v?? Date: Oct 25, 1995 */
-		ROM_REGION( 0x800000, REGION_CPU1, 0 )		/* 4MB for RAM at 0 */
+	static RomLoadPtr rom_area51 = new RomLoadPtr(){ public void handler(){  /* 68020 based, Area51 v?? Date: Oct 25, 1995 */
+		ROM_REGION( 0x800000, REGION_CPU1, 0 );	/* 4MB for RAM at 0 */
 	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 2MB for 68020 code */
-		ROM_LOAD32_BYTE( "3h", 0x00000, 0x80000, CRC(116d37e6) SHA1(5d36cae792dd349faa77cd2d8018722a28ee55c1) )
-		ROM_LOAD32_BYTE( "3p", 0x00001, 0x80000, CRC(eb10f539) SHA1(dadc4be5a442dd4bd17385033056555e528ed994) )
-		ROM_LOAD32_BYTE( "3m", 0x00002, 0x80000, CRC(c6d8322b) SHA1(90cf848a4195c51b505653cc2c74a3b9e3c851b8) )
-		ROM_LOAD32_BYTE( "3k", 0x00003, 0x80000, CRC(729eb1b7) SHA1(21864b4281b1ad17b2903e3aa294e4be74161e80) )
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for 68020 code */
+		ROM_LOAD32_BYTE( "3h", 0x00000, 0x80000, CRC(116d37e6);SHA1(5d36cae792dd349faa77cd2d8018722a28ee55c1) )
+		ROM_LOAD32_BYTE( "3p", 0x00001, 0x80000, CRC(eb10f539);SHA1(dadc4be5a442dd4bd17385033056555e528ed994) )
+		ROM_LOAD32_BYTE( "3m", 0x00002, 0x80000, CRC(c6d8322b);SHA1(90cf848a4195c51b505653cc2c74a3b9e3c851b8) )
+		ROM_LOAD32_BYTE( "3k", 0x00003, 0x80000, CRC(729eb1b7);SHA1(21864b4281b1ad17b2903e3aa294e4be74161e80) )
 	
 		DISK_REGION( REGION_DISKS )
 		DISK_IMAGE( "area51.chd", 0, MD5(130b330eff59403f8fc3433ff501852b) SHA1(9ea749404c9a5d44f407cdb8803293ec0d61410d) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	ROM_START( maxforce ) /* R3000 based, labeled as "Maximum Force 5-23-97 v1.05" */
-		ROM_REGION( 0x800000, REGION_CPU1, 0 )		/* 4MB for RAM at 0 */
+	static RomLoadPtr rom_maxforce = new RomLoadPtr(){ public void handler(){  /* R3000 based, labeled as "Maximum Force 5-23-97 v1.05" */
+		ROM_REGION( 0x800000, REGION_CPU1, 0 );	/* 4MB for RAM at 0 */
 	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 2MB for IDT 79R3041 code */
-		ROM_LOAD32_BYTE( "maxf_105.hh", 0x00000, 0x80000, CRC(ec7f8167) SHA1(0cf057bfb1f30c2c9621d3ed25021e7ba7bdd46e) )
-		ROM_LOAD32_BYTE( "maxf_105.hl", 0x00001, 0x80000, CRC(3172611c) SHA1(00f14f871b737c66c20f95743740d964d0be3f24) )
-		ROM_LOAD32_BYTE( "maxf_105.lh", 0x00002, 0x80000, CRC(84d49423) SHA1(88d9a6724f1118f2bbef5dfa27accc2b65c5ba1d) )
-		ROM_LOAD32_BYTE( "maxf_105.ll", 0x00003, 0x80000, CRC(16d0768d) SHA1(665a6d7602a7f2f5b1f332b0220b1533143d56b1) )
-	
-		DISK_REGION( REGION_DISKS )
-		DISK_IMAGE( "maxforce.chd", 0, MD5(b0a214c7b3f8ba9d592396332fc974c9) SHA1(59d77280afdb2d1f801ee81786aa7d3166ec2695) )
-	ROM_END
-	
-	
-	ROM_START( maxf_102 ) /* R3000 based, labeled as "Maximum Force 2-27-97 v1.02" */
-		ROM_REGION( 0x800000, REGION_CPU1, 0 )		/* 4MB for RAM at 0 */
-	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 2MB for IDT 79R3041 code */
-		ROM_LOAD32_BYTE( "maxf_102.hh", 0x00000, 0x80000, CRC(8ff7009d) SHA1(da22eae298a6e0e36f503fa091ac3913423dcd0f) )
-		ROM_LOAD32_BYTE( "maxf_102.hl", 0x00001, 0x80000, CRC(96c2cc1d) SHA1(b332b8c042b92c736131c478cefac1c3c2d2673b) )
-		ROM_LOAD32_BYTE( "maxf_102.lh", 0x00002, 0x80000, CRC(459ffba5) SHA1(adb40db6904e84c17f32ac6518fd2e994da7883f) )
-		ROM_LOAD32_BYTE( "maxf_102.ll", 0x00003, 0x80000, CRC(e491be7f) SHA1(cbe281c099a4aa87067752d68cf2bb0ab3900531) )
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for IDT 79R3041 code */
+		ROM_LOAD32_BYTE( "maxf_105.hh", 0x00000, 0x80000, CRC(ec7f8167);SHA1(0cf057bfb1f30c2c9621d3ed25021e7ba7bdd46e) )
+		ROM_LOAD32_BYTE( "maxf_105.hl", 0x00001, 0x80000, CRC(3172611c);SHA1(00f14f871b737c66c20f95743740d964d0be3f24) )
+		ROM_LOAD32_BYTE( "maxf_105.lh", 0x00002, 0x80000, CRC(84d49423);SHA1(88d9a6724f1118f2bbef5dfa27accc2b65c5ba1d) )
+		ROM_LOAD32_BYTE( "maxf_105.ll", 0x00003, 0x80000, CRC(16d0768d);SHA1(665a6d7602a7f2f5b1f332b0220b1533143d56b1) )
 	
 		DISK_REGION( REGION_DISKS )
 		DISK_IMAGE( "maxforce.chd", 0, MD5(b0a214c7b3f8ba9d592396332fc974c9) SHA1(59d77280afdb2d1f801ee81786aa7d3166ec2695) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	ROM_START( area51mx )	/* 68020 based, Labeled as "68020 MAX/A51 KIT 2.0" Date: Apr 22, 1998 */
-		ROM_REGION( 0x800000, REGION_CPU1, 0 )  /* 4MB for RAM at 0 */
+	static RomLoadPtr rom_maxf_102 = new RomLoadPtr(){ public void handler(){  /* R3000 based, labeled as "Maximum Force 2-27-97 v1.02" */
+		ROM_REGION( 0x800000, REGION_CPU1, 0 );	/* 4MB for RAM at 0 */
 	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE ) /* 2MB for 68020 code */
-		ROM_LOAD32_BYTE( "area51mx.3h", 0x00000, 0x80000, CRC(47cbf30b) SHA1(23377bcc65c0fc330d5bc7e76e233bae043ac364) )
-		ROM_LOAD32_BYTE( "area51mx.3p", 0x00001, 0x80000, CRC(a3c93684) SHA1(f6b3357bb69900a176fd6bc6b819b2f57b7d0f59) )
-		ROM_LOAD32_BYTE( "area51mx.3m", 0x00002, 0x80000, CRC(d800ac17) SHA1(3d515c8608d8101ee9227116175b3c3f1fe22e0c) )
-		ROM_LOAD32_BYTE( "area51mx.3k", 0x00003, 0x80000, CRC(0e78f308) SHA1(adc4c8e441eb8fe525d0a6220eb3a2a8791a7289) )
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for IDT 79R3041 code */
+		ROM_LOAD32_BYTE( "maxf_102.hh", 0x00000, 0x80000, CRC(8ff7009d);SHA1(da22eae298a6e0e36f503fa091ac3913423dcd0f) )
+		ROM_LOAD32_BYTE( "maxf_102.hl", 0x00001, 0x80000, CRC(96c2cc1d);SHA1(b332b8c042b92c736131c478cefac1c3c2d2673b) )
+		ROM_LOAD32_BYTE( "maxf_102.lh", 0x00002, 0x80000, CRC(459ffba5);SHA1(adb40db6904e84c17f32ac6518fd2e994da7883f) )
+		ROM_LOAD32_BYTE( "maxf_102.ll", 0x00003, 0x80000, CRC(e491be7f);SHA1(cbe281c099a4aa87067752d68cf2bb0ab3900531) )
+	
+		DISK_REGION( REGION_DISKS )
+		DISK_IMAGE( "maxforce.chd", 0, MD5(b0a214c7b3f8ba9d592396332fc974c9) SHA1(59d77280afdb2d1f801ee81786aa7d3166ec2695) )
+	ROM_END(); }}; 
+	
+	
+	static RomLoadPtr rom_area51mx = new RomLoadPtr(){ public void handler(){ 	/* 68020 based, Labeled as "68020 MAX/A51 KIT 2.0" Date: Apr 22, 1998 */
+		ROM_REGION( 0x800000, REGION_CPU1, 0 ); /* 4MB for RAM at 0 */
+	
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for 68020 code */
+		ROM_LOAD32_BYTE( "area51mx.3h", 0x00000, 0x80000, CRC(47cbf30b);SHA1(23377bcc65c0fc330d5bc7e76e233bae043ac364) )
+		ROM_LOAD32_BYTE( "area51mx.3p", 0x00001, 0x80000, CRC(a3c93684);SHA1(f6b3357bb69900a176fd6bc6b819b2f57b7d0f59) )
+		ROM_LOAD32_BYTE( "area51mx.3m", 0x00002, 0x80000, CRC(d800ac17);SHA1(3d515c8608d8101ee9227116175b3c3f1fe22e0c) )
+		ROM_LOAD32_BYTE( "area51mx.3k", 0x00003, 0x80000, CRC(0e78f308);SHA1(adc4c8e441eb8fe525d0a6220eb3a2a8791a7289) )
 	
 		DISK_REGION( REGION_DISKS )
 		DISK_IMAGE( "area51mx.chd", 0, MD5(fce1a0954759fa22e50747959716823d) SHA1(7e629045eb5baa8cd522273befffbf8520828938) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	ROM_START( a51mxr3k ) /* R3000 based, Labeled as "R3K Max/A51 Kit Ver 1.0" */
-		ROM_REGION( 0x800000, REGION_CPU1, 0 )		/* 4MB for RAM at 0 */
+	static RomLoadPtr rom_a51mxr3k = new RomLoadPtr(){ public void handler(){  /* R3000 based, Labeled as "R3K Max/A51 Kit Ver 1.0" */
+		ROM_REGION( 0x800000, REGION_CPU1, 0 );	/* 4MB for RAM at 0 */
 	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 2MB for IDT 79R3041 code */
-		ROM_LOAD32_BYTE( "a51mxr3k.hh", 0x00000, 0x80000, CRC(a984dab2) SHA1(debb3bc11ff49e87a52e89a69533a1bab7db700e) )
-		ROM_LOAD32_BYTE( "a51mxr3k.hl", 0x00001, 0x80000, CRC(0af49d74) SHA1(c19f26056a823fd32293e9a7b3ea868640eabf49) )
-		ROM_LOAD32_BYTE( "a51mxr3k.lh", 0x00002, 0x80000, CRC(d7d94dac) SHA1(2060a74715f36a0d7f5dd0855eda48ad1f20f095) )
-		ROM_LOAD32_BYTE( "a51mxr3k.ll", 0x00003, 0x80000, CRC(ece9e5ae) SHA1(7e44402726f5afa6d1670b27aa43ad13d21c4ad9) )
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for IDT 79R3041 code */
+		ROM_LOAD32_BYTE( "a51mxr3k.hh", 0x00000, 0x80000, CRC(a984dab2);SHA1(debb3bc11ff49e87a52e89a69533a1bab7db700e) )
+		ROM_LOAD32_BYTE( "a51mxr3k.hl", 0x00001, 0x80000, CRC(0af49d74);SHA1(c19f26056a823fd32293e9a7b3ea868640eabf49) )
+		ROM_LOAD32_BYTE( "a51mxr3k.lh", 0x00002, 0x80000, CRC(d7d94dac);SHA1(2060a74715f36a0d7f5dd0855eda48ad1f20f095) )
+		ROM_LOAD32_BYTE( "a51mxr3k.ll", 0x00003, 0x80000, CRC(ece9e5ae);SHA1(7e44402726f5afa6d1670b27aa43ad13d21c4ad9) )
 	
 		DISK_REGION( REGION_DISKS )
 		DISK_IMAGE( "area51mx.chd", 0, MD5(fce1a0954759fa22e50747959716823d) SHA1(7e629045eb5baa8cd522273befffbf8520828938) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	ROM_START( vcircle )
-		ROM_REGION( 0x10, REGION_CPU1, 0 )		/* dummy region for R3000 */
+	static RomLoadPtr rom_vcircle = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10, REGION_CPU1, 0 );	/* dummy region for R3000 */
 	
-		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE )	/* 2MB for R3000 code */
-		ROM_LOAD32_BYTE( "hh", 0x00000, 0x80000, CRC(7276f5f5) SHA1(716287e370a4f300b1743103f8031afc82de38ca) )
-		ROM_LOAD32_BYTE( "hl", 0x00001, 0x80000, CRC(146060a1) SHA1(f291989f1f0ef228757f1990fb14da5ff8f3cf8d) )
-		ROM_LOAD32_BYTE( "lh", 0x00002, 0x80000, CRC(be4b2ef6) SHA1(4332b3036e9cb12685e914d085d9a63aa856f0be) )
-		ROM_LOAD32_BYTE( "ll", 0x00003, 0x80000, CRC(ba8753eb) SHA1(0322e0e37d814a38d08ba191b1a97fb1a55fe461) )
+		ROM_REGION32_BE( 0x200000, REGION_USER1, ROMREGION_DISPOSE );/* 2MB for R3000 code */
+		ROM_LOAD32_BYTE( "hh", 0x00000, 0x80000, CRC(7276f5f5);SHA1(716287e370a4f300b1743103f8031afc82de38ca) )
+		ROM_LOAD32_BYTE( "hl", 0x00001, 0x80000, CRC(146060a1);SHA1(f291989f1f0ef228757f1990fb14da5ff8f3cf8d) )
+		ROM_LOAD32_BYTE( "lh", 0x00002, 0x80000, CRC(be4b2ef6);SHA1(4332b3036e9cb12685e914d085d9a63aa856f0be) )
+		ROM_LOAD32_BYTE( "ll", 0x00003, 0x80000, CRC(ba8753eb);SHA1(0322e0e37d814a38d08ba191b1a97fb1a55fe461) )
 	
 		DISK_REGION( REGION_DISKS )
 		DISK_IMAGE( "vcircle.chd", 0, MD5(fc316bd92363573d60083514223c6816) SHA1(f1d3e3d081d10ec42d07cd695d52b44812264983) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	
 	
@@ -1081,10 +1081,10 @@ public class cojag
 	 *
 	 *************************************/
 	
-	GAME( 1995, area51,   0,        cojag68k,  area51,   area51,   ROT0, "Atari Games", "Area 51" )
-	GAME( 1996, maxforce, 0,        r3knarrow, area51,   maxforce, ROT0, "Atari Games", "Maximum Force v1.05" )
-	GAME( 1996, maxf_102, maxforce, r3knarrow, area51,   maxforce, ROT0, "Atari Games", "Maximum Force v1.02" )
-	GAME( 1998, area51mx, 0,        cojag68k,  area51,   area51mx, ROT0, "Atari Games", "Area 51 / Maximum Force Duo v2.0" )
-	GAME( 1998, a51mxr3k, area51mx, r3knarrow, area51,   a51mxr3k, ROT0, "Atari Games", "Area 51 / Maximum Force Duo (R3000)" )
-	GAME( 1996, vcircle,  0,        cojagr3k,  vcircle,  vcircle,  ROT0, "Atari Games", "Vicious Circle (prototype)" )
+	public static GameDriver driver_area51	   = new GameDriver("1995"	,"area51"	,"cojag.java"	,rom_area51,null	,machine_driver_cojag68k	,input_ports_area51	,init_area51	,ROT0	,	"Atari Games", "Area 51" )
+	public static GameDriver driver_maxforce	   = new GameDriver("1996"	,"maxforce"	,"cojag.java"	,rom_maxforce,null	,machine_driver_r3knarrow	,input_ports_area51	,init_maxforce	,ROT0	,	"Atari Games", "Maximum Force v1.05" )
+	public static GameDriver driver_maxf_102	   = new GameDriver("1996"	,"maxf_102"	,"cojag.java"	,rom_maxf_102,driver_maxforce	,machine_driver_r3knarrow	,input_ports_area51	,init_maxforce	,ROT0	,	"Atari Games", "Maximum Force v1.02" )
+	public static GameDriver driver_area51mx	   = new GameDriver("1998"	,"area51mx"	,"cojag.java"	,rom_area51mx,null	,machine_driver_cojag68k	,input_ports_area51	,init_area51mx	,ROT0	,	"Atari Games", "Area 51 / Maximum Force Duo v2.0" )
+	public static GameDriver driver_a51mxr3k	   = new GameDriver("1998"	,"a51mxr3k"	,"cojag.java"	,rom_a51mxr3k,driver_area51mx	,machine_driver_r3knarrow	,input_ports_area51	,init_a51mxr3k	,ROT0	,	"Atari Games", "Area 51 / Maximum Force Duo (R3000)" )
+	public static GameDriver driver_vcircle	   = new GameDriver("1996"	,"vcircle"	,"cojag.java"	,rom_vcircle,null	,machine_driver_cojagr3k	,input_ports_vcircle	,init_vcircle	,ROT0	,	"Atari Games", "Vicious Circle (prototype)" )
 }

@@ -13,7 +13,7 @@ package vidhrdw;
 public class subs
 {
 	
-	WRITE_HANDLER( subs_invert1_w )
+	public static WriteHandlerPtr subs_invert1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 0x01) == 1)
 		{
@@ -25,9 +25,9 @@ public class subs
 			palette_set_color(1, 0x00, 0x00, 0x00);
 			palette_set_color(0, 0xFF, 0xFF, 0xFF);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( subs_invert2_w )
+	public static WriteHandlerPtr subs_invert2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 0x01) == 1)
 		{
@@ -39,7 +39,7 @@ public class subs
 			palette_set_color(3, 0x00, 0x00, 0x00);
 			palette_set_color(2, 0xFF, 0xFF, 0xFF);
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -71,7 +71,7 @@ public class subs
 	
 				dirtybuffer[offs]=0;
 	
-				charcode = videoram[offs];
+				charcode = videoram.read(offs);
 	
 				/* Which monitor is this for? */
 				right_enable = charcode & 0x40;
@@ -133,11 +133,11 @@ public class subs
 			int prom_set;
 			int sub_enable;
 	
-			sx = spriteram[0x00 + (offs * 2)] - 16;
-			sy = spriteram[0x08 + (offs * 2)] - 16;
-			charcode = spriteram[0x09 + (offs * 2)];
+			sx = spriteram.read(0x00 + (offs * 2))- 16;
+			sy = spriteram.read(0x08 + (offs * 2))- 16;
+			charcode = spriteram.read(0x09 + (offs * 2));
 			if (offs < 2)
-				sub_enable = spriteram[0x01 + (offs * 2)] & 0x80;
+				sub_enable = spriteram.read(0x01 + (offs * 2))& 0x80;
 			else
 				sub_enable = 1;
 	
@@ -166,7 +166,7 @@ public class subs
 		}
 	
 		/* Update sound */
-		discrete_sound_w(2, spriteram[5] & 0x0f);		// Launch data
-		discrete_sound_w(3, (spriteram[5] >> 4) & 0x0f);	// Crash/explode data
+		discrete_sound_w(2, spriteram.read(5)& 0x0f);		// Launch data
+		discrete_sound_w(3, (spriteram.read(5)>> 4) & 0x0f);	// Crash/explode data
 	}
 }

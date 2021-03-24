@@ -211,7 +211,7 @@ public class taito_z
 			color = (data & 0xff00) >> 8;
 			zoomx = (data & 0x7f);
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			map_offset = tilenum << 7;
 	
@@ -304,7 +304,7 @@ public class taito_z
 			/* higher bits are sometimes used... e.g. sign over flashing enemy car...! */
 			tilenum = data & 0x7ff;
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			zoomx += 1;
 			zoomy += 1;
@@ -488,7 +488,7 @@ public class taito_z
 			data = spriteram16[offs+3];
 			tilenum = data & 0x1fff;	/* $80000 spritemap rom maps up to $2000 64x64 sprites */
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			map_offset = tilenum << 5;
 	
@@ -590,7 +590,7 @@ public class taito_z
 			data = spriteram16[offs+3];
 			tilenum = data & 0x1fff;	/* $80000 spritemap rom maps up to $2000 64x64 sprites */
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			map_offset = tilenum << 5;
 	
@@ -683,7 +683,7 @@ public class taito_z
 			flipy = (data & 0x8000) >> 15;	// ???
 			tilenum = data & 0x1fff;	/* $80000 spritemap rom maps up to $2000 64x64 sprites */
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			map_offset = tilenum << 5;
 	
@@ -775,7 +775,7 @@ public class taito_z
 			flipy = (data & 0x8000) >> 15;	// ???
 			tilenum = data & 0x1fff;	/* $80000 spritemap rom maps up to $2000 64x64 sprites */
 	
-			if (!tilenum) continue;
+			if (tilenum == 0) continue;
 	
 			map_offset = tilenum << 5;
 	

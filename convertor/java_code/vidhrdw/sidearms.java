@@ -15,7 +15,6 @@ package vidhrdw;
 public class sidearms
 {
 	
-	extern int sidearms_gameid;
 	
 	UINT8 *sidearms_bg_scrollx;
 	UINT8 *sidearms_bg_scrolly;
@@ -27,25 +26,25 @@ public class sidearms
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( sidearms_videoram_w )
+	public static WriteHandlerPtr sidearms_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sidearms_colorram_w )
+	public static WriteHandlerPtr sidearms_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sidearms_c804_w )
+	public static WriteHandlerPtr sidearms_c804_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0 and 1 are coin counters */
 		coin_counter_w(0, data & 0x01);
@@ -87,15 +86,15 @@ public class sidearms
 			flip_screen_set(flipon);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sidearms_gfxctrl_w )
+	public static WriteHandlerPtr sidearms_gfxctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		objon = data & 0x01;
 		bgon = data & 0x02;
-	}
+	} };
 	
-	WRITE_HANDLER( sidearms_star_scrollx_w )
+	public static WriteHandlerPtr sidearms_star_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned int last_state = hcount_191;
 	
@@ -105,13 +104,13 @@ public class sidearms
 		// invert 74LS74A(flipflop) output on 74LS191(hscan counter) carry's rising edge
 		if (hcount_191 & ~last_state & 0x100)
 			hflop_74a_n ^= 1;
-	}
+	} };
 	
-	WRITE_HANDLER( sidearms_star_scrolly_w )
+	public static WriteHandlerPtr sidearms_star_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vcount_191++;
 		vcount_191 &= 0xff;
-	}
+	} };
 	
 	
 	INLINE void get_sidearms_bg_tile_info(int offs)
@@ -158,8 +157,8 @@ public class sidearms
 	
 	INLINE void get_fg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + (attr<<2 & 0x300);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ (attr<<2 & 0x300);
 		int color = attr & 0x3f;
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -178,12 +177,12 @@ public class sidearms
 	{
 		tilerom = memory_region(REGION_GFX4);
 	
-		if (!sidearms_gameid)
+		if (sidearms_gameid == 0)
 		{
 			bg_tilemap = tilemap_create(get_sidearms_bg_tile_info, sidearms_tilemap_scan,
 				TILEMAP_TRANSPARENT, 32, 32, 128, 128);
 	
-			if ( !bg_tilemap ) return 1;
+			if (bg_tilemap == 0) return 1;
 	
 			tilemap_set_transparent_pen(bg_tilemap, 15);
 		}
@@ -196,13 +195,13 @@ public class sidearms
 		
 			
 	
-			if ( !bg_tilemap ) return 1;
+			if (bg_tilemap == 0) return 1;
 		}
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 64, 64);
 	
-		if ( !fg_tilemap ) return 1;
+		if (fg_tilemap == 0) return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 3);
 	
@@ -274,7 +273,7 @@ public class sidearms
 		sf_rom = memory_region(REGION_USER1);
 	
 	#if 0 // old loop (for reference; easier to read)
-		if (!flipon)
+		if (flipon == 0)
 		{
 			lineptr = (UINT16 *)bitmap->line[0];
 			pixadv  = 1;
@@ -317,7 +316,7 @@ public class sidearms
 			lineptr += lineadv;
 		}
 	#else // optimized loop
-		if (!flipon)
+		if (flipon == 0)
 		{
 			lineptr = (UINT16 *)bitmap->line[16] + 64;
 			pixadv  = 1;

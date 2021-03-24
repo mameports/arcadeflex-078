@@ -268,7 +268,7 @@ public class system16
 			dx = 1;
 		}
 	
-		if (!eos)
+		if (eos == 0)
 		{
 			sy = y0;
 			for( y=height; y; y-- ){
@@ -437,7 +437,7 @@ public class system16
 				}
 				else
 				{
-					if (!width) { width = 512; eos = 1; } // used by fantasy zone for laser
+					if (width == 0) { width = 512; eos = 1; } // used by fantasy zone for laser
 					screen_width = width;
 					logical_height = sprite.screen_height;
 	
@@ -823,7 +823,7 @@ public class system16
 		};
 		sys16_obj_bank = bank_default;
 	
-		if( !sys16_bg1_trans )
+		if (sys16_bg1_trans == 0)
 			background = tilemap_create(
 				get_bg_tile_info,
 				sys16_bg_map,
@@ -1143,7 +1143,7 @@ public class system16
 	}
 	
 	VIDEO_UPDATE( system16 ){
-		if (!sys16_refreshenable) return;
+		if (sys16_refreshenable == 0) return;
 	
 		if( sys16_update_proc ) sys16_update_proc();
 		update_page();
@@ -1168,7 +1168,7 @@ public class system16
 	}
 	
 	VIDEO_UPDATE( system18 ){
-		if (!sys16_refreshenable) return;
+		if (sys16_refreshenable == 0) return;
 		if( sys16_update_proc ) sys16_update_proc();
 		update_page();
 		sys18_vh_screenrefresh_helper(); /* set scroll registers */
@@ -1379,7 +1379,7 @@ public class system16
 	}
 	
 	VIDEO_UPDATE( hangon ){
-		if (!sys16_refreshenable) return;
+		if (sys16_refreshenable == 0) return;
 		if( sys16_update_proc ) sys16_update_proc();
 		update_page();
 	

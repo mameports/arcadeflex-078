@@ -85,36 +85,36 @@ public class gundealr
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( gundealr_bg_videoram_w )
+	public static WriteHandlerPtr gundealr_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gundealr_bg_videoram[offset] != data)
 		{
 			gundealr_bg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gundealr_fg_videoram_w )
+	public static WriteHandlerPtr gundealr_fg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gundealr_fg_videoram[offset] != data)
 		{
 			gundealr_fg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset/2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gundealr_paletteram_w )
+	public static WriteHandlerPtr gundealr_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b,val;
 	
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
-		val = paletteram[offset & ~1];
+		val = paletteram.read(offset & ~1);
 		r = (val >> 4) & 0x0f;
 		g = (val >> 0) & 0x0f;
 	
-		val = paletteram[offset | 1];
+		val = paletteram.read(offset | 1);
 		b = (val >> 4) & 0x0f;
 		/* TODO: the bottom 4 bits are used as well, but I'm not sure about the meaning */
 	
@@ -123,31 +123,31 @@ public class gundealr
 		b = 0x11 * b;
 	
 		palette_set_color(offset / 2,r,g,b);
-	}
+	} };
 	
-	WRITE_HANDLER( gundealr_fg_scroll_w )
+	public static WriteHandlerPtr gundealr_fg_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[4];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(fg_tilemap,0,scroll[1] | ((scroll[0] & 0x03) << 8));
 		tilemap_set_scrolly(fg_tilemap,0,scroll[3] | ((scroll[2] & 0x03) << 8));
-	}
+	} };
 	
-	WRITE_HANDLER( yamyam_fg_scroll_w )
+	public static WriteHandlerPtr yamyam_fg_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[4];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(fg_tilemap,0,scroll[0] | ((scroll[1] & 0x03) << 8));
 		tilemap_set_scrolly(fg_tilemap,0,scroll[2] | ((scroll[3] & 0x03) << 8));
-	}
+	} };
 	
-	WRITE_HANDLER( gundealr_flipscreen_w )
+	public static WriteHandlerPtr gundealr_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flipscreen = data;
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-	}
+	} };
 	
 	
 	

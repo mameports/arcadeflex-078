@@ -147,221 +147,229 @@ public class taotaido
 	/* sound cpu - same as aerofgt */
 	
 	
-	static WRITE_HANDLER( pending_command_clear_w )
+	public static WriteHandlerPtr pending_command_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pending_command = 0;
-	}
+	} };
 	
-	static WRITE_HANDLER( taotaido_sh_bankswitch_w )
+	public static WriteHandlerPtr taotaido_sh_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data8_t *rom = memory_region(REGION_CPU2) + 0x10000;
 	
 		cpu_setbank(1,rom + (data & 0x03) * 0x8000);
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x77ff, MRA_ROM },
-		{ 0x7800, 0x7fff, MRA_RAM },
-		{ 0x8000, 0xffff, MRA_BANK1 },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x77ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x7800, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_BANK1 ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x77ff, MWA_ROM },
-		{ 0x7800, 0x7fff, MWA_RAM },
-		{ 0x8000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x77ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x7800, 0x7fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( taotaido_sound_readport )
-		{ 0x00, 0x00, YM2610_status_port_0_A_r },
-		{ 0x02, 0x02, YM2610_status_port_0_B_r },
-		{ 0x0c, 0x0c, soundlatch_r },
-	PORT_END
+	public static IO_ReadPort taotaido_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, YM2610_status_port_0_A_r ),
+		new IO_ReadPort( 0x02, 0x02, YM2610_status_port_0_B_r ),
+		new IO_ReadPort( 0x0c, 0x0c, soundlatch_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( taotaido_sound_writeport )
-		{ 0x00, 0x00, YM2610_control_port_0_A_w },
-		{ 0x01, 0x01, YM2610_data_port_0_A_w },
-		{ 0x02, 0x02, YM2610_control_port_0_B_w },
-		{ 0x03, 0x03, YM2610_data_port_0_B_w },
-		{ 0x04, 0x04, taotaido_sh_bankswitch_w },
-		{ 0x08, 0x08, pending_command_clear_w },
-	PORT_END
+	public static IO_WritePort taotaido_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, YM2610_control_port_0_A_w ),
+		new IO_WritePort( 0x01, 0x01, YM2610_data_port_0_A_w ),
+		new IO_WritePort( 0x02, 0x02, YM2610_control_port_0_B_w ),
+		new IO_WritePort( 0x03, 0x03, YM2610_data_port_0_B_w ),
+		new IO_WritePort( 0x04, 0x04, taotaido_sh_bankswitch_w ),
+		new IO_WritePort( 0x08, 0x08, pending_command_clear_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	INPUT_PORTS_START( taotaido )
-		PORT_START	/* Player 1 controls (0xffff81.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )	// "Punch"
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )	// "Kick"
+	static InputPortPtr input_ports_taotaido = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Player 1 controls (0xffff81.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );// "Punch"
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );// "Kick"
 	#if TAOTAIDO_SHOW_ALL_INPUTS
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
 	#else
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	#endif
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* Player 2 controls (0xffff83.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )	// "Punch"
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )	// "Kick"
+		PORT_START(); 	/* Player 2 controls (0xffff83.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );// "Punch"
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );// "Kick"
 	#if TAOTAIDO_SHOW_ALL_INPUTS
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
 	#else
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	#endif
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* System inputs (0xffff85.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )	// see notes
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
+		PORT_START(); 	/* System inputs (0xffff85.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );// see notes
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
 	#if TAOTAIDO_SHOW_ALL_INPUTS
-		PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, "Test", KEYCODE_F1, IP_JOY_NONE )
+		PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, "Test", KEYCODE_F1, IP_JOY_NONE );
 	#else
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE )	// "Test" in "test mode"
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE );// "Test" in "test mode"
 	#endif
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )		// not working ?
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 )	// see notes - SERVICE in "test mode"
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	// VBLANK ? The game freezes when ON
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT );	// not working ?
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1 );// see notes - SERVICE in "test mode"
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );// VBLANK ? The game freezes when ON
 	
-		PORT_START	/* DSW A (0xffff87.b -> !0xfe2f6c.w or !0xfe30d0) */
-		PORT_DIPNAME( 0x01, 0x01, "Coin Slot" )
-		PORT_DIPSETTING(    0x01, "Same" )
-		PORT_DIPSETTING(    0x00, "Individual" )
-		PORT_DIPNAME( 0x0e, 0x0e, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, "2 Coins to Start, 1 to Continue" )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* DSW A (0xffff87.b -> !0xfe2f6c.w or !0xfe30d0) */
+		PORT_DIPNAME( 0x01, 0x01, "Coin Slot" );
+		PORT_DIPSETTING(    0x01, "Same" );
+		PORT_DIPSETTING(    0x00, "Individual" );
+		PORT_DIPNAME( 0x0e, 0x0e, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, "2 Coins to Start, 1 to Continue" );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* DSW B (0xffff89.b -> !0xfe73c2.w or !0xfe751c.w) */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )	// check code at 0x0963e2 or 0x845e2
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x10, "Easy" )
-		PORT_DIPSETTING(    0x18, "Normal" )
-		PORT_DIPSETTING(    0x08, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* DSW B (0xffff89.b -> !0xfe73c2.w or !0xfe751c.w) */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Flip_Screen") );	// check code at 0x0963e2 or 0x845e2
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x18, 0x18, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x10, "Easy" );
+		PORT_DIPSETTING(    0x18, "Normal" );
+		PORT_DIPSETTING(    0x08, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_SERVICE( 0x20, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* DSW C (0xffff8b.b -> !0xfe2f94.w or !0xfe30f8.w) */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )	// doesn't seem to be demo sounds
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Buy In" )			// see notes
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* DSW C (0xffff8b.b -> !0xfe2f94.w or !0xfe30f8.w) */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );	// doesn't seem to be demo sounds
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Buy In" );		// see notes
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Jumpers (0xffff8f.b) */
-		PORT_DIPNAME( 0x0f, 0x08, "Country" )
-		PORT_DIPSETTING(    0x00, "US" )				// also (c) Mc O'River Inc
-		PORT_DIPSETTING(    0x01, "Japan" )
-		PORT_DIPSETTING(    0x02, "Hong-Kong/Taiwan" )
-	//	PORT_DIPSETTING(    0x03, "Japan" )
-		PORT_DIPSETTING(    0x04, "Korea" )
-	//	PORT_DIPSETTING(    0x05, "Japan" )
-	//	PORT_DIPSETTING(    0x06, "Japan" )
-	//	PORT_DIPSETTING(    0x07, "Japan" )
-		PORT_DIPSETTING(    0x08, "World" )
+		PORT_START(); 	/* Jumpers (0xffff8f.b) */
+		PORT_DIPNAME( 0x0f, 0x08, "Country" );
+		PORT_DIPSETTING(    0x00, "US" );			// also (c) Mc O'River Inc
+		PORT_DIPSETTING(    0x01, "Japan" );
+		PORT_DIPSETTING(    0x02, "Hong-Kong/Taiwan" );
+	//	PORT_DIPSETTING(    0x03, "Japan" );
+		PORT_DIPSETTING(    0x04, "Korea" );
+	//	PORT_DIPSETTING(    0x05, "Japan" );
+	//	PORT_DIPSETTING(    0x06, "Japan" );
+	//	PORT_DIPSETTING(    0x07, "Japan" );
+		PORT_DIPSETTING(    0x08, "World" );
 		/* 0x09 to 0x0f : "Japan" */
 	
 	#if TAOTAIDO_SHOW_ALL_INPUTS
 		/* These inputs are only to fit the test mode - leftover from another game ? */
-		PORT_START	/* Player 3 inputs (0xffffa1.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER3 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* Player 3 inputs (0xffffa1.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER3 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START	/* Player 4 inputs (0xffffa3.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER4 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER4 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER4 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER4 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER4 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER4 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER4 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* Player 4 inputs (0xffffa3.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER4 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER4 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER4 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER4 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER4 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER4 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER4 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	#endif
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	
-	static struct GfxLayout taotaido_layout =
-	{
+	static GfxLayout taotaido_layout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
 				9*4, 8*4, 11*4, 10*4, 13*4, 12*4, 15*4, 14*4 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 				8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &taotaido_layout,  0x000, 256  }, /* sprites */
-		{ REGION_GFX2, 0, &taotaido_layout,  0x300, 256  }, /* bg tiles */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, taotaido_layout,  0x000, 256  ), /* sprites */
+		new GfxDecodeInfo( REGION_GFX2, 0, taotaido_layout,  0x300, 256  ), /* bg tiles */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	static void irqhandler(int irq)
@@ -415,54 +423,54 @@ public class taotaido
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( taotaido )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* 68000 Code */
+	static RomLoadPtr rom_taotaido = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 Code */
 		ROM_LOAD16_WORD_SWAP( "1-u90.bin", 0x00000, 0x80000, CRC(a3ee30da) SHA1(920a83ce9192bf785bffdc041e280f1a420de4c9) )
 		ROM_LOAD16_WORD_SWAP( "2-u91.bin", 0x80000, 0x80000, CRC(30b7e4fb) SHA1(15e1f6d252c736fdee33b691a0a1a45f0307bffb) )
 	
-		ROM_REGION( 0x30000, REGION_CPU2, 0 ) /* z80 Code */
-		ROM_LOAD( "3-u113.bin", 0x000000, 0x20000, CRC(a167c4e4) SHA1(d32184e7040935cd440d4d82c66491b710ec87a8) )
-		ROM_RELOAD ( 0x10000, 0x20000 )
+		ROM_REGION( 0x30000, REGION_CPU2, 0 );/* z80 Code */
+		ROM_LOAD( "3-u113.bin", 0x000000, 0x20000, CRC(a167c4e4);SHA1(d32184e7040935cd440d4d82c66491b710ec87a8) )
+		ROM_RELOAD ( 0x10000, 0x20000 );
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 ) /* sound samples */
-		ROM_LOAD( "u104.bin",     0x000000, 0x100000, CRC(e89387a9) SHA1(1deeee056af367d1a5aa0722dd3d6c68a82d0489) )
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* sound samples */
+		ROM_LOAD( "u104.bin",     0x000000, 0x100000, CRC(e89387a9);SHA1(1deeee056af367d1a5aa0722dd3d6c68a82d0489) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND2, 0 ) /* sound samples */
-		ROM_LOAD( "u127.bin",     0x00000, 0x200000, CRC(0cf0cb23) SHA1(a87e7159db2fa0d50446cbf45ec9fbf585b8f396) )
+		ROM_REGION( 0x200000, REGION_SOUND2, 0 );/* sound samples */
+		ROM_LOAD( "u127.bin",     0x00000, 0x200000, CRC(0cf0cb23);SHA1(a87e7159db2fa0d50446cbf45ec9fbf585b8f396) )
 	
-		ROM_REGION( 0x600000, REGION_GFX1, 0 ) /* Sprites */
-		ROM_LOAD( "u86.bin", 0x000000, 0x200000, CRC(908e251e) SHA1(5a135787f3263bfb195f8fd1e814c580d840531f) )
-		ROM_LOAD( "u87.bin", 0x200000, 0x200000, CRC(c4290ba6) SHA1(4132ffad4668f1dd3f708f009e18435e7dd60120) )
-		ROM_LOAD( "u88.bin", 0x400000, 0x200000, CRC(407d9aeb) SHA1(d532c7b80f6c192dba86542fb6eb3ef24fbbbdb9) )
+		ROM_REGION( 0x600000, REGION_GFX1, 0 );/* Sprites */
+		ROM_LOAD( "u86.bin", 0x000000, 0x200000, CRC(908e251e);SHA1(5a135787f3263bfb195f8fd1e814c580d840531f) )
+		ROM_LOAD( "u87.bin", 0x200000, 0x200000, CRC(c4290ba6);SHA1(4132ffad4668f1dd3f708f009e18435e7dd60120) )
+		ROM_LOAD( "u88.bin", 0x400000, 0x200000, CRC(407d9aeb);SHA1(d532c7b80f6c192dba86542fb6eb3ef24fbbbdb9) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, 0 ) /* BG Tiles */
-		ROM_LOAD( "u15.bin", 0x000000, 0x200000, CRC(e95823e9) SHA1(362583944ad4fdde4f9e29928cf34376c7ad931f) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_GFX2, 0 );/* BG Tiles */
+		ROM_LOAD( "u15.bin", 0x000000, 0x200000, CRC(e95823e9);SHA1(362583944ad4fdde4f9e29928cf34376c7ad931f) )
+	ROM_END(); }}; 
 	
-	ROM_START( taotaida )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* 68000 Code */
+	static RomLoadPtr rom_taotaida = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 Code */
 		ROM_LOAD16_WORD_SWAP( "tt0-u90.bin", 0x00000, 0x80000, CRC(69d4cca7) SHA1(f1aba74fef8fe4271d19763f428fc0e2674d08b3) )
 		ROM_LOAD16_WORD_SWAP( "tt1-u91.bin", 0x80000, 0x80000, CRC(41025469) SHA1(fa3a424ca3ecb513f418e436e4191ff76f6a0de1) )
 	
-		ROM_REGION( 0x30000, REGION_CPU2, 0 ) /* z80 Code */
-		ROM_LOAD( "3-u113.bin", 0x000000, 0x20000, CRC(a167c4e4) SHA1(d32184e7040935cd440d4d82c66491b710ec87a8) )
-		ROM_RELOAD ( 0x10000, 0x20000 )
+		ROM_REGION( 0x30000, REGION_CPU2, 0 );/* z80 Code */
+		ROM_LOAD( "3-u113.bin", 0x000000, 0x20000, CRC(a167c4e4);SHA1(d32184e7040935cd440d4d82c66491b710ec87a8) )
+		ROM_RELOAD ( 0x10000, 0x20000 );
 	
-		ROM_REGION( 0x100000, REGION_SOUND1, 0 ) /* sound samples */
-		ROM_LOAD( "u104.bin",     0x000000, 0x100000, CRC(e89387a9) SHA1(1deeee056af367d1a5aa0722dd3d6c68a82d0489) )
+		ROM_REGION( 0x100000, REGION_SOUND1, 0 );/* sound samples */
+		ROM_LOAD( "u104.bin",     0x000000, 0x100000, CRC(e89387a9);SHA1(1deeee056af367d1a5aa0722dd3d6c68a82d0489) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND2, 0 ) /* sound samples */
-		ROM_LOAD( "u127.bin",     0x00000, 0x200000, CRC(0cf0cb23) SHA1(a87e7159db2fa0d50446cbf45ec9fbf585b8f396) )
+		ROM_REGION( 0x200000, REGION_SOUND2, 0 );/* sound samples */
+		ROM_LOAD( "u127.bin",     0x00000, 0x200000, CRC(0cf0cb23);SHA1(a87e7159db2fa0d50446cbf45ec9fbf585b8f396) )
 	
-		ROM_REGION( 0x600000, REGION_GFX1, 0 ) /* Sprites */
-		ROM_LOAD( "u86.bin", 0x000000, 0x200000, CRC(908e251e) SHA1(5a135787f3263bfb195f8fd1e814c580d840531f) )
-		ROM_LOAD( "u87.bin", 0x200000, 0x200000, CRC(c4290ba6) SHA1(4132ffad4668f1dd3f708f009e18435e7dd60120) )
-		ROM_LOAD( "u88.bin", 0x400000, 0x200000, CRC(407d9aeb) SHA1(d532c7b80f6c192dba86542fb6eb3ef24fbbbdb9) )
+		ROM_REGION( 0x600000, REGION_GFX1, 0 );/* Sprites */
+		ROM_LOAD( "u86.bin", 0x000000, 0x200000, CRC(908e251e);SHA1(5a135787f3263bfb195f8fd1e814c580d840531f) )
+		ROM_LOAD( "u87.bin", 0x200000, 0x200000, CRC(c4290ba6);SHA1(4132ffad4668f1dd3f708f009e18435e7dd60120) )
+		ROM_LOAD( "u88.bin", 0x400000, 0x200000, CRC(407d9aeb);SHA1(d532c7b80f6c192dba86542fb6eb3ef24fbbbdb9) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, 0 ) /* BG Tiles */
-		ROM_LOAD( "u15.bin", 0x000000, 0x200000, CRC(e95823e9) SHA1(362583944ad4fdde4f9e29928cf34376c7ad931f) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_GFX2, 0 );/* BG Tiles */
+		ROM_LOAD( "u15.bin", 0x000000, 0x200000, CRC(e95823e9);SHA1(362583944ad4fdde4f9e29928cf34376c7ad931f) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1993, taotaido, 0,        taotaido, taotaido, 0, ROT0, "Video System Co.", "Tao Taido (set 1)", GAME_NO_COCKTAIL )
-	GAMEX( 1993, taotaida, taotaido, taotaido, taotaido, 0, ROT0, "Video System Co.", "Tao Taido (set 2)", GAME_NO_COCKTAIL )
+	public static GameDriver driver_taotaido	   = new GameDriver("1993"	,"taotaido"	,"taotaido.java"	,rom_taotaido,null	,machine_driver_taotaido	,input_ports_taotaido	,null	,ROT0	,	"Video System Co.", "Tao Taido (set 1)", GAME_NO_COCKTAIL )
+	public static GameDriver driver_taotaida	   = new GameDriver("1993"	,"taotaida"	,"taotaido.java"	,rom_taotaida,driver_taotaido	,machine_driver_taotaido	,input_ports_taotaido	,null	,ROT0	,	"Video System Co.", "Tao Taido (set 2)", GAME_NO_COCKTAIL )
 }

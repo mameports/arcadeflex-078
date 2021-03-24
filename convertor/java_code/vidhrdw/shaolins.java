@@ -47,20 +47,20 @@ public class shaolins
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -100,34 +100,34 @@ public class shaolins
 		}
 	}
 	
-	WRITE_HANDLER( shaolins_videoram_w )
+	public static WriteHandlerPtr shaolins_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( shaolins_colorram_w )
+	public static WriteHandlerPtr shaolins_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( shaolins_palettebank_w )
+	public static WriteHandlerPtr shaolins_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (palettebank != (data & 0x07))
 		{
 			palettebank = data & 0x07;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( shaolins_scroll_w )
+	public static WriteHandlerPtr shaolins_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int col;
 	
@@ -135,9 +135,9 @@ public class shaolins
 		{
 			tilemap_set_scrolly(bg_tilemap, col, data + 1);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( shaolins_nmi_w )
+	public static WriteHandlerPtr shaolins_nmi_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		shaolins_nmi_enable = data;
 	
@@ -146,12 +146,12 @@ public class shaolins
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0x40) << 2);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0x40) << 2);
 		int color = (attr & 0x0f) + 16 * palettebank;
 		int flags = (attr & 0x20) ? TILE_FLIPY : 0;
 	
@@ -163,7 +163,7 @@ public class shaolins
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_cols(bg_tilemap, 32);
@@ -177,14 +177,14 @@ public class shaolins
 	
 		for (offs = spriteram_size-32; offs >= 0; offs-=32 ) /* max 24 sprites */
 		{
-			if (spriteram[offs] && spriteram[offs + 6]) /* stop rogue sprites on high score screen */
+			if (spriteram.read(offs)&& spriteram.read(offs + 6)) /* stop rogue sprites on high score screen */
 			{
-				int code = spriteram[offs + 8];
-				int color = (spriteram[offs + 9] & 0x0f) + 16 * palettebank;
-				int flipx = !(spriteram[offs + 9] & 0x40);
-				int flipy = spriteram[offs + 9] & 0x80;
-				int sx = 240 - spriteram[offs + 6];
-				int sy = 248 - spriteram[offs + 4];
+				int code = spriteram.read(offs + 8);
+				int color = (spriteram.read(offs + 9)& 0x0f) + 16 * palettebank;
+				int flipx = !(spriteram.read(offs + 9)& 0x40);
+				int flipy = spriteram.read(offs + 9)& 0x80;
+				int sx = 240 - spriteram.read(offs + 6);
+				int sy = 248 - spriteram.read(offs + 4);
 	
 				if (flip_screen)
 				{

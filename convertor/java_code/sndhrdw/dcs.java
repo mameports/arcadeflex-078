@@ -266,15 +266,15 @@ public class dcs
 	****************************************************************************/
 	
 	/* Custom structure (DCS variant) */
-	static struct CustomSound_interface dcs_custom_interface =
-	{
+	static CustomSound_interface dcs_custom_interface = new CustomSound_interface
+	(
 		dcs_custom_start,0,0
-	};
+	);
 	
-	static struct CustomSound_interface dcs2_custom_interface =
-	{
+	static CustomSound_interface dcs2_custom_interface = new CustomSound_interface
+	(
 		dcs2_custom_start,0,0
-	};
+	);
 	
 	
 	

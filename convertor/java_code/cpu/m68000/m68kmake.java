@@ -240,8 +240,6 @@ public class m68kmake
 	void generate_opcode_handler(FILE* filep, body_struct* body, replace_struct* replace, opcode_struct* opinfo, int ea_mode);
 	void generate_opcode_ea_variants(FILE* filep, body_struct* body, replace_struct* replace, opcode_struct* op);
 	void generate_opcode_cc_variants(FILE* filep, body_struct* body, replace_struct* replace, opcode_struct* op_in, int offset);
-	void process_opcode_handlers(void);
-	void populate_table(void);
 	void read_insert(char* insert);
 	
 	
@@ -748,7 +746,7 @@ public class m68kmake
 					}
 				}
 				/* Found a directive with no matching replace string */
-				if(!found)
+				if (found == 0)
 					error_exit("Unknown " ID_BASE " directive");
 			}
 			fprintf(filep, "%s\n", output);
@@ -1375,11 +1373,11 @@ public class m68kmake
 			}
 			else if(strcmp(section_id, ID_TABLE_BODY) == 0)
 			{
-				if(!prototype_header_read)
+				if (prototype_header_read == 0)
 					error_exit("Table body encountered before prototype header");
-				if(!table_header_read)
+				if (table_header_read == 0)
 					error_exit("Table body encountered before table header");
-				if(!ophandler_header_read)
+				if (ophandler_header_read == 0)
 					error_exit("Table body encountered before opcode handler header");
 	
 				if(table_body_read)
@@ -1390,13 +1388,13 @@ public class m68kmake
 			}
 			else if(strcmp(section_id, ID_OPHANDLER_BODY) == 0)
 			{
-				if(!prototype_header_read)
+				if (prototype_header_read == 0)
 					error_exit("Opcode handlers encountered before prototype header");
-				if(!table_header_read)
+				if (table_header_read == 0)
 					error_exit("Opcode handlers encountered before table header");
-				if(!ophandler_header_read)
+				if (ophandler_header_read == 0)
 					error_exit("Opcode handlers encountered before opcode handler header");
-				if(!table_body_read)
+				if (table_body_read == 0)
 					error_exit("Opcode handlers encountered before table body");
 	
 				if(ophandler_body_read)
@@ -1409,21 +1407,21 @@ public class m68kmake
 			else if(strcmp(section_id, ID_END) == 0)
 			{
 				/* End of input file.  Do a sanity check and then write footers */
-				if(!prototype_header_read)
+				if (prototype_header_read == 0)
 					error_exit("Missing prototype header");
-				if(!prototype_footer_read)
+				if (prototype_footer_read == 0)
 					error_exit("Missing prototype footer");
-				if(!table_header_read)
+				if (table_header_read == 0)
 					error_exit("Missing table header");
-				if(!table_footer_read)
+				if (table_footer_read == 0)
 					error_exit("Missing table footer");
-				if(!table_body_read)
+				if (table_body_read == 0)
 					error_exit("Missing table body");
-				if(!ophandler_header_read)
+				if (ophandler_header_read == 0)
 					error_exit("Missing opcode handler header");
-				if(!ophandler_footer_read)
+				if (ophandler_footer_read == 0)
 					error_exit("Missing opcode handler footer");
-				if(!ophandler_body_read)
+				if (ophandler_body_read == 0)
 					error_exit("Missing opcode handler body");
 	
 				print_opcode_output_table(g_table_file);

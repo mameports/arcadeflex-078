@@ -252,73 +252,81 @@ public class tecmosys
 		{ 0xe80000, 0xe80001, reg_e80000_w },
 	MEMORY_END
 	
-	INPUT_PORTS_START( deroon )
-	INPUT_PORTS_END
+	static InputPortPtr input_ports_deroon = new InputPortPtr(){ public void handler() { 
+	INPUT_PORTS_END(); }}; 
 	
 	/*
-	static struct GfxLayout tecmosys_charlayout =
-	{
+	static GfxLayout tecmosys_charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0,1,2,3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0,1,2,3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		8*32
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tecmosys_charlayout,   0, 1  },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, tecmosys_charlayout,   0, 1  ),
+		new GfxDecodeInfo( -1 )
 	};
 	*/
 	
 	
 	
 	
-	static WRITE_HANDLER( deroon_bankswitch_w )
+	public static WriteHandlerPtr deroon_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank( 1, memory_region(REGION_CPU2) + ((data-2) & 0x0f) * 0x4000 + 0x10000 );
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xbfff, MRA_BANK1 },
-		{ 0xe000, 0xf7ff, MRA_RAM },
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK1 ),
+		new Memory_ReadAddress( 0xe000, 0xf7ff, MRA_RAM ),
 	
-	MEMORY_END
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0xbfff, MWA_ROM },
-		{ 0xe000, 0xf7ff, MWA_RAM },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xe000, 0xf7ff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static PORT_READ_START( readport )
-		{ 0x00, 0x00, YMF262_status_0_r },
-		{ 0x40, 0x40, soundlatch_r },
-		//{ 0x60, 0x60, YMZ280B_status_0_r },
-	PORT_END
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, YMF262_status_0_r ),
+		new IO_ReadPort( 0x40, 0x40, soundlatch_r ),
+		//new IO_ReadPort( 0x60, 0x60, YMZ280B_status_0_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( writeport )
-		{ 0x00, 0x00, YMF262_register_A_0_w },
-		{ 0x01, 0x01, YMF262_data_A_0_w },
-		{ 0x02, 0x02, YMF262_register_B_0_w },
-		{ 0x03, 0x03, YMF262_data_B_0_w },
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, YMF262_register_A_0_w ),
+		new IO_WritePort( 0x01, 0x01, YMF262_data_A_0_w ),
+		new IO_WritePort( 0x02, 0x02, YMF262_register_B_0_w ),
+		new IO_WritePort( 0x03, 0x03, YMF262_data_B_0_w ),
 	
-		{ 0x10, 0x10, OKIM6295_data_0_w },
+		new IO_WritePort( 0x10, 0x10, OKIM6295_data_0_w ),
 	
-		{ 0x30, 0x30, deroon_bankswitch_w },
+		new IO_WritePort( 0x30, 0x30, deroon_bankswitch_w ),
 	
-		//{ 0x50, 0x50, to_main_cpu_latch_w },
-		{ 0x50, 0x50, IOWP_NOP },
+		//new IO_WritePort( 0x50, 0x50, to_main_cpu_latch_w ),
+		new IO_WritePort( 0x50, 0x50, IOWP_NOP ),
 	
-		{ 0x60, 0x60, YMZ280B_register_0_w },
-		{ 0x61, 0x61, YMZ280B_data_0_w },
-	PORT_END
+		new IO_WritePort( 0x60, 0x60, YMZ280B_register_0_w ),
+		new IO_WritePort( 0x61, 0x61, YMZ280B_data_0_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -469,62 +477,62 @@ public class tecmosys
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( deroon )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) // Main Program
-		ROM_LOAD16_BYTE( "t001upau.bin", 0x00000, 0x80000, CRC(14b92c18) SHA1(b47b8c828222a3f7c0fe9271899bd38171d972fb) )
-		ROM_LOAD16_BYTE( "t002upal.bin", 0x00001, 0x80000, CRC(0fb05c68) SHA1(5140592e15414770fb46d5ac9ba8f76e3d4ab323) )
+	static RomLoadPtr rom_deroon = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );// Main Program
+		ROM_LOAD16_BYTE( "t001upau.bin", 0x00000, 0x80000, CRC(14b92c18);SHA1(b47b8c828222a3f7c0fe9271899bd38171d972fb) )
+		ROM_LOAD16_BYTE( "t002upal.bin", 0x00001, 0x80000, CRC(0fb05c68);SHA1(5140592e15414770fb46d5ac9ba8f76e3d4ab323) )
 	
-		ROM_REGION( 0x048000, REGION_CPU2, 0 ) // Sound Porgram
-		ROM_LOAD( "t003uz1.bin", 0x000000, 0x008000, CRC(8bdfafa0) SHA1(c0cf3eb7a65d967958fe2aace171859b0faf7753) )
-		ROM_CONTINUE(            0x010000, 0x038000 ) /* banked part */
+		ROM_REGION( 0x048000, REGION_CPU2, 0 );// Sound Porgram
+		ROM_LOAD( "t003uz1.bin", 0x000000, 0x008000, CRC(8bdfafa0);SHA1(c0cf3eb7a65d967958fe2aace171859b0faf7753) )
+		ROM_CONTINUE(            0x010000, 0x038000 );/* banked part */
 	
-		ROM_REGION( 0xb00000, REGION_GFX1, 0 ) // Graphics - mostly (maybe all?) not tile based
-		ROM_LOAD( "t101uah1.j66", 0x000000, 0x200000, CRC(74baf845) SHA1(935d2954ba227a894542be492654a2750198e1bc) )
-		ROM_LOAD( "t102ual1.j67", 0x200000, 0x200000, CRC(1a02c4a3) SHA1(5155eeaef009fc9a9f258e3e54ca2a7f78242df5) )
-		ROM_LOAD( "t103ubl1.j08", 0x400000, 0x200000, CRC(75431ec5) SHA1(c03e724c15e1fe7a0a385332f849e9ac9d149887) )
-		ROM_LOAD( "t104ucl1.j68", 0x600000, 0x200000, CRC(66eb611a) SHA1(64435d35677fea3c06fdb03c670f3f63ee481c02) )
-		ROM_LOAD( "t201ubb1.w61", 0x800000, 0x100000, CRC(d5a087ac) SHA1(5098160ce7719d93e3edae05f6edd317d4c61f0d) )
-		ROM_LOAD( "t202ubc1.w62", 0x900000, 0x100000, CRC(f051dae1) SHA1(f5677c07fe644b3838657370f0309fb09244c619) )
-		ROM_LOAD( "t301ubd1.w63", 0xa00000, 0x100000, CRC(8b026177) SHA1(3887856bdaec4d9d3669fe3bc958ef186fbe9adb) )
+		ROM_REGION( 0xb00000, REGION_GFX1, 0 );// Graphics - mostly (maybe all?) not tile based
+		ROM_LOAD( "t101uah1.j66", 0x000000, 0x200000, CRC(74baf845);SHA1(935d2954ba227a894542be492654a2750198e1bc) )
+		ROM_LOAD( "t102ual1.j67", 0x200000, 0x200000, CRC(1a02c4a3);SHA1(5155eeaef009fc9a9f258e3e54ca2a7f78242df5) )
+		ROM_LOAD( "t103ubl1.j08", 0x400000, 0x200000, CRC(75431ec5);SHA1(c03e724c15e1fe7a0a385332f849e9ac9d149887) )
+		ROM_LOAD( "t104ucl1.j68", 0x600000, 0x200000, CRC(66eb611a);SHA1(64435d35677fea3c06fdb03c670f3f63ee481c02) )
+		ROM_LOAD( "t201ubb1.w61", 0x800000, 0x100000, CRC(d5a087ac);SHA1(5098160ce7719d93e3edae05f6edd317d4c61f0d) )
+		ROM_LOAD( "t202ubc1.w62", 0x900000, 0x100000, CRC(f051dae1);SHA1(f5677c07fe644b3838657370f0309fb09244c619) )
+		ROM_LOAD( "t301ubd1.w63", 0xa00000, 0x100000, CRC(8b026177);SHA1(3887856bdaec4d9d3669fe3bc958ef186fbe9adb) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 ) // YMZ280B Samples
-		ROM_LOAD( "t401uya1.w16", 0x000000, 0x200000, CRC(92111992) SHA1(ae27e11ae76dec0b9892ad32e1a8bf6ab11f2e6c) )
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );// YMZ280B Samples
+		ROM_LOAD( "t401uya1.w16", 0x000000, 0x200000, CRC(92111992);SHA1(ae27e11ae76dec0b9892ad32e1a8bf6ab11f2e6c) )
 	
-		ROM_REGION( 0x080000, REGION_SOUND2, 0 ) // M6295 Samples
-		ROM_LOAD( "t501uad1.w01", 0x000000, 0x080000, CRC(2fbcfe27) SHA1(f25c830322423f0959a36955edb563a6150f2142) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_SOUND2, 0 );// M6295 Samples
+		ROM_LOAD( "t501uad1.w01", 0x000000, 0x080000, CRC(2fbcfe27);SHA1(f25c830322423f0959a36955edb563a6150f2142) )
+	ROM_END(); }}; 
 	
-	ROM_START( tkdensho )
-		ROM_REGION( 0x600000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "aeprge-2.pal", 0x00000, 0x80000, CRC(25e453d6) SHA1(9c84e2af42eff5cc9b14c1759d5bab42fa7bb663) )
-		ROM_LOAD16_BYTE( "aeprgo-2.pau", 0x00001, 0x80000, CRC(22d59510) SHA1(5ade482d6ab9a22df2ee8337458c22cfa9045c73) )
+	static RomLoadPtr rom_tkdensho = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x600000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "aeprge-2.pal", 0x00000, 0x80000, CRC(25e453d6);SHA1(9c84e2af42eff5cc9b14c1759d5bab42fa7bb663) )
+		ROM_LOAD16_BYTE( "aeprgo-2.pau", 0x00001, 0x80000, CRC(22d59510);SHA1(5ade482d6ab9a22df2ee8337458c22cfa9045c73) )
 	
-		ROM_REGION( 0x038000, REGION_CPU2, 0 ) // Sound Porgram
-		ROM_LOAD( "aesprg-2.z1", 0x000000, 0x008000, CRC(43550ab6) SHA1(2580129ef8ebd9295249175de4ba985c752e06fe) )
-		ROM_CONTINUE(            0x010000, 0x018000 ) /* banked part */
+		ROM_REGION( 0x038000, REGION_CPU2, 0 );// Sound Porgram
+		ROM_LOAD( "aesprg-2.z1", 0x000000, 0x008000, CRC(43550ab6);SHA1(2580129ef8ebd9295249175de4ba985c752e06fe) )
+		ROM_CONTINUE(            0x010000, 0x018000 );/* banked part */
 	
-		ROM_REGION( 0x2900000, REGION_GFX1, 0 ) // Graphics - mostly (maybe all?) not tile based
-		ROM_LOAD( "ae100h.ah1",    0x0000000, 0x0400000, CRC(06be252b) SHA1(08d1bb569fd2e66e2c2f47da7780b31945232e62) )
-		ROM_LOAD( "ae100.al1",     0x0400000, 0x0400000, CRC(009cdff4) SHA1(fd88f07313d14fd4429b09a1e8d6b595df3b98e5) )
-		ROM_LOAD( "ae101h.bh1",    0x0800000, 0x0400000, CRC(f2469eff) SHA1(ba49d15cc7949437ba9f56d9b425a5f0e62137df) )
-		ROM_LOAD( "ae101.bl1",     0x0c00000, 0x0400000, CRC(db7791bb) SHA1(1fe40b747b7cee7a9200683192b1d60a735a0446) )
-		ROM_LOAD( "ae102h.ch1",    0x1000000, 0x0200000, CRC(f9d2a343) SHA1(d141ac0b20be587e77a576ef78f15d269d9c84e5) )
-		ROM_LOAD( "ae102.cl1",     0x1200000, 0x0200000, CRC(681be889) SHA1(8044ca7cbb325e6dcadb409f91e0c01b88a1bca7) )
-		ROM_LOAD( "ae104.el1",     0x1400000, 0x0400000, CRC(e431b798) SHA1(c2c24d4f395bba8c78a45ecf44009a830551e856) )
-		ROM_LOAD( "ae105.fl1",     0x1800000, 0x0400000, CRC(b7f9ebc1) SHA1(987f664072b43a578b39fa6132aaaccc5fe5bfc2) )
-		ROM_LOAD( "ae106.gl1",     0x1c00000, 0x0200000, CRC(7c50374b) SHA1(40865913125230122072bb13f46fb5fb60c088ea) )
-		ROM_LOAD( "ae200w74.ba1",  0x1e00000, 0x0100000, CRC(c1645041) SHA1(323670a6aa2a4524eb968cc0b4d688098ffeeb12) )
-		ROM_LOAD( "ae201w75.bb1",  0x1f00000, 0x0100000, CRC(3f63bdff) SHA1(0d3d57fdc0ec4bceef27c11403b3631d23abadbf) )
-		ROM_LOAD( "ae202w76.bc1",  0x2000000, 0x0100000, CRC(5cc857ca) SHA1(2553fb5220433acc15dfb726dc064fe333e51d88) )
-		ROM_LOAD( "ae300w36.bd1",  0x2100000, 0x0080000, CRC(e829f29e) SHA1(e56bfe2669ed1d1ae394c644def426db129d97e3) )
+		ROM_REGION( 0x2900000, REGION_GFX1, 0 );// Graphics - mostly (maybe all?) not tile based
+		ROM_LOAD( "ae100h.ah1",    0x0000000, 0x0400000, CRC(06be252b);SHA1(08d1bb569fd2e66e2c2f47da7780b31945232e62) )
+		ROM_LOAD( "ae100.al1",     0x0400000, 0x0400000, CRC(009cdff4);SHA1(fd88f07313d14fd4429b09a1e8d6b595df3b98e5) )
+		ROM_LOAD( "ae101h.bh1",    0x0800000, 0x0400000, CRC(f2469eff);SHA1(ba49d15cc7949437ba9f56d9b425a5f0e62137df) )
+		ROM_LOAD( "ae101.bl1",     0x0c00000, 0x0400000, CRC(db7791bb);SHA1(1fe40b747b7cee7a9200683192b1d60a735a0446) )
+		ROM_LOAD( "ae102h.ch1",    0x1000000, 0x0200000, CRC(f9d2a343);SHA1(d141ac0b20be587e77a576ef78f15d269d9c84e5) )
+		ROM_LOAD( "ae102.cl1",     0x1200000, 0x0200000, CRC(681be889);SHA1(8044ca7cbb325e6dcadb409f91e0c01b88a1bca7) )
+		ROM_LOAD( "ae104.el1",     0x1400000, 0x0400000, CRC(e431b798);SHA1(c2c24d4f395bba8c78a45ecf44009a830551e856) )
+		ROM_LOAD( "ae105.fl1",     0x1800000, 0x0400000, CRC(b7f9ebc1);SHA1(987f664072b43a578b39fa6132aaaccc5fe5bfc2) )
+		ROM_LOAD( "ae106.gl1",     0x1c00000, 0x0200000, CRC(7c50374b);SHA1(40865913125230122072bb13f46fb5fb60c088ea) )
+		ROM_LOAD( "ae200w74.ba1",  0x1e00000, 0x0100000, CRC(c1645041);SHA1(323670a6aa2a4524eb968cc0b4d688098ffeeb12) )
+		ROM_LOAD( "ae201w75.bb1",  0x1f00000, 0x0100000, CRC(3f63bdff);SHA1(0d3d57fdc0ec4bceef27c11403b3631d23abadbf) )
+		ROM_LOAD( "ae202w76.bc1",  0x2000000, 0x0100000, CRC(5cc857ca);SHA1(2553fb5220433acc15dfb726dc064fe333e51d88) )
+		ROM_LOAD( "ae300w36.bd1",  0x2100000, 0x0080000, CRC(e829f29e);SHA1(e56bfe2669ed1d1ae394c644def426db129d97e3) )
 	
-		ROM_REGION( 0x400000, REGION_SOUND1, 0 ) // YMZ280B Samples
-		ROM_LOAD( "ae400t23.ya1", 0x000000, 0x200000, CRC(c6ffb043) SHA1(e0c6c5f6b840f63c9a685a2c3be66efa4935cbeb) )
-		ROM_LOAD( "ae401t24.yb1", 0x200000, 0x200000, CRC(d83f1a73) SHA1(412b7ac9ff09a984c28b7d195330d78c4aac3dc5) )
+		ROM_REGION( 0x400000, REGION_SOUND1, 0 );// YMZ280B Samples
+		ROM_LOAD( "ae400t23.ya1", 0x000000, 0x200000, CRC(c6ffb043);SHA1(e0c6c5f6b840f63c9a685a2c3be66efa4935cbeb) )
+		ROM_LOAD( "ae401t24.yb1", 0x200000, 0x200000, CRC(d83f1a73);SHA1(412b7ac9ff09a984c28b7d195330d78c4aac3dc5) )
 	
-		ROM_REGION( 0x080000, REGION_SOUND2, 0 ) // M6295 Samples
-		ROM_LOAD( "ae500w07.ad1", 0x000000, 0x080000, CRC(3734f92c) SHA1(048555b5aa89eaf983305c439ba08d32b4a1bb80) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_SOUND2, 0 );// M6295 Samples
+		ROM_LOAD( "ae500w07.ad1", 0x000000, 0x080000, CRC(3734f92c);SHA1(048555b5aa89eaf983305c439ba08d32b4a1bb80) )
+	ROM_END(); }}; 
 	
 	
 	static DRIVER_INIT( deroon )
@@ -540,7 +548,7 @@ public class tecmosys
 	//	ROM[0x44A/2] = 0x4E71;
 	}
 	
-	GAMEX( 1996, deroon,      0, deroon, deroon, deroon,     ROT0, "Tecmo", "Deroon DeroDero", GAME_NOT_WORKING | GAME_NO_SOUND )
-	GAMEX( 1996, tkdensho,    0, deroon, deroon, 0,          ROT0, "Tecmo", "Touki Denshou -Angel Eyes-", GAME_NOT_WORKING | GAME_NO_SOUND )
+	public static GameDriver driver_deroon	   = new GameDriver("1996"	,"deroon"	,"tecmosys.java"	,rom_deroon,null	,machine_driver_deroon	,input_ports_deroon	,init_deroon	,ROT0	,	"Tecmo", "Deroon DeroDero", GAME_NOT_WORKING | GAME_NO_SOUND )
+	public static GameDriver driver_tkdensho	   = new GameDriver("1996"	,"tkdensho"	,"tecmosys.java"	,rom_tkdensho,null	,machine_driver_deroon	,input_ports_deroon	,null	,ROT0	,	"Tecmo", "Touki Denshou -Angel Eyes-", GAME_NOT_WORKING | GAME_NO_SOUND )
 	
 }

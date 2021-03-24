@@ -103,34 +103,34 @@ public class vastar
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( vastar_fgvideoram_w )
+	public static WriteHandlerPtr vastar_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vastar_fgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( vastar_bg1videoram_w )
+	public static WriteHandlerPtr vastar_bg1videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vastar_bg1videoram[offset] = data;
 		tilemap_mark_tile_dirty(bg1_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( vastar_bg2videoram_w )
+	public static WriteHandlerPtr vastar_bg2videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		vastar_bg2videoram[offset] = data;
 		tilemap_mark_tile_dirty(bg2_tilemap,offset & 0x3ff);
-	}
+	} };
 	
 	
-	READ_HANDLER( vastar_bg1videoram_r )
+	public static ReadHandlerPtr vastar_bg1videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return vastar_bg1videoram[offset];
-	}
+	} };
 	
-	READ_HANDLER( vastar_bg2videoram_r )
+	public static ReadHandlerPtr vastar_bg2videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return vastar_bg2videoram[offset];
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -149,14 +149,14 @@ public class vastar
 			int code, sx, sy, color, flipx, flipy;
 	
 	
-			code = ((spriteram_3[offs] & 0xfc) >> 2) + ((spriteram_2[offs] & 0x01) << 6)
+			code = ((spriteram_3.read(offs)& 0xfc) >> 2) + ((spriteram_2.read(offs)& 0x01) << 6)
 					+ ((offs & 0x20) << 2);
 	
-			sx = spriteram_3[offs + 1];
-			sy = spriteram[offs];
-			color = spriteram[offs + 1] & 0x3f;
-			flipx = spriteram_3[offs] & 0x02;
-			flipy = spriteram_3[offs] & 0x01;
+			sx = spriteram_3.read(offs + 1);
+			sy = spriteram.read(offs);
+			color = spriteram.read(offs + 1)& 0x3f;
+			flipx = spriteram_3.read(offs)& 0x02;
+			flipy = spriteram_3.read(offs)& 0x01;
 	
 			if (flip_screen)
 			{
@@ -164,9 +164,9 @@ public class vastar
 				flipy = !flipy;
 			}
 	
-			if (spriteram_2[offs] & 0x08)	/* double width */
+			if (spriteram_2.read(offs)& 0x08)	/* double width */
 			{
-				if (!flip_screen)
+				if (flip_screen == 0)
 					sy = 224 - sy;
 	
 				drawgfx(bitmap,Machine->gfx[2],
@@ -185,7 +185,7 @@ public class vastar
 			}
 			else
 			{
-				if (!flip_screen)
+				if (flip_screen == 0)
 					sy = 240 - sy;
 	
 				drawgfx(bitmap,Machine->gfx[1],

@@ -51,17 +51,17 @@ public class jrpacman
 			int bit0,bit1,bit2,r,g,b;
 	
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i+256] >> 0) & 0x01;
-			bit2 = (color_prom[i+256] >> 1) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i+256)>> 0) & 0x01;
+			bit2 = (color_prom.read(i+256)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i+256] >> 2) & 0x01;
-			bit2 = (color_prom[i+256] >> 3) & 0x01;
+			bit1 = (color_prom.read(i+256)>> 2) & 0x01;
+			bit2 = (color_prom.read(i+256)>> 3) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
@@ -71,10 +71,10 @@ public class jrpacman
 		for (i = 0;i < 64*4;i++)
 		{
 			/* chars */
-			colortable[i] = color_prom[i];
+			colortable[i] = color_prom.read(i);
 	
 			/* sprites */
-			if (color_prom[i]) colortable[i + 64*4] = color_prom[i] + 0x10;
+			if (color_prom.read(i)) colortable[i + 64*4] = color_prom.read(i)+ 0x10;
 			else colortable[i + 64*4] = 0;
 		}
 	}
@@ -102,13 +102,13 @@ public class jrpacman
 	
 	
 	
-	WRITE_HANDLER( jrpacman_videoram_w )
+	public static WriteHandlerPtr jrpacman_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
 			dirtybuffer[offset] = 1;
 	
-			videoram[offset] = data;
+			videoram.write(offset,data);
 	
 			if (offset < 32)	/* line color - mark whole line as dirty */
 			{
@@ -123,50 +123,50 @@ public class jrpacman
 				dirtybuffer[offset & ~0x80] = 1;
 			}
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( jrpacman_palettebank_w )
+	public static WriteHandlerPtr jrpacman_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (*jrpacman_palettebank != data)
 		{
 			*jrpacman_palettebank = data;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( jrpacman_colortablebank_w )
+	public static WriteHandlerPtr jrpacman_colortablebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (*jrpacman_colortablebank != data)
 		{
 			*jrpacman_colortablebank = data;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( jrpacman_charbank_w )
+	public static WriteHandlerPtr jrpacman_charbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (*jrpacman_charbank != data)
 		{
 			*jrpacman_charbank = data;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( jrpacman_flipscreen_w )
+	public static WriteHandlerPtr jrpacman_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -212,9 +212,9 @@ public class jrpacman
 						}
 	
 						drawgfx(tmpbitmap,Machine->gfx[0],
-								videoram[offs] + 256 * *jrpacman_charbank,
+								videoram.read(offs)+ 256 * *jrpacman_charbank,
 							/* color is set line by line */
-								(videoram[mx] & 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
+								(videoram.read(mx)& 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
 										+ 0x40 * (*jrpacman_palettebank & 1),
 								flipscreen,flipscreen,
 								8*sx,8*sy,
@@ -233,8 +233,8 @@ public class jrpacman
 							}
 	
 							drawgfx(tmpbitmap,Machine->gfx[0],
-									videoram[offs],
-									(videoram[offs + 4*32] & 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
+									videoram.read(offs),
+									(videoram.read(offs + 4*32)& 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
 											+ 0x40 * (*jrpacman_palettebank & 1),
 									flipscreen,flipscreen,
 									8*sx,8*sy,
@@ -251,8 +251,8 @@ public class jrpacman
 							}
 	
 							drawgfx(tmpbitmap,Machine->gfx[0],
-									videoram[offs] + 0x100 * (*jrpacman_charbank & 1),
-									(videoram[offs + 4*32] & 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
+									videoram.read(offs)+ 0x100 * (*jrpacman_charbank & 1),
+									(videoram.read(offs + 4*32)& 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
 											+ 0x40 * (*jrpacman_palettebank & 1),
 									flipscreen,flipscreen,
 									8*sx,8*sy,
@@ -290,22 +290,22 @@ public class jrpacman
 		for (offs = spriteram_size - 2;offs > 2*2;offs -= 2)
 		{
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] >> 2) + 0x40 * (*jrpacman_spritebank & 1),
-					(spriteram[offs + 1] & 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
+					(spriteram.read(offs)>> 2) + 0x40 * (*jrpacman_spritebank & 1),
+					(spriteram.read(offs + 1)& 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
 							+ 0x40 * (*jrpacman_palettebank & 1),
-					spriteram[offs] & 1,spriteram[offs] & 2,
-					272 - spriteram_2[offs + 1],spriteram_2[offs]-31,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
+					272 - spriteram_2.read(offs + 1),spriteram_2.read(offs)-31,
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
 		/* the first two sprites must be offset one pixel to the left */
 		for (offs = 2*2;offs > 0;offs -= 2)
 		{
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] >> 2) + 0x40 * (*jrpacman_spritebank & 1),
-					(spriteram[offs + 1] & 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
+					(spriteram.read(offs)>> 2) + 0x40 * (*jrpacman_spritebank & 1),
+					(spriteram.read(offs + 1)& 0x1f) + 0x20 * (*jrpacman_colortablebank & 1)
 							+ 0x40 * (*jrpacman_palettebank & 1),
-					spriteram[offs] & 1,spriteram[offs] & 2,
-					272 - spriteram_2[offs + 1],spriteram_2[offs]-30,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
+					272 - spriteram_2.read(offs + 1),spriteram_2.read(offs)-30,
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
 	

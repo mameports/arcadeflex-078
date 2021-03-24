@@ -16,7 +16,6 @@ public class wwfsstar
 {
 	
 	data16_t *wwfsstar_fg0_videoram, *wwfsstar_bg0_videoram;
-	extern int wwfsstar_scrollx, wwfsstar_scrolly;
 	static struct tilemap *fg0_tilemap, *bg0_tilemap;
 	
 	/*******************************************************************************
@@ -175,7 +174,7 @@ public class wwfsstar
 				{
 					if (flip_screen)
 					{
-						if (!flipy)
+						if (flipy == 0)
 						{
 							drawgfx(bitmap,gfx,number+count,colourbank,flipx,flipy,xpos,ypos+16*count,cliprect,TRANSPARENCY_PEN,0);
 						}
@@ -186,7 +185,7 @@ public class wwfsstar
 					}
 					else
 					{
-						if (!flipy)
+						if (flipy == 0)
 						{
 							drawgfx(bitmap,gfx,number+count,colourbank,flipx,flipy,xpos,ypos-(16*(chain-1))+(16*count),cliprect,TRANSPARENCY_PEN,0);
 						}

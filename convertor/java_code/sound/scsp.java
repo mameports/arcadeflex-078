@@ -61,8 +61,7 @@ public class scsp
 	#define scsp_dexe 		scsp_regs[0x416/2] & 0x1000
 	#define dma_transfer_end	((scsp_regs[0x424/2] & 0x10)>>4)|(((scsp_regs[0x426/2] & 0x10)>>4)<<1)|(((scsp_regs[0x428/2] & 0x10)>>4)<<2)
 	static UINT16 scsp_dtlg;
-	static void dma_scsp(void); 		/*SCSP DMA transfer function*/
-	
+	static 
 	#define SHIFT	12
 	#define FIX(v)	((data32_t) ((float) (1<<SHIFT)*(v)))
 	
@@ -226,7 +225,7 @@ public class scsp
 			SCSP[0].Int68kCB(IrqMidi);
 			return;
 		}
-		if(!pend)
+		if (pend == 0)
 			return;
 		if(pend&0x40)
 			if(en&0x40)
@@ -389,7 +388,7 @@ public class scsp
 			SCSP = &SCSPs[i];
 			memset(SCSP,0,sizeof(SCSP));
 	
-			if (!i)
+			if (i == 0)
 			{
 				SCSP->Master=1;
 			}
@@ -878,7 +877,7 @@ public class scsp
 			signed int smpl=*bufl1>>2;
 			signed int smpr=*bufr1>>2;
 	
-			if (!chip)
+			if (chip == 0)
 			{
 				SCSP_TimersAddTicks(1);
 				CheckPendingIRQ();

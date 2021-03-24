@@ -18,16 +18,16 @@ public class hexa
 	static int charbank;
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( hexa_videoram_w )
+	public static WriteHandlerPtr hexa_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( hexa_d008_w )
+	public static WriteHandlerPtr hexa_d008_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *RAM = memory_region(REGION_CPU1);
 		int bankaddress;
@@ -60,13 +60,13 @@ public class hexa
 		}
 	
 		/* bit 6 - 7 unknown */
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		int offs = tile_index * 2;
-		int tile = videoram[offs + 1] + ((videoram[offs] & 0x07) << 8) + (charbank << 11);
-		int color = (videoram[offs] & 0xf8) >> 3;
+		int tile = videoram.read(offs + 1)+ ((videoram.read(offs)& 0x07) << 8) + (charbank << 11);
+		int color = (videoram.read(offs)& 0xf8) >> 3;
 	
 		SET_TILE_INFO(0, tile, color, 0)
 	}
@@ -76,7 +76,7 @@ public class hexa
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;

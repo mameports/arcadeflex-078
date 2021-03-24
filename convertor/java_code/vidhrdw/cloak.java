@@ -45,7 +45,7 @@ public class cloak
 	  bit 0 -- diode |< -- pullup 1 kohm -- 10  kohm resistor -- pulldown 100 pf -- BLUE
 	
 	***************************************************************************/
-	WRITE_HANDLER( cloak_paletteram_w )
+	public static WriteHandlerPtr cloak_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 		int bit0,bit1,bit2;
@@ -73,9 +73,9 @@ public class cloak
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 		palette_set_color(offset & 0x3f,r,g,b);
-	}
+	} };
 	
-	WRITE_HANDLER( cloak_clearbmp_w )
+	public static WriteHandlerPtr cloak_clearbmp_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bmap = data & 0x01;
 	
@@ -92,7 +92,7 @@ public class cloak
 				memset(tmpvideoram2, 0, 256*256);
 			}
 		}
-	}
+	} };
 	
 	static void adjust_xy(int offset)
 	{
@@ -107,7 +107,7 @@ public class cloak
 		}
 	}
 	
-	READ_HANDLER( graph_processor_r )
+	public static ReadHandlerPtr graph_processor_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int ret;
 	
@@ -123,9 +123,9 @@ public class cloak
 		adjust_xy(offset);
 	
 		return ret;
-	}
+	} };
 	
-	WRITE_HANDLER( graph_processor_w )
+	public static WriteHandlerPtr graph_processor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int color;
 	
@@ -150,25 +150,25 @@ public class cloak
 				adjust_xy(offset);
 				break;
 			}
-	}
+	} };
 	
-	WRITE_HANDLER( cloak_videoram_w )
+	public static WriteHandlerPtr cloak_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( cloak_flipscreen_w )
+	public static WriteHandlerPtr cloak_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 0x80);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, 0, 0)
 	}
@@ -178,7 +178,7 @@ public class cloak
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		if ((tmpbitmap = auto_bitmap_alloc(Machine->drv->screen_width,Machine->drv->screen_height)) == 0)
@@ -218,11 +218,11 @@ public class cloak
 	
 		for (offs = (spriteram_size / 4) - 1; offs >= 0; offs--)
 		{
-			int code = spriteram[offs + 64] & 0x7f;
-			int flipx = spriteram[offs + 64] & 0x80;
+			int code = spriteram.read(offs + 64)& 0x7f;
+			int flipx = spriteram.read(offs + 64)& 0x80;
 			int flipy = 0;
-			int sx = spriteram[offs + 192];
-			int sy = 240 - spriteram[offs];
+			int sx = spriteram.read(offs + 192);
+			int sy = 240 - spriteram.read(offs);
 	
 			if (flip_screen)
 			{

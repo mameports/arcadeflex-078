@@ -216,16 +216,11 @@ public class cpuexec
 	 *
 	 *************************************/
 	
-	static void cpu_timeslice(void);
-	static void cpu_inittimers(void);
-	static void cpu_vblankreset(void);
-	static void cpu_vblankcallback(int param);
+	static static static static void cpu_vblankcallback(int param);
 	static void cpu_updatecallback(int param);
 	static void end_interleave_boost(int param);
-	static void compute_perfect_interleave(void);
-	
-	static void handle_loadsave(void);
-	
+	static 
+	static 
 	
 	
 	#if 0
@@ -669,17 +664,17 @@ public class cpuexec
 	}
 	
 	
-	WRITE_HANDLER( watchdog_reset_w )
+	public static WriteHandlerPtr watchdog_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		watchdog_reset();
-	}
+	} };
 	
 	
-	READ_HANDLER( watchdog_reset_r )
+	public static ReadHandlerPtr watchdog_reset_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		watchdog_reset();
 		return 0xff;
-	}
+	} };
 	
 	
 	WRITE16_HANDLER( watchdog_reset16_w )
@@ -872,8 +867,7 @@ public class cpuexec
 		/* huh? something for the debugger */
 		#ifdef MAME_DEBUG
 		{
-			extern int debug_key_delay;
-			debug_key_delay = 0x7ffe;
+					debug_key_delay = 0x7ffe;
 		}
 		#endif
 	}

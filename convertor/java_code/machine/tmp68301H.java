@@ -18,9 +18,6 @@ public class tmp68301H
 	WRITE16_HANDLER( tmp68301_regs_w );
 	
 	// Interrupts
-	void tmp68301_external_interrupt_0(void);
-	void tmp68301_external_interrupt_1(void);
-	void tmp68301_external_interrupt_2(void);
 	
 	#endif
 }

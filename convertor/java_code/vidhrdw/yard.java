@@ -31,17 +31,17 @@ public class yard
 	
 	#define RADAR_PALETTE_BASE (256+16)
 	
-	static struct rectangle panelvisiblearea =
-	{
+	static rectangle panelvisiblearea = new rectangle
+	(
 		26*8, 32*8-1,
 		1*8, 31*8-1
-	};
+	);
 	
-	static struct rectangle panelvisibleareaflip =
-	{
+	static rectangle panelvisibleareaflip = new rectangle
+	(
 		0*8, 6*8-1,
 		1*8, 31*8-1
-	};
+	);
 	
 	
 	/***************************************************************************
@@ -81,18 +81,18 @@ public class yard
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[256] >> 2) & 0x01;
-			bit2 = (color_prom[256] >> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 2) & 0x01;
+			bit2 = (color_prom.read(256)>> 3) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[0] >> 3) & 0x01;
-			bit1 = (color_prom[256] >> 0) & 0x01;
-			bit2 = (color_prom[256] >> 1) & 0x01;
+			bit0 = (color_prom.read(0)>> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 0) & 0x01;
+			bit2 = (color_prom.read(256)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -150,18 +150,18 @@ public class yard
 	
 			/* red component */
 			bit0 = 0;
-			bit1 = (color_prom[256] >> 2) & 0x01;
-			bit2 = (color_prom[256] >> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 2) & 0x01;
+			bit2 = (color_prom.read(256)>> 3) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[0] >> 3) & 0x01;
-			bit1 = (color_prom[256] >> 0) & 0x01;
-			bit2 = (color_prom[256] >> 1) & 0x01;
+			bit0 = (color_prom.read(0)>> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 0) & 0x01;
+			bit2 = (color_prom.read(256)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i+256+16,r,g,b);
@@ -195,7 +195,7 @@ public class yard
 	
 	
 	
-	WRITE_HANDLER( yard_flipscreen_w )
+	public static WriteHandlerPtr yard_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* screen flip is handled both by software and hardware */
 		data ^= ~readinputport(4) & 1;
@@ -204,10 +204,10 @@ public class yard
 	
 		coin_counter_w(0,data & 0x02);
 		coin_counter_w(1,data & 0x20);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( yard_scroll_panel_w )
+	public static WriteHandlerPtr yard_scroll_panel_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int sx,sy,i;
 	
@@ -227,7 +227,7 @@ public class yard
 	
 			plot_pixel(scroll_panel_bitmap, sx + i, sy, Machine->pens[RADAR_PALETTE_BASE + (sy & 0xfc) + col]);
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -262,7 +262,7 @@ public class yard
 	
 				sx = (offs/2) % 32;
 				sy = (offs/2) / 32;
-				flipx = videoram[offs+1] & 0x20;
+				flipx = videoram.read(offs+1)& 0x20;
 	
 				if (sy >= 32)
 				{
@@ -278,8 +278,8 @@ public class yard
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs] + ((videoram[offs+1] & 0xc0) << 2),
-						videoram[offs+1] & 0x1f,
+						videoram.read(offs)+ ((videoram.read(offs+1)& 0xc0) << 2),
+						videoram.read(offs+1)& 0x1f,
 						flipx,flip_screen,
 						8*sx,8*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -312,12 +312,12 @@ public class yard
 			int code1,code2,bank,sx,sy1,sy2,flipx,flipy;
 	
 	
-			bank  = (spriteram[offs + 1] & 0x20) >> 5;
-			code1 =  spriteram[offs + 2] & 0xbf;
-			sx    =  spriteram[offs + 3];
-			sy1   =  241 - spriteram[offs];
-			flipx =  spriteram[offs + 1] & 0x40;
-			flipy =  spriteram[offs + 1] & 0x80;
+			bank  = (spriteram.read(offs + 1)& 0x20) >> 5;
+			code1 =  spriteram.read(offs + 2)& 0xbf;
+			sx    =  spriteram.read(offs + 3);
+			sy1   =  241 - spriteram.read(offs);
+			flipx =  spriteram.read(offs + 1)& 0x40;
+			flipy =  spriteram.read(offs + 1)& 0x80;
 	
 			if (flipy)
 			{
@@ -344,14 +344,14 @@ public class yard
 	
 			drawgfx(bitmap,Machine->gfx[1],
 					code1 + 256 * bank,
-					spriteram[offs + 1] & 0x1f,
+					spriteram.read(offs + 1)& 0x1f,
 					flipx,flipy,
 					sx, sy1,
 					&Machine->visible_area,TRANSPARENCY_COLOR,256);
 	
 			drawgfx(bitmap,Machine->gfx[1],
 					code2 + 256 * bank,
-					spriteram[offs + 1] & 0x1f,
+					spriteram.read(offs + 1)& 0x1f,
 					flipx,flipy,
 					sx, sy2,
 					&Machine->visible_area,TRANSPARENCY_COLOR,256);

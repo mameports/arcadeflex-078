@@ -323,68 +323,72 @@ public class overdriv
 	MEMORY_END
 	
 	
-	static MEMORY_READ_START( overdriv_s_readmem )
-		{ 0x0201, 0x0201, YM2151_status_port_0_r },
-		{ 0x0400, 0x042f, K053260_0_r },
-		{ 0x0600, 0x062f, K053260_1_r },
-		{ 0x0800, 0x0fff, MRA_RAM },
-		{ 0x1000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress overdriv_s_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0201, 0x0201, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0x0400, 0x042f, K053260_0_r ),
+		new Memory_ReadAddress( 0x0600, 0x062f, K053260_1_r ),
+		new Memory_ReadAddress( 0x0800, 0x0fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( overdriv_s_writemem )
-		{ 0x0200, 0x0200, YM2151_register_port_0_w },
-		{ 0x0201, 0x0201, YM2151_data_port_0_w },
-		{ 0x0400, 0x042f, K053260_0_w },
-		{ 0x0600, 0x062f, K053260_1_w },
-		{ 0x0800, 0x0fff, MWA_RAM },
-		{ 0x1000, 0xffff, MWA_ROM },
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( overdriv )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_TOGGLE )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* EEPROM data */
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// ?
-	
-		PORT_START
-		PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_CENTER, 100, 50, 0, 0 )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress overdriv_s_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0200, 0x0200, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0x0201, 0x0201, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0x0400, 0x042f, K053260_0_w ),
+		new Memory_WriteAddress( 0x0600, 0x062f, K053260_1_w ),
+		new Memory_WriteAddress( 0x0800, 0x0fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x1000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static struct GfxLayout charlayout =
-	{
+	static InputPortPtr input_ports_overdriv = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_TOGGLE );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SPECIAL );/* EEPROM data */
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL );// ?
+	
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_CENTER, 100, 50, 0, 0 );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ STEP8(0,4) },
-		{ STEP8(7*8*4,-8*4) },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { STEP8(0,4) },
+		new int[] { STEP8(7*8*4,-8*4) },
 		8*8*4
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX4, 0, &charlayout, 0, 0x80 },
-		{ REGION_GFX5, 0, &charlayout, 0, 0x80 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX4, 0, charlayout, 0, 0x80 ),
+		new GfxDecodeInfo( REGION_GFX5, 0, charlayout, 0, 0x80 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -456,43 +460,43 @@ public class overdriv
 	
 	***************************************************************************/
 	
-	ROM_START( overdriv )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "789.2",        0x00000, 0x20000, CRC(77f18f3f) SHA1(a8c91435573c7851a7864d07eeacfb2f142abbe2) )
-		ROM_LOAD16_BYTE( "789.1",        0x00001, 0x20000, CRC(4f44e6ad) SHA1(9fa871f55e6b2ec353dd979ded568cd9da83f5d6) )
+	static RomLoadPtr rom_overdriv = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "789.2",        0x00000, 0x20000, CRC(77f18f3f);SHA1(a8c91435573c7851a7864d07eeacfb2f142abbe2) )
+		ROM_LOAD16_BYTE( "789.1",        0x00001, 0x20000, CRC(4f44e6ad);SHA1(9fa871f55e6b2ec353dd979ded568cd9da83f5d6) )
 	
-		ROM_REGION( 0x40000, REGION_CPU2, 0 )
-		ROM_LOAD16_BYTE( "789.4",        0x00000, 0x20000, CRC(46fb7e88) SHA1(f706a76aff9bec64abe6da325cba0715d6e6ed0a) )
-		ROM_LOAD16_BYTE( "789.3",        0x00001, 0x20000, CRC(24427195) SHA1(48f4f81729acc0e497b40fddbde11242c5c4c573) )
+		ROM_REGION( 0x40000, REGION_CPU2, 0 );
+		ROM_LOAD16_BYTE( "789.4",        0x00000, 0x20000, CRC(46fb7e88);SHA1(f706a76aff9bec64abe6da325cba0715d6e6ed0a) )
+		ROM_LOAD16_BYTE( "789.3",        0x00001, 0x20000, CRC(24427195);SHA1(48f4f81729acc0e497b40fddbde11242c5c4c573) )
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
-		ROM_LOAD( "789.5",        0x00000, 0x10000, CRC(1085f069) SHA1(27228cedb357ff2e130a4bd6d8aa01cf537e034f) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );/* 64k for the audio CPU */
+		ROM_LOAD( "789.5",        0x00000, 0x10000, CRC(1085f069);SHA1(27228cedb357ff2e130a4bd6d8aa01cf537e034f) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, 0 )	/* graphics (addressable by the CPU) */
-		ROM_LOAD( "e12.r1",       0x000000, 0x100000, CRC(14a10fb2) SHA1(03fb9c15514c5ecc2d9ae4a53961c4bbb49cec73) )	/* sprites */
-		ROM_LOAD( "e13.r4",       0x100000, 0x100000, CRC(6314a628) SHA1(f8a8918998c266109348c77427a7696b503daeb3) )
-		ROM_LOAD( "e14.r10",      0x200000, 0x100000, CRC(b5eca14b) SHA1(a1c5f5e9cd8bbcfc875e2acb33be024724da63aa) )
-		ROM_LOAD( "e15.r15",      0x300000, 0x100000, CRC(5d93e0c3) SHA1(d5cb7666c0c28fd465c860c7f9dbb18a7f739a93) )
+		ROM_REGION( 0x400000, REGION_GFX1, 0 );/* graphics (addressable by the CPU) */
+		ROM_LOAD( "e12.r1",       0x000000, 0x100000, CRC(14a10fb2);SHA1(03fb9c15514c5ecc2d9ae4a53961c4bbb49cec73) )	/* sprites */
+		ROM_LOAD( "e13.r4",       0x100000, 0x100000, CRC(6314a628);SHA1(f8a8918998c266109348c77427a7696b503daeb3) )
+		ROM_LOAD( "e14.r10",      0x200000, 0x100000, CRC(b5eca14b);SHA1(a1c5f5e9cd8bbcfc875e2acb33be024724da63aa) )
+		ROM_LOAD( "e15.r15",      0x300000, 0x100000, CRC(5d93e0c3);SHA1(d5cb7666c0c28fd465c860c7f9dbb18a7f739a93) )
 	
-		ROM_REGION( 0x020000, REGION_GFX2, 0 )	/* graphics (addressable by the CPU) */
-		ROM_LOAD( "e06.a21",      0x000000, 0x020000, CRC(14a085e6) SHA1(86dad6f223e13ff8af7075c3d99bb0a83784c384) )	/* zoom/rotate */
+		ROM_REGION( 0x020000, REGION_GFX2, 0 );/* graphics (addressable by the CPU) */
+		ROM_LOAD( "e06.a21",      0x000000, 0x020000, CRC(14a085e6);SHA1(86dad6f223e13ff8af7075c3d99bb0a83784c384) )	/* zoom/rotate */
 	
-		ROM_REGION( 0x020000, REGION_GFX3, 0 )	/* graphics (addressable by the CPU) */
-		ROM_LOAD( "e07.c23",      0x000000, 0x020000, CRC(8a6ceab9) SHA1(1a52b7361f71a6126cd648a76af00223d5b25c7a) )	/* zoom/rotate */
+		ROM_REGION( 0x020000, REGION_GFX3, 0 );/* graphics (addressable by the CPU) */
+		ROM_LOAD( "e07.c23",      0x000000, 0x020000, CRC(8a6ceab9);SHA1(1a52b7361f71a6126cd648a76af00223d5b25c7a) )	/* zoom/rotate */
 	
-		ROM_REGION( 0x0c0000, REGION_GFX4, 0 )	/* graphics (addressable by the CPU) */
-		ROM_LOAD( "e18.p22",      0x000000, 0x040000, CRC(985a4a75) SHA1(b726166c295be6fbec38a9d11098cc4a4a5de456) )	/* 053250 #0 */
-		ROM_LOAD( "e19.r22",      0x040000, 0x040000, CRC(15c54ea2) SHA1(5b10bd28e48e51613359820ba8c75d4a91c2d322) )
-		ROM_LOAD( "e20.s22",      0x080000, 0x040000, CRC(ea204acd) SHA1(52b8c30234eaefcba1074496028a4ac2bca48e95) )
+		ROM_REGION( 0x0c0000, REGION_GFX4, 0 );/* graphics (addressable by the CPU) */
+		ROM_LOAD( "e18.p22",      0x000000, 0x040000, CRC(985a4a75);SHA1(b726166c295be6fbec38a9d11098cc4a4a5de456) )	/* 053250 #0 */
+		ROM_LOAD( "e19.r22",      0x040000, 0x040000, CRC(15c54ea2);SHA1(5b10bd28e48e51613359820ba8c75d4a91c2d322) )
+		ROM_LOAD( "e20.s22",      0x080000, 0x040000, CRC(ea204acd);SHA1(52b8c30234eaefcba1074496028a4ac2bca48e95) )
 	
-		ROM_REGION( 0x080000, REGION_GFX5, 0 )	/* unknown (053250?) */
-		ROM_LOAD( "e16.p12",      0x000000, 0x040000, CRC(9348dee1) SHA1(367193373e28962b5b0e54cc15d68ed88ab83f12) )	/* 053250 #1 */
-		ROM_LOAD( "e17.p17",      0x040000, 0x040000, CRC(04c07248) SHA1(873445002cbf90c9fc5a35bf4a8f6c43193ee342) )
+		ROM_REGION( 0x080000, REGION_GFX5, 0 );/* unknown (053250?) */
+		ROM_LOAD( "e16.p12",      0x000000, 0x040000, CRC(9348dee1);SHA1(367193373e28962b5b0e54cc15d68ed88ab83f12) )	/* 053250 #1 */
+		ROM_LOAD( "e17.p17",      0x040000, 0x040000, CRC(04c07248);SHA1(873445002cbf90c9fc5a35bf4a8f6c43193ee342) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )	/* 053260 samples */
-		ROM_LOAD( "e03.j1",       0x000000, 0x100000, CRC(51ebfebe) SHA1(17f0c23189258e801f48d5833fe934e7a48d071b) )
-		ROM_LOAD( "e02.f1",       0x100000, 0x100000, CRC(bdd3b5c6) SHA1(412332d64052c0a3714f4002c944b0e7d32980a4) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );/* 053260 samples */
+		ROM_LOAD( "e03.j1",       0x000000, 0x100000, CRC(51ebfebe);SHA1(17f0c23189258e801f48d5833fe934e7a48d071b) )
+		ROM_LOAD( "e02.f1",       0x100000, 0x100000, CRC(bdd3b5c6);SHA1(412332d64052c0a3714f4002c944b0e7d32980a4) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -503,5 +507,5 @@ public class overdriv
 	
 	
 	
-	GAMEX( 1990, overdriv, 0, overdriv, overdriv, overdriv, ROT90, "Konami", "Over Drive", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_overdriv	   = new GameDriver("1990"	,"overdriv"	,"overdriv.java"	,rom_overdriv,null	,machine_driver_overdriv	,input_ports_overdriv	,init_overdriv	,ROT90	,	"Konami", "Over Drive", GAME_IMPERFECT_GRAPHICS )
 }

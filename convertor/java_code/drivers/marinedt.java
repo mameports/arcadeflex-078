@@ -105,29 +105,33 @@ public class marinedt
 	static	int coll,cx,cyr,cyq;
 	static	int collh,cxh,cyrh,cyqh;
 	
-	static MEMORY_READ_START( marinedt_readmem )
-		{ 0x0000, 0x37ff, MRA_ROM },
-		{ 0x4000, 0x43ff, MRA_RAM },
-		{ 0x4400, 0x47ff, MRA_RAM },	//unused, vram mirror?
-		{ 0x4000, 0x4bff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress marinedt_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x37ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x4000, 0x43ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x4400, 0x47ff, MRA_RAM ),	//unused, vram mirror?
+		new Memory_ReadAddress( 0x4000, 0x4bff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( marinedt_writemem )
-		{ 0x0000, 0x37ff, MWA_ROM },
-		{ 0x4000, 0x47ff, MWA_RAM },
-		{ 0x4800, 0x4bff, videoram_w, &videoram, &videoram_size },
-		{ 0x4c00, 0x4c00, MWA_NOP },	//?? maybe off by one error
-	MEMORY_END
+	public static Memory_WriteAddress marinedt_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x37ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x4000, 0x47ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x4800, 0x4bff, videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0x4c00, 0x4c00, MWA_NOP ),	//?? maybe off by one error
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static READ_HANDLER( marinedt_port1_r )
+	public static ReadHandlerPtr marinedt_port1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	//might need to be reversed for cocktail stuff
 	
 		/* x/y multiplexed */
 		return readinputport(3 + ((marinedt_pf&0x08)>>3));
-	}
+	} };
 	
-	static READ_HANDLER( marinedt_coll_r )
+	public static ReadHandlerPtr marinedt_coll_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		//76543210
 		//x------- obj1 to obj2 collision
@@ -139,13 +143,13 @@ public class marinedt
 		if (keyboard_pressed(KEYCODE_Z)) return 0x08;
 	
 		return coll | collh;
-	}
+	} };
 	
 	//are these returning only during a collision?
 	//id imagine they are returning the pf char where the collission took place?
 	//what about where there is lots of colls?
 	//maybe the first on a scanline basis
-	static READ_HANDLER( marinedt_obj1_x_r )
+	public static ReadHandlerPtr marinedt_obj1_x_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		//76543210
 		//xxxx---- unknown
@@ -155,9 +159,9 @@ public class marinedt
 	if(RAM[0x430e]) --cx; else ++cx;
 	//figure out why inc/dec based on 430e?
 		return cx | (cxh<<4);
-	}
+	} };
 	
-	static READ_HANDLER( marinedt_obj1_yr_r )
+	public static ReadHandlerPtr marinedt_obj1_yr_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		//76543210
 		//xxxx---- unknown
@@ -166,9 +170,9 @@ public class marinedt
 	if (cx==0x10) cyr++;
 	
 		return cyr | (cyrh<<4);
-	}
+	} };
 	
-	static READ_HANDLER( marinedt_obj1_yq_r )
+	public static ReadHandlerPtr marinedt_obj1_yq_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		//76543210
 		//xx------ unknown
@@ -177,29 +181,31 @@ public class marinedt
 		//------xx screen quarter
 	
 		return cyq | (cyqh<<4);
-	}
+	} };
 	
-	static PORT_READ_START( marinedt_readport )
-		{ 0x00, 0x00, input_port_0_r },		//dips coinage
-		{ 0x01, 0x01, marinedt_port1_r },	//trackball xy muxed
-		{ 0x02, 0x02, marinedt_obj1_x_r },
-		{ 0x03, 0x03, input_port_1_r },		//buttons
-		{ 0x04, 0x04, input_port_2_r },		//dips
-		{ 0x06, 0x06, marinedt_obj1_yr_r },
-		{ 0x0a, 0x0a, marinedt_obj1_yq_r },
-		{ 0x0e, 0x0e, marinedt_coll_r },
-	PORT_END
+	public static IO_ReadPort marinedt_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, input_port_0_r ),		//dips coinage
+		new IO_ReadPort( 0x01, 0x01, marinedt_port1_r ),	//trackball xy muxed
+		new IO_ReadPort( 0x02, 0x02, marinedt_obj1_x_r ),
+		new IO_ReadPort( 0x03, 0x03, input_port_1_r ),		//buttons
+		new IO_ReadPort( 0x04, 0x04, input_port_2_r ),		//dips
+		new IO_ReadPort( 0x06, 0x06, marinedt_obj1_yr_r ),
+		new IO_ReadPort( 0x0a, 0x0a, marinedt_obj1_yq_r ),
+		new IO_ReadPort( 0x0e, 0x0e, marinedt_coll_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static WRITE_HANDLER( marinedt_obj1_a_w ) {	marinedt_obj1_a = data; }
-	static WRITE_HANDLER( marinedt_obj1_x_w ) {	marinedt_obj1_x = data; }
-	static WRITE_HANDLER( marinedt_obj1_y_w ) {	marinedt_obj1_y = data; }
-	static WRITE_HANDLER( marinedt_obj2_a_w ) {	marinedt_obj2_a = data; }
-	static WRITE_HANDLER( marinedt_obj2_x_w ) {	marinedt_obj2_x = data; }
-	static WRITE_HANDLER( marinedt_obj2_y_w ) {	marinedt_obj2_y = data; }
+	public static WriteHandlerPtr marinedt_obj1_a_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj1_a = data; } };
+	public static WriteHandlerPtr marinedt_obj1_x_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj1_x = data; } };
+	public static WriteHandlerPtr marinedt_obj1_y_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj1_y = data; } };
+	public static WriteHandlerPtr marinedt_obj2_a_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj2_a = data; } };
+	public static WriteHandlerPtr marinedt_obj2_x_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj2_x = data; } };
+	public static WriteHandlerPtr marinedt_obj2_y_w = new WriteHandlerPtr() {public void handler(int offset, int data) {	marinedt_obj2_y = data; } };
 	
-	static WRITE_HANDLER( marinedt_music_w ){	marinedt_music = data; }
+	public static WriteHandlerPtr marinedt_music_w = new WriteHandlerPtr() {public void handler(int offset, int data){	marinedt_music = data; } };
 	
-	static WRITE_HANDLER( marinedt_sound_w )
+	public static WriteHandlerPtr marinedt_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		//76543210
 		//xx------ ??
@@ -211,9 +217,9 @@ public class marinedt
 		//-------x ??
 	
 		marinedt_sound = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( marinedt_pd_w )
+	public static WriteHandlerPtr marinedt_pd_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		//76543210
 		//xxx----- ?? unused
@@ -224,9 +230,9 @@ public class marinedt
 		//-------x obj1 enable
 	
 		marinedt_pd = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( marinedt_pf_w )
+	public static WriteHandlerPtr marinedt_pf_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		//76543210
 		//xxxx---- ?? unused (will need to understand table of written values)
@@ -241,131 +247,133 @@ public class marinedt
 	//	logerror("pf:%02x %d\n",marinedt_pf);
 	//logerror("pd:%02x %d\n",marinedt_pd, cpu_getcurrentframe());
 	
-	}
+	} };
 	
-	static PORT_WRITE_START( marinedt_writeport )
-		{ 0x02, 0x02, marinedt_obj1_a_w },
-		{ 0x03, 0x03, marinedt_obj1_x_w },
-		{ 0x04, 0x04, marinedt_obj1_y_w },
-		{ 0x05, 0x05, marinedt_music_w },
-		{ 0x06, 0x06, marinedt_sound_w },
-		{ 0x08, 0x08, marinedt_obj2_a_w },
-		{ 0x09, 0x09, marinedt_obj2_x_w },
-		{ 0x0a, 0x0a, marinedt_obj2_y_w },
-		{ 0x0d, 0x0d, marinedt_pd_w },
-		{ 0x0e, 0x0e, watchdog_reset_w },
-		{ 0x0f, 0x0f, marinedt_pf_w },
-	PORT_END
+	public static IO_WritePort marinedt_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x02, 0x02, marinedt_obj1_a_w ),
+		new IO_WritePort( 0x03, 0x03, marinedt_obj1_x_w ),
+		new IO_WritePort( 0x04, 0x04, marinedt_obj1_y_w ),
+		new IO_WritePort( 0x05, 0x05, marinedt_music_w ),
+		new IO_WritePort( 0x06, 0x06, marinedt_sound_w ),
+		new IO_WritePort( 0x08, 0x08, marinedt_obj2_a_w ),
+		new IO_WritePort( 0x09, 0x09, marinedt_obj2_x_w ),
+		new IO_WritePort( 0x0a, 0x0a, marinedt_obj2_y_w ),
+		new IO_WritePort( 0x0d, 0x0d, marinedt_pd_w ),
+		new IO_WritePort( 0x0e, 0x0e, watchdog_reset_w ),
+		new IO_WritePort( 0x0f, 0x0f, marinedt_pf_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( marinedt )
-		PORT_START	/* IN0 */
-		PORT_DIPNAME( 0x0f, 0x00, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x0f, DEF_STR( 9C_1C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 8C_1C ) )
-		PORT_DIPSETTING(    0x0d, DEF_STR( 7C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 6C_1C ) )
-		PORT_DIPSETTING(    0x0b, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x09, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_8C ) )
-		PORT_DIPNAME( 0xf0, 0x00, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0xf0, DEF_STR( 9C_1C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 8C_1C ) )
-		PORT_DIPSETTING(    0xd0, DEF_STR( 7C_1C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 6C_1C ) )
-		PORT_DIPSETTING(    0xb0, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x90, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x50, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x70, DEF_STR( 1C_8C ) )
+	static InputPortPtr input_ports_marinedt = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_DIPNAME( 0x0f, 0x00, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x0f, DEF_STR( "9C_1C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "8C_1C") );
+		PORT_DIPSETTING(    0x0d, DEF_STR( "7C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "6C_1C") );
+		PORT_DIPSETTING(    0x0b, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x09, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_8C") );
+		PORT_DIPNAME( 0xf0, 0x00, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0xf0, DEF_STR( "9C_1C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "8C_1C") );
+		PORT_DIPSETTING(    0xd0, DEF_STR( "7C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "6C_1C") );
+		PORT_DIPSETTING(    0xb0, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x90, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x50, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x70, DEF_STR( "1C_8C") );
 	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SERVICE1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_TILT )
-		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START1 )
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_SERVICE1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_TILT );
+		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START2 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START1 );
 	
-		PORT_START	/* IN2 */
-	    PORT_DIPNAME( 0x01, 0x00, DEF_STR( Bonus_Life ) )
-	    PORT_DIPSETTING(    0x01, "5000" )
-	    PORT_DIPSETTING(    0x00, "10000" )
+		PORT_START(); 	/* IN2 */
+	    PORT_DIPNAME( 0x01, 0x00, DEF_STR( "Bonus_Life") );
+	    PORT_DIPSETTING(    0x01, "5000" );
+	    PORT_DIPSETTING(    0x00, "10000" );
 	//cheat?
-	    PORT_DIPNAME( 0x02, 0x00, "ignore internal bounce?" )	//maybe die/bounce of rocks/coral?
-	    PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-	    PORT_DIPSETTING(    0x02, DEF_STR( On ) )
+	    PORT_DIPNAME( 0x02, 0x00, "ignore internal bounce?" );//maybe die/bounce of rocks/coral?
+	    PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+	    PORT_DIPSETTING(    0x02, DEF_STR( "On") );
 	//freezes the game before the reset
 	//doesn't seem to be done as a dip, but what about mixing with diops like this?
-		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_SERVICE | IPF_TOGGLE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0x10, 0x00, "Coin Chutes" )
-		PORT_DIPSETTING(    0x00, "Common" )
-		PORT_DIPSETTING(    0x10, "Individual" )
-	    PORT_DIPNAME( 0x20, 0x00, "Year Display" )
-	    PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-	    PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	    PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Lives ) )
-	    PORT_DIPSETTING(    0x00, "3" )
-	    PORT_DIPSETTING(    0x40, "4" )
-	    PORT_DIPSETTING(    0x80, "5" )
-	    PORT_DIPSETTING(    0xc0, "6" )
+		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_SERVICE | IPF_TOGGLE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Upright") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x10, 0x00, "Coin Chutes" );
+		PORT_DIPSETTING(    0x00, "Common" );
+		PORT_DIPSETTING(    0x10, "Individual" );
+	    PORT_DIPNAME( 0x20, 0x00, "Year Display" );
+	    PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+	    PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	    PORT_DIPNAME( 0xc0, 0x00, DEF_STR( "Lives") );
+	    PORT_DIPSETTING(    0x00, "3" );
+	    PORT_DIPSETTING(    0x40, "4" );
+	    PORT_DIPSETTING(    0x80, "5" );
+	    PORT_DIPSETTING(    0xc0, "6" );
 	
-	    PORT_START  /* IN3 - FAKE MUXED */
+	    PORT_START();   /* IN3 - FAKE MUXED */
 	//check all bits are used
-	    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE, 25, 10, 0, 0 )
+	    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE, 25, 10, 0, 0 );
 	
-	    PORT_START  /* IN4 - FAKE MUXED */
-	    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_Y, 25, 10, 0, 0 )
-	INPUT_PORTS_END
+	    PORT_START();   /* IN4 - FAKE MUXED */
+	    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_Y, 25, 10, 0, 0 );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout marinedt_charlayout =
-	{
+	static GfxLayout marinedt_charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,3),
 		3,
-		{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },	//maybe 120
-		{ STEP8(0,1) },
-		{ STEP8(0,8) },
+		new int[] { RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },	//maybe 120
+		new int[] { STEP8(0,1) },
+		new int[] { STEP8(0,8) },
 		8*8
-	};
+	);
 	
-	static struct GfxLayout marinedt_objlayout =
-	{
+	static GfxLayout marinedt_objlayout = new GfxLayout
+	(
 		32,32,
 		RGN_FRAC(1,1),
 		2,
-		{ 0, 4 },
-		{ STEP4(32*8*7,1), STEP4(32*8*6,1), STEP4(32*8*5,1), STEP4(32*8*4,1), STEP4(32*8*3,1), STEP4(32*8*2,1), STEP4(32*8*1,1), STEP4(32*8*0,1) },
-		{ STEP16(0,8), STEP16(16*8,8) },
+		new int[] { 0, 4 },
+		new int[] { STEP4(32*8*7,1), STEP4(32*8*6,1), STEP4(32*8*5,1), STEP4(32*8*4,1), STEP4(32*8*3,1), STEP4(32*8*2,1), STEP4(32*8*1,1), STEP4(32*8*0,1) },
+		new int[] { STEP16(0,8), STEP16(16*8,8) },
 		32*32*2
-	};
+	);
 	
-	static struct GfxDecodeInfo marinedt_gfxdecodeinfo[] =
+	static GfxDecodeInfo marinedt_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &marinedt_charlayout, 0,  4 },	//really only 1 colour set?
-		{ REGION_GFX2, 0, &marinedt_objlayout,  48, 4 },
-		{ REGION_GFX3, 0, &marinedt_objlayout,  32, 4 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, marinedt_charlayout, 0,  4 ),	//really only 1 colour set?
+		new GfxDecodeInfo( REGION_GFX2, 0, marinedt_objlayout,  48, 4 ),
+		new GfxDecodeInfo( REGION_GFX3, 0, marinedt_objlayout,  32, 4 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	PALETTE_INIT( marinedt )
@@ -377,21 +385,21 @@ public class marinedt
 			int bit0,bit1,bit2;
 	
 			/* red component */
-			bit0 = (~color_prom[i] >> 0) & 0x01;
-			bit1 = (~color_prom[i] >> 1) & 0x01;
-			bit2 = (~color_prom[i] >> 2) & 0x01;
+			bit0 = (~color_prom.read(i)>> 0) & 0x01;
+			bit1 = (~color_prom.read(i)>> 1) & 0x01;
+			bit2 = (~color_prom.read(i)>> 2) & 0x01;
 	//		*(palette++) = 0x92 * bit0 + 0x46 * bit1 + 0x27 * bit2;
 			r = 0x27 * bit0 + 0x46 * bit1 + 0x92 * bit2;
 			/* green component */
-			bit0 = (~color_prom[i] >> 3) & 0x01;
-			bit1 = (~color_prom[i] >> 4) & 0x01;
-			bit2 = (~color_prom[i] >> 5) & 0x01;
+			bit0 = (~color_prom.read(i)>> 3) & 0x01;
+			bit1 = (~color_prom.read(i)>> 4) & 0x01;
+			bit2 = (~color_prom.read(i)>> 5) & 0x01;
 	//		*(palette++) = 0x92 * bit0 + 0x46 * bit1 + 0x27 * bit2;
 			g = 0x27 * bit0 + 0x46 * bit1 + 0x92 * bit2;
 			/* blue component */
-			bit0 = (~color_prom[i] >> 5) & 0x01;
-			bit1 = (~color_prom[i] >> 6) & 0x01;
-			bit2 = (~color_prom[i] >> 7) & 0x01;
+			bit0 = (~color_prom.read(i)>> 5) & 0x01;
+			bit1 = (~color_prom.read(i)>> 6) & 0x01;
+			bit2 = (~color_prom.read(i)>> 7) & 0x01;
 	bit0=0;
 	//		*(palette++) = 0x92 * bit0 + 0x46 * bit1 + 0x27 * bit2;
 			b = 0x27 * bit0 + 0x46 * bit1 + 0x92 * bit2;
@@ -414,10 +422,10 @@ public class marinedt
 			flipx = 1;
 			flipy = 0;
 	
-	//logerror("%x\n",videoram[offs]);
+	//logerror("%x\n",videoram.read(offs));
 	
 			drawgfx(bitmap,Machine->gfx[0],
-					videoram[offs],
+					videoram.read(offs),
 					0,
 					flipx,flipy,
 					8*sx,8*sy,
@@ -437,7 +445,7 @@ public class marinedt
 	//		flipx = 1;
 	//		flipy = 0;
 	
-	//logerror("%x\n",videoram[offs]);
+	//logerror("%x\n",videoram.read(offs));
 	
 	//		drawgfx(bitmap,Machine->gfx[0],
 	//				0,
@@ -525,7 +533,7 @@ public class marinedt
 			flipx = 1;
 			flipy = 0;
 	
-	//logerror("%x\n",videoram[offs]);
+	//logerror("%x\n",videoram.read(offs));
 	
 			drawgfx(bitmap,Machine->gfx[0],
 					0,
@@ -632,33 +640,33 @@ public class marinedt
 	
 	***************************************************************************/
 	
-	ROM_START( marinedt )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "mg01",     0x0000, 0x0800, CRC(ad09f04d) SHA1(932fc973b4a2fbbebd7e6437ed30c8444e3d4afb))
-		ROM_LOAD( "mg02",     0x0800, 0x0800, CRC(555a2b0f) SHA1(143a8953ce5070c31dc4c1f623833b2a5a2cf657))
-		ROM_LOAD( "mg03",     0x1000, 0x0800, CRC(2abc79b3) SHA1(1afb331a2c0e320b6d026bc5cb47a53ac3356c2a))
-		ROM_LOAD( "mg04",     0x1800, 0x0800, CRC(be928364) SHA1(8d9ae71e2751c009187e41d84fbad9519ab551e1) )
-		ROM_LOAD( "mg05",     0x2000, 0x0800, CRC(44cd114a) SHA1(833165c5c00c6e505acf29fef4a3ae3f9647b443) )
-		ROM_LOAD( "mg06",     0x2800, 0x0800, CRC(a7e2c69b) SHA1(614fc479d13c1726382fe7b4b0379c1dd4915af0) )
-		ROM_LOAD( "mg07",     0x3000, 0x0800, CRC(b85d1f9a) SHA1(4fd3e76b1816912df84477dba4655d395f5e7072) )
+	static RomLoadPtr rom_marinedt = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "mg01",     0x0000, 0x0800, CRC(ad09f04d);SHA1(932fc973b4a2fbbebd7e6437ed30c8444e3d4afb))
+		ROM_LOAD( "mg02",     0x0800, 0x0800, CRC(555a2b0f);SHA1(143a8953ce5070c31dc4c1f623833b2a5a2cf657))
+		ROM_LOAD( "mg03",     0x1000, 0x0800, CRC(2abc79b3);SHA1(1afb331a2c0e320b6d026bc5cb47a53ac3356c2a))
+		ROM_LOAD( "mg04",     0x1800, 0x0800, CRC(be928364);SHA1(8d9ae71e2751c009187e41d84fbad9519ab551e1) )
+		ROM_LOAD( "mg05",     0x2000, 0x0800, CRC(44cd114a);SHA1(833165c5c00c6e505acf29fef4a3ae3f9647b443) )
+		ROM_LOAD( "mg06",     0x2800, 0x0800, CRC(a7e2c69b);SHA1(614fc479d13c1726382fe7b4b0379c1dd4915af0) )
+		ROM_LOAD( "mg07",     0x3000, 0x0800, CRC(b85d1f9a);SHA1(4fd3e76b1816912df84477dba4655d395f5e7072) )
 	
-		ROM_REGION( 0x1800, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "mg09",     0x0000, 0x0800, CRC(f4c349ca) SHA1(077f65eeac616a778d6c42bb95677fa2892ab697) )
-		ROM_LOAD( "mg10",     0x0800, 0x0800, CRC(b41251e3) SHA1(e125a971b401c78efeb4b03d0fab43e392d3fc14) )
-		ROM_LOAD( "mg11",     0x1000, 0x0800, CRC(50d66dd7) SHA1(858d1d2a75e091b0e382d964c5e4ddcd8e6f07dd))
+		ROM_REGION( 0x1800, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "mg09",     0x0000, 0x0800, CRC(f4c349ca);SHA1(077f65eeac616a778d6c42bb95677fa2892ab697) )
+		ROM_LOAD( "mg10",     0x0800, 0x0800, CRC(b41251e3);SHA1(e125a971b401c78efeb4b03d0fab43e392d3fc14) )
+		ROM_LOAD( "mg11",     0x1000, 0x0800, CRC(50d66dd7);SHA1(858d1d2a75e091b0e382d964c5e4ddcd8e6f07dd))
 	
-		ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "mg12",     0x0000, 0x1000, CRC(7c6486d5) SHA1(a7f17a803937937f05fc90621883a0fd44b297a0) )
+		ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "mg12",     0x0000, 0x1000, CRC(7c6486d5);SHA1(a7f17a803937937f05fc90621883a0fd44b297a0) )
 	
-		ROM_REGION( 0x1000, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "mg13",     0x0000, 0x1000, CRC(17817044) SHA1(8c9b96620e3c414952e6d85c6e81b0df85c88e7a) )
+		ROM_REGION( 0x1000, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "mg13",     0x0000, 0x1000, CRC(17817044);SHA1(8c9b96620e3c414952e6d85c6e81b0df85c88e7a) )
 	
-		ROM_REGION( 0x0080, REGION_PROMS, 0 )
-		ROM_LOAD( "mg14.bpr", 0x0000, 0x0020, CRC(f75f4e3a) SHA1(36e665987f475c57435fa8c224a2a3ce0c5e672b) )	//char clr
-		ROM_LOAD( "mg15.bpr", 0x0020, 0x0020, CRC(cd3ab489) SHA1(a77478fb94d0cf8f4317f89cc9579def7c294b4f) )	//obj clr
-		ROM_LOAD( "mg16.bpr", 0x0040, 0x0020, CRC(92c868bc) SHA1(483ae6f47845ddacb701528e82bd388d7d66a0fb) )	//?? collisions
-		ROM_LOAD( "mg17.bpr", 0x0060, 0x0020, CRC(13261a02) SHA1(050edd18e4f79d19d5206f55f329340432fd4099) )	//?? table of increasing values
-	ROM_END
+		ROM_REGION( 0x0080, REGION_PROMS, 0 );
+		ROM_LOAD( "mg14.bpr", 0x0000, 0x0020, CRC(f75f4e3a);SHA1(36e665987f475c57435fa8c224a2a3ce0c5e672b) )	//char clr
+		ROM_LOAD( "mg15.bpr", 0x0020, 0x0020, CRC(cd3ab489);SHA1(a77478fb94d0cf8f4317f89cc9579def7c294b4f) )	//obj clr
+		ROM_LOAD( "mg16.bpr", 0x0040, 0x0020, CRC(92c868bc);SHA1(483ae6f47845ddacb701528e82bd388d7d66a0fb) )	//?? collisions
+		ROM_LOAD( "mg17.bpr", 0x0060, 0x0020, CRC(13261a02);SHA1(050edd18e4f79d19d5206f55f329340432fd4099) )	//?? table of increasing values
+	ROM_END(); }}; 
 	
-	GAMEX( 1981, marinedt, 0, marinedt, marinedt, 0, ROT270, "Taito", "Marine Date", GAME_NO_SOUND | GAME_NOT_WORKING )
+	public static GameDriver driver_marinedt	   = new GameDriver("1981"	,"marinedt"	,"marinedt.java"	,rom_marinedt,null	,machine_driver_marinedt	,input_ports_marinedt	,null	,ROT270	,	"Taito", "Marine Date", GAME_NO_SOUND | GAME_NOT_WORKING )
 }

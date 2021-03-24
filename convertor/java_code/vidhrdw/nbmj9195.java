@@ -63,12 +63,12 @@ public class nbmj9195
 	
 	
 	******************************************************************************/
-	READ_HANDLER( sailorws_palette_r )
+	public static ReadHandlerPtr sailorws_palette_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return sailorws_palette[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( sailorws_palette_w )
+	public static WriteHandlerPtr sailorws_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
@@ -88,14 +88,14 @@ public class nbmj9195
 	
 			palette_set_color((offset >> 1), r, g, b);
 		}
-	}
+	} };
 	
-	READ_HANDLER( mscoutm_palette_r )
+	public static ReadHandlerPtr mscoutm_palette_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return mscoutm_palette[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( mscoutm_palette_w )
+	public static WriteHandlerPtr mscoutm_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 		int offs_h, offs_l;
@@ -110,7 +110,7 @@ public class nbmj9195
 		b = mscoutm_palette[(0x200 + (offs_h * 0x300) + offs_l)];
 	
 		palette_set_color(((offs_h * 0x100) + offs_l), r, g, b);
-	}
+	} };
 	
 	/******************************************************************************
 	
@@ -180,7 +180,7 @@ public class nbmj9195
 	{
 		sailorws_radr_tmp[vram][offset] = data;
 	
-		if (!offset)
+		if (offset == 0)
 		{
 			sailorws_radr[vram] = (sailorws_radr_tmp[vram][0] + (sailorws_radr_tmp[vram][1] << 8) + (sailorws_radr_tmp[vram][2] << 16));
 		}
@@ -247,15 +247,15 @@ public class nbmj9195
 		sailorws_paltblnum = data;
 	}
 	
-	WRITE_HANDLER( sailorws_paltbl_0_w )
+	public static WriteHandlerPtr sailorws_paltbl_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sailorws_paltbl0[((sailorws_paltblnum & 0xff) * 0x10) + (offset & 0x0f)] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( sailorws_paltbl_1_w )
+	public static WriteHandlerPtr sailorws_paltbl_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sailorws_paltbl1[((sailorws_paltblnum & 0xff) * 0x10) + (offset & 0x0f)] = data;
-	}
+	} };
 	
 	void sailorws_gfxflag2_w(int data)
 	{
@@ -398,7 +398,7 @@ public class nbmj9195
 					color2 = (color & 0xf0) >> 4;
 				}
 	
-				if (!vram)
+				if (vram == 0)
 				{
 					drawcolor1 = sailorws_paltbl0[(sailorws_paltblnum * 0x10) + color1];
 					drawcolor2 = sailorws_paltbl0[(sailorws_paltblnum * 0x10) + color2];
@@ -420,7 +420,7 @@ public class nbmj9195
 					tflag2 = 1;
 				}
 	
-				if (!vram)
+				if (vram == 0)
 				{
 					if (tflag1)
 					{
@@ -558,7 +558,7 @@ public class nbmj9195
 						drawcolor1 = ((color1 & 0x0f) << 0);
 						drawcolor2 = ((color2 & 0x0f) << 0);
 	
-						if (!vram)
+						if (vram == 0)
 						{
 							sailorws_videoworkram0[(dy * Machine->drv->screen_width) + dx1] = drawcolor1;
 							sailorws_videoworkram0[(dy * Machine->drv->screen_width) + dx2] = drawcolor2;
@@ -577,7 +577,7 @@ public class nbmj9195
 						drawcolor1 = ((color1 & 0x0f) << 4);
 						drawcolor2 = ((color2 & 0x0f) << 4);
 	
-						if (!vram)
+						if (vram == 0)
 						{
 							drawcolor1 |= sailorws_videoworkram0[(dy * Machine->drv->screen_width) + dx1];
 							drawcolor2 |= sailorws_videoworkram0[(dy * Machine->drv->screen_width) + dx2];
@@ -599,7 +599,7 @@ public class nbmj9195
 				{
 					// normal color mode
 	
-					if (!vram)
+					if (vram == 0)
 					{
 						drawcolor1 = sailorws_paltbl0[(sailorws_paltblnum * 0x10) + color1];
 						drawcolor2 = sailorws_paltbl0[(sailorws_paltblnum * 0x10) + color2];
@@ -625,7 +625,7 @@ public class nbmj9195
 				drawcolor1 |= (0x100 * vram);
 				drawcolor2 |= (0x100 * vram);
 	
-				if (!vram)
+				if (vram == 0)
 				{
 					if (tflag1)
 					{
@@ -665,28 +665,28 @@ public class nbmj9195
 	
 	
 	******************************************************************************/
-	WRITE_HANDLER( sailorws_gfxflag_0_w ) { sailorws_gfxflag_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_scrollx_0_w ) { sailorws_scrollx_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_scrolly_0_w ) { sailorws_scrolly_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_radr_0_w ) { sailorws_radr_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_sizex_0_w ) { sailorws_sizex_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_sizey_0_w ) { sailorws_sizey_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_drawx_0_w ) { sailorws_drawx_w(0, offset, data); }
-	WRITE_HANDLER( sailorws_drawy_0_w ) { sailorws_drawy_w(0, offset, data); }
+	public static WriteHandlerPtr sailorws_gfxflag_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_gfxflag_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_scrollx_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_scrollx_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_scrolly_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_scrolly_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_radr_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_radr_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_sizex_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_sizex_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_sizey_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_sizey_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_drawx_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_drawx_w(0, offset, data); } };
+	public static WriteHandlerPtr sailorws_drawy_0_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_drawy_w(0, offset, data); } };
 	
-	WRITE_HANDLER( sailorws_gfxflag_1_w ) { sailorws_gfxflag_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_scrollx_1_w ) { sailorws_scrollx_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_scrolly_1_w ) { sailorws_scrolly_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_radr_1_w ) { sailorws_radr_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_sizex_1_w ) { sailorws_sizex_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_sizey_1_w ) { sailorws_sizey_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_drawx_1_w ) { sailorws_drawx_w(1, offset, data); }
-	WRITE_HANDLER( sailorws_drawy_1_w ) { sailorws_drawy_w(1, offset, data); }
+	public static WriteHandlerPtr sailorws_gfxflag_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_gfxflag_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_scrollx_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_scrollx_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_scrolly_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_scrolly_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_radr_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_radr_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_sizex_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_sizex_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_sizey_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_sizey_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_drawx_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_drawx_w(1, offset, data); } };
+	public static WriteHandlerPtr sailorws_drawy_1_w = new WriteHandlerPtr() {public void handler(int offset, int data) { sailorws_drawy_w(1, offset, data); } };
 	
-	READ_HANDLER( sailorws_gfxbusy_0_r ) { return sailorws_gfxbusy_r(0, offset); }
-	READ_HANDLER( sailorws_gfxbusy_1_r ) { return sailorws_gfxbusy_r(1, offset); }
-	READ_HANDLER( sailorws_gfxrom_0_r ) { return sailorws_gfxrom_r(0, offset); }
-	READ_HANDLER( sailorws_gfxrom_1_r ) { return sailorws_gfxrom_r(1, offset); }
+	public static ReadHandlerPtr sailorws_gfxbusy_0_r  = new ReadHandlerPtr() { public int handler(int offset) { return sailorws_gfxbusy_r(0, offset); } };
+	public static ReadHandlerPtr sailorws_gfxbusy_1_r  = new ReadHandlerPtr() { public int handler(int offset) { return sailorws_gfxbusy_r(1, offset); } };
+	public static ReadHandlerPtr sailorws_gfxrom_0_r  = new ReadHandlerPtr() { public int handler(int offset) { return sailorws_gfxrom_r(0, offset); } };
+	public static ReadHandlerPtr sailorws_gfxrom_1_r  = new ReadHandlerPtr() { public int handler(int offset) { return sailorws_gfxrom_r(1, offset); } };
 	
 	/******************************************************************************
 	

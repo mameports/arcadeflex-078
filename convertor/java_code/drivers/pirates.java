@@ -214,77 +214,77 @@ public class pirates
 	
 	/* Input Ports */
 	
-	INPUT_PORTS_START( pirates )
-		PORT_START	// IN0 - 0x300000.w
-		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 )
+	static InputPortPtr input_ports_pirates = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// IN0 - 0x300000.w
+		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );
+		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );
+		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 );
 	
-		PORT_START	// IN1 - 0x400000.w
-		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BITX( 0x0008, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT(  0x0010, IP_ACTIVE_HIGH,IPT_SPECIAL )		// EEPROM data
-		PORT_BIT(  0x0020, IP_ACTIVE_HIGH, IPT_UNKNOWN )		// seems checked in "test mode"
-		PORT_BIT(  0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )		// seems checked in "test mode"
-		PORT_BIT(  0x0080, IP_ACTIVE_HIGH,IPT_SPECIAL )		// protection (see pirates_in1_r)
+		PORT_START(); 	// IN1 - 0x400000.w
+		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BITX( 0x0008, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(  0x0010, IP_ACTIVE_HIGH,IPT_SPECIAL );	// EEPROM data
+		PORT_BIT(  0x0020, IP_ACTIVE_HIGH, IPT_UNKNOWN );	// seems checked in "test mode"
+		PORT_BIT(  0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN );	// seems checked in "test mode"
+		PORT_BIT(  0x0080, IP_ACTIVE_HIGH,IPT_SPECIAL );	// protection (see pirates_in1_r)
 		/* What do these bits do ? */
-		PORT_BIT(  0x0100, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x0800, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x1000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x2000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT(  0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_BIT(  0x0100, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x0200, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x0400, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x0800, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x1000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x2000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x4000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT(  0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(3,4), RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
-		{ 7, 6, 5, 4, 3, 2, 1, 0 },
-		{ 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7 },
+		new int[] { RGN_FRAC(3,4), RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0 },
+		new int[] { 8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7 },
 		8*8
-	};
+	);
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		4,
-		{ RGN_FRAC(3,4), RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
-		{ 7, 6, 5, 4, 3, 2, 1, 0,
+		new int[] { RGN_FRAC(3,4), RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0,
 		 15,14,13,12,11,10, 9, 8 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 		  8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16 },
 		16*16
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
 	
-		{ REGION_GFX1, 0, &charlayout,   0x0000, 3*128 },
-		{ REGION_GFX2, 0, &spritelayout, 0x1800,   128 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,   0x0000, 3*128 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, spritelayout, 0x1800,   128 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -329,47 +329,47 @@ public class pirates
 	
 	/* Rom Loading */
 	
-	ROM_START( pirates )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* 68000 Code (encrypted) */
-		ROM_LOAD16_BYTE( "r_449b.bin",  0x00000, 0x80000, CRC(224aeeda) SHA1(5b7e47a106af0debf8b07f120571f437ad6ab5c3) )
-		ROM_LOAD16_BYTE( "l_5c1e.bin",  0x00001, 0x80000, CRC(46740204) SHA1(6f1da3b2cbea25bbfdec74c625c5fb23459b83b6) )
+	static RomLoadPtr rom_pirates = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 Code (encrypted) */
+		ROM_LOAD16_BYTE( "r_449b.bin",  0x00000, 0x80000, CRC(224aeeda);SHA1(5b7e47a106af0debf8b07f120571f437ad6ab5c3) )
+		ROM_LOAD16_BYTE( "l_5c1e.bin",  0x00001, 0x80000, CRC(46740204);SHA1(6f1da3b2cbea25bbfdec74c625c5fb23459b83b6) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 ) /* GFX (encrypted) */
-		ROM_LOAD( "p4_4d48.bin", 0x000000, 0x080000, CRC(89fda216) SHA1(ea31e750460e67a24972b04171230633eb2b6d9d) )
-		ROM_LOAD( "p2_5d74.bin", 0x080000, 0x080000, CRC(40e069b4) SHA1(515d12cbb29bdbf3f3016e5bbe14941209978095) )
-		ROM_LOAD( "p1_7b30.bin", 0x100000, 0x080000, CRC(26d78518) SHA1(c293f1194f8ef38241d149cf1db1a511a7fb4936) )
-		ROM_LOAD( "p8_9f4f.bin", 0x180000, 0x080000, CRC(f31696ea) SHA1(f5ab59e441317b02b615a1cdc6d075c5bdcdea73) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );/* GFX (encrypted) */
+		ROM_LOAD( "p4_4d48.bin", 0x000000, 0x080000, CRC(89fda216);SHA1(ea31e750460e67a24972b04171230633eb2b6d9d) )
+		ROM_LOAD( "p2_5d74.bin", 0x080000, 0x080000, CRC(40e069b4);SHA1(515d12cbb29bdbf3f3016e5bbe14941209978095) )
+		ROM_LOAD( "p1_7b30.bin", 0x100000, 0x080000, CRC(26d78518);SHA1(c293f1194f8ef38241d149cf1db1a511a7fb4936) )
+		ROM_LOAD( "p8_9f4f.bin", 0x180000, 0x080000, CRC(f31696ea);SHA1(f5ab59e441317b02b615a1cdc6d075c5bdcdea73) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, 0 ) /* GFX (encrypted) */
-		ROM_LOAD( "s1_6e89.bin", 0x000000, 0x080000, CRC(c78a276f) SHA1(d5127593e68f9e8f2878803c652a35a1c6d82b2c) )
-		ROM_LOAD( "s2_6df3.bin", 0x080000, 0x080000, CRC(9f0bad96) SHA1(b8f910aa259192e261815392f5d7c9c7dabe0b4d) )
-		ROM_LOAD( "s4_fdcc.bin", 0x100000, 0x080000, CRC(8916ddb5) SHA1(f4f7da831ef929eb7575bbe69eae317f15cfd648) )
-		ROM_LOAD( "s8_4b7c.bin", 0x180000, 0x080000, CRC(1c41bd2c) SHA1(fba264a3c195f303337223a74cbad5eec5c457ec) )
+		ROM_REGION( 0x200000, REGION_GFX2, 0 );/* GFX (encrypted) */
+		ROM_LOAD( "s1_6e89.bin", 0x000000, 0x080000, CRC(c78a276f);SHA1(d5127593e68f9e8f2878803c652a35a1c6d82b2c) )
+		ROM_LOAD( "s2_6df3.bin", 0x080000, 0x080000, CRC(9f0bad96);SHA1(b8f910aa259192e261815392f5d7c9c7dabe0b4d) )
+		ROM_LOAD( "s4_fdcc.bin", 0x100000, 0x080000, CRC(8916ddb5);SHA1(f4f7da831ef929eb7575bbe69eae317f15cfd648) )
+		ROM_LOAD( "s8_4b7c.bin", 0x180000, 0x080000, CRC(1c41bd2c);SHA1(fba264a3c195f303337223a74cbad5eec5c457ec) )
 	
-		ROM_REGION( 0x080000, REGION_SOUND1, 0) /* OKI samples (encrypted) */
-		ROM_LOAD( "s89_49d4.bin", 0x000000, 0x080000, CRC(63a739ec) SHA1(c57f657225e62b3c9c5f0c7185ad7a87794d55f4) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_SOUND1, 0);/* OKI samples (encrypted) */
+		ROM_LOAD( "s89_49d4.bin", 0x000000, 0x080000, CRC(63a739ec);SHA1(c57f657225e62b3c9c5f0c7185ad7a87794d55f4) )
+	ROM_END(); }}; 
 	
-	ROM_START( genix )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* 68000 Code (encrypted) */
-		ROM_LOAD16_BYTE( "1.15",  0x00000, 0x80000, CRC(d26abfb0) SHA1(4a89ba7504f86cb612796c376f359ab61ec3d902) )
-		ROM_LOAD16_BYTE( "2.16",  0x00001, 0x80000, CRC(a14a25b4) SHA1(9fa64c6514bdee56b5654b001f8367283b461e8a) )
+	static RomLoadPtr rom_genix = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 Code (encrypted) */
+		ROM_LOAD16_BYTE( "1.15",  0x00000, 0x80000, CRC(d26abfb0);SHA1(4a89ba7504f86cb612796c376f359ab61ec3d902) )
+		ROM_LOAD16_BYTE( "2.16",  0x00001, 0x80000, CRC(a14a25b4);SHA1(9fa64c6514bdee56b5654b001f8367283b461e8a) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, 0 ) /* GFX (encrypted) */
-		ROM_LOAD( "7.34", 0x000000, 0x040000, CRC(58da8aac) SHA1(bfc8449ba842f8ceac62ebdf6005d8f19d96afa6) )
-		ROM_LOAD( "9.35", 0x080000, 0x040000, CRC(96bad9a8) SHA1(4e757cca0ab157f0c935087c9702c88741bf7a79) )
-		ROM_LOAD( "8.48", 0x100000, 0x040000, CRC(0ddc58b6) SHA1(d52437607695ddebfe8494fd214efd20ba72d549) )
-		ROM_LOAD( "10.49",0x180000, 0x040000, CRC(2be308c5) SHA1(22fc0991557643c22f6763f186b74900a33a39e0) )
+		ROM_REGION( 0x200000, REGION_GFX1, 0 );/* GFX (encrypted) */
+		ROM_LOAD( "7.34", 0x000000, 0x040000, CRC(58da8aac);SHA1(bfc8449ba842f8ceac62ebdf6005d8f19d96afa6) )
+		ROM_LOAD( "9.35", 0x080000, 0x040000, CRC(96bad9a8);SHA1(4e757cca0ab157f0c935087c9702c88741bf7a79) )
+		ROM_LOAD( "8.48", 0x100000, 0x040000, CRC(0ddc58b6);SHA1(d52437607695ddebfe8494fd214efd20ba72d549) )
+		ROM_LOAD( "10.49",0x180000, 0x040000, CRC(2be308c5);SHA1(22fc0991557643c22f6763f186b74900a33a39e0) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, 0 ) /* GFX (encrypted) */
-		ROM_LOAD( "6.69", 0x000000, 0x040000, CRC(b8422af7) SHA1(d3290fc6ea2670c445731e2b493205874dc4b319) )
-		ROM_LOAD( "5.70", 0x080000, 0x040000, CRC(e46125c5) SHA1(73d9a51f30a9c1a8397145d2a4397696ef37f4e5) )
-		ROM_LOAD( "4.71", 0x100000, 0x040000, CRC(7a8ed21b) SHA1(f380156c44de2fc316f390adee09b6a3cd404dec) )
-		ROM_LOAD( "3.72", 0x180000, 0x040000, CRC(f78bd6ca) SHA1(c70857b8053f9a6e3e15bbc9f7d13354b0966b30) )
+		ROM_REGION( 0x200000, REGION_GFX2, 0 );/* GFX (encrypted) */
+		ROM_LOAD( "6.69", 0x000000, 0x040000, CRC(b8422af7);SHA1(d3290fc6ea2670c445731e2b493205874dc4b319) )
+		ROM_LOAD( "5.70", 0x080000, 0x040000, CRC(e46125c5);SHA1(73d9a51f30a9c1a8397145d2a4397696ef37f4e5) )
+		ROM_LOAD( "4.71", 0x100000, 0x040000, CRC(7a8ed21b);SHA1(f380156c44de2fc316f390adee09b6a3cd404dec) )
+		ROM_LOAD( "3.72", 0x180000, 0x040000, CRC(f78bd6ca);SHA1(c70857b8053f9a6e3e15bbc9f7d13354b0966b30) )
 	
-		ROM_REGION( 0x080000, REGION_SOUND1, 0) /* OKI samples (encrypted) */
-		ROM_LOAD( "0.31", 0x000000, 0x080000, CRC(80d087bc) SHA1(04d1aacc273c7ffa57b48bd043d55b5b3d993f74) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_SOUND1, 0);/* OKI samples (encrypted) */
+		ROM_LOAD( "0.31", 0x000000, 0x080000, CRC(80d087bc);SHA1(04d1aacc273c7ffa57b48bd043d55b5b3d993f74) )
+	ROM_END(); }}; 
 	
 	/* Init */
 	
@@ -383,7 +383,7 @@ public class pirates
 	
 	    buf = malloc(rom_size);
 	
-	    if (!buf) return;
+	    if (buf == 0) return;
 	
 	    rom = (UINT16 *)memory_region(REGION_CPU1);
 	    memcpy (buf, rom, rom_size);
@@ -414,7 +414,7 @@ public class pirates
 	
 	    buf = malloc(rom_size);
 	
-	    if (!buf) return;
+	    if (buf == 0) return;
 	
 	    rom = memory_region(REGION_GFX1);
 	    memcpy (buf, rom, rom_size);
@@ -440,7 +440,7 @@ public class pirates
 	
 	    buf = malloc(rom_size);
 	
-	    if (!buf) return;
+	    if (buf == 0) return;
 	
 	    rom = memory_region(REGION_GFX2);
 	    memcpy (buf, rom, rom_size);
@@ -467,7 +467,7 @@ public class pirates
 	
 	    buf = malloc(rom_size);
 	
-	    if (!buf) return;
+	    if (buf == 0) return;
 	
 	    rom = memory_region(REGION_SOUND1);
 	    memcpy (buf, rom, rom_size);
@@ -494,7 +494,7 @@ public class pirates
 		rom[0x62c0/2] = 0x6006; // beq -> bra
 	}
 	
-	static READ16_HANDLER( genix_prot_r ) {	if(!offset)	return 0x0004; else	return 0x0000; }
+	static READ16_HANDLER( genix_prot_r ) {	if (offset == 0)	return 0x0004; else	return 0x0000; }
 	
 	static DRIVER_INIT( genix )
 	{
@@ -511,6 +511,6 @@ public class pirates
 	
 	/* GAME */
 	
-	GAME( 1994, pirates, 0, pirates, pirates, pirates, 0, "NIX", "Pirates" )
-	GAME( 1994, genix,   0, pirates, pirates, genix,   0, "NIX", "Genix Family" )
+	public static GameDriver driver_pirates	   = new GameDriver("1994"	,"pirates"	,"pirates.java"	,rom_pirates,null	,machine_driver_pirates	,input_ports_pirates	,init_pirates	,0	,	"NIX", "Pirates" )
+	public static GameDriver driver_genix	   = new GameDriver("1994"	,"genix"	,"pirates.java"	,rom_genix,null	,machine_driver_pirates	,input_ports_pirates	,init_genix	,0	,	"NIX", "Genix Family" )
 }

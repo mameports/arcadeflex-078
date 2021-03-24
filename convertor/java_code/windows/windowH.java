@@ -50,30 +50,8 @@ public class windowH
 	//============================================================
 	
 	// command line config
-	extern int			win_window_mode;
-	extern int			win_wait_vsync;
-	extern int			win_triple_buffer;
-	extern int			win_use_ddraw;
-	extern int			win_use_d3d;
-	extern int			win_dd_hw_stretch;
-	extern int			win_force_int_stretch;
-	extern int			win_gfx_width;
-	extern int			win_gfx_height;
-	extern int			win_gfx_depth;
-	extern int			win_gfx_zoom;
-	extern int			win_old_scanlines;
-	extern int			win_switch_res;
-	extern int			win_switch_bpp;
-	extern int			win_start_maximized;
-	extern int			win_keep_aspect;
-	extern int			win_gfx_refresh;
-	extern int			win_match_refresh;
-	extern int			win_sync_refresh;
 	extern float		win_gfx_brightness;
-	extern int			win_blit_effect;
 	extern float		win_screen_aspect;
-	extern int			win_force_rdtsc;
-	extern int			win_high_priority;
 	
 	// windows
 	extern HWND			win_video_window;
@@ -81,25 +59,13 @@ public class windowH
 	
 	// video bounds
 	extern double		win_aspect_ratio_adjust;
-	extern int 			win_default_constraints;
 	
 	// visible bounds
 	extern RECT			win_visible_rect;
-	extern int			win_visible_width;
-	extern int			win_visible_height;
 	
 	// 16bpp color conversion
-	extern int			win_color16_rsrc_shift;
-	extern int			win_color16_gsrc_shift;
-	extern int			win_color16_bsrc_shift;
-	extern int			win_color16_rdst_shift;
-	extern int			win_color16_gdst_shift;
-	extern int			win_color16_bdst_shift;
 	
 	// 32bpp color conversion
-	extern int			win_color32_rdst_shift;
-	extern int			win_color32_gdst_shift;
-	extern int			win_color32_bdst_shift;
 	
 	
 	
@@ -124,27 +90,18 @@ public class windowH
 	//	PROTOTYPES
 	//============================================================
 	
-	int win_init_window(void);
 	int win_create_window(int width, int height, int depth, int attributes, double aspect);
-	void win_destroy_window(void);
-	void win_update_cursor_state(void);
 	void win_toggle_maximize(int force_maximize);
-	void win_toggle_full_screen(void);
-	void win_adjust_window(void);
 	
 	void win_constrain_to_aspect_ratio(RECT *rect, int adjustment, int constraints);
 	void win_adjust_window_for_visible(int min_x, int max_x, int min_y, int max_y);
-	void win_wait_for_vsync(void);
 	
 	void win_update_video_window(struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels);
 	void win_update_debug_window(struct mame_bitmap *bitmap, const rgb_t *palette);
 	
 	void win_set_palette_entry(int _index, UINT8 red, UINT8 green, UINT8 blue);
 	
-	int win_process_events(void);
-	void win_process_events_periodic(void);
 	void osd_set_leds(int state);
-	int osd_get_leds(void);
 	
 	UINT32 *win_prepare_palette(struct win_blit_params *params);
 	

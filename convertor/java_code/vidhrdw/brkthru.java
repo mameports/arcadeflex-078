@@ -58,20 +58,20 @@ public class brkthru
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -96,21 +96,21 @@ public class brkthru
 			---- --xx xxxx xxxx = Code
 		*/
 	
-		int code = (videoram[tile_index*2] | ((videoram[tile_index*2+1]) << 8)) & 0x3ff;
+		int code = (videoram.read(tile_index*2)| ((videoram.read(tile_index*2+1)) << 8)) & 0x3ff;
 		int region = 1 + (code >> 7);
-		int colour = bgbasecolor + ((videoram[tile_index*2+1] & 0x04) >> 2);
+		int colour = bgbasecolor + ((videoram.read(tile_index*2+1)& 0x04) >> 2);
 	
 		SET_TILE_INFO(region, code & 0x7f,colour,0)
 	}
 	
-	WRITE_HANDLER( brkthru_bgram_w )
+	public static WriteHandlerPtr brkthru_bgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
 	
 	static void get_fg_tile_info(int tile_index)
@@ -119,24 +119,24 @@ public class brkthru
 		SET_TILE_INFO(0, code, 0, 0)
 	}
 	
-	WRITE_HANDLER( brkthru_fgram_w )
+	public static WriteHandlerPtr brkthru_fgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (brkthru_videoram[offset] != data)
 		{
 			brkthru_videoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset);
 		}
-	}
+	} };
 	
 	VIDEO_START( brkthru )
 	{
 		fg_tilemap = tilemap_create(get_fg_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,32,32);
 		bg_tilemap = tilemap_create(get_bg_tile_info,tilemap_scan_cols,TILEMAP_TRANSPARENT,16,16,32,16);
 	
-		if (!fg_tilemap)
+		if (fg_tilemap == 0)
 			return 1;
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen( fg_tilemap, 0 );
@@ -147,7 +147,7 @@ public class brkthru
 	
 	
 	
-	WRITE_HANDLER( brkthru_1800_w )
+	public static WriteHandlerPtr brkthru_1800_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset == 0)	/* low 8 bits of scroll */
 			bgscroll = (bgscroll & 0x100) | data;
@@ -180,7 +180,7 @@ public class brkthru
 			/* bit 7 = high bit of scroll */
 			bgscroll = (bgscroll & 0xff) | ((data & 0x80) << 1);
 		}
-	}
+	} };
 	
 	
 	#if 0
@@ -227,22 +227,22 @@ public class brkthru
 	
 		for (offs = 0;offs < spriteram_size; offs += 4)
 		{
-			if ((spriteram[offs] & 0x09) == prio)	/* Enable && Low Priority */
+			if ((spriteram.read(offs)& 0x09) == prio)	/* Enable && Low Priority */
 			{
 				int sx,sy,code,color;
 	
-				sx = 240 - spriteram[offs+3];
+				sx = 240 - spriteram.read(offs+3);
 				if (sx < -7) sx += 256;
-				sy = 240 - spriteram[offs+2];
-				code = spriteram[offs+1] + 128 * (spriteram[offs] & 0x06);
-				color = (spriteram[offs] & 0xe0) >> 5;
+				sy = 240 - spriteram.read(offs+2);
+				code = spriteram.read(offs+1)+ 128 * (spriteram.read(offs)& 0x06);
+				color = (spriteram.read(offs)& 0xe0) >> 5;
 				if (flipscreen)
 				{
 					sx = 240 - sx;
 					sy = 240 - sy;
 				}
 	
-				if (spriteram[offs] & 0x10)	/* double height */
+				if (spriteram.read(offs)& 0x10)	/* double height */
 				{
 					drawgfx(bitmap,Machine->gfx[9],
 							code & ~1,

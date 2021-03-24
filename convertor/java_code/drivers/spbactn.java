@@ -203,149 +203,153 @@ public class spbactn
 		{ 0xa0206, 0xa0207, MWA16_NOP },
 	MEMORY_END
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0xefff, MRA_ROM },
-		{ 0xf000, 0xf7ff, MRA_RAM },
-		{ 0xf800, 0xf800, OKIM6295_status_0_r },
-		{ 0xfc00, 0xfc00, MRA_NOP },	/* irq ack ?? */
-		{ 0xfc20, 0xfc20, soundlatch_r },
-	MEMORY_END
-	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0xefff, MWA_ROM },
-		{ 0xf000, 0xf7ff, MWA_RAM },
-		{ 0xf800, 0xf800, OKIM6295_data_0_w },
-		{ 0xf810, 0xf810, YM3812_control_port_0_w },
-		{ 0xf811, 0xf811, YM3812_write_port_0_w },
-		{ 0xfc00, 0xfc00, MWA_NOP },	/* irq ack ?? */
-	MEMORY_END
-	
-	INPUT_PORTS_START( spbactn )
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )		// Left flipper
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )		// "Shake"
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )		// "Shake" (duplicated)
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )		// Right flipper
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* IN2 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )		// Press mulitple times for multiple players
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* DSW1 */
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x01, "2 Coins/1 Credit 3/2" )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x05, "1 Coin/1 Credit 2/3" )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x00, "1 Coin/1 Credit 5/6" )
-		PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x08, "2 Coins/1 Credit 3/2" )
-		PORT_DIPSETTING(    0x38, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x28, "1 Coin/1 Credit 2/3" )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x00, "1 Coin/1 Credit 5/6" )
-		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Lives ) )		// Balls
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPSETTING(    0xc0, "3" )
-		PORT_DIPSETTING(    0x80, "4" )
-		PORT_DIPSETTING(    0x40, "5" )
-	
-		PORT_START	/* DSW2 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x02, "Easy" )
-		PORT_DIPSETTING(    0x03, "Normal" )
-		PORT_DIPSETTING(    0x01, "Hard" )
-		PORT_DIPSETTING(    0x00, "Very Hard" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x04, "100k and 500k" )
-		PORT_DIPSETTING(    0x0c, "200k and 800k" )
-		PORT_DIPSETTING(    0x08, "200k" )
-		PORT_DIPSETTING(    0x00, "None" )
-		PORT_DIPNAME( 0x10, 0x10, "Hit Difficulty" )		// From .xls file - WHAT does that mean ?
-		PORT_DIPSETTING(    0x10, "Normal" )
-		PORT_DIPSETTING(    0x00, "Difficult" )
-		PORT_DIPNAME( 0x20, 0x20, "Display Instructions" )	// "Change Software" in .xls file
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Demo_Sounds ) )	// To be confirmed
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, "Match" )				// Check code at 0x00bf8c
-		PORT_DIPSETTING(    0x80, "1/20" )
-		PORT_DIPSETTING(    0x00, "1/40" )
-	INPUT_PORTS_END
-	
-	static struct GfxLayout fgtilelayout =
-	{
-		16,8,
-		RGN_FRAC(1,2),
-		4,
-		{ 0, 1, 2, 3 },
-		{ 0*4, 1*4, RGN_FRAC(1,2)+0*4, RGN_FRAC(1,2)+1*4, 2*4, 3*4, RGN_FRAC(1,2)+2*4, RGN_FRAC(1,2)+3*4,
-				16*8+0*4, 16*8+1*4, 16*8+RGN_FRAC(1,2)+0*4, 16*8+RGN_FRAC(1,2)+1*4, 16*8+2*4, 16*8+3*4, 16*8+RGN_FRAC(1,2)+2*4, 16*8+RGN_FRAC(1,2)+3*4 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
-		32*8
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0xefff, MRA_ROM ),
+		new Memory_ReadAddress( 0xf000, 0xf7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xf800, 0xf800, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0xfc00, 0xfc00, MRA_NOP ),	/* irq ack ?? */
+		new Memory_ReadAddress( 0xfc20, 0xfc20, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
 	};
 	
-	static struct GfxLayout bgtilelayout =
-	{
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xefff, MWA_ROM ),
+		new Memory_WriteAddress( 0xf000, 0xf7ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xf800, 0xf800, OKIM6295_data_0_w ),
+		new Memory_WriteAddress( 0xf810, 0xf810, YM3812_control_port_0_w ),
+		new Memory_WriteAddress( 0xf811, 0xf811, YM3812_write_port_0_w ),
+		new Memory_WriteAddress( 0xfc00, 0xfc00, MWA_NOP ),	/* irq ack ?? */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
+	
+	static InputPortPtr input_ports_spbactn = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );	// Left flipper
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 );	// "Shake"
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );	// "Shake" (duplicated)
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );	// Right flipper
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* IN2 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );	// Press mulitple times for multiple players
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* DSW1 */
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x01, "2 Coins/1 Credit 3/2" );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x05, "1 Coin/1 Credit 2/3" );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x00, "1 Coin/1 Credit 5/6" );
+		PORT_DIPNAME( 0x38, 0x38, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x08, "2 Coins/1 Credit 3/2" );
+		PORT_DIPSETTING(    0x38, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x28, "1 Coin/1 Credit 2/3" );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x00, "1 Coin/1 Credit 5/6" );
+		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( "Lives") );		// Balls
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPSETTING(    0xc0, "3" );
+		PORT_DIPSETTING(    0x80, "4" );
+		PORT_DIPSETTING(    0x40, "5" );
+	
+		PORT_START(); 	/* DSW2 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x02, "Easy" );
+		PORT_DIPSETTING(    0x03, "Normal" );
+		PORT_DIPSETTING(    0x01, "Hard" );
+		PORT_DIPSETTING(    0x00, "Very Hard" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x04, "100k and 500k" );
+		PORT_DIPSETTING(    0x0c, "200k and 800k" );
+		PORT_DIPSETTING(    0x08, "200k" );
+		PORT_DIPSETTING(    0x00, "None" );
+		PORT_DIPNAME( 0x10, 0x10, "Hit Difficulty" );	// From .xls file - WHAT does that mean ?
+		PORT_DIPSETTING(    0x10, "Normal" );
+		PORT_DIPSETTING(    0x00, "Difficult" );
+		PORT_DIPNAME( 0x20, 0x20, "Display Instructions" );// "Change Software" in .xls file
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Demo_Sounds") );	// To be confirmed
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, "Match" );			// Check code at 0x00bf8c
+		PORT_DIPSETTING(    0x80, "1/20" );
+		PORT_DIPSETTING(    0x00, "1/40" );
+	INPUT_PORTS_END(); }}; 
+	
+	static GfxLayout fgtilelayout = new GfxLayout
+	(
 		16,8,
 		RGN_FRAC(1,2),
 		4,
-		{ 3, 2, 1, 0 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0*4, 1*4, RGN_FRAC(1,2)+0*4, RGN_FRAC(1,2)+1*4, 2*4, 3*4, RGN_FRAC(1,2)+2*4, RGN_FRAC(1,2)+3*4,
+				16*8+0*4, 16*8+1*4, 16*8+RGN_FRAC(1,2)+0*4, 16*8+RGN_FRAC(1,2)+1*4, 16*8+2*4, 16*8+3*4, 16*8+RGN_FRAC(1,2)+2*4, 16*8+RGN_FRAC(1,2)+3*4 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		32*8
+	);
 	
-		{ RGN_FRAC(1,2)+1*4, RGN_FRAC(1,2)+0*4, 1*4, 0*4,
+	static GfxLayout bgtilelayout = new GfxLayout
+	(
+		16,8,
+		RGN_FRAC(1,2),
+		4,
+		new int[] { 3, 2, 1, 0 },
+	
+		new int[] { RGN_FRAC(1,2)+1*4, RGN_FRAC(1,2)+0*4, 1*4, 0*4,
 		RGN_FRAC(1,2)+3*4, RGN_FRAC(1,2)+2*4, 3*4, 2*4,
 		16*8+RGN_FRAC(1,2)+1*4,16*8+RGN_FRAC(1,2)+0*4, 16*8+1*4,16*8+0*4,
 		16*8+RGN_FRAC(1,2)+3*4, 16*8+RGN_FRAC(1,2)+2*4, 16*8+3*4,16*8+2*4 },
 	
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 		32*8
-	};
+	);
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,2),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0, 4, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4, 8+0, 8+4, 8+RGN_FRAC(1,2)+0, 8+RGN_FRAC(1,2)+4 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0, 4, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4, 8+0, 8+4, 8+RGN_FRAC(1,2)+0, 8+RGN_FRAC(1,2)+4 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 		16*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &fgtilelayout,   0x0200, 16384  },
-		{ REGION_GFX2, 0, &bgtilelayout,   0x0300, 16384  },
-		{ REGION_GFX3, 0, &spritelayout,   0x0000, 16384  },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, fgtilelayout,   0x0200, 16384  ),
+		new GfxDecodeInfo( REGION_GFX2, 0, bgtilelayout,   0x0300, 16384  ),
+		new GfxDecodeInfo( REGION_GFX3, 0, spritelayout,   0x0000, 16384  ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	static void irqhandler(int linestate)
@@ -397,58 +401,58 @@ public class spbactn
 		MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
 	MACHINE_DRIVER_END
 	
-	ROM_START( spbactn )
+	static RomLoadPtr rom_spbactn = new RomLoadPtr(){ public void handler(){ 
 		/* Board 9002-A (CPU Board) */
-		ROM_REGION( 0x40000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "rom1.bin", 0x00000, 0x20000, CRC(6741bd3f) SHA1(844eb6465a15d339043fd6d2b6ba20ba216de493) )
-		ROM_LOAD16_BYTE( "rom2.bin", 0x00001, 0x20000, CRC(488cc511) SHA1(41b4a01f35e0e93634b4843dbb894ab9840807bf) )
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "rom1.bin", 0x00000, 0x20000, CRC(6741bd3f);SHA1(844eb6465a15d339043fd6d2b6ba20ba216de493) )
+		ROM_LOAD16_BYTE( "rom2.bin", 0x00001, 0x20000, CRC(488cc511);SHA1(41b4a01f35e0e93634b4843dbb894ab9840807bf) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )
-		ROM_LOAD( "a-u14.3", 0x00000, 0x10000, CRC(57f4c503) SHA1(e5ddc63a43ba824bcaa4340eeba25a0d3f26cad9) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );
+		ROM_LOAD( "a-u14.3", 0x00000, 0x10000, CRC(57f4c503);SHA1(e5ddc63a43ba824bcaa4340eeba25a0d3f26cad9) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )
-		ROM_LOAD( "a-u19",   0x00000, 0x20000,  CRC(87427d7d) SHA1(f76b0dc3f0d87deb0f0c81084aff9756b236e867) )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );
+		ROM_LOAD( "a-u19",   0x00000, 0x20000,  CRC(87427d7d);SHA1(f76b0dc3f0d87deb0f0c81084aff9756b236e867) )
 	
 		/* Board 9002-B (GFX Board) */
-		ROM_REGION( 0x080000, REGION_GFX1, 0 ) /* 16x8 FG Tiles */
-		ROM_LOAD( "b-u98",   0x00000, 0x40000, CRC(315eab4d) SHA1(6f812c85981dc649caca8b4635e3b8fd3a3c054d) )
-		ROM_LOAD( "b-u99",   0x40000, 0x40000, CRC(7b76efd9) SHA1(9f23460aebe12cb5c4193776bf876d6044892979) )
+		ROM_REGION( 0x080000, REGION_GFX1, 0 );/* 16x8 FG Tiles */
+		ROM_LOAD( "b-u98",   0x00000, 0x40000, CRC(315eab4d);SHA1(6f812c85981dc649caca8b4635e3b8fd3a3c054d) )
+		ROM_LOAD( "b-u99",   0x40000, 0x40000, CRC(7b76efd9);SHA1(9f23460aebe12cb5c4193776bf876d6044892979) )
 	
-		ROM_REGION( 0x080000, REGION_GFX2, 0 ) /* 16x8 BG Tiles */
-		ROM_LOAD( "b-u104",  0x00000, 0x40000, CRC(b648a40a) SHA1(1fb756dcd027a5702596e33bbe8a0beeb3ceb22b) )
-		ROM_LOAD( "b-u105",  0x40000, 0x40000, CRC(0172d79a) SHA1(7ee1faa65c85860bd81988329df516bc34940ef5) )
+		ROM_REGION( 0x080000, REGION_GFX2, 0 );/* 16x8 BG Tiles */
+		ROM_LOAD( "b-u104",  0x00000, 0x40000, CRC(b648a40a);SHA1(1fb756dcd027a5702596e33bbe8a0beeb3ceb22b) )
+		ROM_LOAD( "b-u105",  0x40000, 0x40000, CRC(0172d79a);SHA1(7ee1faa65c85860bd81988329df516bc34940ef5) )
 	
-		ROM_REGION( 0x080000, REGION_GFX3, 0 ) /* 8x8 Sprite Tiles */
-		ROM_LOAD( "b-u110",  0x00000, 0x40000, CRC(862ebacd) SHA1(05732e8524c50256c1db29317625d0edc19b87d2) )
-		ROM_LOAD( "b-u111",  0x40000, 0x40000, CRC(1cc1379a) SHA1(44fdab8cb5ab1488688f1ac52f005454e835efee) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_GFX3, 0 );/* 8x8 Sprite Tiles */
+		ROM_LOAD( "b-u110",  0x00000, 0x40000, CRC(862ebacd);SHA1(05732e8524c50256c1db29317625d0edc19b87d2) )
+		ROM_LOAD( "b-u111",  0x40000, 0x40000, CRC(1cc1379a);SHA1(44fdab8cb5ab1488688f1ac52f005454e835efee) )
+	ROM_END(); }}; 
 	
-	ROM_START( spbactnj )
+	static RomLoadPtr rom_spbactnj = new RomLoadPtr(){ public void handler(){ 
 		/* Board 9002-A (CPU Board) */
-		ROM_REGION( 0x40000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "a-u68.1", 0x00000, 0x20000, CRC(b5b2d824) SHA1(be04ca370a381d7396f39e31fb2680973193daee) )
-		ROM_LOAD16_BYTE( "a-u67.2", 0x00001, 0x20000, CRC(9577b48b) SHA1(291d890a9d0e434455f183eb12ae6edf3156688d) )
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "a-u68.1", 0x00000, 0x20000, CRC(b5b2d824);SHA1(be04ca370a381d7396f39e31fb2680973193daee) )
+		ROM_LOAD16_BYTE( "a-u67.2", 0x00001, 0x20000, CRC(9577b48b);SHA1(291d890a9d0e434455f183eb12ae6edf3156688d) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )
-		ROM_LOAD( "a-u14.3", 0x00000, 0x10000, CRC(57f4c503) SHA1(e5ddc63a43ba824bcaa4340eeba25a0d3f26cad9) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );
+		ROM_LOAD( "a-u14.3", 0x00000, 0x10000, CRC(57f4c503);SHA1(e5ddc63a43ba824bcaa4340eeba25a0d3f26cad9) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )
-		ROM_LOAD( "a-u19",   0x00000, 0x20000,  CRC(87427d7d) SHA1(f76b0dc3f0d87deb0f0c81084aff9756b236e867) )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );
+		ROM_LOAD( "a-u19",   0x00000, 0x20000,  CRC(87427d7d);SHA1(f76b0dc3f0d87deb0f0c81084aff9756b236e867) )
 	
 		/* Board 9002-B (GFX Board) */
-		ROM_REGION( 0x080000, REGION_GFX1, 0 ) /* 16x8 FG Tiles */
-		ROM_LOAD( "b-u98",   0x00000, 0x40000, CRC(315eab4d) SHA1(6f812c85981dc649caca8b4635e3b8fd3a3c054d) )
-		ROM_LOAD( "b-u99",   0x40000, 0x40000, CRC(7b76efd9) SHA1(9f23460aebe12cb5c4193776bf876d6044892979) )
+		ROM_REGION( 0x080000, REGION_GFX1, 0 );/* 16x8 FG Tiles */
+		ROM_LOAD( "b-u98",   0x00000, 0x40000, CRC(315eab4d);SHA1(6f812c85981dc649caca8b4635e3b8fd3a3c054d) )
+		ROM_LOAD( "b-u99",   0x40000, 0x40000, CRC(7b76efd9);SHA1(9f23460aebe12cb5c4193776bf876d6044892979) )
 	
-		ROM_REGION( 0x080000, REGION_GFX2, 0 ) /* 16x8 BG Tiles */
-		ROM_LOAD( "b-u104",  0x00000, 0x40000, CRC(b648a40a) SHA1(1fb756dcd027a5702596e33bbe8a0beeb3ceb22b) )
-		ROM_LOAD( "b-u105",  0x40000, 0x40000, CRC(0172d79a) SHA1(7ee1faa65c85860bd81988329df516bc34940ef5) )
+		ROM_REGION( 0x080000, REGION_GFX2, 0 );/* 16x8 BG Tiles */
+		ROM_LOAD( "b-u104",  0x00000, 0x40000, CRC(b648a40a);SHA1(1fb756dcd027a5702596e33bbe8a0beeb3ceb22b) )
+		ROM_LOAD( "b-u105",  0x40000, 0x40000, CRC(0172d79a);SHA1(7ee1faa65c85860bd81988329df516bc34940ef5) )
 	
-		ROM_REGION( 0x080000, REGION_GFX3, 0 ) /* 8x8 Sprite Tiles */
-		ROM_LOAD( "b-u110",  0x00000, 0x40000, CRC(862ebacd) SHA1(05732e8524c50256c1db29317625d0edc19b87d2) )
-		ROM_LOAD( "b-u111",  0x40000, 0x40000, CRC(1cc1379a) SHA1(44fdab8cb5ab1488688f1ac52f005454e835efee) )
-	ROM_END
+		ROM_REGION( 0x080000, REGION_GFX3, 0 );/* 8x8 Sprite Tiles */
+		ROM_LOAD( "b-u110",  0x00000, 0x40000, CRC(862ebacd);SHA1(05732e8524c50256c1db29317625d0edc19b87d2) )
+		ROM_LOAD( "b-u111",  0x40000, 0x40000, CRC(1cc1379a);SHA1(44fdab8cb5ab1488688f1ac52f005454e835efee) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1991, spbactn, 0,        spbactn, spbactn, 0, ROT90, "Tecmo", "Super Pinball Action (US)", GAME_IMPERFECT_GRAPHICS )
-	GAMEX( 1991, spbactnj, spbactn, spbactn, spbactn, 0, ROT90, "Tecmo", "Super Pinball Action (Japan)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_spbactn	   = new GameDriver("1991"	,"spbactn"	,"spbactn.java"	,rom_spbactn,null	,machine_driver_spbactn	,input_ports_spbactn	,null	,ROT90	,	"Tecmo", "Super Pinball Action (US)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_spbactnj	   = new GameDriver("1991"	,"spbactnj"	,"spbactn.java"	,rom_spbactnj,driver_spbactn	,machine_driver_spbactn	,input_ports_spbactn	,null	,ROT90	,	"Tecmo", "Super Pinball Action (Japan)", GAME_IMPERFECT_GRAPHICS )
 }

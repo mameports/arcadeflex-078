@@ -41,7 +41,7 @@ public class qix
 	{
 		/* allocate memory for the full video RAM */
 		videoram = auto_malloc(256 * 256);
-		if (!videoram)
+		if (videoram == 0)
 			return 1;
 	
 		/* initialize the mask for games that don't use it */
@@ -77,11 +77,11 @@ public class qix
 	 *
 	 *************************************/
 	
-	READ_HANDLER( qix_scanline_r )
+	public static ReadHandlerPtr qix_scanline_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int scanline = cpu_getscanline();
 		return (scanline <= 0xff) ? scanline : 0;
-	}
+	} };
 	
 	
 	
@@ -91,13 +91,13 @@ public class qix
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( slither_vram_mask_w )
+	public static WriteHandlerPtr slither_vram_mask_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* Slither appears to extend the basic hardware by providing */
 		/* a mask register which controls which data bits get written */
 		/* to video RAM */
 		vram_mask = data;
-	}
+	} };
 	
 	
 	
@@ -116,22 +116,22 @@ public class qix
 	 *
 	 *************************************/
 	
-	READ_HANDLER( qix_videoram_r )
+	public static ReadHandlerPtr qix_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* add in the upper bit of the address latch */
 		offset += (qix_videoaddress[0] & 0x80) << 8;
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
 	
-	WRITE_HANDLER( qix_videoram_w )
+	public static WriteHandlerPtr qix_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* add in the upper bit of the address latch */
 		offset += (qix_videoaddress[0] & 0x80) << 8;
 	
 		/* blend the data */
-		videoram[offset] = (videoram[offset] & ~vram_mask) | (data & vram_mask);
-	}
+		videoram.write(offset,(videoram[offset] & ~vram_mask) | (data & vram_mask));
+	} };
 	
 	
 	
@@ -150,23 +150,23 @@ public class qix
 	 *
 	 *************************************/
 	
-	READ_HANDLER( qix_addresslatch_r )
+	public static ReadHandlerPtr qix_addresslatch_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* compute the value at the address latch */
 		offset = (qix_videoaddress[0] << 8) | qix_videoaddress[1];
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
 	
 	
-	WRITE_HANDLER( qix_addresslatch_w )
+	public static WriteHandlerPtr qix_addresslatch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* compute the value at the address latch */
 		offset = (qix_videoaddress[0] << 8) | qix_videoaddress[1];
 	
 		/* blend the data */
-		videoram[offset] = (videoram[offset] & ~vram_mask) | (data & vram_mask);
-	}
+		videoram.write(offset,(videoram[offset] & ~vram_mask) | (data & vram_mask));
+	} };
 	
 	
 	
@@ -176,7 +176,7 @@ public class qix
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( qix_paletteram_w )
+	public static WriteHandlerPtr qix_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* this conversion table should be about right. It gives a reasonable */
 		/* gray scale in the test screen, and the red, green and blue squares */
@@ -203,7 +203,7 @@ public class qix
 		int bits, intensity, red, green, blue;
 	
 		/* set the palette RAM value */
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		/* compute R, G, B from the table */
 		intensity = (data >> 0) & 0x03;
@@ -216,10 +216,10 @@ public class qix
 	
 		/* update the palette */
 		palette_set_color(offset, red, green, blue);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( qix_palettebank_w )
+	public static WriteHandlerPtr qix_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* set the bank value */
 		if (qix_palettebank != (data & 3))
@@ -229,7 +229,7 @@ public class qix
 		}
 	
 		/* LEDs are in the upper 6 bits */
-	}
+	} };
 	
 	
 	
@@ -246,6 +246,6 @@ public class qix
 	
 		/* draw the bitmap */
 		for (y = cliprect->min_y; y <= cliprect->max_y; y++)
-			draw_scanline8(bitmap, 0, y, 256, &videoram[y * 256], pens, -1);
+			draw_scanline8(bitmap, 0, y, 256, &videoram.read(y * 256), pens, -1);
 	}
 }

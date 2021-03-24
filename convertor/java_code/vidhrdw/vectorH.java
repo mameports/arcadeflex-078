@@ -47,7 +47,6 @@ public class vectorH
 	
 	extern vector_pixel_t *vector_dirty_list;
 	
-	extern int translucency;  /* translucent vectors  */
 	
 	extern unsigned char *vectorram;
 	extern size_t vectorram_size;
@@ -72,7 +71,6 @@ public class vectorH
 	
 	void vector_register_aux_renderer(int (*aux_renderer)(point *start, int num_points));
 	
-	void vector_clear_list (void);
 	void vector_draw_to (int x2, int y2, rgb_t col, int intensity, int dirty, rgb_t (*color_callback)(void));
 	void vector_add_point (int x, int y, rgb_t color, int intensity);
 	void vector_add_point_callback (int x, int y, rgb_t (*color_callback)(void), int intensity);

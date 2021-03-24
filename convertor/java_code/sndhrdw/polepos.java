@@ -79,7 +79,7 @@ public class polepos
 		mixer_set_name(channel,"Speech");
 	
 		speech = auto_malloc(16*SAMPLE_SIZE);
-		if (!speech)
+		if (speech == 0)
 			return 1;
 	
 		/* decode the rom samples, interpolating to make it sound a little better */
@@ -154,21 +154,21 @@ public class polepos
 	/************************************/
 	/* Write LSB of engine sound		*/
 	/************************************/
-	WRITE_HANDLER( polepos_engine_sound_lsb_w )
+	public static WriteHandlerPtr polepos_engine_sound_lsb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		stream_update(sound_stream, 0);
 		sample_lsb = data & 62;
 	    sample_enable = data & 1;
-	}
+	} };
 	
 	/************************************/
 	/* Write MSB of engine sound		*/
 	/************************************/
-	WRITE_HANDLER( polepos_engine_sound_msb_w )
+	public static WriteHandlerPtr polepos_engine_sound_msb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		stream_update(sound_stream, 0);
 		sample_msb = data & 63;
-	}
+	} };
 	
 	/************************************/
 	/* Play speech sample				*/

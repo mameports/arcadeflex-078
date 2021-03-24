@@ -190,152 +190,156 @@ public class sshangha
 	
 	/******************************************************************************/
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0xc000, 0xc000, YM2203_status_port_0_r },
-		{ 0xf800, 0xffff, MRA_RAM },
-	//	{ 0xf800, 0xf800, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc000, 0xc000, YM2203_status_port_0_r ),
+		new Memory_ReadAddress( 0xf800, 0xffff, MRA_RAM ),
+	//	new Memory_ReadAddress( 0xf800, 0xf800, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0xc000, 0xc000, YM2203_control_port_0_w },
-		{ 0xc001, 0xc001, YM2203_write_port_0_w },
-		{ 0xf800, 0xffff, MWA_RAM },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xc000, YM2203_control_port_0_w ),
+		new Memory_WriteAddress( 0xc001, 0xc001, YM2203_write_port_0_w ),
+		new Memory_WriteAddress( 0xf800, 0xffff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	/******************************************************************************/
 	
-	INPUT_PORTS_START( sshangha )
-		PORT_START	/* Player 1 controls (0xfec047.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )	// "Pick Tile"
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )	// "Cancel"
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )	// "Help"
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
+	static InputPortPtr input_ports_sshangha = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Player 1 controls (0xfec047.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );// "Pick Tile"
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );// "Cancel"
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );// "Help"
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START	/* Player 2 controls (0xfec046.b) */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )	// "Pick Tile"
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )	// "Cancel"
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )	// "Help"
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
+		PORT_START(); 	/* Player 2 controls (0xfec046.b) */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );// "Pick Tile"
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );// "Cancel"
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );// "Help"
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
 	
-		PORT_START	/* Credits */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 	/* Credits */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
 		/* Dips seem inverted with respect to other Deco games */
 	
-		PORT_START	/* Dip switch bank 1 (0xfec04a.b, inverted bits order) */
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Demo_Sounds ) )	// To be confirmed
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x10, 0x10, "Coin Mode" )			// Check code at 0x0010f2
-		PORT_DIPSETTING(    0x10, "Mode 1" )
-		PORT_DIPSETTING(    0x00, "Mode 2" )
+		PORT_START(); 	/* Dip switch bank 1 (0xfec04a.b, inverted bits order) */
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Demo_Sounds") );	// To be confirmed
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x20, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x10, 0x10, "Coin Mode" );		// Check code at 0x0010f2
+		PORT_DIPSETTING(    0x10, "Mode 1" );
+		PORT_DIPSETTING(    0x00, "Mode 2" );
 		/* Settings for "Mode 1" */
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_2C") );
 		/* Settings for "Mode 2"
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_4C ) )
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_4C") );
 		*/
 	
-		PORT_START	/* Dip switch bank 2 (0xfec04b.b, inverted bits order) */
-		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x40, "Easy" )
-		PORT_DIPSETTING(    0xc0, "Normal" )
-		PORT_DIPSETTING(    0x80, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
+		PORT_START(); 	/* Dip switch bank 2 (0xfec04b.b, inverted bits order) */
+		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x40, "Easy" );
+		PORT_DIPSETTING(    0xc0, "Normal" );
+		PORT_DIPSETTING(    0x80, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
 	#if SSHANGHA_HACK
-		PORT_DIPNAME( 0x20, 0x20, "Debug Mode" )
+		PORT_DIPNAME( 0x20, 0x20, "Debug Mode" );
 	#else
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )		// See notes
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unused") );		// See notes
 	#endif
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, "Tile Animation" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x04, 0x04, "Use Mahjong Tiles" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x02, 0x02, "Adult Mode" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Yes ) )
-	  	PORT_DIPNAME( 0x01, 0x01, "Quest Mode" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
-	INPUT_PORTS_END
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, "Tile Animation" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x04, 0x04, "Use Mahjong Tiles" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x02, 0x02, "Adult Mode" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Yes") );
+	  	PORT_DIPNAME( 0x01, 0x01, "Quest Mode" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Yes") );
+	INPUT_PORTS_END(); }}; 
 	
 	/******************************************************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,	/* 8*8 chars */
 		4096,
 		4,		/* 4 bits per pixel  */
-		{ 8, 0, 0x100000*8+8,0x100000*8+0 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		new int[] { 8, 0, 0x100000*8+8,0x100000*8+0 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 		16*8
-	};
+	);
 	
-	static struct GfxLayout tilelayout =
-	{
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,2),
 		4,
-		{ 8, 0, 0x100000*8+8, 0x100000*8+0 },
-		{ 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+		new int[] { 8, 0, 0x100000*8+8, 0x100000*8+0 },
+		new int[] { 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		64*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout,  256, 64 }, /* Characters 8x8 */
-		{ REGION_GFX1, 0, &tilelayout,  256, 64 }, /* Tiles 16x16 */
-		{ REGION_GFX2, 0, &tilelayout,    0, 32 }, /* Sprites 16x16 */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,  256, 64 ), /* Characters 8x8 */
+		new GfxDecodeInfo( REGION_GFX1, 0, tilelayout,  256, 64 ), /* Tiles 16x16 */
+		new GfxDecodeInfo( REGION_GFX2, 0, tilelayout,    0, 32 ), /* Sprites 16x16 */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	/******************************************************************************/
@@ -398,45 +402,45 @@ public class sshangha
 	
 	/******************************************************************************/
 	
-	ROM_START( sshangha )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 ) /* 68000 code */
-		ROM_LOAD16_BYTE( "ss007-1.u28", 0x00000, 0x20000, CRC(bc466edf) SHA1(b96525b2c879d15b46a7753fa6ebf12a851cd019) )
-		ROM_LOAD16_BYTE( "ss006-1.u27", 0x00001, 0x20000, CRC(872a2a2d) SHA1(42d7a01465d5c403354aaf0f2dab8adb9afe61b0) )
+	static RomLoadPtr rom_sshangha = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* 68000 code */
+		ROM_LOAD16_BYTE( "ss007-1.u28", 0x00000, 0x20000, CRC(bc466edf);SHA1(b96525b2c879d15b46a7753fa6ebf12a851cd019) )
+		ROM_LOAD16_BYTE( "ss006-1.u27", 0x00001, 0x20000, CRC(872a2a2d);SHA1(42d7a01465d5c403354aaf0f2dab8adb9afe61b0) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound CPU */
-		ROM_LOAD( "ss008.u82", 0x000000, 0x010000, CRC(04dc3647) SHA1(c06a7e8932c03de5759a9b69da0d761006b49517) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "ss008.u82", 0x000000, 0x010000, CRC(04dc3647);SHA1(c06a7e8932c03de5759a9b69da0d761006b49517) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "ss001.u8",  0x000000, 0x100000, CRC(ebeca5b7) SHA1(1746e757ad9bbef2aa9028c54f25d4aa4dedf79e) )
-		ROM_LOAD( "ss002.u7",  0x100000, 0x100000, CRC(67659f29) SHA1(50944877665b7b848b3f7063892bd39a96a847cf) )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "ss001.u8",  0x000000, 0x100000, CRC(ebeca5b7);SHA1(1746e757ad9bbef2aa9028c54f25d4aa4dedf79e) )
+		ROM_LOAD( "ss002.u7",  0x100000, 0x100000, CRC(67659f29);SHA1(50944877665b7b848b3f7063892bd39a96a847cf) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "ss003.u39", 0x000000, 0x100000, CRC(fbecde72) SHA1(2fe32b28e77ec390c534d276261eefac3fbe21fd) ) /* Copy of rom at u47 */
-		ROM_LOAD( "ss004.u37", 0x100000, 0x100000, CRC(98b82c5e) SHA1(af1b52d4b36b1776c148478b5a5581e6a57256b8) ) /* Copy of rom at u46 */
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "ss003.u39", 0x000000, 0x100000, CRC(fbecde72);SHA1(2fe32b28e77ec390c534d276261eefac3fbe21fd) ) /* Copy of rom at u47 */
+		ROM_LOAD( "ss004.u37", 0x100000, 0x100000, CRC(98b82c5e);SHA1(af1b52d4b36b1776c148478b5a5581e6a57256b8) ) /* Copy of rom at u46 */
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* ADPCM samples */
-		ROM_LOAD( "ss005.u86", 0x000000, 0x040000, CRC(c53a82ad) SHA1(756e453c8b5ce8e47f93fbda3a9e48bb73e93e2e) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* ADPCM samples */
+		ROM_LOAD( "ss005.u86", 0x000000, 0x040000, CRC(c53a82ad);SHA1(756e453c8b5ce8e47f93fbda3a9e48bb73e93e2e) )
+	ROM_END(); }}; 
 	
-	ROM_START( sshanghb )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 ) /* 68000 code */
-		ROM_LOAD16_BYTE( "sshanb_2.010", 0x00000, 0x20000, CRC(bc7ed254) SHA1(aeee4b8a8265902bb41575cc143738ecf3aff57d) )
-		ROM_LOAD16_BYTE( "sshanb_1.010", 0x00001, 0x20000, CRC(7b049f49) SHA1(2570077c67dbd35053d475a18c3f10813bf914f7) )
+	static RomLoadPtr rom_sshanghb = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* 68000 code */
+		ROM_LOAD16_BYTE( "sshanb_2.010", 0x00000, 0x20000, CRC(bc7ed254);SHA1(aeee4b8a8265902bb41575cc143738ecf3aff57d) )
+		ROM_LOAD16_BYTE( "sshanb_1.010", 0x00001, 0x20000, CRC(7b049f49);SHA1(2570077c67dbd35053d475a18c3f10813bf914f7) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound CPU */
-		ROM_LOAD( "ss008.u82", 0x000000, 0x010000, CRC(04dc3647) SHA1(c06a7e8932c03de5759a9b69da0d761006b49517) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "ss008.u82", 0x000000, 0x010000, CRC(04dc3647);SHA1(c06a7e8932c03de5759a9b69da0d761006b49517) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "ss001.u8",  0x000000, 0x100000, CRC(ebeca5b7) SHA1(1746e757ad9bbef2aa9028c54f25d4aa4dedf79e) )
-		ROM_LOAD( "ss002.u7",  0x100000, 0x100000, CRC(67659f29) SHA1(50944877665b7b848b3f7063892bd39a96a847cf) )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "ss001.u8",  0x000000, 0x100000, CRC(ebeca5b7);SHA1(1746e757ad9bbef2aa9028c54f25d4aa4dedf79e) )
+		ROM_LOAD( "ss002.u7",  0x100000, 0x100000, CRC(67659f29);SHA1(50944877665b7b848b3f7063892bd39a96a847cf) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "ss003.u39", 0x000000, 0x100000, CRC(fbecde72) SHA1(2fe32b28e77ec390c534d276261eefac3fbe21fd) ) /* Copy of rom at u47 */
-		ROM_LOAD( "ss004.u37", 0x100000, 0x100000, CRC(98b82c5e) SHA1(af1b52d4b36b1776c148478b5a5581e6a57256b8) ) /* Copy of rom at u46 */
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "ss003.u39", 0x000000, 0x100000, CRC(fbecde72);SHA1(2fe32b28e77ec390c534d276261eefac3fbe21fd) ) /* Copy of rom at u47 */
+		ROM_LOAD( "ss004.u37", 0x100000, 0x100000, CRC(98b82c5e);SHA1(af1b52d4b36b1776c148478b5a5581e6a57256b8) ) /* Copy of rom at u46 */
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* ADPCM samples */
-		ROM_LOAD( "ss005.u86", 0x000000, 0x040000, CRC(c53a82ad) SHA1(756e453c8b5ce8e47f93fbda3a9e48bb73e93e2e) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* ADPCM samples */
+		ROM_LOAD( "ss005.u86", 0x000000, 0x040000, CRC(c53a82ad);SHA1(756e453c8b5ce8e47f93fbda3a9e48bb73e93e2e) )
+	ROM_END(); }}; 
 	
 	
 	static DRIVER_INIT( sshangha )
@@ -456,6 +460,6 @@ public class sshangha
 	}
 	
 	
-	GAMEX( 1992, sshangha, 0,        sshangha, sshangha, sshangha, ROT0, "Hot-B.",   "Super Shanghai Dragon's Eye (Japan)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND )
-	GAMEX( 1992, sshanghb, sshangha, sshangha, sshangha, sshangha, ROT0, "bootleg", "Super Shanghai Dragon's Eye (World, bootleg)", GAME_NO_SOUND )
+	public static GameDriver driver_sshangha	   = new GameDriver("1992"	,"sshangha"	,"sshangha.java"	,rom_sshangha,null	,machine_driver_sshangha	,input_ports_sshangha	,init_sshangha	,ROT0	,	"Hot-B.",   "Super Shanghai Dragon's Eye (Japan)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND )
+	public static GameDriver driver_sshanghb	   = new GameDriver("1992"	,"sshanghb"	,"sshangha.java"	,rom_sshanghb,driver_sshangha	,machine_driver_sshangha	,input_ports_sshangha	,init_sshangha	,ROT0	,	"bootleg", "Super Shanghai Dragon's Eye (World, bootleg)", GAME_NO_SOUND )
 }

@@ -63,42 +63,42 @@ public class crbaloon
 		}
 	}
 	
-	WRITE_HANDLER( crbaloon_videoram_w )
+	public static WriteHandlerPtr crbaloon_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( crbaloon_colorram_w )
+	public static WriteHandlerPtr crbaloon_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( crbaloon_spritectrl_w )
+	public static WriteHandlerPtr crbaloon_spritectrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		spritectrl[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( crbaloon_flipscreen_w )
+	public static WriteHandlerPtr crbaloon_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index] & 0x0f;
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index)& 0x0f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -108,7 +108,7 @@ public class crbaloon
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows_flip_xy, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		if ((tmpbitmap = auto_bitmap_alloc(Machine->drv->screen_width,Machine->drv->screen_height)) == 0)

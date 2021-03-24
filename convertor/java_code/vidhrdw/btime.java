@@ -64,19 +64,19 @@ public class btime
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -109,19 +109,19 @@ public class btime
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 7) & 0x01;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 4) & 0x01;
-			bit1 = (color_prom[i] >> 3) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 4) & 0x01;
+			bit1 = (color_prom.read(i)>> 3) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 0) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -169,24 +169,24 @@ public class btime
 	
 	
 	
-	WRITE_HANDLER( btime_paletteram_w )
+	public static WriteHandlerPtr btime_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    /* RGB output is inverted */
 	    paletteram_BBGGGRRR_w(offset,~data);
-	}
+	} };
 	
-	WRITE_HANDLER( lnc_videoram_w )
+	public static WriteHandlerPtr lnc_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-	    if (videoram[offset] != data || colorram[offset] != *lnc_charbank)
+	    if (videoram.read(offset)!= data || colorram.read(offset)!= *lnc_charbank)
 	    {
-	        videoram[offset] = data;
-	        colorram[offset] = *lnc_charbank;
+	        videoram.write(offset,data);
+	        colorram.write(offset,*lnc_charbank);
 	
 	        dirtybuffer[offset] = 1;
 	    }
-	}
+	} };
 	
-	READ_HANDLER( btime_mirrorvideoram_r )
+	public static ReadHandlerPtr btime_mirrorvideoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	    int x,y;
 	
@@ -196,9 +196,9 @@ public class btime
 	    offset = 32 * y + x;
 	
 	    return videoram_r(offset);
-	}
+	} };
 	
-	READ_HANDLER( btime_mirrorcolorram_r )
+	public static ReadHandlerPtr btime_mirrorcolorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	    int x,y;
 	
@@ -208,9 +208,9 @@ public class btime
 	    offset = 32 * y + x;
 	
 	    return colorram_r(offset);
-	}
+	} };
 	
-	WRITE_HANDLER( btime_mirrorvideoram_w )
+	public static WriteHandlerPtr btime_mirrorvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int x,y;
 	
@@ -220,9 +220,9 @@ public class btime
 	    offset = 32 * y + x;
 	
 	    videoram_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( lnc_mirrorvideoram_w )
+	public static WriteHandlerPtr lnc_mirrorvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int x,y;
 	
@@ -232,9 +232,9 @@ public class btime
 	    offset = 32 * y + x;
 	
 	    lnc_videoram_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( btime_mirrorcolorram_w )
+	public static WriteHandlerPtr btime_mirrorcolorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int x,y;
 	
@@ -244,9 +244,9 @@ public class btime
 	    offset = 32 * y + x;
 	
 	    colorram_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( deco_charram_w )
+	public static WriteHandlerPtr deco_charram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (deco_charram[offset] == data)  return;
 	
@@ -259,9 +259,9 @@ public class btime
 	
 	    /* diry char */
 	    char_dirty  [offset >> 3] = 1;
-	}
+	} };
 	
-	WRITE_HANDLER( bnj_background_w )
+	public static WriteHandlerPtr bnj_background_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (bnj_backgroundram[offset] != data)
 	    {
@@ -269,9 +269,9 @@ public class btime
 	
 	        bnj_backgroundram[offset] = data;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( bnj_scroll1_w )
+	public static WriteHandlerPtr bnj_scroll1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    // Dirty screen if background is being turned off
 	    if (bnj_scroll1 && !data)
@@ -280,14 +280,14 @@ public class btime
 	    }
 	
 	    bnj_scroll1 = data;
-	}
+	} };
 	
-	WRITE_HANDLER( bnj_scroll2_w )
+	public static WriteHandlerPtr bnj_scroll2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    bnj_scroll2 = data;
-	}
+	} };
 	
-	WRITE_HANDLER( zoar_video_control_w )
+	public static WriteHandlerPtr zoar_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    // Zoar video control
 	    //
@@ -297,9 +297,9 @@ public class btime
 	
 		set_vh_global_attribute(&btime_palette, (data & 0x30) >> 3);
 		flip_screen_set(data & 0x80);
-	}
+	} };
 	
-	WRITE_HANDLER( btime_video_control_w )
+	public static WriteHandlerPtr btime_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    // Btime video control
 	    //
@@ -307,9 +307,9 @@ public class btime
 	    // Bit 1-7 = Unknown
 	
 		flip_screen_set(data & 0x01);
-	}
+	} };
 	
-	WRITE_HANDLER( bnj_video_control_w )
+	public static WriteHandlerPtr bnj_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    /* Bnj/Lnc works a little differently than the btime/eggs (apparently). */
 	    /* According to the information at: */
@@ -323,18 +323,18 @@ public class btime
 	
 	    if (input_port_3_r(0) & 0x40) /* cocktail mode */
 	        btime_video_control_w(offset, data);
-	}
+	} };
 	
-	WRITE_HANDLER( lnc_video_control_w )
+	public static WriteHandlerPtr lnc_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    // I have a feeling that this only works by coincidence. I couldn't
 	    // figure out how NMI's are disabled by the sound processor
 	    lnc_sound_interrupt_enabled = data & 0x08;
 	
 	    bnj_video_control_w(offset, data & 0x01);
-	}
+	} };
 	
-	WRITE_HANDLER( disco_video_control_w )
+	public static WriteHandlerPtr disco_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_vh_global_attribute(&btime_palette, (data >> 2) & 0x03);
 	
@@ -342,7 +342,7 @@ public class btime
 		{
 			flip_screen_set(data & 0x01);
 		}
-	}
+	} };
 	
 	
 	INTERRUPT_GEN( lnc_sound_interrupt )
@@ -375,7 +375,7 @@ public class btime
 	
 	        dirtybuffer[offs] = 0;
 	
-	        code = videoram[offs] + 256 * (colorram[offs] & 3);
+	        code = videoram.read(offs)+ 256 * (colorram.read(offs)& 3);
 	
 	        /* check priority */
 	        if ((priority != -1) && (priority != ((code >> 7) & 0x01)))  continue;
@@ -497,7 +497,7 @@ public class btime
 	    {
 	        int code;
 	
-	        code = videoram[offs] + 256 * (colorram[offs] & 3);
+	        code = videoram.read(offs)+ 256 * (colorram.read(offs)& 3);
 	
 	        switch (char_dirty[code])
 	        {
@@ -670,7 +670,7 @@ public class btime
 	
 	        /* copy the background bitmap to the screen */
 	        scroll = (bnj_scroll1 & 0x02) * 128 + 511 - bnj_scroll2;
-	        if (!flip_screen)
+	        if (flip_screen == 0)
 	            scroll = 767-scroll;
 	        copyscrollbitmap (bitmap, background_bitmap, 1, &scroll, 0, 0, &Machine->visible_area,TRANSPARENCY_NONE, 0);
 	

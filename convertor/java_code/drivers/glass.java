@@ -20,7 +20,6 @@ public class glass
 	extern data16_t *glass_vregs;
 	extern data16_t *glass_videoram;
 	extern data16_t *glass_spriteram;
-	extern int glass_current_bit;
 	
 	/* from vidhrdw/glass.c */
 	WRITE16_HANDLER( glass_vram_w );
@@ -50,27 +49,27 @@ public class glass
 	}
 	
 	
-	static struct GfxLayout glass_tilelayout16 =
-	{
+	static GfxLayout glass_tilelayout16 = new GfxLayout
+	(
 		16,16,									/* 16x16 tiles */
 		0x100000/32,							/* number of tiles */
 		4,										/* 4 bpp */
-		{ 3*0x100000*8, 2*0x100000*8, 1*0x100000*8, 0*0x100000*8 },
-		{	
+		new int[] { 3*0x100000*8, 2*0x100000*8, 1*0x100000*8, 0*0x100000*8 },
+		new int[] {	
 			0, 1, 2, 3, 4, 5, 6, 7, 
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7
 		},
-		{ 
+		new int[] { 
 			0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 
 		},
 		32*8
-	};
+	);
 	
-	static struct GfxDecodeInfo glass_gfxdecodeinfo[] =
+	static GfxDecodeInfo glass_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0x000000, &glass_tilelayout16, 0, 64 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0x000000, glass_tilelayout16, 0, 64 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -130,78 +129,78 @@ public class glass
 	MEMORY_END
 	
 	
-	INPUT_PORTS_START( glass )
-	PORT_START	/* DSW #2 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x02, "Easy" )
-		PORT_DIPSETTING(    0x03, "Normal" )
-		PORT_DIPSETTING(    0x01, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x0c, "3" )
-		PORT_DIPSETTING(    0x08, "1" )
-		PORT_DIPSETTING(    0x04, "2" )
-		PORT_DIPSETTING(    0x00, "4" )
-		PORT_DIPNAME( 0x10, 0x10, "Version" )
-		PORT_DIPSETTING(    0x10, "Normal" )
-		PORT_DIPSETTING(    0x00, "Light" )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+	static InputPortPtr input_ports_glass = new InputPortPtr(){ public void handler() { 
+	PORT_START(); 	/* DSW #2 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x02, "Easy" );
+		PORT_DIPSETTING(    0x03, "Normal" );
+		PORT_DIPSETTING(    0x01, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x0c, "3" );
+		PORT_DIPSETTING(    0x08, "1" );
+		PORT_DIPSETTING(    0x04, "2" );
+		PORT_DIPSETTING(    0x00, "4" );
+		PORT_DIPNAME( 0x10, 0x10, "Version" );
+		PORT_DIPSETTING(    0x10, "Normal" );
+		PORT_DIPSETTING(    0x00, "Light" );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
 		
-	PORT_START	/* DSW #1 */
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_4C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 6C_1C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x28, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_2C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0x38, DEF_STR( 1C_1C ) )
-		PORT_DIPNAME( 0x40, 0x40, "Credit configuration" )
-		PORT_DIPSETTING(    0x40, "Start 1C" )
-		PORT_DIPSETTING(    0x00, "Start 2C" )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_START(); 	/* DSW #1 */
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_4C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x38, 0x38, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "6C_1C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x28, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_2C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0x38, DEF_STR( "1C_1C") );
+		PORT_DIPNAME( 0x40, 0x40, "Credit configuration" );
+		PORT_DIPSETTING(    0x40, "Start 1C" );
+		PORT_DIPSETTING(    0x00, "Start 2C" );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 		
-	PORT_START	/* 1P INPUTS */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_START(); 	/* 1P INPUTS */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
 	
-	PORT_START	/* 2P INPUTS + Button 3 */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0xfc00, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+	PORT_START(); 	/* 2P INPUTS + Button 3 */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0xfc00, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -239,26 +238,26 @@ public class glass
 		MDRV_SOUND_ADD(OKIM6295, glass_okim6295_interface)
 	MACHINE_DRIVER_END
 	
-	ROM_START( glass )
-		ROM_REGION( 0x080000, REGION_CPU1, 0 )	/* 68000 code */
-		ROM_LOAD16_BYTE( "c23.bin",	0x000000, 0x040000, CRC(688cdf33) SHA1(b59dcc3fc15f72037692b745927b110e97d8282e) )
-		ROM_LOAD16_BYTE( "c22.bin",	0x000001, 0x040000, CRC(ab17c992) SHA1(1509b5b4bbfb4e022e0ab6fbbc0ffc070adfa531) )
+	static RomLoadPtr rom_glass = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x080000, REGION_CPU1, 0 );/* 68000 code */
+		ROM_LOAD16_BYTE( "c23.bin",	0x000000, 0x040000, CRC(688cdf33);SHA1(b59dcc3fc15f72037692b745927b110e97d8282e) )
+		ROM_LOAD16_BYTE( "c22.bin",	0x000001, 0x040000, CRC(ab17c992);SHA1(1509b5b4bbfb4e022e0ab6fbbc0ffc070adfa531) )
 	
-		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE )	/* Graphics */
+		ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE );/* Graphics */
 		/* 0x000000-0x3fffff filled in later in the DRIVER_INIT */
 	
-		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE )	/* Graphics */
-		ROM_LOAD( "h13.bin", 0x000000, 0x200000, CRC(13ab7f31) SHA1(468424f74d6cccd1b445a9f20e2d24bc46d61ed6) )
-		ROM_LOAD( "h11.bin", 0x200000, 0x200000, CRC(c6ac41c8) SHA1(22408ef1e35c66d0fba0c72972c46fad891d1193) )
+		ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE );/* Graphics */
+		ROM_LOAD( "h13.bin", 0x000000, 0x200000, CRC(13ab7f31);SHA1(468424f74d6cccd1b445a9f20e2d24bc46d61ed6) )
+		ROM_LOAD( "h11.bin", 0x200000, 0x200000, CRC(c6ac41c8);SHA1(22408ef1e35c66d0fba0c72972c46fad891d1193) )
 		
-		ROM_REGION( 0x100000, REGION_GFX3, 0 )	/* 16 bitmaps (320x200, indexed colors) */
-		ROM_LOAD( "h9.bin", 0x000000, 0x100000, CRC(b9492557) SHA1(3f5c0d696d65e1cd492763dfa749c813dd56a9bf) )
+		ROM_REGION( 0x100000, REGION_GFX3, 0 );/* 16 bitmaps (320x200, indexed colors) */
+		ROM_LOAD( "h9.bin", 0x000000, 0x100000, CRC(b9492557);SHA1(3f5c0d696d65e1cd492763dfa749c813dd56a9bf) )
 	
-		ROM_REGION( 0x140000, REGION_SOUND1, 0 )	/* ADPCM samples - sound chip is OKIM6295 */
-		ROM_LOAD( "c1.bin",	 0x000000, 0x100000, CRC(d9f075a2) SHA1(31a7a677861f39d512e9d1f51925c689e481159a) )
+		ROM_REGION( 0x140000, REGION_SOUND1, 0 );/* ADPCM samples - sound chip is OKIM6295 */
+		ROM_LOAD( "c1.bin",	 0x000000, 0x100000, CRC(d9f075a2);SHA1(31a7a677861f39d512e9d1f51925c689e481159a) )
 		/* 0x00000-0x2ffff is fixed, 0x30000-0x3ffff is bank switched from all the ROMs */
-		ROM_RELOAD(				0x040000, 0x100000 )
-	ROM_END
+		ROM_RELOAD(				0x040000, 0x100000 );
+	ROM_END(); }}; 
 	
 	/***************************************************************************
 	
@@ -304,5 +303,5 @@ public class glass
 		glass_ROM16_split(REGION_GFX2, REGION_GFX1, 0x0200000, 0x0200000, 0x0200000, 0x0300000);
 	}
 	
-	GAMEX( 1993, glass, 0, glass,glass, glass, ROT0, "Gaelco", "Glass", GAME_UNEMULATED_PROTECTION )
+	public static GameDriver driver_glass	   = new GameDriver("1993"	,"glass"	,"glass.java"	,rom_glass,null	,machine_driver_glass	,input_ports_glass	,init_glass	,ROT0	,	"Gaelco", "Glass", GAME_UNEMULATED_PROTECTION )
 }

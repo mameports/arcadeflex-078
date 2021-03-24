@@ -27,15 +27,6 @@ public class _8080bw
 	static mem_write_handler videoram_w_p;
 	static void (*video_update_p)(struct mame_bitmap *bitmap,const struct rectangle *cliprect);
 	
-	static WRITE_HANDLER( bw_videoram_w );
-	static WRITE_HANDLER( schaser_videoram_w );
-	static WRITE_HANDLER( lupin3_videoram_w );
-	static WRITE_HANDLER( polaris_videoram_w );
-	static WRITE_HANDLER( sstrngr2_videoram_w );
-	static WRITE_HANDLER( helifire_videoram_w );
-	static WRITE_HANDLER( phantom2_videoram_w );
-	static WRITE_HANDLER( invadpt2_videoram_w );
-	static WRITE_HANDLER( cosmo_videoram_w );
 	
 	static VIDEO_UPDATE( 8080bw_common );
 	static VIDEO_UPDATE( helifire );
@@ -345,58 +336,58 @@ public class _8080bw
 	}
 	
 	
-	WRITE_HANDLER( c8080bw_videoram_w )
+	public static WriteHandlerPtr c8080bw_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		videoram_w_p(offset, data);
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( bw_videoram_w )
+	public static WriteHandlerPtr bw_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
 		plot_byte(x, y, data, 1, 0);
-	}
+	} };
 	
-	static WRITE_HANDLER( schaser_videoram_w )
+	public static WriteHandlerPtr schaser_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y,col;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
-		col = colorram[offset & 0x1f1f] & 0x07;
+		col = colorram.read(offset & 0x1f1f)& 0x07;
 	
 		plot_byte(x, y, data, col, background_color);
-	}
+	} };
 	
-	static WRITE_HANDLER( lupin3_videoram_w )
+	public static WriteHandlerPtr lupin3_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y,col;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
-		col = ~colorram[offset & 0x1f1f] & 0x07;
+		col = ~colorram.read(offset & 0x1f1f)& 0x07;
 	
 		plot_byte(x, y, data, col, 0);
-	}
+	} };
 	
-	static WRITE_HANDLER( polaris_videoram_w )
+	public static WriteHandlerPtr polaris_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,i,col,back_color,fore_color,color_map;
 		UINT8 y, cloud_y;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
@@ -408,7 +399,7 @@ public class _8080bw
 	
 		color_map = memory_region(REGION_PROMS)[(y >> 3 << 5) | (x >> 3)];
 		back_color = (color_map & 1) ? 6 : 2;
-		fore_color = ~colorram[offset & 0x1f1f] & 0x07;
+		fore_color = ~colorram.read(offset & 0x1f1f)& 0x07;
 	
 		/* bit 3 is connected to the cloud enable. bits 1 and 2 are marked 'not use' (sic)
 		   on the schematics */
@@ -454,56 +445,56 @@ public class _8080bw
 				data >>= 1;
 			}
 		}
-	}
+	} };
 	
-	static WRITE_HANDLER( helifire_videoram_w )
+	public static WriteHandlerPtr helifire_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y,back_color,foreground_color;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
 		back_color = 8; /* TRANSPARENT PEN */
-		foreground_color = colorram[offset] & 0x07;
+		foreground_color = colorram.read(offset)& 0x07;
 	
 		plot_byte(x, y, data, foreground_color, back_color);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( helifire_colorram_w )
+	public static WriteHandlerPtr helifire_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		colorram[offset] = data;
+		colorram.write(offset,data);
 	
 		/* redraw region with (possibly) changed color */
-		videoram_w_p(offset, videoram[offset]);
-	}
+		videoram_w_p(offset, videoram.read(offset));
+	} };
 	
 	
-	WRITE_HANDLER( schaser_colorram_w )
+	public static WriteHandlerPtr schaser_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
 	
 		offset &= 0x1f1f;
 	
-		colorram[offset] = data;
+		colorram.write(offset,data);
 	
 		/* redraw region with (possibly) changed color */
 		for (i = 0; i < 8; i++, offset += 0x20)
 		{
-			videoram_w_p(offset, videoram[offset]);
+			videoram_w_p(offset, videoram.read(offset));
 		}
-	}
+	} };
 	
-	READ_HANDLER( schaser_colorram_r )
+	public static ReadHandlerPtr schaser_colorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return colorram[offset & 0x1f1f];
-	}
+		return colorram.read(offset & 0x1f1f);
+	} };
 	
 	
-	static WRITE_HANDLER( phantom2_videoram_w )
+	public static WriteHandlerPtr phantom2_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int CLOUD_SHIFT[] = { 0x01, 0x01, 0x02, 0x02, 0x04, 0x04, 0x08, 0x08,
 		                             0x10, 0x10, 0x20, 0x20, 0x40, 0x40, 0x80, 0x80 };
@@ -514,7 +505,7 @@ public class _8080bw
 		offs_t cloud_offs;
 	
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = (offset % 32) * 8;
@@ -555,7 +546,7 @@ public class _8080bw
 			cloud_x++;
 			data >>= 1;
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -578,7 +569,7 @@ public class _8080bw
 			int offs;
 	
 			for (offs = 0;offs < videoram_size;offs++)
-				videoram_w_p(offs, videoram[offs]);
+				videoram_w_p(offs, videoram.read(offs));
 		}
 	
 		copybitmap(bitmap,tmpbitmap,0,0,0,0,cliprect,TRANSPARENCY_NONE,0);
@@ -709,7 +700,7 @@ public class _8080bw
 			int offs;
 	
 			for (offs = 0;offs < videoram_size;offs++)
-				videoram_w_p(offs, videoram[offs]);
+				videoram_w_p(offs, videoram.read(offs));
 		}
 	
 	
@@ -883,14 +874,14 @@ public class _8080bw
 	}
 	
 	
-	WRITE_HANDLER( bowler_bonus_display_w )
+	public static WriteHandlerPtr bowler_bonus_display_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* Bits 0-6 control which score is lit.
 		   Bit 7 appears to be a global enable, but the exact
 		   effect is not known. */
 	
 		bowler_bonus_display = data;
-	}
+	} };
 	
 	
 	static VIDEO_UPDATE( bowler )
@@ -979,17 +970,17 @@ public class _8080bw
 	}
 	
 	
-	static WRITE_HANDLER( invadpt2_videoram_w )
+	public static WriteHandlerPtr invadpt2_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y,col;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
 		/* 32 x 32 colormap */
-		if (!screen_red)
+		if (screen_red == 0)
 		{
 			UINT16 colbase;
 	
@@ -1000,7 +991,7 @@ public class _8080bw
 			col = 1;	/* red */
 	
 		plot_byte(x, y, data, col, 0);
-	}
+	} };
 	
 	PALETTE_INIT( cosmo )
 	{
@@ -1016,47 +1007,47 @@ public class _8080bw
 		}
 	}
 	
-	WRITE_HANDLER( cosmo_colorram_w )
+	public static WriteHandlerPtr cosmo_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		int offs = ((offset>>5)<<8) | (offset&0x1f);
 	
-		colorram[offset] = data;
+		colorram.write(offset,data);
 	
 		/* redraw region with (possibly) changed color */
 		for (i=0; i<8; i++)
 		{
-			videoram_w_p(offs, videoram[offs]);
+			videoram_w_p(offs, videoram.read(offs));
 			offs+= 0x20;
 		}		
-	}
+	} };
 	
-	static WRITE_HANDLER( cosmo_videoram_w )
+	public static WriteHandlerPtr cosmo_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y,col;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = offset % 32;
 	
 		/* 32 x 32 colormap */
-		col = colorram[(y >> 3 << 5) | x ] & 0x07;
+		col = colorram.read((y >> 3 << 5) | x )& 0x07;
 	
 		plot_byte(8*x, y, data, col, 0);
-	}
+	} };
 	
-	static WRITE_HANDLER( sstrngr2_videoram_w )
+	public static WriteHandlerPtr sstrngr2_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y,col;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = offset / 32;
 		x = 8 * (offset % 32);
 	
 		/* 16 x 32 colormap */
-		if (!screen_red)
+		if (screen_red == 0)
 		{
 			UINT16 colbase;
 	
@@ -1073,5 +1064,5 @@ public class _8080bw
 		}
 	
 		plot_byte(x, y, data, col, 0);
-	}
+	} };
 }

@@ -81,9 +81,7 @@ public class i8039
 	};
 	
 	
-	static int Ext_IRQ(void);
-	static int Timer_IRQ(void);
-	
+	static static 
 	#define M_RDMEM(A)		I8039_RDMEM(A)
 	#define M_RDOP(A)		I8039_RDOP(A)
 	#define M_RDOP_ARG(A)	I8039_RDOP_ARG(A)
@@ -941,7 +939,7 @@ public class i8039
 	
 		which = (which+1) % 8;
 		buffer[which][0] = '\0';
-		if( !context )
+		if (context == 0)
 			r = &R;
 	
 		switch( regnum )

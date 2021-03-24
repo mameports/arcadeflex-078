@@ -215,8 +215,7 @@ public class v60
 		_CY	= _CY ? 1 : 0; \
 	}
 	
-	static void v60_try_irq(void);
-	
+	static 
 	#define STACK_REG(IS,EL)	((IS)==0?37+(EL):36)
 	
 	static UINT32 v60ReadPSW(void)
@@ -297,7 +296,7 @@ public class v60
 	{
 		int cpu = cpu_getactivecpu();
 		static int opt_init = 0;
-		if(!opt_init) {
+		if (opt_init == 0) {
 			InitTables();	// set up opcode tables
 	#ifdef MAME_DEBUG
 			v60_dasm_init();

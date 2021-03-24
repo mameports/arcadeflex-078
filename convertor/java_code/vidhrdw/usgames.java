@@ -55,27 +55,27 @@ public class usgames
 	{
 		usg_tilemap = tilemap_create(get_usg_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE, 8, 8,64,32);
 	
-		if (!usg_tilemap)
+		if (usg_tilemap == 0)
 			return 1;
 	
 		return 0;
 	}
 	
 	
-	WRITE_HANDLER( usg_videoram_w )
+	public static WriteHandlerPtr usg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		usg_videoram[offset] = data;
 		tilemap_mark_tile_dirty(usg_tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( usg_charram_w )
+	public static WriteHandlerPtr usg_charram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		usg_charram[offset] = data;
 	
 		decodechar(Machine->gfx[0], offset/8, usg_charram, Machine->drv->gfxdecodeinfo[0].gfxlayout);
 	
 		tilemap_mark_all_tiles_dirty(usg_tilemap);
-	}
+	} };
 	
 	
 	

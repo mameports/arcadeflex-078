@@ -56,20 +56,20 @@ public class _1943
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i + 2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + 2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + 2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + 2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -90,7 +90,7 @@ public class _1943
 			if (i % Machine->gfx[1]->color_granularity == 0)
 				COLOR(1,i) = 0;
 			else
-				COLOR(1,i) = color_prom[0] + 16 * (color_prom[256] & 0x03);
+				COLOR(1,i) = color_prom.read(0)+ 16 * (color_prom.read(256)& 0x03);
 			color_prom++;
 		}
 		color_prom += TOTAL_COLORS(1);
@@ -98,7 +98,7 @@ public class _1943
 		/* background tiles use colors 0-63 */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			COLOR(2,i) = color_prom[0] + 16 * (color_prom[256] & 0x03);
+			COLOR(2,i) = color_prom.read(0)+ 16 * (color_prom.read(256)& 0x03);
 			color_prom++;
 		}
 		color_prom += TOTAL_COLORS(2);
@@ -108,7 +108,7 @@ public class _1943
 		/* it differently for speed reasons */
 		for (i = 0;i < TOTAL_COLORS(3);i++)
 		{
-			COLOR(3,i) = color_prom[0] + 16 * (color_prom[256] & 0x07) + 128;
+			COLOR(3,i) = color_prom.read(0)+ 16 * (color_prom.read(256)& 0x07) + 128;
 			color_prom++;
 		}
 		color_prom += TOTAL_COLORS(3);
@@ -135,7 +135,7 @@ public class _1943
 	
 	
 	
-	WRITE_HANDLER( c1943_c804_w )
+	public static WriteHandlerPtr c1943_c804_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		unsigned char *RAM = memory_region(REGION_CPU1);
@@ -160,11 +160,11 @@ public class _1943
 	
 		/* bit 7 enables characters */
 		chon = data & 0x80;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( c1943_d806_w )
+	public static WriteHandlerPtr c1943_d806_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 4 enables bg 1 */
 		sc1on = data & 0x10;
@@ -174,7 +174,7 @@ public class _1943
 	
 		/* bit 6 enables sprites */
 		objon = data & 0x40;
-	}
+	} };
 	
 	
 	
@@ -253,12 +253,12 @@ public class _1943
 				int color;
 	
 	
-				color = spriteram[offs + 1] & 0x0f;
+				color = spriteram.read(offs + 1)& 0x0f;
 				if (color == 0x0a || color == 0x0b)	/* the priority is actually selected by */
 													/* bit 3 of BMPROM.07 */
 				{
-					sx = spriteram[offs + 3] - ((spriteram[offs + 1] & 0x10) << 4);
-					sy = spriteram[offs + 2];
+					sx = spriteram.read(offs + 3)- ((spriteram.read(offs + 1)& 0x10) << 4);
+					sy = spriteram.read(offs + 2);
 					if (flipscreen)
 					{
 						sx = 240 - sx;
@@ -266,7 +266,7 @@ public class _1943
 					}
 	
 					drawgfx(bitmap,Machine->gfx[3],
-							spriteram[offs] + ((spriteram[offs + 1] & 0xe0) << 3),
+							spriteram.read(offs)+ ((spriteram.read(offs + 1)& 0xe0) << 3),
 							color,
 							flipscreen,flipscreen,
 							sx,sy,
@@ -342,12 +342,12 @@ public class _1943
 				int color;
 	
 	
-				color = spriteram[offs + 1] & 0x0f;
+				color = spriteram.read(offs + 1)& 0x0f;
 				if (color != 0x0a && color != 0x0b)	/* the priority is actually selected by */
 													/* bit 3 of BMPROM.07 */
 				{
-					sx = spriteram[offs + 3] - ((spriteram[offs + 1] & 0x10) << 4);
-					sy = spriteram[offs + 2];
+					sx = spriteram.read(offs + 3)- ((spriteram.read(offs + 1)& 0x10) << 4);
+					sy = spriteram.read(offs + 2);
 					if (flipscreen)
 					{
 						sx = 240 - sx;
@@ -355,7 +355,7 @@ public class _1943
 					}
 	
 					drawgfx(bitmap,Machine->gfx[3],
-							spriteram[offs] + ((spriteram[offs + 1] & 0xe0) << 3),
+							spriteram.read(offs)+ ((spriteram.read(offs + 1)& 0xe0) << 3),
 							color,
 							flipscreen,flipscreen,
 							sx,sy,
@@ -379,8 +379,8 @@ public class _1943
 				}
 	
 				drawgfx(bitmap,Machine->gfx[0],
-						videoram[offs] + ((colorram[offs] & 0xe0) << 3),
-						colorram[offs] & 0x1f,
+						videoram.read(offs)+ ((colorram.read(offs)& 0xe0) << 3),
+						colorram.read(offs)& 0x1f,
 						flipscreen,flipscreen,
 						8*sx,8*sy,
 						cliprect,TRANSPARENCY_COLOR,79);

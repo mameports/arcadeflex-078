@@ -36,8 +36,8 @@ public class slapfght
 	{
 		int tile,color;
 	
-		tile=videoram[tile_index] + ((colorram[tile_index] & 0x03) << 8);
-		color=(colorram[tile_index] >> 3) & 0x0f;
+		tile=videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x03) << 8);
+		color=(colorram.read(tile_index)>> 3) & 0x0f;
 		SET_TILE_INFO(
 				0,
 				tile,
@@ -49,8 +49,8 @@ public class slapfght
 	{
 		int tile,color;
 	
-		tile=videoram[tile_index] + ((colorram[tile_index] & 0x0f) << 8);
-		color=(colorram[tile_index] & 0xf0) >> 4;
+		tile=videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x0f) << 8);
+		color=(colorram.read(tile_index)& 0xf0) >> 4;
 	
 		SET_TILE_INFO(
 				1,
@@ -84,7 +84,7 @@ public class slapfght
 	{
 		pf1_tilemap = tilemap_create(get_pf_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,64,32);
 	
-		if (!pf1_tilemap)
+		if (pf1_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(pf1_tilemap,0);
@@ -112,36 +112,36 @@ public class slapfght
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( slapfight_videoram_w )
+	public static WriteHandlerPtr slapfight_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(pf1_tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( slapfight_colorram_w )
+	public static WriteHandlerPtr slapfight_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		colorram[offset]=data;
+		colorram.write(offset,data);
 		tilemap_mark_tile_dirty(pf1_tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( slapfight_fixram_w )
+	public static WriteHandlerPtr slapfight_fixram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		slapfight_videoram[offset]=data;
 		tilemap_mark_tile_dirty(fix_tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( slapfight_fixcol_w )
+	public static WriteHandlerPtr slapfight_fixcol_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		slapfight_colorram[offset]=data;
 		tilemap_mark_tile_dirty(fix_tilemap,offset);
-	}
+	} };
 	
-	WRITE_HANDLER( slapfight_flipscreen_w )
+	public static WriteHandlerPtr slapfight_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		logerror("Writing %02x to flipscreen\n",offset);
 		if (offset==0) flipscreen=1; /* Port 0x2 is flipscreen */
 		else flipscreen=0; /* Port 0x3 is normal */
-	}
+	} };
 	
 	#ifdef MAME_DEBUG
 	void slapfght_log_vram(void)
@@ -151,7 +151,7 @@ public class slapfght
 			int i;
 			for (i=0; i<0x800; i++)
 			{
-				logerror("Offset:%03x   TileRAM:%02x   AttribRAM:%02x   SpriteRAM:%02x\n",i, videoram[i],colorram[i],spriteram[i]);
+				logerror("Offset:%03x   TileRAM:%02x   AttribRAM:%02x   SpriteRAM:%02x\n",i, videoram.read(i),colorram.read(i),spriteram.read(i));
 			}
 		}
 	}

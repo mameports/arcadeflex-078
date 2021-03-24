@@ -23,7 +23,7 @@ public class dotrikun
 		Palette Setting.
 	
 	*******************************************************************/
-	WRITE_HANDLER( dotrikun_color_w )
+	public static WriteHandlerPtr dotrikun_color_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
@@ -36,7 +36,7 @@ public class dotrikun
 		g = ((data & 0x02) ? 0xff : 0x00);
 		b = ((data & 0x04) ? 0xff : 0x00);
 		palette_set_color(1, r, g, b);		// DOT color
-	}
+	} };
 	
 	
 	/*******************************************************************
@@ -44,14 +44,14 @@ public class dotrikun
 		Draw Pixel.
 	
 	*******************************************************************/
-	WRITE_HANDLER( dotrikun_videoram_w )
+	public static WriteHandlerPtr dotrikun_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		int x, y;
 		int color;
 	
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		x = 2 * (((offset % 16) * 8));
 		y = 2 * ((offset / 16));
@@ -72,7 +72,7 @@ public class dotrikun
 				plot_pixel(tmpbitmap, x + 2*(7 - i)+1, y+1, color);
 			}
 		}
-	}
+	} };
 	
 	
 	VIDEO_UPDATE( dotrikun )
@@ -84,7 +84,7 @@ public class dotrikun
 			/* redraw bitmap */
 	
 			for (offs = 0; offs < videoram_size; offs++)
-				dotrikun_videoram_w(offs,videoram[offs]);
+				dotrikun_videoram_w(offs,videoram.read(offs));
 		}
 		copybitmap(bitmap,tmpbitmap,0,0,0,0,&Machine->visible_area,TRANSPARENCY_NONE,0);
 	}

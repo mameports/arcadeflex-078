@@ -56,7 +56,7 @@ public class vball
 	VIDEO_START( vb )
 	{
 		bg_tilemap = tilemap_create(get_bg_tile_info,background_scan,TILEMAP_OPAQUE, 8, 8,64,64);
-		if( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap,32);
@@ -64,27 +64,27 @@ public class vball
 		return 0;
 	}
 	
-	WRITE_HANDLER( vb_videoram_w )
+	public static WriteHandlerPtr vb_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (vb_videoram[offset] != data)
 		{
 			vb_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( vb_attrib_r )
+	public static ReadHandlerPtr vb_attrib_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return vb_attribram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( vb_attrib_w )
+	public static WriteHandlerPtr vb_attrib_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( vb_attribram[offset] != data ){
 			vb_attribram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
 	void vb_bgprombank_w( int bank )
 	{
@@ -95,8 +95,8 @@ public class vball
 	
 		color_prom = memory_region(REGION_PROMS) + bank*0x80;
 		for (i=0;i<128;i++, color_prom++) {
-			palette_set_color(i,(color_prom[0] & 0x0f) << 4,(color_prom[0] & 0xf0) >> 0,
-					       (color_prom[0x800] & 0x0f) << 4);
+			palette_set_color(i,(color_prom.read(0)& 0x0f) << 4,(color_prom.read(0)& 0xf0) >> 0,
+					       (color_prom.read(0x800)& 0x0f) << 4);
 		}
 		vb_bgprombank=bank;
 	}
@@ -111,8 +111,8 @@ public class vball
 	
 		color_prom = memory_region(REGION_PROMS)+0x400 + bank*0x80;
 		for (i=128;i<256;i++,color_prom++)	{
-			palette_set_color(i,(color_prom[0] & 0x0f) << 4,(color_prom[0] & 0xf0) >> 0,
-					       (color_prom[0x800] & 0x0f) << 4);
+			palette_set_color(i,(color_prom.read(0)& 0x0f) << 4,(color_prom.read(0)& 0xf0) >> 0,
+					       (color_prom.read(0x800)& 0x0f) << 4);
 		}
 		vb_spprombank=bank;
 	}

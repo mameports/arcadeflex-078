@@ -25,19 +25,19 @@ public class amspdwy
 	static struct tilemap *tilemap;
 	
 	
-	WRITE_HANDLER( amspdwy_paletteram_w )
+	public static WriteHandlerPtr amspdwy_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data ^= 0xff;
 		paletteram_BBGGGRRR_w(offset,data);
 	//	paletteram_RRRGGGBB_w(offset,data);
-	}
+	} };
 	
-	WRITE_HANDLER( amspdwy_flipscreen_w )
+	public static WriteHandlerPtr amspdwy_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int flip = 0;
 		flip ^= 1;
 		flip_screen_set( flip );
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -54,8 +54,8 @@ public class amspdwy
 	
 	static void get_tile_info( int tile_index )
 	{
-		data8_t code	=	videoram[ tile_index ];
-		data8_t color	=	colorram[ tile_index ];
+		data8_t code	=	videoram.read( tile_index );
+		data8_t color	=	colorram.read( tile_index );
 		SET_TILE_INFO(
 				0,
 				code + ((color & 0x18)<<5),
@@ -63,23 +63,23 @@ public class amspdwy
 				0)
 	}
 	
-	WRITE_HANDLER( amspdwy_videoram_w )
+	public static WriteHandlerPtr amspdwy_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( amspdwy_colorram_w )
+	public static WriteHandlerPtr amspdwy_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(tilemap, offset);
 		}
-	}
+	} };
 	
 	
 	/* logical (col,row) -> memory offset */
@@ -126,10 +126,10 @@ public class amspdwy
 	
 		for (i = 0; i < spriteram_size ; i += 4)
 		{
-			int y		=	spriteram[i+0];
-			int x		=	spriteram[i+1];
-			int code	=	spriteram[i+2];
-			int attr	=	spriteram[i+3];
+			int y		=	spriteram.read(i+0);
+			int x		=	spriteram.read(i+1);
+			int code	=	spriteram.read(i+2);
+			int attr	=	spriteram.read(i+3);
 			int flipx	=	attr & 0x80;
 			int flipy	=	attr & 0x40;
 	

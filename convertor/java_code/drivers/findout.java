@@ -25,12 +25,12 @@ public class findout
 	
 	static data8_t drawctrl[3];
 	
-	static WRITE_HANDLER( findout_drawctrl_w )
+	public static WriteHandlerPtr findout_drawctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		drawctrl[offset] = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( findout_bitmap_w )
+	public static WriteHandlerPtr findout_bitmap_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int sx,sy;
 		int fg,bg,mask,bits;
@@ -54,25 +54,25 @@ public class findout
 		if (mask & 0x04) plot_pixel(tmpbitmap,sx+5,sy,(bits & 0x04) ? fg : bg);
 		if (mask & 0x02) plot_pixel(tmpbitmap,sx+6,sy,(bits & 0x02) ? fg : bg);
 		if (mask & 0x01) plot_pixel(tmpbitmap,sx+7,sy,(bits & 0x01) ? fg : bg);
-	}
+	} };
 	
 	
-	static READ_HANDLER( portC_r )
+	public static ReadHandlerPtr portC_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 4;
 	//	return (rand()&2);
-	}
+	} };
 	
-	static WRITE_HANDLER( lamps_w )
+	public static WriteHandlerPtr lamps_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(0,data & 0x01);
 		set_led_status(1,data & 0x02);
 		set_led_status(2,data & 0x04);
 		set_led_status(3,data & 0x08);
 		set_led_status(4,data & 0x10);
-	}
+	} };
 	
-	static WRITE_HANDLER( sound_w )
+	public static WriteHandlerPtr sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 3 used but unknown */
 	
@@ -84,7 +84,7 @@ public class findout
 	
 	//	logerror("%04x: sound_w %02x\n",activecpu_get_pc(),data);
 	//	usrintf_showmessage("%02x",data);
-	}
+	} };
 	
 	static ppi8255_interface ppi8255_intf =
 	{
@@ -103,7 +103,7 @@ public class findout
 	}
 	
 	
-	static READ_HANDLER( catchall )
+	public static ReadHandlerPtr catchall  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int pc = activecpu_get_pc();
 	
@@ -111,43 +111,43 @@ public class findout
 			logerror("%04x: unmapped memory read from %04x\n",pc,offset);
 	
 		return 0xff;
-	}
+	} };
 	
-	static WRITE_HANDLER( banksel_main_w )
+	public static WriteHandlerPtr banksel_main_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x8000);
-	}
-	static WRITE_HANDLER( banksel_1_w )
+	} };
+	public static WriteHandlerPtr banksel_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x10000);
-	}
-	static WRITE_HANDLER( banksel_2_w )
+	} };
+	public static WriteHandlerPtr banksel_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x18000);
-	}
-	static WRITE_HANDLER( banksel_3_w )
+	} };
+	public static WriteHandlerPtr banksel_3_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x20000);
-	}
-	static WRITE_HANDLER( banksel_4_w )
+	} };
+	public static WriteHandlerPtr banksel_4_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x28000);
-	}
-	static WRITE_HANDLER( banksel_5_w )
+	} };
+	public static WriteHandlerPtr banksel_5_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_setbank(1,memory_region(REGION_CPU1) + 0x30000);
-	}
+	} };
 	
 	
 	/* This signature is used to validate the question ROMs. Simple protection check? */
 	static int signature_answer,signature_pos;
 	
-	static READ_HANDLER( signature_r )
+	public static ReadHandlerPtr signature_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return signature_answer;
-	}
+	} };
 	
-	static WRITE_HANDLER( signature_w )
+	public static WriteHandlerPtr signature_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data == 0) signature_pos = 0;
 		else
@@ -158,97 +158,101 @@ public class findout
 	
 			signature_pos &= 7;	/* safety; shouldn't happen */
 		}
-	}
+	} };
 	
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x3fff, MRA_ROM },
-		{ 0x4000, 0x47ff, MRA_RAM },
-		{ 0x4800, 0x4803, ppi8255_0_r },
-		{ 0x5000, 0x5003, ppi8255_1_r },
-		{ 0x6400, 0x6400, signature_r },
-		{ 0x7800, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xffff, MRA_BANK1 },
-		{ 0x0000, 0xffff, catchall },
-	MEMORY_END
-	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x3fff, MWA_ROM },
-		{ 0x4000, 0x47ff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-		{ 0x4800, 0x4803, ppi8255_0_w },
-		{ 0x5000, 0x5003, ppi8255_1_w },
-		/* banked ROMs are enabled by low 6 bits of the address */
-		{ 0x603e, 0x603e, banksel_1_w },
-		{ 0x603d, 0x603d, banksel_2_w },
-		{ 0x603b, 0x603b, banksel_3_w },
-		{ 0x6037, 0x6037, banksel_4_w },
-		{ 0x602f, 0x602f, banksel_5_w },
-		{ 0x601f, 0x601f, banksel_main_w },
-		{ 0x6200, 0x6200, signature_w },
-		{ 0x7800, 0x7fff, MWA_ROM },	/* space for diagnostic ROM? */
-		{ 0x8000, 0x8002, findout_drawctrl_w },
-		{ 0xc000, 0xffff, findout_bitmap_w },
-		{ 0x8000, 0xffff, MWA_ROM },	/* overlapped by the above */
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( findout )
-		PORT_START
-		PORT_DIPNAME( 0x07, 0x01, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 7C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 6C_1C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 5C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x08, 0x00, "Game Repetition" )
-		PORT_DIPSETTING( 0x08, DEF_STR( No ) )
-		PORT_DIPSETTING( 0x00, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x10, 0x10, "Orientation" )
-		PORT_DIPSETTING( 0x10, "Horizontal" )
-		PORT_DIPSETTING( 0x00, "Vertical" )
-		PORT_DIPNAME( 0x20, 0x20, "Buy Letter" )
-		PORT_DIPSETTING( 0x20, DEF_STR( No ) )
-		PORT_DIPSETTING( 0x00, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x40, 0x40, "Starting Letter" )
-		PORT_DIPSETTING( 0x40, DEF_STR( No ) )
-		PORT_DIPSETTING( 0x00, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x80, 0x80, "Bonus Letter" )
-		PORT_DIPSETTING( 0x80, DEF_STR( No ) )
-		PORT_DIPSETTING( 0x00, DEF_STR( Yes ) )
-	
-		PORT_START
-		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_LOW, IPT_COIN1, 2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_SERVICE( 0x08, IP_ACTIVE_LOW )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON5 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
-	
-	
-	
-	static struct DACinterface dac_interface =
-	{
-		1,
-		{ 100 }
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x3fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x4000, 0x47ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x4800, 0x4803, ppi8255_0_r ),
+		new Memory_ReadAddress( 0x5000, 0x5003, ppi8255_1_r ),
+		new Memory_ReadAddress( 0x6400, 0x6400, signature_r ),
+		new Memory_ReadAddress( 0x7800, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_BANK1 ),
+		new Memory_ReadAddress( 0x0000, 0xffff, catchall ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
 	};
+	
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x3fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x4000, 0x47ff, MWA_RAM, generic_nvram, generic_nvram_size ),
+		new Memory_WriteAddress( 0x4800, 0x4803, ppi8255_0_w ),
+		new Memory_WriteAddress( 0x5000, 0x5003, ppi8255_1_w ),
+		/* banked ROMs are enabled by low 6 bits of the address */
+		new Memory_WriteAddress( 0x603e, 0x603e, banksel_1_w ),
+		new Memory_WriteAddress( 0x603d, 0x603d, banksel_2_w ),
+		new Memory_WriteAddress( 0x603b, 0x603b, banksel_3_w ),
+		new Memory_WriteAddress( 0x6037, 0x6037, banksel_4_w ),
+		new Memory_WriteAddress( 0x602f, 0x602f, banksel_5_w ),
+		new Memory_WriteAddress( 0x601f, 0x601f, banksel_main_w ),
+		new Memory_WriteAddress( 0x6200, 0x6200, signature_w ),
+		new Memory_WriteAddress( 0x7800, 0x7fff, MWA_ROM ),	/* space for diagnostic ROM? */
+		new Memory_WriteAddress( 0x8000, 0x8002, findout_drawctrl_w ),
+		new Memory_WriteAddress( 0xc000, 0xffff, findout_bitmap_w ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_ROM ),	/* overlapped by the above */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
+	
+	
+	
+	static InputPortPtr input_ports_findout = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x07, 0x01, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "7C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "6C_1C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "5C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x08, 0x00, "Game Repetition" );
+		PORT_DIPSETTING( 0x08, DEF_STR( "No") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x10, 0x10, "Orientation" );
+		PORT_DIPSETTING( 0x10, "Horizontal" );
+		PORT_DIPSETTING( 0x00, "Vertical" );
+		PORT_DIPNAME( 0x20, 0x20, "Buy Letter" );
+		PORT_DIPSETTING( 0x20, DEF_STR( "No") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x40, 0x40, "Starting Letter" );
+		PORT_DIPSETTING( 0x40, DEF_STR( "No") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x80, 0x80, "Bonus Letter" );
+		PORT_DIPSETTING( 0x80, DEF_STR( "No") );
+		PORT_DIPSETTING( 0x00, DEF_STR( "Yes") );
+	
+		PORT_START(); 
+		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_LOW, IPT_COIN1, 2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_SERVICE( 0x08, IP_ACTIVE_LOW );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON5 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static DACinterface dac_interface = new DACinterface
+	(
+		1,
+		new int[] { 100 }
+	);
 	
 	
 	
@@ -286,21 +290,21 @@ public class findout
 	
 	***************************************************************************/
 	
-	ROM_START( findout )
-		ROM_REGION( 0x38000, REGION_CPU1, 0 )
-		ROM_LOAD( "12.bin",       0x00000, 0x4000, CRC(21132d4c) SHA1(e3562ee2f46b3f022a852a0e0b1c8fb8164f64a3) )
-		ROM_LOAD( "11.bin",       0x08000, 0x2000, CRC(0014282c) SHA1(c6792f2ff712ba3759ff009950d78750df844d01) )	/* banked */
-		ROM_LOAD( "13.bin",       0x10000, 0x8000, CRC(cea91a13) SHA1(ad3b395ab0362f3decf178824b1feb10b6335bb3) )	/* banked ROMs for solution data */
-		ROM_LOAD( "14.bin",       0x18000, 0x8000, CRC(2a433a40) SHA1(4132d81256db940789a40aa1162bf1b3997cb23f) )
-		ROM_LOAD( "15.bin",       0x20000, 0x8000, CRC(d817b31e) SHA1(11e6e1042ee548ce2080127611ce3516a0528ae0) )
-		ROM_LOAD( "16.bin",       0x28000, 0x8000, CRC(143f9ac8) SHA1(4411e8ba853d7d5c032115ce23453362ab82e9bb) )
-		ROM_LOAD( "17.bin",       0x30000, 0x8000, CRC(dd743bc7) SHA1(63f7e01ac5cda76a1d3390b6b83f4429b7d3b781) )
+	static RomLoadPtr rom_findout = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x38000, REGION_CPU1, 0 );
+		ROM_LOAD( "12.bin",       0x00000, 0x4000, CRC(21132d4c);SHA1(e3562ee2f46b3f022a852a0e0b1c8fb8164f64a3) )
+		ROM_LOAD( "11.bin",       0x08000, 0x2000, CRC(0014282c);SHA1(c6792f2ff712ba3759ff009950d78750df844d01) )	/* banked */
+		ROM_LOAD( "13.bin",       0x10000, 0x8000, CRC(cea91a13);SHA1(ad3b395ab0362f3decf178824b1feb10b6335bb3) )	/* banked ROMs for solution data */
+		ROM_LOAD( "14.bin",       0x18000, 0x8000, CRC(2a433a40);SHA1(4132d81256db940789a40aa1162bf1b3997cb23f) )
+		ROM_LOAD( "15.bin",       0x20000, 0x8000, CRC(d817b31e);SHA1(11e6e1042ee548ce2080127611ce3516a0528ae0) )
+		ROM_LOAD( "16.bin",       0x28000, 0x8000, CRC(143f9ac8);SHA1(4411e8ba853d7d5c032115ce23453362ab82e9bb) )
+		ROM_LOAD( "17.bin",       0x30000, 0x8000, CRC(dd743bc7);SHA1(63f7e01ac5cda76a1d3390b6b83f4429b7d3b781) )
 	
-		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "82s147.bin",   0x0000, 0x0200, CRC(f3b663bb) SHA1(5a683951c8d3a2baac4b49e379d6e10e35465c8a) )	/* unknown */
-	ROM_END
+		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "82s147.bin",   0x0000, 0x0200, CRC(f3b663bb);SHA1(5a683951c8d3a2baac4b49e379d6e10e35465c8a) )	/* unknown */
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX( 1987, findout, 0, findout, findout, 0, ROT0, "Elettronolo", "Find Out", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_findout	   = new GameDriver("1987"	,"findout"	,"findout.java"	,rom_findout,null	,machine_driver_findout	,input_ports_findout	,null	,ROT0	,	"Elettronolo", "Find Out", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND )
 }

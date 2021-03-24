@@ -74,13 +74,13 @@ public class diverboy
 		}
 	}
 	
-	static WRITE_HANDLER( okibank_w )
+	public static WriteHandlerPtr okibank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 2 might be reset */
 	//	usrintf_showmessage("%02x",data);
 	
 		OKIM6295_set_bank_base(0,(data & 3) * 0x20000);
-	}
+	} };
 	
 	
 	
@@ -107,97 +107,101 @@ public class diverboy
 	//	{ 0x340002, 0x340003, MWA16_NOP },
 	MEMORY_END
 	
-	static MEMORY_READ_START( snd_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0xa000, 0xa000, soundlatch_r },
-		{ 0x9800, 0x9800, OKIM6295_status_0_r },
-	MEMORY_END
+	public static Memory_ReadAddress snd_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xa000, 0xa000, soundlatch_r ),
+		new Memory_ReadAddress( 0x9800, 0x9800, OKIM6295_status_0_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( snd_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM },
-		{ 0x9000, 0x9000, okibank_w },
-		{ 0x9800, 0x9800, OKIM6295_data_0_w },
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( diverboy )
-		PORT_START	// 0x180000.w
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )	// unused ?
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )	// unused ?
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )		// "Dive"
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )		// unknown effect
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )	// unused ?
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )	// unused ?
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )		// "Dive"
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )		// unknown effect
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
-	
-		PORT_START	// 0x180002.w
-		PORT_DIPNAME( 0x07, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPSETTING(    0x08, "3" )
-		PORT_DIPNAME( 0x10, 0x10, "Display Copyright" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x60, 0x00, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x00, "Easy" )
-		PORT_DIPSETTING(    0x20, "Normal" )
-		PORT_DIPSETTING(    0x40, "Hard" )
-		PORT_DIPSETTING(    0x60, "Hardest" )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	
-		PORT_START	// 0x180008.w
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )	// read notes
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	// must be 00 - check code at 0x001680
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress snd_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x9000, 0x9000, okibank_w ),
+		new Memory_WriteAddress( 0x9800, 0x9800, OKIM6295_data_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static struct GfxLayout diverboy_spritelayout =
-	{
+	static InputPortPtr input_ports_diverboy = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	// 0x180000.w
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 );// unused ?
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 );// unused ?
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );	// "Dive"
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );	// unknown effect
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 );// unused ?
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 );// unused ?
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );	// "Dive"
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );	// unknown effect
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 );
+	
+		PORT_START(); 	// 0x180002.w
+		PORT_DIPNAME( 0x07, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPSETTING(    0x08, "3" );
+		PORT_DIPNAME( 0x10, 0x10, "Display Copyright" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x60, 0x00, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x00, "Easy" );
+		PORT_DIPSETTING(    0x20, "Normal" );
+		PORT_DIPSETTING(    0x40, "Hard" );
+		PORT_DIPSETTING(    0x60, "Hardest" );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Yes") );
+	
+		PORT_START(); 	// 0x180008.w
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 );// read notes
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN );// must be 00 - check code at 0x001680
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout diverboy_spritelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ 0,1,2,3 },
-		{  4, 0,  12, 8,  20, 16, 28, 24,
+		new int[] { 0,1,2,3 },
+		new int[] {  4, 0,  12, 8,  20, 16, 28, 24,
 		  36, 32, 44, 40, 52, 48, 60, 56, },
-		{ 0*64, 1*64, 2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
+		new int[] { 0*64, 1*64, 2*64,  3*64,  4*64,  5*64,  6*64,  7*64,
 		  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		16*64
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &diverboy_spritelayout, 0, 4*16 },
-		{ REGION_GFX2, 0, &diverboy_spritelayout, 0, 4*16 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, diverboy_spritelayout, 0, 4*16 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, diverboy_spritelayout, 0, 4*16 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -239,33 +243,33 @@ public class diverboy
 	
 	
 	
-	ROM_START( diverboy )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 ) /* 68000 Code */
-		ROM_LOAD16_BYTE( "db_01.bin", 0x00000, 0x20000, CRC(6aa11366) SHA1(714c8a4a64c18632825a734a76a2d1b031106d76) )
-		ROM_LOAD16_BYTE( "db_02.bin", 0x00001, 0x20000, CRC(45f8a673) SHA1(4eea1374cafacb4a2e0b623fcb802deb5fca1b3a) )
+	static RomLoadPtr rom_diverboy = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* 68000 Code */
+		ROM_LOAD16_BYTE( "db_01.bin", 0x00000, 0x20000, CRC(6aa11366);SHA1(714c8a4a64c18632825a734a76a2d1b031106d76) )
+		ROM_LOAD16_BYTE( "db_02.bin", 0x00001, 0x20000, CRC(45f8a673);SHA1(4eea1374cafacb4a2e0b623fcb802deb5fca1b3a) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* z80 */
-		ROM_LOAD( "db_05.bin", 0x00000, 0x8000, CRC(ffeb49ec) SHA1(911b13897ff4ace3940bfff4ab88584a93796c24) ) /* this part is empty */
-		ROM_CONTINUE( 0x0000, 0x8000 ) /* this part contains the code */
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* z80 */
+		ROM_LOAD( "db_05.bin", 0x00000, 0x8000, CRC(ffeb49ec);SHA1(911b13897ff4ace3940bfff4ab88584a93796c24) ) /* this part is empty */
+		ROM_CONTINUE( 0x0000, 0x8000 );/* this part contains the code */
 	
-		ROM_REGION( 0x100000, REGION_GFX1, ROMREGION_DISPOSE ) /* GFX */
-		ROM_LOAD16_BYTE( "db_08.bin", 0x000000, 0x80000, CRC(7bb96220) SHA1(671b3f218106e594b13ae5f2e680cf2e2cfc5501) )
-		ROM_LOAD16_BYTE( "db_09.bin", 0x000001, 0x80000, CRC(12b15476) SHA1(400a5b846f70567de137e0b95586dd9cfc27becb) )
+		ROM_REGION( 0x100000, REGION_GFX1, ROMREGION_DISPOSE );/* GFX */
+		ROM_LOAD16_BYTE( "db_08.bin", 0x000000, 0x80000, CRC(7bb96220);SHA1(671b3f218106e594b13ae5f2e680cf2e2cfc5501) )
+		ROM_LOAD16_BYTE( "db_09.bin", 0x000001, 0x80000, CRC(12b15476);SHA1(400a5b846f70567de137e0b95586dd9cfc27becb) )
 	
-		ROM_REGION( 0x180000, REGION_GFX2, ROMREGION_DISPOSE ) /* GFX */
-		ROM_LOAD16_BYTE( "db_07.bin", 0x000000, 0x20000, CRC(18485741) SHA1(a8edceaf34a98f2aa2bfada9d6e06fb82639a4e0) )
-		ROM_LOAD16_BYTE( "db_10.bin", 0x000001, 0x20000, CRC(c381d1cc) SHA1(88b97d8893c500951cfe8e7e7f0b547b36bbe2c0) )
-		ROM_LOAD16_BYTE( "db_06.bin", 0x040000, 0x20000, CRC(21b4e352) SHA1(a553de67e5dc751ea81ec4739724e0e46e8c5fab) )
-		ROM_LOAD16_BYTE( "db_11.bin", 0x040001, 0x20000, CRC(41d29c81) SHA1(448fd5c1b16159d03436b8bd71ffe871c8daf7fa) )
+		ROM_REGION( 0x180000, REGION_GFX2, ROMREGION_DISPOSE );/* GFX */
+		ROM_LOAD16_BYTE( "db_07.bin", 0x000000, 0x20000, CRC(18485741);SHA1(a8edceaf34a98f2aa2bfada9d6e06fb82639a4e0) )
+		ROM_LOAD16_BYTE( "db_10.bin", 0x000001, 0x20000, CRC(c381d1cc);SHA1(88b97d8893c500951cfe8e7e7f0b547b36bbe2c0) )
+		ROM_LOAD16_BYTE( "db_06.bin", 0x040000, 0x20000, CRC(21b4e352);SHA1(a553de67e5dc751ea81ec4739724e0e46e8c5fab) )
+		ROM_LOAD16_BYTE( "db_11.bin", 0x040001, 0x20000, CRC(41d29c81);SHA1(448fd5c1b16159d03436b8bd71ffe871c8daf7fa) )
 	
-		ROM_REGION( 0x80000, REGION_SOUND1, 0 ) /* Sound */
-		ROM_LOAD( "db_03.bin", 0x00000, 0x80000, CRC(50457505) SHA1(faf1c055ec56d2ed7f5e6993cc04d3317bf1c3cc) )
+		ROM_REGION( 0x80000, REGION_SOUND1, 0 );/* Sound */
+		ROM_LOAD( "db_03.bin", 0x00000, 0x80000, CRC(50457505);SHA1(faf1c055ec56d2ed7f5e6993cc04d3317bf1c3cc) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND2, 0 ) /* Sound */
-		ROM_LOAD( "db_04.bin", 0x00000, 0x20000, CRC(01b81da0) SHA1(914802f3206dc59a720af9d57eb2285bc8ba822b) ) /* same as tumble pop?, is this used? */
-	ROM_END
+		ROM_REGION( 0x20000, REGION_SOUND2, 0 );/* Sound */
+		ROM_LOAD( "db_04.bin", 0x00000, 0x20000, CRC(01b81da0);SHA1(914802f3206dc59a720af9d57eb2285bc8ba822b) ) /* same as tumble pop?, is this used? */
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX(1992, diverboy, 0, diverboy, diverboy, 0, ORIENTATION_FLIP_X, "Electronic Devices Italy", "Diver Boy", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_diverboy	   = new GameDriver("1992"	,"diverboy"	,"diverboy.java"	,rom_diverboy,null	,machine_driver_diverboy	,input_ports_diverboy	,null	,ORIENTATION_FLIP_X	,	"Electronic Devices Italy", "Diver Boy", GAME_IMPERFECT_SOUND )
 }

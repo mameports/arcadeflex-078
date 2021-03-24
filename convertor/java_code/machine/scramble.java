@@ -48,11 +48,11 @@ public class scramble
 	};
 	
 	
-	WRITE_HANDLER( galaxian_nmi_enable_w )
+	public static WriteHandlerPtr galaxian_nmi_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		TTL7474_preset_w(1, data);
 		TTL7474_update(1);
-	}
+	} };
 	
 	
 	static void interrupt_timer(int param)
@@ -71,7 +71,7 @@ public class scramble
 	}
 	
 	
-	static void machine_init_common( int line )
+	public static InitMachinePtr machine_init_common = new InitMachinePtr() { public void handler() ( int line )
 	{
 		irq_line = line;
 	
@@ -87,7 +87,7 @@ public class scramble
 	
 		/* start a timer to generate interrupts */
 		timer_set(cpu_getscanlinetime(0), 0, interrupt_timer);
-	}
+	} };
 	
 	MACHINE_INIT( galaxian )
 	{
@@ -124,35 +124,35 @@ public class scramble
 		machine_init_scramble();
 	}
 	
-	WRITE_HANDLER( galaxian_coin_lockout_w )
+	public static WriteHandlerPtr galaxian_coin_lockout_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_lockout_global_w(~data & 1);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( galaxian_coin_counter_w )
+	public static WriteHandlerPtr galaxian_coin_counter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(offset, data & 0x01);
-	}
+	} };
 	
-	WRITE_HANDLER( galaxian_coin_counter_1_w )
+	public static WriteHandlerPtr galaxian_coin_counter_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(1, data & 0x01);
-	}
+	} };
 	
-	WRITE_HANDLER( galaxian_coin_counter_2_w )
+	public static WriteHandlerPtr galaxian_coin_counter_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(2, data & 0x01);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( galaxian_leds_w )
+	public static WriteHandlerPtr galaxian_leds_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(offset,data & 1);
-	}
+	} };
 	
 	
-	static READ_HANDLER( scrambls_input_port_2_r )
+	public static ReadHandlerPtr scrambls_input_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		data8_t res;
 	
@@ -165,27 +165,27 @@ public class scramble
 		if (activecpu_get_pc() == 0x00e4) res &= 0x7f;
 	
 		return res;
-	}
+	} };
 	
-	static READ_HANDLER( ckongs_input_port_1_r )
+	public static ReadHandlerPtr ckongs_input_port_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(1) & 0xfc) | ((readinputport(2) & 0x06) >> 1);
-	}
+	} };
 	
-	static READ_HANDLER( ckongs_input_port_2_r )
+	public static ReadHandlerPtr ckongs_input_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(2) & 0xf9) | ((readinputport(1) & 0x03) << 1);
-	}
+	} };
 	
 	
 	static data8_t moonwar_port_select;
 	
-	static WRITE_HANDLER( moonwar_port_select_w )
+	public static WriteHandlerPtr moonwar_port_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		moonwar_port_select = data & 0x10;
-	}
+	} };
 	
-	static READ_HANDLER( moonwar_input_port_0_r )
+	public static ReadHandlerPtr moonwar_input_port_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		data8_t sign;
 		data8_t delta;
@@ -196,22 +196,22 @@ public class scramble
 		delta &= 0x0f;
 	
 		return ((readinputport(0) & 0xe0) | delta | sign );
-	}
+	} };
 	
 	
 	/* the coinage DIPs are spread accross two input ports */
-	static READ_HANDLER( stratgyx_input_port_2_r )
+	public static ReadHandlerPtr stratgyx_input_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(2) & ~0x06) | ((readinputport(4) << 1) & 0x06);
-	}
+	} };
 	
-	static READ_HANDLER( stratgyx_input_port_3_r )
+	public static ReadHandlerPtr stratgyx_input_port_3_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(3) & ~0x03) | ((readinputport(4) >> 2) & 0x03);
-	}
+	} };
 	
 	
-	static READ_HANDLER( darkplnt_input_port_1_r )
+	public static ReadHandlerPtr darkplnt_input_port_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		static data8_t remap[] = {0x03, 0x02, 0x00, 0x01, 0x21, 0x20, 0x22, 0x23,
 								  0x33, 0x32, 0x30, 0x31, 0x11, 0x10, 0x12, 0x13,
@@ -226,16 +226,16 @@ public class scramble
 		val = readinputport(1);
 	
 		return ((val & 0x03) | (remap[val >> 2] << 2));
-	}
+	} };
 	
 	
 	
-	static WRITE_HANDLER( scramble_protection_w )
+	public static WriteHandlerPtr scramble_protection_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* nothing to do yet */
-	}
+	} };
 	
-	static READ_HANDLER( scramble_protection_r )
+	public static ReadHandlerPtr scramble_protection_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (activecpu_get_pc())
 		{
@@ -251,17 +251,17 @@ public class scramble
 			logerror("%04x: read protection\n",activecpu_get_pc());
 			return 0;
 		}
-	}
+	} };
 	
-	static READ_HANDLER( scrambls_protection_r )
+	public static ReadHandlerPtr scrambls_protection_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		logerror("%04x: read protection\n",activecpu_get_pc());
 	
 		return 0x6f;
-	}
+	} };
 	
 	
-	READ_HANDLER( scramblb_protection_1_r )
+	public static ReadHandlerPtr scramblb_protection_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (activecpu_get_pc())
 		{
@@ -271,9 +271,9 @@ public class scramble
 			logerror("%04x: read protection 1\n",activecpu_get_pc());
 			return 0;
 		}
-	}
+	} };
 	
-	READ_HANDLER( scramblb_protection_2_r )
+	public static ReadHandlerPtr scramblb_protection_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (activecpu_get_pc())
 		{
@@ -282,10 +282,10 @@ public class scramble
 			logerror("%04x: read protection 2\n",activecpu_get_pc());
 			return 0;
 		}
-	}
+	} };
 	
 	
-	READ_HANDLER( jumpbug_protection_r )
+	public static ReadHandlerPtr jumpbug_protection_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (offset)
 		{
@@ -299,43 +299,43 @@ public class scramble
 		}
 	
 		return 0;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( theend_coin_counter_w )
+	public static WriteHandlerPtr theend_coin_counter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		coin_counter_w(0, data & 0x80);
-	}
+	} };
 	
 	
-	static READ_HANDLER( mariner_protection_1_r )
+	public static ReadHandlerPtr mariner_protection_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 7;
-	}
+	} };
 	
-	static READ_HANDLER( mariner_protection_2_r )
+	public static ReadHandlerPtr mariner_protection_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 3;
-	}
+	} };
 	
 	
-	READ_HANDLER( triplep_pip_r )
+	public static ReadHandlerPtr triplep_pip_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		logerror("PC %04x: triplep read port 2\n",activecpu_get_pc());
 		if (activecpu_get_pc() == 0x015a) return 0xff;
 		else if (activecpu_get_pc() == 0x0886) return 0x05;
 		else return 0;
-	}
+	} };
 	
-	READ_HANDLER( triplep_pap_r )
+	public static ReadHandlerPtr triplep_pap_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		logerror("PC %04x: triplep read port 3\n",activecpu_get_pc());
 		if (activecpu_get_pc() == 0x015d) return 0x04;
 		else return 0;
-	}
+	} };
 	
 	
-	static READ_HANDLER( checkmaj_protection_r )
+	public static ReadHandlerPtr checkmaj_protection_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (activecpu_get_pc())
 		{
@@ -350,11 +350,11 @@ public class scramble
 		}
 	
 		return 0;
-	}
+	} };
 	
 	
 	/* Zig Zag can swap ROMs 2 and 3 as a form of copy protection */
-	WRITE_HANDLER( zigzag_sillyprotection_w )
+	public static WriteHandlerPtr zigzag_sillyprotection_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data8_t *RAM = memory_region(REGION_CPU1);
 	
@@ -370,74 +370,74 @@ public class scramble
 			cpu_setbank(1,&RAM[0x2000]);
 			cpu_setbank(2,&RAM[0x3000]);
 		}
-	}
+	} };
 	
 	
-	static READ_HANDLER( dingo_3000_r )
+	public static ReadHandlerPtr dingo_3000_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 0xaa;
-	}
+	} };
 	
-	static READ_HANDLER( dingo_3035_r )
+	public static ReadHandlerPtr dingo_3035_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return 0x8c;
-	}
+	} };
 	
 	
 	static int kingball_speech_dip;
 	
 	/* Hack? If $b003 is high, we'll check our "fake" speech dipswitch (marked as SLAM) */
-	static READ_HANDLER( kingball_IN0_r )
+	public static ReadHandlerPtr kingball_IN0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (kingball_speech_dip)
 			return (readinputport(0) & ~0x40) | ((readinputport(3) & 0x01) << 6);
 		else
 			return readinputport(0);
-	}
+	} };
 	
-	static READ_HANDLER( kingball_IN1_r )
+	public static ReadHandlerPtr kingball_IN1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* bit 5 is the NOISE line from the sound circuit.  The code just verifies
 		   that it's working, doesn't actually use return value, so we can just use
 		   rand() */
 	
 		return (readinputport(1) & ~0x20) | (rand() & 0x20);
-	}
+	} };
 	
-	WRITE_HANDLER( kingball_speech_dip_w )
+	public static WriteHandlerPtr kingball_speech_dip_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kingball_speech_dip = data;
-	}
+	} };
 	
 	static int kingball_sound;
 	
-	WRITE_HANDLER( kingball_sound1_w )
+	public static WriteHandlerPtr kingball_sound1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kingball_sound = (kingball_sound & ~0x01) | data;
-	}
+	} };
 	
-	WRITE_HANDLER( kingball_sound2_w )
+	public static WriteHandlerPtr kingball_sound2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kingball_sound = (kingball_sound & ~0x02) | (data << 1);
 		soundlatch_w (0, kingball_sound | 0xf0);
-	}
+	} };
 	
 	
 	
-	static READ_HANDLER( azurian_IN1_r )
+	public static ReadHandlerPtr azurian_IN1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(1) & ~0x40) | ((readinputport(3) & 0x01) << 6);
-	}
+	} };
 	
-	static READ_HANDLER( azurian_IN2_r )
+	public static ReadHandlerPtr azurian_IN2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(2) & ~0x04) | ((readinputport(3) & 0x02) << 1);
-	}
+	} };
 	
 	
 	static int _4in1_bank;
 	
-	WRITE_HANDLER( _4in1_bank_w )
+	public static WriteHandlerPtr _4in1_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* games are banked at 0x0000 - 0x3fff */
 		offs_t bankaddress;
@@ -449,17 +449,17 @@ public class scramble
 		cpu_setbank(1, &RAM[bankaddress]);
 	
 		galaxian_gfxbank_w(0, _4in1_bank);
-	}
+	} };
 	
-	READ_HANDLER( _4in1_input_port_1_r )
+	public static ReadHandlerPtr _4in1_input_port_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(1) & ~0xc0) | (readinputport(3+_4in1_bank) & 0xc0);
-	}
+	} };
 	
-	READ_HANDLER( _4in1_input_port_2_r )
+	public static ReadHandlerPtr _4in1_input_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(2) & 0x04) | (readinputport(3+_4in1_bank) & ~0xc4);
-	}
+	} };
 	
 	
 	static int gmgalax_selected_game;
@@ -478,20 +478,20 @@ public class scramble
 		galaxian_gfxbank_w(0, gmgalax_selected_game);
 	}
 	
-	READ_HANDLER( gmgalax_input_port_0_r )
+	public static ReadHandlerPtr gmgalax_input_port_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(gmgalax_selected_game ? 3 : 0);
-	}
+	} };
 	
-	READ_HANDLER( gmgalax_input_port_1_r )
+	public static ReadHandlerPtr gmgalax_input_port_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(gmgalax_selected_game ? 4 : 1);
-	}
+	} };
 	
-	READ_HANDLER( gmgalax_input_port_2_r )
+	public static ReadHandlerPtr gmgalax_input_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(gmgalax_selected_game ? 5 : 2);
-	}
+	} };
 	
 	
 	static void cavelon_banksw(void)
@@ -516,7 +516,7 @@ public class scramble
 		}
 	}
 	
-	static READ_HANDLER( cavelon_banksw_r )
+	public static ReadHandlerPtr cavelon_banksw_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		cavelon_banksw();
 	
@@ -526,9 +526,9 @@ public class scramble
 			return ppi8255_1_r(offset - 0x0200);
 	
 		return 0xff;
-	}
+	} };
 	
-	static WRITE_HANDLER( cavelon_banksw_w )
+	public static WriteHandlerPtr cavelon_banksw_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cavelon_banksw();
 	
@@ -536,18 +536,18 @@ public class scramble
 			ppi8255_0_w(offset - 0x0100, data);
 		else if ((offset >= 0x0200) && (offset <= 0x0203))
 			ppi8255_1_w(offset - 0x0200, data);
-	}
+	} };
 	
 	
-	READ_HANDLER( hunchbks_mirror_r )
+	public static ReadHandlerPtr hunchbks_mirror_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return cpu_readmem16(0x1000+offset);
-	}
+	} };
 	
-	WRITE_HANDLER( hunchbks_mirror_w )
+	public static WriteHandlerPtr hunchbks_mirror_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_writemem16(0x1000+offset,data);
-	}
+	} };
 	
 	
 	READ_HANDLER(frogger_ppi8255_0_r)

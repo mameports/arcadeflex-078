@@ -123,8 +123,8 @@ public class warpwarp
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs],
+						videoram.read(offs),
+						colorram.read(offs),
 						0,0,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -166,9 +166,9 @@ public class warpwarp
 	}
 	
 	
-	WRITE_HANDLER( warpwarp_flip_screen_w )
+	public static WriteHandlerPtr warpwarp_flip_screen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 1);
-	}
+	} };
 	
 }

@@ -9,23 +9,23 @@ public class higemaru
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( higemaru_videoram_w )
+	public static WriteHandlerPtr higemaru_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( higemaru_colorram_w )
+	public static WriteHandlerPtr higemaru_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -76,7 +76,7 @@ public class higemaru
 			COLOR(1,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( higemaru_c800_w )
+	public static WriteHandlerPtr higemaru_c800_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data & 0x7c) logerror("c800 = %02x\n",data);
 	
@@ -90,12 +90,12 @@ public class higemaru
 			flip_screen_set(data & 0x80);
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 0x80) << 1);
-		int color = colorram[tile_index] & 0x1f;
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x80) << 1);
+		int color = colorram.read(tile_index)& 0x1f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -105,7 +105,7 @@ public class higemaru
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -119,12 +119,12 @@ public class higemaru
 		{
 			int code,col,sx,sy,flipx,flipy;
 	
-			code = spriteram[offs] & 0x7f;
-			col = spriteram[offs + 4] & 0x0f;
-			sx = spriteram[offs + 12];
-			sy = spriteram[offs + 8];
-			flipx = spriteram[offs + 4] & 0x10;
-			flipy = spriteram[offs + 4] & 0x20;
+			code = spriteram.read(offs)& 0x7f;
+			col = spriteram.read(offs + 4)& 0x0f;
+			sx = spriteram.read(offs + 12);
+			sy = spriteram.read(offs + 8);
+			flipx = spriteram.read(offs + 4)& 0x10;
+			flipy = spriteram.read(offs + 4)& 0x20;
 			if (flip_screen)
 			{
 				sx = 240 - sx;

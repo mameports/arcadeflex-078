@@ -280,7 +280,7 @@ public class idectrl
 		const struct hard_disk_info *hdinfo;
 	
 		/* NULL interface is immediate failure */
-		if (!intf)
+		if (intf == 0)
 			return 1;
 	
 		/* reset the IDE state */
@@ -1246,8 +1246,7 @@ public class idectrl
 				LOGPRINT(("IDE unknown command (%02X)\n", command));
 	#ifdef MAME_DEBUG
 	{
-		extern int debug_key_pressed;
-		debug_key_pressed = 1;
+			debug_key_pressed = 1;
 	}
 	#endif
 				break;

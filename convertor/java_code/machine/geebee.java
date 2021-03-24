@@ -20,7 +20,6 @@ public class geebee
 {
 	
 	/* from sndhrdw/geebee.c */
-	WRITE_HANDLER( geebee_sound_w );
 	
 	/* globals */
 	int geebee_ball_h;
@@ -31,10 +30,9 @@ public class geebee
 	
 	#ifdef MAME_DEBUG
 	extern char geebee_msg[32+1];
-	extern int geebee_cnt;
 	#endif
 	
-	READ_HANDLER( geebee_in_r )
+	public static ReadHandlerPtr geebee_in_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int data = readinputport(offset & 3);
 		if ((offset & 3) == 2)	/* combine with Bonus Life settings ? */
@@ -46,9 +44,9 @@ public class geebee
 		}
 		logerror("in_r %d $%02X\n", offset & 3, data);
 		return data;
-	}
+	} };
 	
-	READ_HANDLER( navalone_in_r )
+	public static ReadHandlerPtr navalone_in_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	    int data = readinputport(offset & 3);
 		if ((offset & 3) == 3)
@@ -60,9 +58,9 @@ public class geebee
 		}
 	    logerror("in_r %d $%02X\n", offset & 3, data);
 	    return data;
-	}
+	} };
 	
-	WRITE_HANDLER( geebee_out6_w )
+	public static WriteHandlerPtr geebee_out6_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    switch (offset & 3)
 	    {
@@ -86,9 +84,9 @@ public class geebee
 			geebee_sound_w(offset,data);
 	        break;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( geebee_out7_w )
+	public static WriteHandlerPtr geebee_out7_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 7)
 		{
@@ -118,11 +116,11 @@ public class geebee
 		case 7:
 			logerror("out7_w:7 inv      $%02X\n", data);
 			if( geebee_inv != (data & 1) )
-				memset(dirtybuffer, 1, videoram_size);
+				memset(dirtybuffer, 1, videoram_size[0]);
 			geebee_inv = data & 1;
 			break;
 		}
-	}
+	} };
 	
 	
 }

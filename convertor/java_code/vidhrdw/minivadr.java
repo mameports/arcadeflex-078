@@ -36,14 +36,14 @@ public class minivadr
 		Draw Pixel.
 	
 	*******************************************************************/
-	WRITE_HANDLER( minivadr_videoram_w )
+	public static WriteHandlerPtr minivadr_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		int x, y;
 		int color;
 	
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		x = (offset % 32) * 8;
 		y = (offset / 32);
@@ -60,7 +60,7 @@ public class minivadr
 				plot_pixel(tmpbitmap, x + (7 - i), y, color);
 			}
 		}
-	}
+	} };
 	
 	
 	VIDEO_UPDATE( minivadr )
@@ -72,7 +72,7 @@ public class minivadr
 			/* redraw bitmap */
 	
 			for (offs = 0; offs < videoram_size; offs++)
-				minivadr_videoram_w(offs,videoram[offs]);
+				minivadr_videoram_w(offs,videoram.read(offs));
 		}
 		copybitmap(bitmap,tmpbitmap,0,0,0,0,&Machine->visible_area,TRANSPARENCY_NONE,0);
 	}

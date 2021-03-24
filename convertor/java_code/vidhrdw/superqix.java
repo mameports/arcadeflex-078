@@ -24,30 +24,30 @@ public class superqix
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( superqix_videoram_w )
+	public static WriteHandlerPtr superqix_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( superqix_colorram_w )
+	public static WriteHandlerPtr superqix_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( superqix_bitmapram_r )
+	public static ReadHandlerPtr superqix_bitmapram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return superqix_bitmapram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( superqix_bitmapram_w )
+	public static WriteHandlerPtr superqix_bitmapram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data != superqix_bitmapram[offset])
 		{
@@ -61,14 +61,14 @@ public class superqix
 			if(y<sqix_miny) sqix_miny=y;
 			if(y>sqix_maxy) sqix_maxy=y;
 		}
-	}
+	} };
 	
-	READ_HANDLER( superqix_bitmapram2_r )
+	public static ReadHandlerPtr superqix_bitmapram2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return superqix_bitmapram2[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( superqix_bitmapram2_w )
+	public static WriteHandlerPtr superqix_bitmapram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data != superqix_bitmapram2[offset])
 		{
@@ -82,9 +82,9 @@ public class superqix
 			if(y<sqix_miny) sqix_miny=y;
 			if(y>sqix_maxy) sqix_maxy=y;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( superqix_0410_w )
+	public static WriteHandlerPtr superqix_0410_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		UINT8 *RAM = memory_region(REGION_CPU1);
@@ -112,18 +112,18 @@ public class superqix
 		/* bits 4-5 control ROM bank */
 		bankaddress = 0x10000 + ((data & 0x30) >> 4) * 0x4000;
 		cpu_setbank(1,&RAM[bankaddress]);
-	}
+	} };
 	
-	WRITE_HANDLER( superqix_flipscreen_w )
+	public static WriteHandlerPtr superqix_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(!data);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
+		int attr = colorram.read(tile_index);
 		int bank = (attr & 0x04) ? 0 : (1 + gfxbank);
-		int code = videoram[tile_index] + 256 * (attr & 0x03);
+		int code = videoram.read(tile_index)+ 256 * (attr & 0x03);
 		int color = (attr & 0xf0) >> 4;
 	
 		tile_info.priority = (attr & 0x08) >> 3;
@@ -163,7 +163,7 @@ public class superqix
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 		
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(bg_tilemap, 0);
@@ -239,13 +239,13 @@ public class superqix
 	
 		for (offs = 0; offs < spriteram_size; offs += 4)
 		{
-			int attr = spriteram[offs + 3];
-			int code = spriteram[offs] + 256 * (attr & 0x01);
+			int attr = spriteram.read(offs + 3);
+			int code = spriteram.read(offs)+ 256 * (attr & 0x01);
 			int color = (attr & 0xf0) >> 4;
 			int flipx = attr & 0x04;
 			int flipy = attr & 0x08;
-			int sx = spriteram[offs + 1];
-			int sy = spriteram[offs + 2];
+			int sx = spriteram.read(offs + 1);
+			int sy = spriteram.read(offs + 2);
 	
 			if (flip_screen)
 			{

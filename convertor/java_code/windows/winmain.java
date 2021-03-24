@@ -81,14 +81,11 @@ public class winmain
 	static LONG CALLBACK exception_filter(struct _EXCEPTION_POINTERS *info);
 	static const char *lookup_symbol(UINT32 address);
 	static int get_code_base_size(UINT32 *base, UINT32 *size);
-	static void parse_map_file(void);
-	
+	static 
 	#if ENABLE_PROFILER
 	static void output_symbol_list(FILE *f);
 	static void increment_bucket(UINT32 addr);
-	static void start_profiler(void);
-	static void stop_profiler(void);
-	#endif
+	static static #endif
 	
 	
 	
@@ -239,8 +236,7 @@ public class winmain
 	
 	int osd_init(void)
 	{
-		extern int win_init_input(void);
-		int result;
+			int result;
 	
 		result = win_init_window();
 		if (result == 0)
@@ -256,8 +252,7 @@ public class winmain
 	
 	void osd_exit(void)
 	{
-		extern void win_shutdown_input(void);
-		win_shutdown_input();
+			win_shutdown_input();
 		osd_set_leds(0);
 	}
 	
@@ -496,7 +491,7 @@ public class winmain
 	
 		// open the map file
 		map = fopen(mapfile_name, "r");
-		if (!map)
+		if (map == 0)
 			return;
 	
 		// parse out the various symbols into map entries
@@ -639,7 +634,7 @@ public class winmain
 	
 		/* start the thread */
 		profiler_thread = CreateThread(NULL, 0, profiler_thread_entry, (LPVOID)currentThread, 0, &profiler_thread_id);
-		if (!profiler_thread)
+		if (profiler_thread == 0)
 			fprintf(stderr, "Failed to create profiler thread\n");
 	
 		/* max out the priority */

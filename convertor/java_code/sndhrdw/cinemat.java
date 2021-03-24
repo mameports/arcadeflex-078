@@ -756,7 +756,7 @@ public class cinemat
 		}
 	}
 	
-	static READ_HANDLER( demon_sound_r )
+	public static ReadHandlerPtr demon_sound_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int ret;
 	
@@ -770,19 +770,19 @@ public class cinemat
 		//logerror("Reading Sound Latch %04X = %02X\n", activecpu_get_pc(), ret);
 	
 		return ret;
-	}
+	} };
 	
 	
-	struct AY8910interface demon_ay8910_interface =
-	{
+	static AY8910interface demon_ay8910_interface = new AY8910interface
+	(
 		3,	/* 3 chips */
 		3579545,	/* 3.579545 MHz */
-		{ 25, 25, 25 },
-		{ demon_sound_r },
-		{ 0 },	/* there are sound enable bits in here, but don't know what is what */
-		{ 0 },
+		new int[] { 25, 25, 25 },
+		new ReadHandlerPtr[] { demon_sound_r },
+		new ReadHandlerPtr[] { 0 },	/* there are sound enable bits in here, but don't know what is what */
+		new WriteHandlerPtr[] { 0 },
 		{ 0 }
-	};
+	);
 	
 	
 	static void ctc_interrupt(int state)

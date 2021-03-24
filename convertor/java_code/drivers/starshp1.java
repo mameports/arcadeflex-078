@@ -23,29 +23,11 @@ public class starshp1
 	extern unsigned char *starshp1_vpos_ram;
 	extern unsigned char *starshp1_obj_ram;
 	
-	extern int starshp1_ship_explode;
-	extern int starshp1_ship_picture;
-	extern int starshp1_ship_hoffset;
-	extern int starshp1_ship_voffset;
-	extern int starshp1_ship_size;
 	
-	extern int starshp1_circle_hpos;
-	extern int starshp1_circle_vpos;
-	extern int starshp1_circle_size;
-	extern int starshp1_circle_mod;
-	extern int starshp1_circle_kill;
 	
-	extern int starshp1_phasor;
-	extern int starshp1_collision_latch;
-	extern int starshp1_starfield_kill;
-	extern int starshp1_mux;
 	
-	extern READ_HANDLER( starshp1_rng_r );
-	
-	extern WRITE_HANDLER( starshp1_sspic_w );
-	extern WRITE_HANDLER( starshp1_ssadd_w );
-	extern WRITE_HANDLER( starshp1_playfield_w );
-	
+	extern 
+	extern extern extern 
 	extern VIDEO_UPDATE( starshp1 );
 	extern VIDEO_EOF( starshp1 );
 	extern VIDEO_START( starshp1 );
@@ -92,7 +74,7 @@ public class starshp1
 	}
 	
 	
-	static WRITE_HANDLER( starshp1_audio_w )
+	public static WriteHandlerPtr starshp1_audio_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data &= 1;
 	
@@ -123,16 +105,16 @@ public class starshp1
 	
 		coin_lockout_w(0, !starshp1_attract);
 		coin_lockout_w(1, !starshp1_attract);
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( starshp1_collision_reset_w )
+	public static WriteHandlerPtr starshp1_collision_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		starshp1_collision_latch = 0;
-	}
+	} };
 	
 	
-	static READ_HANDLER( starshp1_port_1_r )
+	public static ReadHandlerPtr starshp1_port_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int val = 0;
 	
@@ -153,28 +135,28 @@ public class starshp1
 		}
 	
 		return (val & 0x3f) | readinputport(1);
-	}
+	} };
 	
 	
-	static READ_HANDLER( starshp1_port_2_r )
+	public static ReadHandlerPtr starshp1_port_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(2) | (starshp1_collision_latch & 0x0f);
-	}
+	} };
 	
 	
-	static READ_HANDLER( starshp1_zeropage_r )
+	public static ReadHandlerPtr starshp1_zeropage_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return memory_region(REGION_CPU1)[offset & 0xff];
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( starshp1_analog_in_w )
+	public static WriteHandlerPtr starshp1_analog_in_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		starshp1_analog_in_select = offset & 3;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( starshp1_analog_out_w )
+	public static WriteHandlerPtr starshp1_analog_out_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 7)
 		{
@@ -200,10 +182,10 @@ public class starshp1
 			starshp1_circle_size = data;
 			break;
 		}
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( starshp1_misc_w )
+	public static WriteHandlerPtr starshp1_misc_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data &= 1;
 	
@@ -234,127 +216,131 @@ public class starshp1
 			set_led_status(0, !data);
 			break;
 		}
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( starshp1_zeropage_w )
+	public static WriteHandlerPtr starshp1_zeropage_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		memory_region(REGION_CPU1)[offset & 0xff] = data;
-	}
+	} };
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x00ff, MRA_RAM },
-		{ 0x0100, 0x01ff, starshp1_zeropage_r },
-		{ 0x2c00, 0x3fff, MRA_ROM },
-		{ 0xa000, 0xa000, input_port_0_r },
-		{ 0xb000, 0xb000, starshp1_port_1_r },
-		{ 0xc400, 0xc400, starshp1_port_2_r },
-		{ 0xd800, 0xd800, starshp1_rng_r },
-		{ 0xf000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x00ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x0100, 0x01ff, starshp1_zeropage_r ),
+		new Memory_ReadAddress( 0x2c00, 0x3fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xa000, 0xa000, input_port_0_r ),
+		new Memory_ReadAddress( 0xb000, 0xb000, starshp1_port_1_r ),
+		new Memory_ReadAddress( 0xc400, 0xc400, starshp1_port_2_r ),
+		new Memory_ReadAddress( 0xd800, 0xd800, starshp1_rng_r ),
+		new Memory_ReadAddress( 0xf000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x00ff, MWA_RAM },
-		{ 0x0100, 0x01ff, starshp1_zeropage_w },
-		{ 0x2c00, 0x3fff, MWA_ROM },
-		{ 0xc300, 0xc3ff, starshp1_sspic_w }, /* spaceship picture */
-		{ 0xc400, 0xc4ff, starshp1_ssadd_w }, /* spaceship address */
-		{ 0xc800, 0xc9ff, starshp1_playfield_w, &starshp1_playfield_ram },
-		{ 0xcc00, 0xcc0f, MWA_RAM, &starshp1_hpos_ram },
-		{ 0xd000, 0xd00f, MWA_RAM, &starshp1_vpos_ram },
-		{ 0xd400, 0xd40f, MWA_RAM, &starshp1_obj_ram },
-		{ 0xd800, 0xd80f, starshp1_collision_reset_w },
-		{ 0xdc00, 0xdc0f, starshp1_misc_w },
-		{ 0xdd00, 0xdd0f, starshp1_analog_in_w },
-		{ 0xde00, 0xde0f, starshp1_audio_w },
-		{ 0xdf00, 0xdf0f, starshp1_analog_out_w },
-		{ 0xf000, 0xffff, MWA_ROM },
-	MEMORY_END
-	
-	
-	INPUT_PORTS_START( starshp1 )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* SWA1? */
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_DIPNAME( 0x20, 0x20, "Extended Play" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_TOGGLE )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
-	
-		PORT_START
-		PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_UNUSED ) /* analog in */
-		PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
-	
-		PORT_START
-		PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_UNUSED ) /* collision latch */
-		PORT_DIPNAME( 0x70, 0x20, DEF_STR( Coinage ))
-		PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ))
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_1C ))
-		PORT_DIPSETTING(    0x40, DEF_STR( 1C_2C ))
-		PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_UNUSED ) /* ground */
-	
-		PORT_START
-		PORT_DIPNAME( 0x3f, 0x20, "Play Time" ) /* potentiometer */
-		PORT_DIPSETTING(    0x00, "60 Seconds" )
-		PORT_DIPSETTING(    0x20, "90 Seconds" )
-		PORT_DIPSETTING(    0x3f, "120 Seconds" )
-	
-		PORT_START
-		PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_Y | IPF_REVERSE, 10, 10, 0, 63 )
-	
-		PORT_START
-		PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_X | IPF_REVERSE, 10, 10, 0, 63 )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x00ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x0100, 0x01ff, starshp1_zeropage_w ),
+		new Memory_WriteAddress( 0x2c00, 0x3fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc300, 0xc3ff, starshp1_sspic_w ), /* spaceship picture */
+		new Memory_WriteAddress( 0xc400, 0xc4ff, starshp1_ssadd_w ), /* spaceship address */
+		new Memory_WriteAddress( 0xc800, 0xc9ff, starshp1_playfield_w, starshp1_playfield_ram ),
+		new Memory_WriteAddress( 0xcc00, 0xcc0f, MWA_RAM, starshp1_hpos_ram ),
+		new Memory_WriteAddress( 0xd000, 0xd00f, MWA_RAM, starshp1_vpos_ram ),
+		new Memory_WriteAddress( 0xd400, 0xd40f, MWA_RAM, starshp1_obj_ram ),
+		new Memory_WriteAddress( 0xd800, 0xd80f, starshp1_collision_reset_w ),
+		new Memory_WriteAddress( 0xdc00, 0xdc0f, starshp1_misc_w ),
+		new Memory_WriteAddress( 0xdd00, 0xdd0f, starshp1_analog_in_w ),
+		new Memory_WriteAddress( 0xde00, 0xde0f, starshp1_audio_w ),
+		new Memory_WriteAddress( 0xdf00, 0xdf0f, starshp1_analog_out_w ),
+		new Memory_WriteAddress( 0xf000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static struct GfxLayout tilelayout =
-	{
+	static InputPortPtr input_ports_starshp1 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );/* SWA1? */
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_DIPNAME( 0x20, 0x20, "Extended Play" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Yes") );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_TOGGLE );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 );
+	
+		PORT_START(); 
+		PORT_BIT( 0x3f, IP_ACTIVE_HIGH, IPT_UNUSED );/* analog in */
+		PORT_SERVICE( 0x40, IP_ACTIVE_LOW );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK );
+	
+		PORT_START(); 
+		PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_UNUSED );/* collision latch */
+		PORT_DIPNAME( 0x70, 0x20, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "1C_2C") );
+		PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_UNUSED );/* ground */
+	
+		PORT_START(); 
+		PORT_DIPNAME( 0x3f, 0x20, "Play Time" );/* potentiometer */
+		PORT_DIPSETTING(    0x00, "60 Seconds" );
+		PORT_DIPSETTING(    0x20, "90 Seconds" );
+		PORT_DIPSETTING(    0x3f, "120 Seconds" );
+	
+		PORT_START(); 
+		PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_Y | IPF_REVERSE, 10, 10, 0, 63 );
+	
+		PORT_START(); 
+		PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_X | IPF_REVERSE, 10, 10, 0, 63 );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		16, 8,  /* 16x8 tiles      */
 		64,     /* 64 tiles        */
 		1,      /* 1 bit per pixel */
-		{ 0 },
-		{
+		new int[] { 0 },
+		new int[] {
 			0x204, 0x204, 0x205, 0x205, 0x206, 0x206, 0x207, 0x207,
 			0x004, 0x004, 0x005, 0x005, 0x006, 0x006, 0x007, 0x007
 		},
-		{
+		new int[] {
 			0x0000, 0x0400, 0x0800, 0x0c00,
 			0x1000, 0x1400, 0x1800, 0x1c00
 		},
 		8	    /* step */
-	};
+	);
 	
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16, 8,  /* 16x8 sprites    */
 		8,      /* 8 sprites       */
 		1,      /* 1 bit per pixel */
-		{ 0 },
-		{
+		new int[] { 0 },
+		new int[] {
 			0x04, 0x05, 0x06, 0x07, 0x0c, 0x0d, 0x0e, 0x0f,
 			0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f
 		},
-		{
+		new int[] {
 			0x00, 0x20, 0x40, 0x60, 0x80, 0xa0, 0xc0, 0xe0
 		},
 		0x100	/* step */
-	};
+	);
 	
 	
-	static struct GfxLayout shiplayout =
-	{
+	static GfxLayout shiplayout = new GfxLayout
+	(
 		64, 16, /* 64x16 sprites    */
 		4,      /* 4 sprites        */
 		2,      /* 2 bits per pixel */
-		{ 0, 0x2000 },
-		{
+		new int[] { 0, 0x2000 },
+		new int[] {
 			0x04, 0x05, 0x06, 0x07, 0x0c, 0x0d, 0x0e, 0x0f,
 			0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f,
 			0x24, 0x25, 0x26, 0x27, 0x2c, 0x2d, 0x2e, 0x2f,
@@ -364,20 +350,20 @@ public class starshp1
 			0x64, 0x65, 0x66, 0x67, 0x6c, 0x6d, 0x6e, 0x6f,
 			0x74, 0x75, 0x76, 0x77, 0x7c, 0x7d, 0x7e, 0x7f
 		},
-		{
+		new int[] {
 			0x000, 0x080, 0x100, 0x180, 0x200, 0x280, 0x300, 0x380,
 			0x400, 0x480, 0x500, 0x580, 0x600, 0x680, 0x700, 0x780
 		},
 		0x800	/* step */
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tilelayout,   0, 1 },
-		{ REGION_GFX2, 0, &spritelayout, 2, 2 },
-		{ REGION_GFX3, 0, &shiplayout,   6, 2 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, tilelayout,   0, 1 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, spritelayout, 2, 2 ),
+		new GfxDecodeInfo( REGION_GFX3, 0, shiplayout,   6, 2 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -416,69 +402,69 @@ public class starshp1
 	
 	***************************************************************************/
 	
-	ROM_START( starshp1 )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD_NIB_HIGH( "7529-02.c2", 0x2c00, 0x0400, CRC(f191c328) SHA1(5d44be879bcf16a142a69e4f1501533e02720fe5) )
-		ROM_LOAD_NIB_LOW ( "7528-02.c1", 0x2c00, 0x0400, CRC(605ed4df) SHA1(b0d892bcd08b611d2c01ab23b491c1d9db498e7b) )
-		ROM_LOAD(          "7530-02.h3", 0x3000, 0x0800, CRC(4b2d466c) SHA1(2104c4d163adbf53f9853334868622752ccb01b8) )
-		ROM_RELOAD(                      0xf000, 0x0800 )
-		ROM_LOAD(          "7531-02.e3", 0x3800, 0x0800, CRC(b35b2c0e) SHA1(e52240cdfbba3dc380ba63f24cfc07b44feafd53) )
-		ROM_RELOAD(                      0xf800, 0x0800 )
+	static RomLoadPtr rom_starshp1 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD_NIB_HIGH( "7529-02.c2", 0x2c00, 0x0400, CRC(f191c328);SHA1(5d44be879bcf16a142a69e4f1501533e02720fe5) )
+		ROM_LOAD_NIB_LOW ( "7528-02.c1", 0x2c00, 0x0400, CRC(605ed4df);SHA1(b0d892bcd08b611d2c01ab23b491c1d9db498e7b) )
+		ROM_LOAD(          "7530-02.h3", 0x3000, 0x0800, CRC(4b2d466c);SHA1(2104c4d163adbf53f9853334868622752ccb01b8) )
+		ROM_RELOAD(                      0xf000, 0x0800 );
+		ROM_LOAD(          "7531-02.e3", 0x3800, 0x0800, CRC(b35b2c0e);SHA1(e52240cdfbba3dc380ba63f24cfc07b44feafd53) )
+		ROM_RELOAD(                      0xf800, 0x0800 );
 	
-		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "7513-01.n7",	 0x0000, 0x0400, CRC(8fb0045d) SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
+		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "7513-01.n7",	 0x0000, 0x0400, CRC(8fb0045d);SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
 	
-		ROM_REGION( 0x0100, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "7515-01.j5",	 0x0000, 0x0100, CRC(fcbcbf2e) SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
+		ROM_REGION( 0x0100, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "7515-01.j5",	 0x0000, 0x0100, CRC(fcbcbf2e);SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
 	
-		ROM_REGION( 0x0800, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "7517-01.r1",	 0x0000, 0x0400, CRC(1531f85f) SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
-		ROM_LOAD( "7516-01.p1",	 0x0400, 0x0400, CRC(64fbfe4c) SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
+		ROM_REGION( 0x0800, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "7517-01.r1",	 0x0000, 0x0400, CRC(1531f85f);SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
+		ROM_LOAD( "7516-01.p1",	 0x0400, 0x0400, CRC(64fbfe4c);SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
 	
-		ROM_REGION( 0x0220, REGION_PROMS, ROMREGION_DISPOSE )
-		ROM_LOAD( "7518-01.r10", 0x0000, 0x0100, CRC(80877f7e) SHA1(8b28f48936a4247c583ca6713bfbaf4772c7a4f5) ) /* video output */
-		ROM_LOAD( "7514-01.n9",  0x0100, 0x0100, CRC(3610b453) SHA1(9e33ee04f22a9174c29fafb8e71781fa330a7a08) ) /* sync */
-		ROM_LOAD( "7519-01.b5",  0x0200, 0x0020, CRC(23b9cd3c) SHA1(220f9f73d86cdcf1b390c52c591750a73402af50) ) /* address */
-	ROM_END
+		ROM_REGION( 0x0220, REGION_PROMS, ROMREGION_DISPOSE );
+		ROM_LOAD( "7518-01.r10", 0x0000, 0x0100, CRC(80877f7e);SHA1(8b28f48936a4247c583ca6713bfbaf4772c7a4f5) ) /* video output */
+		ROM_LOAD( "7514-01.n9",  0x0100, 0x0100, CRC(3610b453);SHA1(9e33ee04f22a9174c29fafb8e71781fa330a7a08) ) /* sync */
+		ROM_LOAD( "7519-01.b5",  0x0200, 0x0020, CRC(23b9cd3c);SHA1(220f9f73d86cdcf1b390c52c591750a73402af50) ) /* address */
+	ROM_END(); }}; 
 	
-	ROM_START( starshpp )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD_NIB_HIGH( "7529-02.c2", 0x2c00, 0x0400, CRC(f191c328) SHA1(5d44be879bcf16a142a69e4f1501533e02720fe5) )
-		ROM_LOAD_NIB_LOW ( "7528-02.c1", 0x2c00, 0x0400, CRC(605ed4df) SHA1(b0d892bcd08b611d2c01ab23b491c1d9db498e7b) )
-		ROM_LOAD_NIB_HIGH( "7521.h2", 0x3000, 0x0400, CRC(6e3525db) SHA1(b615c60e4958d6576f4c179bbead9e8d330bba99) )
-		ROM_RELOAD(                   0xf000, 0x0400 )
-		ROM_LOAD_NIB_LOW ( "7520.h1", 0x3000, 0x0400, CRC(2fbed61b) SHA1(5cbe1aee82a32edbf33780a46e4166ec45c88170) )
-		ROM_RELOAD(                   0xf000, 0x0400 )
-		ROM_LOAD_NIB_HIGH( "f2",      0x3400, 0x0400, CRC(590ea913) SHA1(4baf5a6f6c9dcc5916163f85cec01d78a339ae20) )
-		ROM_RELOAD(                   0xf400, 0x0400 )
-		ROM_LOAD_NIB_LOW ( "f1",      0x3400, 0x0400, CRC(84fce404) SHA1(edd78f5439c4087c4a853d66446433f9a356b17f) )
-		ROM_RELOAD(                   0xf400, 0x0400 )
-		ROM_LOAD_NIB_HIGH( "7525.e2", 0x3800, 0x0400, CRC(5c6d12d9) SHA1(7078b685d859fd4122b814e473c83647b81ef7cd) )
-		ROM_RELOAD(                   0xf800, 0x0400 )
-		ROM_LOAD_NIB_LOW ( "7524.e1", 0x3800, 0x0400, CRC(6193a7bd) SHA1(3c9eab14481cb29ba2627bc73434f579d6b96a6e) )
-		ROM_RELOAD(                   0xf800, 0x0400 )
-		ROM_LOAD_NIB_HIGH( "d2",      0x3c00, 0x0400, CRC(a17df2ea) SHA1(ec488f4af47594e20b3d51882ee862a92e2f38fd) )
-		ROM_RELOAD(                   0xfc00, 0x0400 )
-		ROM_LOAD_NIB_LOW ( "d1",      0x3c00, 0x0400, CRC(be4050b6) SHA1(03ca4833769efb10f18f52b7ba4d016568d3cab9) )
-		ROM_RELOAD(                   0xfc00, 0x0400 )
+	static RomLoadPtr rom_starshpp = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD_NIB_HIGH( "7529-02.c2", 0x2c00, 0x0400, CRC(f191c328);SHA1(5d44be879bcf16a142a69e4f1501533e02720fe5) )
+		ROM_LOAD_NIB_LOW ( "7528-02.c1", 0x2c00, 0x0400, CRC(605ed4df);SHA1(b0d892bcd08b611d2c01ab23b491c1d9db498e7b) )
+		ROM_LOAD_NIB_HIGH( "7521.h2", 0x3000, 0x0400, CRC(6e3525db);SHA1(b615c60e4958d6576f4c179bbead9e8d330bba99) )
+		ROM_RELOAD(                   0xf000, 0x0400 );
+		ROM_LOAD_NIB_LOW ( "7520.h1", 0x3000, 0x0400, CRC(2fbed61b);SHA1(5cbe1aee82a32edbf33780a46e4166ec45c88170) )
+		ROM_RELOAD(                   0xf000, 0x0400 );
+		ROM_LOAD_NIB_HIGH( "f2",      0x3400, 0x0400, CRC(590ea913);SHA1(4baf5a6f6c9dcc5916163f85cec01d78a339ae20) )
+		ROM_RELOAD(                   0xf400, 0x0400 );
+		ROM_LOAD_NIB_LOW ( "f1",      0x3400, 0x0400, CRC(84fce404);SHA1(edd78f5439c4087c4a853d66446433f9a356b17f) )
+		ROM_RELOAD(                   0xf400, 0x0400 );
+		ROM_LOAD_NIB_HIGH( "7525.e2", 0x3800, 0x0400, CRC(5c6d12d9);SHA1(7078b685d859fd4122b814e473c83647b81ef7cd) )
+		ROM_RELOAD(                   0xf800, 0x0400 );
+		ROM_LOAD_NIB_LOW ( "7524.e1", 0x3800, 0x0400, CRC(6193a7bd);SHA1(3c9eab14481cb29ba2627bc73434f579d6b96a6e) )
+		ROM_RELOAD(                   0xf800, 0x0400 );
+		ROM_LOAD_NIB_HIGH( "d2",      0x3c00, 0x0400, CRC(a17df2ea);SHA1(ec488f4af47594e20b3d51882ee862a92e2f38fd) )
+		ROM_RELOAD(                   0xfc00, 0x0400 );
+		ROM_LOAD_NIB_LOW ( "d1",      0x3c00, 0x0400, CRC(be4050b6);SHA1(03ca4833769efb10f18f52b7ba4d016568d3cab9) )
+		ROM_RELOAD(                   0xfc00, 0x0400 );
 	
-		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "7513-01.n7", 0x0000, 0x0400, CRC(8fb0045d) SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
+		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "7513-01.n7", 0x0000, 0x0400, CRC(8fb0045d);SHA1(fb311c6977dec6e2a04179406e9ffdb920989a47) )
 	
-		ROM_REGION( 0x0100, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "7515-01.j5", 0x0000, 0x0100, CRC(fcbcbf2e) SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
+		ROM_REGION( 0x0100, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "7515-01.j5", 0x0000, 0x0100, CRC(fcbcbf2e);SHA1(adf3cc43b77ad18eddbe39ee11625e552d1abab9) )
 	
-		ROM_REGION( 0x0800, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "7517-01.r1", 0x0000, 0x0400, CRC(1531f85f) SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
-		ROM_LOAD( "7516-01.p1", 0x0400, 0x0400, CRC(64fbfe4c) SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
+		ROM_REGION( 0x0800, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "7517-01.r1", 0x0000, 0x0400, CRC(1531f85f);SHA1(291822614fc6d3a71bf56607c796e18779f8cfc9) )
+		ROM_LOAD( "7516-01.p1", 0x0400, 0x0400, CRC(64fbfe4c);SHA1(b2dfdcc1c9927c693fe43b2e1411d0f14375fdeb) )
 	
-		ROM_REGION( 0x0220, REGION_PROMS, ROMREGION_DISPOSE )
-		ROM_LOAD( "7518-01.r10", 0x0000, 0x0100, CRC(80877f7e) SHA1(8b28f48936a4247c583ca6713bfbaf4772c7a4f5) ) /* video output */
-		ROM_LOAD( "7514-01.n9",  0x0100, 0x0100, CRC(3610b453) SHA1(9e33ee04f22a9174c29fafb8e71781fa330a7a08) ) /* sync */
-		ROM_LOAD( "7519-01.b5",  0x0200, 0x0020, CRC(23b9cd3c) SHA1(220f9f73d86cdcf1b390c52c591750a73402af50) ) /* address */
-	ROM_END
+		ROM_REGION( 0x0220, REGION_PROMS, ROMREGION_DISPOSE );
+		ROM_LOAD( "7518-01.r10", 0x0000, 0x0100, CRC(80877f7e);SHA1(8b28f48936a4247c583ca6713bfbaf4772c7a4f5) ) /* video output */
+		ROM_LOAD( "7514-01.n9",  0x0100, 0x0100, CRC(3610b453);SHA1(9e33ee04f22a9174c29fafb8e71781fa330a7a08) ) /* sync */
+		ROM_LOAD( "7519-01.b5",  0x0200, 0x0020, CRC(23b9cd3c);SHA1(220f9f73d86cdcf1b390c52c591750a73402af50) ) /* address */
+	ROM_END(); }}; 
 	
 	
-	GAMEX( 1977, starshp1, 0,        starshp1, starshp1, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1",              GAME_NO_SOUND )
-	GAMEX( 1977, starshpp, starshp1, starshp1, starshp1, 0, ORIENTATION_FLIP_X, "Atari", "Starship 1 (prototype?)", GAME_NO_SOUND )
+	public static GameDriver driver_starshp1	   = new GameDriver("1977"	,"starshp1"	,"starshp1.java"	,rom_starshp1,null	,machine_driver_starshp1	,input_ports_starshp1	,null	,ORIENTATION_FLIP_X	,	"Atari", "Starship 1",              GAME_NO_SOUND )
+	public static GameDriver driver_starshpp	   = new GameDriver("1977"	,"starshpp"	,"starshp1.java"	,rom_starshpp,driver_starshp1	,machine_driver_starshp1	,input_ports_starshp1	,null	,ORIENTATION_FLIP_X	,	"Atari", "Starship 1 (prototype?)", GAME_NO_SOUND )
 }

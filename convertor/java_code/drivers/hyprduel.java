@@ -119,7 +119,7 @@ public class hyprduel
 	
 		if (data & 0x01)
 		{
-			if (!subcpu_resetline)
+			if (subcpu_resetline == 0)
 			{
 				if (pc != 0x95f2)
 				{
@@ -514,122 +514,122 @@ public class hyprduel
 	***************************************************************************/
 	
 	#define JOY_LSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+		PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ );\
 	
 	#define JOY_MSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+		PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ );\
+		PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ );\
 	
 	
-	INPUT_PORTS_START( hyprduel )
-		PORT_START
-		PORT_BITX(    0x8000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_DIPNAME( 0x4000, 0x0000, "Show Warning" )
-		PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT( 0x3fff, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_hyprduel = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BITX(    0x8000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_DIPNAME( 0x4000, 0x0000, "Show Warning" );
+		PORT_DIPSETTING(      0x4000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0x3fff, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0001, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0002, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0003, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0007, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0006, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0005, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0018, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0038, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0030, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0028, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x0040, 0x0000, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, "Start Up Mode" )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT(     0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0800, "Easy" )
-		PORT_DIPSETTING(      0x0c00, "Normal" )
-		PORT_DIPSETTING(      0x0400, "Hard" )
-		PORT_DIPSETTING(      0x0000, "Very Hard" )
-		PORT_DIPNAME( 0x3000, 0x3000, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x2000, "2" )
-		PORT_DIPSETTING(      0x3000, "3" )
-		PORT_DIPSETTING(      0x1000, "4" )
-		PORT_DIPSETTING(      0x0000, "5" )
-		PORT_BIT(     0xc000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_START(); 
+		PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0001, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0003, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0007, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0006, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0005, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0018, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0038, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0030, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0028, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x0040, 0x0000, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, "Start Up Mode" );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(      0x0100, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT(     0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_DIPNAME( 0x0c00, 0x0c00, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0800, "Easy" );
+		PORT_DIPSETTING(      0x0c00, "Normal" );
+		PORT_DIPSETTING(      0x0400, "Hard" );
+		PORT_DIPSETTING(      0x0000, "Very Hard" );
+		PORT_DIPNAME( 0x3000, 0x3000, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x2000, "2" );
+		PORT_DIPSETTING(      0x3000, "3" );
+		PORT_DIPSETTING(      0x1000, "4" );
+		PORT_DIPSETTING(      0x0000, "5" );
+		PORT_BIT(     0xc000, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
+		PORT_START(); 
 		JOY_LSB(1, BUTTON1, BUTTON2, BUTTON3, UNKNOWN)
 		JOY_MSB(2, BUTTON1, BUTTON2, BUTTON3, UNKNOWN)
 	
-		PORT_START
-		PORT_BIT_IMPULSE(  0x0001, IP_ACTIVE_LOW,  IPT_COIN1, 2 )
-		PORT_BIT_IMPULSE(  0x0002, IP_ACTIVE_LOW,  IPT_COIN2, 2 )
-		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_SERVICE2 )
-		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_START1   )
-		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_START2   )
-		PORT_BIT(  0xffc0, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT_IMPULSE(  0x0001, IP_ACTIVE_LOW,  IPT_COIN1, 2 );
+		PORT_BIT_IMPULSE(  0x0002, IP_ACTIVE_LOW,  IPT_COIN2, 2 );
+		PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_SERVICE2 );
+		PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_START1   );
+		PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_START2   );
+		PORT_BIT(  0xffc0, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	/***************************************************************************
 								Graphics Layouts
 	***************************************************************************/
 	
 	/* 8x8x4 tiles */
-	static struct GfxLayout layout_8x8x4 =
-	{
+	static GfxLayout layout_8x8x4 = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ GFX_RAW },
-		{ 0 },		/* org displacement */
-		{ 4*8 },	/* line modulo */
+		new int[] { GFX_RAW },
+		new int[] { 0 },		/* org displacement */
+		new int[] { 4*8 },	/* line modulo */
 		32*8		/* char modulo */
-	};
+	);
 	
 	/* 8x8x8 tiles for later games */
-	static struct GfxLayout layout_8x8x8h =
-	{
+	static GfxLayout layout_8x8x8h = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		8,
-		{ GFX_RAW },
-		{ 0 },		/* org displacement */
-		{ 8*8 },	/* line modulo */
+		new int[] { GFX_RAW },
+		new int[] { 0 },		/* org displacement */
+		new int[] { 8*8 },	/* line modulo */
 		32*8		/* char modulo (half char step) */
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo_14220[] =
+	static GfxDecodeInfo gfxdecodeinfo_14220[] =
 	{
-		{ REGION_GFX1, 0, &layout_8x8x4,    0x0, 0x200 }, // [0] 4 Bit Tiles
-		{ REGION_GFX1, 0, &layout_8x8x8h,   0x0,  0x20 }, // [1] 8 Bit Tiles
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_8x8x4,    0x0, 0x200 ), // [0] 4 Bit Tiles
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_8x8x8h,   0x0,  0x20 ), // [1] 8 Bit Tiles
+		new GfxDecodeInfo( -1 )
 	};
 	
 	/***************************************************************************
@@ -724,42 +724,42 @@ public class hyprduel
 	}
 	
 	
-	ROM_START( hyprduel )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "hd_prg2.rom", 0x000000, 0x40000, CRC(c7402722) SHA1(e385676cdcee65a3ddf07791d82a1fe83ba1b3e2) )
-		ROM_LOAD16_BYTE( "hd_prg1.rom", 0x000001, 0x40000, CRC(d8297c2b) SHA1(2e23c5b1784d0a465c0c0dc3ca28505689a8b16c) )
+	static RomLoadPtr rom_hyprduel = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "hd_prg2.rom", 0x000000, 0x40000, CRC(c7402722);SHA1(e385676cdcee65a3ddf07791d82a1fe83ba1b3e2) )
+		ROM_LOAD16_BYTE( "hd_prg1.rom", 0x000001, 0x40000, CRC(d8297c2b);SHA1(2e23c5b1784d0a465c0c0dc3ca28505689a8b16c) )
 	
-		ROM_REGION( 0x8000, REGION_CPU2, 0 )
+		ROM_REGION( 0x8000, REGION_CPU2, 0 );
 	
-		ROM_REGION( 0x400000, REGION_GFX1, 0 )	/* Gfx + Prg + Data (Addressable by CPU & Blitter) */
+		ROM_REGION( 0x400000, REGION_GFX1, 0 );/* Gfx + Prg + Data (Addressable by CPU & Blitter) */
 		ROMX_LOAD( "hd_m1.rom", 0x000000, 0x100000, BAD_DUMP CRC(582aab46) SHA1(b94bd7aee717c5e449c9138fd82ca9a6423cd382) , ROM_GROUPWORD | ROM_SKIP(6) )	// BAD ADDRESS LINES (mask=000100)
 		ROMX_LOAD( "hd_m2.rom", 0x000002, 0x100000, BAD_DUMP CRC(63da509e) SHA1(b7254fab2d6d68bf52b0cdbf4e32d990420e4627) , ROM_GROUPWORD | ROM_SKIP(6) )	// BAD ADDRESS LINES (mask=000100)
 		ROMX_LOAD( "hd_m3.rom", 0x000004, 0x100000, BAD_DUMP CRC(4dbb5a79) SHA1(5df5cfe7ab404ec97822c3edd86728b03aeb33d1) , ROM_GROUPWORD | ROM_SKIP(6) )	// BAD ADDRESS LINES (mask=000100)
 		ROMX_LOAD( "hd_m4.rom", 0x000006, 0x100000, BAD_DUMP CRC(8061d5dd) SHA1(1d953ba8d85e0513683e0094eb1f5bbfda4576bf) , ROM_GROUPWORD | ROM_SKIP(6) )	// BAD ADDRESS LINES (mask=000100)
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "97.11", 0x00000, 0x40000, CRC(bf3f8574) SHA1(9e743f05e53256c886d43e1f0c43d7417134b9b3) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "97.11", 0x00000, 0x40000, CRC(bf3f8574);SHA1(9e743f05e53256c886d43e1f0c43d7417134b9b3) )
+	ROM_END(); }}; 
 	
-	ROM_START( hyprdelj )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "u24a.10", 0x000000, 0x40000, CRC(2458f91d) SHA1(c75c7bccc84738e29b35667793491a1213aea1da) )
-		ROM_LOAD16_BYTE( "u23a.9",  0x000001, 0x40000, CRC(98aedfca) SHA1(42028e57ac79473cde683be2100b953ff3b2b345) )
+	static RomLoadPtr rom_hyprdelj = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "u24a.10", 0x000000, 0x40000, CRC(2458f91d);SHA1(c75c7bccc84738e29b35667793491a1213aea1da) )
+		ROM_LOAD16_BYTE( "u23a.9",  0x000001, 0x40000, CRC(98aedfca);SHA1(42028e57ac79473cde683be2100b953ff3b2b345) )
 	
-		ROM_REGION( 0x8000, REGION_CPU2, 0 )
+		ROM_REGION( 0x8000, REGION_CPU2, 0 );
 	
-		ROM_REGION( 0x400000, REGION_GFX1, 0 )	/* Gfx + Prg + Data (Addressable by CPU & Blitter) */
+		ROM_REGION( 0x400000, REGION_GFX1, 0 );/* Gfx + Prg + Data (Addressable by CPU & Blitter) */
 		ROMX_LOAD( "hyper-1.4", 0x000000, 0x100000, CRC(4b3b2d3c) SHA1(5e9e8ec853f71aeff3910b93dadbaeae2b61717b) , ROM_GROUPWORD | ROM_SKIP(6) )
 		ROMX_LOAD( "hyper-2.6", 0x000002, 0x100000, CRC(dc230116) SHA1(a3c447657d8499764f52c81382961f425c56037b) , ROM_GROUPWORD | ROM_SKIP(6) )
 		ROMX_LOAD( "hyper-3.3", 0x000004, 0x100000, CRC(2d770dd0) SHA1(27f9e7f67e96210d3710ab4f940c5d7ae13f8bbf) , ROM_GROUPWORD | ROM_SKIP(6) )
 		ROMX_LOAD( "hyper-4.5", 0x000006, 0x100000, CRC(f88c6d33) SHA1(277b56df40a17d7dd9f1071b0d498635a5b783cd) , ROM_GROUPWORD | ROM_SKIP(6) )
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* Samples */
-		ROM_LOAD( "97.11", 0x00000, 0x40000, CRC(bf3f8574) SHA1(9e743f05e53256c886d43e1f0c43d7417134b9b3) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* Samples */
+		ROM_LOAD( "97.11", 0x00000, 0x40000, CRC(bf3f8574);SHA1(9e743f05e53256c886d43e1f0c43d7417134b9b3) )
+	ROM_END(); }}; 
 	
 	
-	GAMEX( 1993, hyprduel, 0,        hyprduel, hyprduel, hyprduel, ROT0, "Technosoft", "Hyper Duel (World)", GAME_NOT_WORKING )
-	GAME ( 1993, hyprdelj, hyprduel, hyprduel, hyprduel, hyprduel, ROT0, "Technosoft", "Hyper Duel (Japan)" )
+	public static GameDriver driver_hyprduel	   = new GameDriver("1993"	,"hyprduel"	,"hyprduel.java"	,rom_hyprduel,null	,machine_driver_hyprduel	,input_ports_hyprduel	,init_hyprduel	,ROT0	,	"Technosoft", "Hyper Duel (World)", GAME_NOT_WORKING )
+	public static GameDriver driver_hyprdelj	   = new GameDriver("1993"	,"hyprdelj"	,"hyprduel.java"	,rom_hyprdelj,driver_hyprduel	,machine_driver_hyprduel	,input_ports_hyprduel	,init_hyprduel	,ROT0	,	"Technosoft", "Hyper Duel (Japan)" )
 	
 }

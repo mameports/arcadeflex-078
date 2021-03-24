@@ -19,10 +19,10 @@ public class spcforce
 	unsigned char *spcforce_scrollram;
 	
 	
-	WRITE_HANDLER( spcforce_flip_screen_w )
+	public static WriteHandlerPtr spcforce_flip_screen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(~data & 0x01);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -49,8 +49,8 @@ public class spcforce
 			sy = 8 * (offs / 32) -  (spcforce_scrollram[offs]       & 0x0f);
 			sx = 8 * (offs % 32) + ((spcforce_scrollram[offs] >> 4) & 0x0f);
 	
-			code = videoram[offs] + ((colorram[offs] & 0x01) << 8);
-			col  = (~colorram[offs] >> 4) & 0x07;
+			code = videoram.read(offs)+ ((colorram.read(offs)& 0x01) << 8);
+			col  = (~colorram.read(offs)>> 4) & 0x07;
 	
 			if (flip_screen)
 			{

@@ -18,25 +18,27 @@ public class m79amb
 	
 	
 	/* palette colors (see drivers/8080bw.c) */
-	enum { BLACK, WHITE };
+	public static final int BLACK = 0;
+	public static final int WHITE = 1;
+	
 	
 	
 	static unsigned char mask = 0;
 	
-	WRITE_HANDLER( ramtek_mask_w )
+	public static WriteHandlerPtr ramtek_mask_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		mask = data;
-	}
+	} };
 	
-	WRITE_HANDLER( ramtek_videoram_w )
+	public static WriteHandlerPtr ramtek_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data = data & ~mask;
 	
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
 			int i,x,y;
 	
-			videoram[offset] = data;
+			videoram.write(offset,data);
 	
 			y = offset / 32;
 			x = 8 * (offset % 32);
@@ -49,5 +51,5 @@ public class m79amb
 				data <<= 1;
 			}
 		}
-	}
+	} };
 }

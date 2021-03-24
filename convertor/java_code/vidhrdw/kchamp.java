@@ -26,9 +26,9 @@ public class kchamp
 	
 		for (i = 0;i < Machine->drv->total_colors;i++)
 		{
-			red = color_prom[i];
-			green = color_prom[Machine->drv->total_colors+i];
-			blue = color_prom[2*Machine->drv->total_colors+i];
+			red = color_prom.read(i);
+			green = color_prom.read(Machine->drv->total_colors+i);
+			blue = color_prom.read(2*Machine->drv->total_colors+i);
 	
 			palette_set_color(i,red*0x11,green*0x11,blue*0x11);
 	
@@ -36,33 +36,33 @@ public class kchamp
 		}
 	}
 	
-	WRITE_HANDLER( kchamp_videoram_w )
+	public static WriteHandlerPtr kchamp_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kchamp_colorram_w )
+	public static WriteHandlerPtr kchamp_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kchamp_flipscreen_w )
+	public static WriteHandlerPtr kchamp_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 0x01);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 7) << 8);
-		int color = (colorram[tile_index] >> 3) & 0x1f;
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 7) << 8);
+		int color = (colorram.read(tile_index)>> 3) & 0x1f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -72,7 +72,7 @@ public class kchamp
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -94,14 +94,14 @@ public class kchamp
 	
 	    for (offs = 0; offs < 0x100; offs += 4)
 		{
-			int attr = spriteram[offs + 2];
+			int attr = spriteram.read(offs + 2);
 	        int bank = 1 + ((attr & 0x60) >> 5);
-	        int code = spriteram[offs + 1] + ((attr & 0x10) << 4);
+	        int code = spriteram.read(offs + 1)+ ((attr & 0x10) << 4);
 	        int color = attr & 0x0f;
 			int flipx = 0;
 	        int flipy = attr & 0x80;
-	        int sx = spriteram[offs + 3] - 8;
-	        int sy = 247 - spriteram[offs];
+	        int sx = spriteram.read(offs + 3)- 8;
+	        int sy = 247 - spriteram.read(offs);
 	
 			if (flip_screen)
 			{
@@ -122,14 +122,14 @@ public class kchamp
 	
 	    for (offs = 0; offs < 0x100; offs += 4)
 		{
-			int attr = spriteram[offs + 2];
+			int attr = spriteram.read(offs + 2);
 	        int bank = 1 + ((attr & 0x60) >> 5);
-	        int code = spriteram[offs + 1] + ((attr & 0x10) << 4);
+	        int code = spriteram.read(offs + 1)+ ((attr & 0x10) << 4);
 	        int color = attr & 0x0f;
 			int flipx = 0;
 	        int flipy = attr & 0x80;
-	        int sx = spriteram[offs + 3];
-	        int sy = 240 - spriteram[offs];
+	        int sx = spriteram.read(offs + 3);
+	        int sy = 240 - spriteram.read(offs);
 	
 			if (flip_screen)
 			{

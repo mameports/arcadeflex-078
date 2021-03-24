@@ -49,11 +49,11 @@ public class tugboat
 			int r,g,b,brt;
 	
 	
-			brt = ((color_prom[i] >> 3) & 0x01) ? 0xff : 0x80;
+			brt = ((color_prom.read(i)>> 3) & 0x01) ? 0xff : 0x80;
 	
-			r = brt * ((color_prom[i] >> 0) & 0x01);
-			g = brt * ((color_prom[i] >> 1) & 0x01);
-			b = brt * ((color_prom[i] >> 2) & 0x01);
+			r = brt * ((color_prom.read(i)>> 0) & 0x01);
+			g = brt * ((color_prom.read(i)>> 1) & 0x01);
+			b = brt * ((color_prom.read(i)>> 2) & 0x01);
 	
 			palette_set_color(i,r,g,b);
 		}
@@ -63,25 +63,25 @@ public class tugboat
 	
 	/* see crtc6845.c. That file is only a placeholder, I process the writes here
 	   because I need the start_addr register to handle scrolling */
-	static WRITE_HANDLER( tugboat_hd46505_0_w )
+	public static WriteHandlerPtr tugboat_hd46505_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int reg;
 		if (offset == 0) reg = data & 0x0f;
 		else if (reg < 18) hd46505_0_reg[reg] = data;
-	}
-	static WRITE_HANDLER( tugboat_hd46505_1_w )
+	} };
+	public static WriteHandlerPtr tugboat_hd46505_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int reg;
 		if (offset == 0) reg = data & 0x0f;
 		else if (reg < 18) hd46505_1_reg[reg] = data;
-	}
+	} };
 	
 	
 	
-	static WRITE_HANDLER( tugboat_score_w )
+	public static WriteHandlerPtr tugboat_score_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tugboat_ram[0x291d + 32*offset] = data ^ 0x0f;	/* ???? */
-	}
+	} };
 	
 	static void draw_tilemap(struct mame_bitmap *bitmap,const struct rectangle *cliprect,
 			int addr,int gfx0,int gfx1,int transparency)
@@ -133,7 +133,7 @@ public class tugboat
 	
 	static int ctrl;
 	
-	static READ_HANDLER( tugboat_input_r )
+	public static ReadHandlerPtr tugboat_input_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (~ctrl & 0x80)
 			return readinputport(0);
@@ -145,17 +145,17 @@ public class tugboat
 			return readinputport(3);
 		else
 			return readinputport(4);
-	}
+	} };
 	
-	static READ_HANDLER( tugboat_ctrl_r )
+	public static ReadHandlerPtr tugboat_ctrl_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ctrl;
-	}
+	} };
 	
-	static WRITE_HANDLER( tugboat_ctrl_w )
+	public static WriteHandlerPtr tugboat_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ctrl = data;
-	}
+	} };
 	
 	static struct pia6821_interface pia0_intf =
 	{
@@ -187,135 +187,139 @@ public class tugboat
 	}
 	
 	
-	static MEMORY_READ_START( tugboat_readmem )
-		{ 0x0000, 0x01ff, MRA_RAM },
-		{ 0x11e4, 0x11e7, pia_0_r },
-		{ 0x11e8, 0x11eb, pia_1_r },
-		{ 0x2000, 0x2fff, MRA_RAM },
-		{ 0x5000, 0x7fff, MRA_ROM },
-		{ 0xfff0, 0xffff, MRA_ROM },	/* vectors */
-	MEMORY_END
+	public static Memory_ReadAddress tugboat_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x01ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x11e4, 0x11e7, pia_0_r ),
+		new Memory_ReadAddress( 0x11e8, 0x11eb, pia_1_r ),
+		new Memory_ReadAddress( 0x2000, 0x2fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x5000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xfff0, 0xffff, MRA_ROM ),	/* vectors */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( tugboat_writemem )
-		{ 0x0000, 0x01ff, MWA_RAM, &tugboat_ram },
-		{ 0x1060, 0x1060, AY8910_control_port_0_w },
-		{ 0x1061, 0x1061, AY8910_write_port_0_w },
-		{ 0x10a0, 0x10a1, tugboat_hd46505_0_w },	// scrolling is performed changing the start_addr register (0C/0D)
-		{ 0x10c0, 0x10c1, tugboat_hd46505_1_w },
-		{ 0x11e4, 0x11e7, pia_0_w },
-		{ 0x11e8, 0x11eb, pia_1_w },
-		{ 0x18e0, 0x18ef, tugboat_score_w },
-		{ 0x2000, 0x2fff, MWA_RAM },	/* tilemap RAM */
-	    { 0x5000, 0x7fff, MWA_ROM },
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( tugboat )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_LOW, IPT_COIN1, 1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "3" )
-		PORT_DIPSETTING(    0x40, "5" )
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( On ) )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress tugboat_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x01ff, MWA_RAM, tugboat_ram ),
+		new Memory_WriteAddress( 0x1060, 0x1060, AY8910_control_port_0_w ),
+		new Memory_WriteAddress( 0x1061, 0x1061, AY8910_write_port_0_w ),
+		new Memory_WriteAddress( 0x10a0, 0x10a1, tugboat_hd46505_0_w ),	// scrolling is performed changing the start_addr register (0C/0D)
+		new Memory_WriteAddress( 0x10c0, 0x10c1, tugboat_hd46505_1_w ),
+		new Memory_WriteAddress( 0x11e4, 0x11e7, pia_0_w ),
+		new Memory_WriteAddress( 0x11e8, 0x11eb, pia_1_w ),
+		new Memory_WriteAddress( 0x18e0, 0x18ef, tugboat_score_w ),
+		new Memory_WriteAddress( 0x2000, 0x2fff, MWA_RAM ),	/* tilemap RAM */
+	    new Memory_WriteAddress( 0x5000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static struct GfxLayout charlayout =
-	{
+	static InputPortPtr input_ports_tugboat = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_LOW, IPT_COIN1, 1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_DIPNAME( 0x30, 0x10, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "3" );
+		PORT_DIPSETTING(    0x40, "5" );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,3),
 		3,
-		{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
+	);
+	
+	static GfxDecodeInfo gfxdecodeinfo[] =
+	{
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout, 0x80, 16 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, charlayout, 0x80, 16 ),
+		new GfxDecodeInfo( REGION_GFX3, 0, charlayout, 0x00, 16 ),
+		new GfxDecodeInfo( REGION_GFX4, 0, charlayout, 0x00, 16 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
-	{
-		{ REGION_GFX1, 0, &charlayout, 0x80, 16 },
-		{ REGION_GFX2, 0, &charlayout, 0x80, 16 },
-		{ REGION_GFX3, 0, &charlayout, 0x00, 16 },
-		{ REGION_GFX4, 0, &charlayout, 0x00, 16 },
-		{ -1 }
-	};
 	
 	
-	
-	static struct AY8910interface ay8910_interface =
-	{
+	static AY8910interface ay8910_interface = new AY8910interface
+	(
 		1,			/* 1 chip */
 		2000000,	/* 2 MHz???? */
-		{ 35 },		/* volume */
-		{ 0 },
-		{ 0 },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { 35 },		/* volume */
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
 	
 	
@@ -344,38 +348,38 @@ public class tugboat
 	
 	
 	
-	ROM_START( tugboat )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "u7.bin", 0x5000, 0x1000, CRC(e81d7581) SHA1(c76327e3b027a5a2af69f8cfafa1f828ad0ebdb1) )
-		ROM_LOAD( "u8.bin", 0x6000, 0x1000, CRC(7525de06) SHA1(0722c7a0b89c55162227173679ffbe398ca350a2) )
-		ROM_LOAD( "u9.bin", 0x7000, 0x1000, CRC(aa4ae687) SHA1(a212eed5d04d6197aa3484ff36059fd7998604a6) )
-		ROM_RELOAD(         0xf000, 0x1000 )	/* for the vectors */
+	static RomLoadPtr rom_tugboat = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "u7.bin", 0x5000, 0x1000, CRC(e81d7581);SHA1(c76327e3b027a5a2af69f8cfafa1f828ad0ebdb1) )
+		ROM_LOAD( "u8.bin", 0x6000, 0x1000, CRC(7525de06);SHA1(0722c7a0b89c55162227173679ffbe398ca350a2) )
+		ROM_LOAD( "u9.bin", 0x7000, 0x1000, CRC(aa4ae687);SHA1(a212eed5d04d6197aa3484ff36059fd7998604a6) )
+		ROM_RELOAD(         0xf000, 0x1000 );/* for the vectors */
 	
-		ROM_REGION( 0x1800, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT  )
-		ROM_LOAD( "u67.bin",  0x0000, 0x0800, CRC(601c425b) SHA1(13ed54ba1307ba3f779293d88c19d0c0f2d91a96) )
-		ROM_FILL(             0x0800, 0x0800, 0xff )
-		ROM_FILL(             0x1000, 0x0800, 0xff )
+		ROM_REGION( 0x1800, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT  );
+		ROM_LOAD( "u67.bin",  0x0000, 0x0800, CRC(601c425b);SHA1(13ed54ba1307ba3f779293d88c19d0c0f2d91a96) )
+		ROM_FILL(             0x0800, 0x0800, 0xff );
+		ROM_FILL(             0x1000, 0x0800, 0xff );
 	
-		ROM_REGION( 0x3000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT  )
-		ROM_LOAD( "u68.bin", 0x0000, 0x1000, CRC(d5835182) SHA1(f67c8f93e0d7dd1bf8e3a98756719d386c133d1c) )
-		ROM_LOAD( "u69.bin", 0x1000, 0x1000, CRC(e6d25878) SHA1(de9096ef3108d031049be1e7f2c5e346d0bc0df1) )
-		ROM_LOAD( "u70.bin", 0x2000, 0x1000, CRC(34ce2850) SHA1(8883126627ed8a1d2c3bed2a3d169ce35eafc8a3) )
+		ROM_REGION( 0x3000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT  );
+		ROM_LOAD( "u68.bin", 0x0000, 0x1000, CRC(d5835182);SHA1(f67c8f93e0d7dd1bf8e3a98756719d386c133d1c) )
+		ROM_LOAD( "u69.bin", 0x1000, 0x1000, CRC(e6d25878);SHA1(de9096ef3108d031049be1e7f2c5e346d0bc0df1) )
+		ROM_LOAD( "u70.bin", 0x2000, 0x1000, CRC(34ce2850);SHA1(8883126627ed8a1d2c3bed2a3d169ce35eafc8a3) )
 	
-		ROM_REGION( 0x1800, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "u168.bin", 0x0000, 0x0800, CRC(279042fd) SHA1(1361fff1bc532251bbd36b7b60776c2cc137cfba) )	/* labeled u-167 */
-		ROM_FILL(             0x0800, 0x0800, 0x00 )
-		ROM_FILL(             0x1000, 0x0800, 0x00 )
+		ROM_REGION( 0x1800, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "u168.bin", 0x0000, 0x0800, CRC(279042fd);SHA1(1361fff1bc532251bbd36b7b60776c2cc137cfba) )	/* labeled u-167 */
+		ROM_FILL(             0x0800, 0x0800, 0x00 );
+		ROM_FILL(             0x1000, 0x0800, 0x00 );
 	
-		ROM_REGION( 0x1800, REGION_GFX4, ROMREGION_DISPOSE )
-		ROM_LOAD( "u170.bin", 0x0000, 0x0800, CRC(64d9f4d7) SHA1(3ff7fc099023512c33ec4583e91e6cbab903e7a8) )	/* labeled u-168 */
-		ROM_LOAD( "u169.bin", 0x0800, 0x0800, CRC(1a636296) SHA1(bcb18d714328ba3db2d16d74c47a985c16a0bbe2) )	/* labeled u-169 */
-		ROM_LOAD( "u167.bin", 0x1000, 0x0800, CRC(b9c9b4f7) SHA1(6685d580ae150d7c67bac2786ee4b7a2c28eddc3) )	/* labeled u-170 */
+		ROM_REGION( 0x1800, REGION_GFX4, ROMREGION_DISPOSE );
+		ROM_LOAD( "u170.bin", 0x0000, 0x0800, CRC(64d9f4d7);SHA1(3ff7fc099023512c33ec4583e91e6cbab903e7a8) )	/* labeled u-168 */
+		ROM_LOAD( "u169.bin", 0x0800, 0x0800, CRC(1a636296);SHA1(bcb18d714328ba3db2d16d74c47a985c16a0bbe2) )	/* labeled u-169 */
+		ROM_LOAD( "u167.bin", 0x1000, 0x0800, CRC(b9c9b4f7);SHA1(6685d580ae150d7c67bac2786ee4b7a2c28eddc3) )	/* labeled u-170 */
 	
-		ROM_REGION( 0x0100, REGION_PROMS, ROMREGION_DISPOSE )
-		ROM_LOAD( "nt2_u128.clr", 0x0000, 0x0100, CRC(236672bf) SHA1(57482d0a23223ef7b211045ad28d3e41e90f961e) )
-	ROM_END
+		ROM_REGION( 0x0100, REGION_PROMS, ROMREGION_DISPOSE );
+		ROM_LOAD( "nt2_u128.clr", 0x0000, 0x0100, CRC(236672bf);SHA1(57482d0a23223ef7b211045ad28d3e41e90f961e) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX( 1982, tugboat, 0, tugboat, tugboat, 0, ROT90, "ETM", "Tugboat", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_tugboat	   = new GameDriver("1982"	,"tugboat"	,"tugboat.java"	,rom_tugboat,null	,machine_driver_tugboat	,input_ports_tugboat	,null	,ROT90	,	"ETM", "Tugboat", GAME_IMPERFECT_GRAPHICS )
 }

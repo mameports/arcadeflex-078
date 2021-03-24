@@ -135,11 +135,11 @@ public class asterix
 		cpu_set_nmi_line(1,ASSERT_LINE);
 	}
 	
-	static WRITE_HANDLER( sound_arm_nmi_w )
+	public static WriteHandlerPtr sound_arm_nmi_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_nmi_line(1,CLEAR_LINE);
 		timer_set(TIME_IN_USEC(5),0,nmi_callback);
-	}
+	} };
 	
 	static WRITE16_HANDLER( sound_irq_w )
 	{
@@ -229,53 +229,57 @@ public class asterix
 		{ 0x440000, 0x44003f, K054157_word_w },
 	MEMORY_END
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0xefff, MRA_ROM },
-		{ 0xf000, 0xf7ff, MRA_RAM },
-		{ 0xf801, 0xf801, YM2151_status_port_0_r },
-		{ 0xfa00, 0xfa2f, K053260_0_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0xefff, MRA_ROM ),
+		new Memory_ReadAddress( 0xf000, 0xf7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xf801, 0xf801, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0xfa00, 0xfa2f, K053260_0_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0xefff, MWA_ROM },
-		{ 0xf000, 0xf7ff, MWA_RAM },
-		{ 0xf801, 0xf801, YM2151_data_port_0_w },
-		{ 0xfa00, 0xfa2f, K053260_0_w },
-		{ 0xfc00, 0xfc00, sound_arm_nmi_w },
-		{ 0xfe00, 0xfe00, YM2151_register_port_0_w },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xefff, MWA_ROM ),
+		new Memory_WriteAddress( 0xf000, 0xf7ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xf801, 0xf801, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0xfa00, 0xfa2f, K053260_0_w ),
+		new Memory_WriteAddress( 0xfc00, 0xfc00, sound_arm_nmi_w ),
+		new Memory_WriteAddress( 0xfe00, 0xfe00, YM2151_register_port_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	INPUT_PORTS_START( asterix )
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_COIN4 )
-		PORT_BIT( 0xf800, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	static InputPortPtr input_ports_asterix = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_COIN4 );
+		PORT_BIT( 0xf800, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW,  IPT_START2 )
-		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_UNUSED )  // EEPROM data
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_UNUSED )  // EEPROM ready (always 1)
-		PORT_BITX(0x0400, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0xf800, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW,  IPT_START2 );
+		PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_UNUSED ); // EEPROM data
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_UNUSED ); // EEPROM ready (always 1)
+		PORT_BITX(0x0400, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0xf800, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	static struct YM2151interface ym2151_interface =
 	{
@@ -327,71 +331,71 @@ public class asterix
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( asterix )
-		ROM_REGION( 0x0c0000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "aster8c.bin", 0x000000,  0x20000, CRC(61d6621d) SHA1(908a344e9bbce0c7544bd049494258d1d3ad073b) )
-		ROM_LOAD16_BYTE( "aster8d.bin", 0x000001,  0x20000, CRC(53aac057) SHA1(7401ca5b70f384688c3353fc1ac9ef0b27814c66) )
-		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc) SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
-		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828) SHA1(e03842418f08e6267eeea03362450da249af73be) )
+	static RomLoadPtr rom_asterix = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x0c0000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "aster8c.bin", 0x000000,  0x20000, CRC(61d6621d);SHA1(908a344e9bbce0c7544bd049494258d1d3ad073b) )
+		ROM_LOAD16_BYTE( "aster8d.bin", 0x000001,  0x20000, CRC(53aac057);SHA1(7401ca5b70f384688c3353fc1ac9ef0b27814c66) )
+		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc);SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
+		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828);SHA1(e03842418f08e6267eeea03362450da249af73be) )
 	
-		ROM_REGION( 0x010000, REGION_CPU2, 0 )
-		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b) SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
+		ROM_REGION( 0x010000, REGION_CPU2, 0 );
+		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b);SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
 	
-		ROM_REGION( 0x100000, REGION_GFX1, 0 )
-		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c) SHA1(a46878916833923e421da0667e37620ae0b77744) )
-		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81) SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
+		ROM_REGION( 0x100000, REGION_GFX1, 0 );
+		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c);SHA1(a46878916833923e421da0667e37620ae0b77744) )
+		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81);SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, 0 )
-		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe) SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
-		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4) SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
+		ROM_REGION( 0x400000, REGION_GFX2, 0 );
+		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe);SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
+		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4);SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )
-		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e) SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );
+		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e);SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
+	ROM_END(); }}; 
 	
-	ROM_START( astrxeac )
-		ROM_REGION( 0x0c0000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "asterix.8c",  0x000000,  0x20000, CRC(0ccd1feb) SHA1(016d642e3a745f0564aa93f0f66d5c0f37962990) )
-		ROM_LOAD16_BYTE( "asterix.8d",  0x000001,  0x20000, CRC(b0805f47) SHA1(b58306164e8fec69002656993ae80abbc8f136cd) )
-		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc) SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
-		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828) SHA1(e03842418f08e6267eeea03362450da249af73be) )
+	static RomLoadPtr rom_astrxeac = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x0c0000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "asterix.8c",  0x000000,  0x20000, CRC(0ccd1feb);SHA1(016d642e3a745f0564aa93f0f66d5c0f37962990) )
+		ROM_LOAD16_BYTE( "asterix.8d",  0x000001,  0x20000, CRC(b0805f47);SHA1(b58306164e8fec69002656993ae80abbc8f136cd) )
+		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc);SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
+		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828);SHA1(e03842418f08e6267eeea03362450da249af73be) )
 	
-		ROM_REGION( 0x010000, REGION_CPU2, 0 )
-		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b) SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
+		ROM_REGION( 0x010000, REGION_CPU2, 0 );
+		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b);SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
 	
-		ROM_REGION( 0x100000, REGION_GFX1, 0 )
-		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c) SHA1(a46878916833923e421da0667e37620ae0b77744) )
-		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81) SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
+		ROM_REGION( 0x100000, REGION_GFX1, 0 );
+		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c);SHA1(a46878916833923e421da0667e37620ae0b77744) )
+		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81);SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, 0 )
-		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe) SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
-		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4) SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
+		ROM_REGION( 0x400000, REGION_GFX2, 0 );
+		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe);SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
+		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4);SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )
-		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e) SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );
+		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e);SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
+	ROM_END(); }}; 
 	
-	ROM_START( astrxeaa )
-		ROM_REGION( 0x0c0000, REGION_CPU1, 0 )
-		ROM_LOAD16_BYTE( "068eaa01.8c", 0x000000,  0x20000, CRC(85b41d8e) SHA1(e1326f6d61b8097f5201d5bd37e4d2a357d17b47) )
-		ROM_LOAD16_BYTE( "068eaa02.8d", 0x000001,  0x20000, CRC(8e886305) SHA1(41a9de2cdad8c1185b4d13ea5b4a9309716947c5) )
-		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc) SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
-		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828) SHA1(e03842418f08e6267eeea03362450da249af73be) )
+	static RomLoadPtr rom_astrxeaa = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x0c0000, REGION_CPU1, 0 );
+		ROM_LOAD16_BYTE( "068eaa01.8c", 0x000000,  0x20000, CRC(85b41d8e);SHA1(e1326f6d61b8097f5201d5bd37e4d2a357d17b47) )
+		ROM_LOAD16_BYTE( "068eaa02.8d", 0x000001,  0x20000, CRC(8e886305);SHA1(41a9de2cdad8c1185b4d13ea5b4a9309716947c5) )
+		ROM_LOAD16_BYTE( "aster7c.bin", 0x080000,  0x20000, CRC(8223ebdc);SHA1(e4aa39e4bc1d210bdda5b0cb41d6c8006c48dd24) )
+		ROM_LOAD16_BYTE( "aster7d.bin", 0x080001,  0x20000, CRC(9f351828);SHA1(e03842418f08e6267eeea03362450da249af73be) )
 	
-		ROM_REGION( 0x010000, REGION_CPU2, 0 )
-		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b) SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
+		ROM_REGION( 0x010000, REGION_CPU2, 0 );
+		ROM_LOAD( "aster5f.bin", 0x000000, 0x010000,  CRC(d3d0d77b);SHA1(bfa77a8bf651dc27f481e96a2d63242084cc214c) )
 	
-		ROM_REGION( 0x100000, REGION_GFX1, 0 )
-		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c) SHA1(a46878916833923e421da0667e37620ae0b77744) )
-		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81) SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
+		ROM_REGION( 0x100000, REGION_GFX1, 0 );
+		ROM_LOAD( "aster16k.bin", 0x000000, 0x080000, CRC(b9da8e9c);SHA1(a46878916833923e421da0667e37620ae0b77744) )
+		ROM_LOAD( "aster12k.bin", 0x080000, 0x080000, CRC(7eb07a81);SHA1(672c0c60834df7816d33d88643e4575b8ca9bcc1) )
 	
-		ROM_REGION( 0x400000, REGION_GFX2, 0 )
-		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe) SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
-		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4) SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
+		ROM_REGION( 0x400000, REGION_GFX2, 0 );
+		ROM_LOAD( "aster7k.bin", 0x000000, 0x200000, CRC(c41278fe);SHA1(58e5f67a67ae97e0b264489828cd7e74662c5ed5) )
+		ROM_LOAD( "aster3k.bin", 0x200000, 0x200000, CRC(32efdbc4);SHA1(b7e8610aa22249176d82b750e2549d1eea6abe4f) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )
-		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e) SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );
+		ROM_LOAD( "aster1e.bin", 0x000000, 0x200000, CRC(6df9ec0e);SHA1(cee60312e9813bd6579f3ac7c3c2521a8e633eca) )
+	ROM_END(); }}; 
 	
 	
 	static DRIVER_INIT( asterix )
@@ -406,7 +410,7 @@ public class asterix
 	}
 	
 	
-	GAMEX( 1992, asterix,  0,       asterix, asterix, asterix, ROT0, "Konami", "Asterix (World ver. EAD)", GAME_IMPERFECT_GRAPHICS )
-	GAMEX( 1992, astrxeac, asterix, asterix, asterix, asterix, ROT0, "Konami", "Asterix (World ver. EAC)", GAME_IMPERFECT_GRAPHICS )
-	GAMEX( 1992, astrxeaa, asterix, asterix, asterix, asterix, ROT0, "Konami", "Asterix (World ver. EAA)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_asterix	   = new GameDriver("1992"	,"asterix"	,"asterix.java"	,rom_asterix,null	,machine_driver_asterix	,input_ports_asterix	,init_asterix	,ROT0	,	"Konami", "Asterix (World ver. EAD)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_astrxeac	   = new GameDriver("1992"	,"astrxeac"	,"asterix.java"	,rom_astrxeac,driver_asterix	,machine_driver_asterix	,input_ports_asterix	,init_asterix	,ROT0	,	"Konami", "Asterix (World ver. EAC)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_astrxeaa	   = new GameDriver("1992"	,"astrxeaa"	,"asterix.java"	,rom_astrxeaa,driver_asterix	,machine_driver_asterix	,input_ports_asterix	,init_asterix	,ROT0	,	"Konami", "Asterix (World ver. EAA)", GAME_IMPERFECT_GRAPHICS )
 }

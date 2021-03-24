@@ -66,22 +66,22 @@ public class m62
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -105,22 +105,22 @@ public class m62
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[512] >> 0) & 0x01;
-			bit1 = (color_prom[512] >> 1) & 0x01;
-			bit2 = (color_prom[512] >> 2) & 0x01;
-			bit3 = (color_prom[512] >> 3) & 0x01;
+			bit0 = (color_prom.read(512)>> 0) & 0x01;
+			bit1 = (color_prom.read(512)>> 1) & 0x01;
+			bit2 = (color_prom.read(512)>> 2) & 0x01;
+			bit3 = (color_prom.read(512)>> 3) & 0x01;
 			g =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*512] >> 0) & 0x01;
-			bit1 = (color_prom[2*512] >> 1) & 0x01;
-			bit2 = (color_prom[2*512] >> 2) & 0x01;
-			bit3 = (color_prom[2*512] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*512)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*512)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*512)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*512)>> 3) & 0x01;
 			b =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -136,17 +136,17 @@ public class m62
 			int bit0,bit1,bit2,r,g,b;
 	
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i+512,r,g,b);
@@ -169,22 +169,22 @@ public class m62
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*256] >> 0) & 0x01;
-			bit1 = (color_prom[2*256] >> 1) & 0x01;
-			bit2 = (color_prom[2*256] >> 2) & 0x01;
-			bit3 = (color_prom[2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*256)>> 3) & 0x01;
 			b =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -200,22 +200,22 @@ public class m62
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			g =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*256] >> 0) & 0x01;
-			bit1 = (color_prom[2*256] >> 1) & 0x01;
-			bit2 = (color_prom[2*256] >> 2) & 0x01;
-			bit3 = (color_prom[2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*256)>> 3) & 0x01;
 			b =  0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i+512,r,g,b);
@@ -243,7 +243,7 @@ public class m62
 		state_save_register_UINT8("video", 0, "irem_textram",            irem_textram,   irem_textram_size);
 	}
 	
-	WRITE_HANDLER( m62_flipscreen_w )
+	public static WriteHandlerPtr m62_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* screen flip is handled both by software and hardware */
 		data ^= ~readinputport(4) & 1;
@@ -256,39 +256,39 @@ public class m62
 	
 		coin_counter_w(0,data & 2);
 		coin_counter_w(1,data & 4);
-	}
+	} };
 	
-	WRITE_HANDLER( m62_hscroll_low_w )
+	public static WriteHandlerPtr m62_hscroll_low_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_background_hscroll = ( m62_background_hscroll & 0xff00 ) | data;
-	}
+	} };
 	
-	WRITE_HANDLER( m62_hscroll_high_w )
+	public static WriteHandlerPtr m62_hscroll_high_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_background_hscroll = ( m62_background_hscroll & 0xff ) | ( data << 8 );
-	}
+	} };
 	
-	WRITE_HANDLER( m62_vscroll_low_w )
+	public static WriteHandlerPtr m62_vscroll_low_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_background_vscroll = ( m62_background_vscroll & 0xff00 ) | data;
-	}
+	} };
 	
-	WRITE_HANDLER( m62_vscroll_high_w )
+	public static WriteHandlerPtr m62_vscroll_high_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_background_vscroll = ( m62_background_vscroll & 0xff ) | ( data << 8 );
-	}
+	} };
 	
-	WRITE_HANDLER( m62_tileram_w )
+	public static WriteHandlerPtr m62_tileram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_tileram[ offset ] = data;
 		tilemap_mark_tile_dirty( m62_background, offset >> 1 );
-	}
+	} };
 	
-	WRITE_HANDLER( m62_textram_w )
+	public static WriteHandlerPtr m62_textram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_textram[ offset ] = data;
 		tilemap_mark_tile_dirty( m62_foreground, offset >> 1 );
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -305,14 +305,14 @@ public class m62
 		{
 			int i,incr,code,col,flipx,flipy,sx,sy;
 	
-			if( ( spriteram[offs] & prioritymask ) == priority )
+			if( ( spriteram.read(offs)& prioritymask ) == priority )
 			{
-				code = spriteram[offs+4] + ((spriteram[offs+5] & 0x07) << 8);
-				col = spriteram[offs+0] & colormask;
-				sx = 256 * (spriteram[offs+7] & 1) + spriteram[offs+6],
-				sy = 256+128-15 - (256 * (spriteram[offs+3] & 1) + spriteram[offs+2]),
-				flipx = spriteram[offs+5] & 0x40;
-				flipy = spriteram[offs+5] & 0x80;
+				code = spriteram.read(offs+4)+ ((spriteram.read(offs+5)& 0x07) << 8);
+				col = spriteram.read(offs+0)& colormask;
+				sx = 256 * (spriteram.read(offs+7)& 1) + spriteram.read(offs+6),
+				sy = 256+128-15 - (256 * (spriteram.read(offs+3)& 1) + spriteram.read(offs+2)),
+				flipx = spriteram.read(offs+5)& 0x40;
+				flipy = spriteram.read(offs+5)& 0x80;
 	
 				i = sprite_height_prom[(code >> 5) & 0x1f];
 				if (i == 1)	/* double height */
@@ -359,7 +359,7 @@ public class m62
 	int m62_start( void (*tile_get_info)( int memory_offset ), int rows, int cols, int x1, int y1, int x2, int y2 )
 	{
 		m62_background = tilemap_create( tile_get_info, tilemap_scan_rows, TILEMAP_TRANSPARENT, x1, y1, x2, y2 );
-		if( !m62_background )
+		if (m62_background == 0)
 		{
 			return 1;
 		}
@@ -384,7 +384,7 @@ public class m62
 	int m62_textlayer( void (*tile_get_info)( int memory_offset ), int rows, int cols, int x1, int y1, int x2, int y2 )
 	{
 		m62_foreground = tilemap_create( tile_get_info, tilemap_scan_rows, TILEMAP_TRANSPARENT, x1, y1, x2, y2 );
-		if( !m62_foreground )
+		if (m62_foreground == 0)
 		{
 			return 1;
 		}
@@ -401,11 +401,11 @@ public class m62
 		return 0;
 	}
 	
-	WRITE_HANDLER( kungfum_tileram_w )
+	public static WriteHandlerPtr kungfum_tileram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_tileram[ offset ] = data;
 		tilemap_mark_tile_dirty( m62_background, offset & 0x7ff );
-	}
+	} };
 	
 	static void get_kungfum_bg_tile_info( int offs )
 	{
@@ -617,24 +617,24 @@ public class m62
 	}
 	
 	
-	WRITE_HANDLER( kidniki_text_vscroll_low_w )
+	public static WriteHandlerPtr kidniki_text_vscroll_low_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kidniki_text_vscroll = (kidniki_text_vscroll & 0xff00) | data;
-	}
+	} };
 	
-	WRITE_HANDLER( kidniki_text_vscroll_high_w )
+	public static WriteHandlerPtr kidniki_text_vscroll_high_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kidniki_text_vscroll = (kidniki_text_vscroll & 0xff) | (data << 8);
-	}
+	} };
 	
-	WRITE_HANDLER( kidniki_background_bank_w )
+	public static WriteHandlerPtr kidniki_background_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (kidniki_background_bank != (data & 1))
 		{
 			kidniki_background_bank = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	static void get_kidniki_bg_tile_info( int offs )
 	{
@@ -673,14 +673,14 @@ public class m62
 	}
 	
 	
-	WRITE_HANDLER( spelunkr_palbank_w )
+	public static WriteHandlerPtr spelunkr_palbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (spelunkr_palbank != (data & 0x01))
 		{
 			spelunkr_palbank = data & 0x01;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	static void get_spelunkr_bg_tile_info( int offs )
 	{
@@ -720,16 +720,16 @@ public class m62
 	}
 	
 	
-	WRITE_HANDLER( spelunk2_gfxport_w )
+	public static WriteHandlerPtr spelunk2_gfxport_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m62_hscroll_high_w(0,(data&2)>>1);
 		m62_vscroll_high_w(0,(data&1));
 		if (spelunkr_palbank != ((data & 0x0c) >> 2))
 		{
 			spelunkr_palbank = (data & 0x0c) >> 2;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	static void get_spelunk2_bg_tile_info( int offs )
 	{
@@ -806,10 +806,10 @@ public class m62
 	}
 	
 	
-	WRITE_HANDLER( horizon_scrollram_w )
+	public static WriteHandlerPtr horizon_scrollram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		horizon_scrollram[ offset ] = data;
-	}
+	} };
 	
 	static void get_horizon_bg_tile_info( int offs )
 	{

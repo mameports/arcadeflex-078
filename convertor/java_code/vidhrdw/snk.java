@@ -81,10 +81,10 @@ public class snk
 		snk_blink_parity = 0;
 	
 		dirtybuffer = auto_malloc( MAX_VRAM_SIZE );
-		if(!dirtybuffer) return 1;
+		if (dirtybuffer == 0) return 1;
 	
 		tmpbitmap = auto_bitmap_alloc( 512, 512 );
-		if(!tmpbitmap) return 1;
+		if (tmpbitmap == 0) return 1;
 	
 		memset( dirtybuffer, 0xff, MAX_VRAM_SIZE );
 	
@@ -108,8 +108,8 @@ public class snk
 		for(x=0; x<x_size; x++) for(y=0; y<y_size; y++)
 		{
 			offs = (x*y_size + y) << 1;
-			tile_number = videoram[offs];
-			attributes  = videoram[offs+1];
+			tile_number = videoram.read(offs);
+			attributes  = videoram.read(offs+1);
 	
 			if(tile_number != dirtybuffer[offs] || attributes != dirtybuffer[offs+1])
 			{
@@ -209,15 +209,15 @@ public class snk
 		{
 			if(*(UINT32*)(spriteram+offs) == 0 || *(UINT32*)(spriteram+offs) == -1) continue;
 	
-			tile_number = spriteram[offs+1];
-			attributes  = spriteram[offs+3]; /* YBBX.CCCC */
+			tile_number = spriteram.read(offs+1);
+			attributes  = spriteram.read(offs+3); /* YBBX.CCCC */
 			if(attributes & 0x40) tile_number |= 256;
 			if(attributes & 0x20) tile_number |= 512;
 	
 			color = attributes & 0xf;
-			sx =  xscroll - spriteram[offs+2];
+			sx =  xscroll - spriteram.read(offs+2);
 			if(!(attributes & 0x80)) sx += 256;
-			sy = -yscroll + spriteram[offs];
+			sy = -yscroll + spriteram.read(offs);
 			if(attributes & 0x10) sy += 256;
 			sx &= 0x1ff;
 			sy &= 0x1ff;
@@ -275,9 +275,9 @@ public class snk
 	VIDEO_START( sgladiat )
 	{
 		dirtybuffer = auto_malloc( MAX_VRAM_SIZE );
-		if(!dirtybuffer) return 1;
+		if (dirtybuffer == 0) return 1;
 		tmpbitmap = auto_bitmap_alloc( 512, 256 );
-		if(!tmpbitmap) return 1;
+		if (tmpbitmap == 0) return 1;
 		memset( dirtybuffer, 0xff, MAX_VRAM_SIZE );
 		return 0;
 	}
@@ -293,7 +293,7 @@ public class snk
 		for(x = 0; x < 64; x++) for(y = 0; y < 32; y++)
 		{
 			offs = (x<<5)+y;
-			tile_number = videoram[offs];
+			tile_number = videoram.read(offs);
 	
 			if(tile_number != dirtybuffer[offs])
 			{

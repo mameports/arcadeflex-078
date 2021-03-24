@@ -42,7 +42,7 @@ public class konamigx
 		ldw = 0;
 	}
 	
-	WRITE_HANDLER( tms57002_control_w )
+	public static WriteHandlerPtr tms57002_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		chk_ldw();
 	
@@ -81,15 +81,15 @@ public class konamigx
 			default:
 			break;
 		}
-	}
+	} };
 	
-	READ_HANDLER( tms57002_status_r )
+	public static ReadHandlerPtr tms57002_status_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		chk_ldw();
 		return 1;
-	}
+	} };
 	
-	WRITE_HANDLER( tms57002_data_w )
+	public static WriteHandlerPtr tms57002_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch(tms57002.control)
 		{
@@ -127,9 +127,9 @@ public class konamigx
 				ldw++;
 			break;
 		}
-	}
+	} };
 	
-	READ_HANDLER( tms57002_data_r )
+	public static ReadHandlerPtr tms57002_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		unsigned char res;
 	
@@ -146,7 +146,7 @@ public class konamigx
 		}
 	
 		return 0;
-	}
+	} };
 	
 	
 	READ16_HANDLER( tms57002_data_word_r )
@@ -316,7 +316,7 @@ public class konamigx
 			starty += incyy;
 			startx += incyx;
 	
-			if (!blend)
+			if (blend == 0)
 				goto DRAW_SOLID;
 			else
 			{
@@ -614,13 +614,13 @@ public class konamigx
 		// calculate zoom factors and clip source
 		if (nozoom)
 		{
-			if (!flipx) src_fbx = 0; else { src_fbx = src_fw - 1; src_fdx = -src_fdx; }
-			if (!flipy) src_fby = 0; else { src_fby = src_fh - 1; src_fdy = -src_fdy; src_pitch = -src_pitch; }
+			if (flipx == 0) src_fbx = 0; else { src_fbx = src_fw - 1; src_fdx = -src_fdx; }
+			if (flipy == 0) src_fby = 0; else { src_fby = src_fh - 1; src_fdy = -src_fdy; src_pitch = -src_pitch; }
 		}
 		else
 		{
-			if (!flipx) src_fbx = FPENT; else { src_fbx = src_fw - FPENT - 1; src_fdx = -src_fdx; }
-			if (!flipy) src_fby = FPENT; else { src_fby = src_fh - FPENT - 1; src_fdy = -src_fdy; }
+			if (flipx == 0) src_fbx = FPENT; else { src_fbx = src_fw - FPENT - 1; src_fdx = -src_fdx; }
+			if (flipy == 0) src_fby = FPENT; else { src_fby = src_fh - FPENT - 1; src_fdy = -src_fdy; }
 		}
 		src_fbx += dst_skipx * src_fdx;
 		src_fby += dst_skipy * src_fdy;
@@ -634,7 +634,7 @@ public class konamigx
 		dst_ptr += dst_y * dst_pitch + dst_x + dst_w;
 		dst_w = -dst_w;
 	
-		if (!nozoom) goto DRAWZOOM;
+		if (nozoom == 0) goto DRAWZOOM;
 	
 		src_ptr = src_base + (src_fby<<4) + src_fbx;
 		src_fdy = src_fdx * dst_w + src_pitch;
@@ -1169,7 +1169,7 @@ public class konamigx
 		ecx = h;
 		do { memset(zptr, -1, w); zptr += GX_ZBUFW; } while (--ecx);
 	
-		if (!noshadow)
+		if (noshadow == 0)
 		{
 			zptr = gx_shdzbuf;
 			w <<= 1;
@@ -1770,8 +1770,8 @@ public class konamigx
 				if (flipscreenx) ox += screenwidth;
 			}
 	
-			if (flipscreenx) { ox = -ox; if (!mirrorx) flipx = !flipx; }
-			if (flipscreeny) { oy = -oy; if (!mirrory) flipy = !flipy; }
+			if (flipscreenx) { ox = -ox; if (mirrorx == 0) flipx = !flipx; }
+			if (flipscreeny) { oy = -oy; if (mirrory == 0) flipy = !flipy; }
 	
 			// apply wrapping and global offsets
 			temp = wrapsize-1;

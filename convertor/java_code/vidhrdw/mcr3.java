@@ -50,7 +50,7 @@ public class mcr3
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index * 2] | (videoram[tile_index * 2 + 1] << 8);
+		int data = videoram.read(tile_index * 2)| (videoram.read(tile_index * 2 + 1)<< 8);
 		int code = (data & 0x3ff) | ((data >> 4) & 0x400);
 		int color = (data >> 12) & 3;
 		SET_TILE_INFO(0, code, color, TILE_FLIPYX((data >> 10) & 3));
@@ -59,7 +59,7 @@ public class mcr3
 	
 	static void mcrmono_get_bg_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index * 2] | (videoram[tile_index * 2 + 1] << 8);
+		int data = videoram.read(tile_index * 2)| (videoram.read(tile_index * 2 + 1)<< 8);
 		int code = (data & 0x3ff) | ((data >> 4) & 0x400);
 		int color = ((data >> 12) & 3) ^ 3;
 		SET_TILE_INFO(0, code, color, TILE_FLIPYX((data >> 10) & 3));
@@ -75,7 +75,7 @@ public class mcr3
 	
 	static void spyhunt_get_bg_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index];
+		int data = videoram.read(tile_index);
 		int code = (data & 0x3f) | ((data >> 1) & 0x40);
 		SET_TILE_INFO(0, code, 0, (data & 0x40) ? TILE_FLIPY : 0);
 	}
@@ -98,7 +98,7 @@ public class mcr3
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		return 0;
 	}
@@ -108,7 +108,7 @@ public class mcr3
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(mcrmono_get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		return 0;
 	}
@@ -118,12 +118,12 @@ public class mcr3
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(spyhunt_get_bg_tile_info, spyhunt_bg_scan, TILEMAP_OPAQUE, 64,32, 64,32);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		/* initialize the text tilemap */
 		alpha_tilemap = tilemap_create(spyhunt_get_alpha_tile_info, tilemap_scan_cols, TILEMAP_TRANSPARENT, 16,16, 32,32);
-		if (!alpha_tilemap)
+		if (alpha_tilemap == 0)
 			return 1;
 		tilemap_set_transparent_pen(alpha_tilemap, 0);
 		tilemap_set_scrollx(alpha_tilemap, 0, 16);
@@ -138,11 +138,11 @@ public class mcr3
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( mcr3_paletteram_w )
+	public static WriteHandlerPtr mcr3_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		offset &= 0x7f;
 	
 		/* high bit of red comes from low bit of address */
@@ -156,7 +156,7 @@ public class mcr3
 		b = (b << 5) | (b << 2) | (b >> 1);
 	
 		palette_set_color(offset / 2, r, g, b);
-	}
+	} };
 	
 	
 	
@@ -166,25 +166,25 @@ public class mcr3
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( mcr3_videoram_w )
+	public static WriteHandlerPtr mcr3_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( spyhunt_videoram_w )
+	public static WriteHandlerPtr spyhunt_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(bg_tilemap, offset);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( spyhunt_alpharam_w )
+	public static WriteHandlerPtr spyhunt_alpharam_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		spyhunt_alpharam[offset] = data;
 		tilemap_mark_tile_dirty(alpha_tilemap, offset);
-	}
+	} };
 	
 	
 	
@@ -210,13 +210,13 @@ public class mcr3
 				continue;
 	
 			/* extract the bits of information */
-			flags = spriteram[offs + 1];
-			code = spriteram[offs + 2] + 256 * ((flags >> 3) & 0x01);
+			flags = spriteram.read(offs + 1);
+			code = spriteram.read(offs + 2)+ 256 * ((flags >> 3) & 0x01);
 			color = ~flags & color_mask;
 			flipx = flags & 0x10;
 			flipy = flags & 0x20;
-			sx = (spriteram[offs + 3] - 3) * 2;
-			sy = (241 - spriteram[offs]) * 2;
+			sx = (spriteram.read(offs + 3)- 3) * 2;
+			sy = (241 - spriteram.read(offs)) * 2;
 	
 			code ^= code_xor;
 	
@@ -225,7 +225,7 @@ public class mcr3
 	
 			/* sprites use color 0 for background pen and 8 for the 'under tile' pen.
 				The color 8 is used to cover over other sprites. */
-			if (!mcr_cocktail_flip)
+			if (mcr_cocktail_flip == 0)
 			{
 				/* first draw the sprite, visible */
 				pdrawgfx(bitmap, Machine->gfx[1], code, color, flipx, flipy, sx, sy,

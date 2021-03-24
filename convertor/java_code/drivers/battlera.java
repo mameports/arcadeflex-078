@@ -33,35 +33,28 @@ public class battlera
 	VIDEO_START( battlera );
 	INTERRUPT_GEN( battlera_interrupt );
 	
-	READ_HANDLER( HuC6270_register_r );
-	WRITE_HANDLER( HuC6270_register_w );
-	READ_HANDLER( HuC6270_data_r );
-	WRITE_HANDLER( HuC6270_data_w );
-	WRITE_HANDLER( battlera_palette_w );
 	
-	READ_HANDLER( HuC6270_debug_r );
-	WRITE_HANDLER( HuC6270_debug_w );
 	
 	static int control_port_select;
 	
 	/******************************************************************************/
 	
-	static WRITE_HANDLER( battlera_sound_w )
+	public static WriteHandlerPtr battlera_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset==0) {
 			soundlatch_w(0,data);
 			cpu_set_irq_line(1, 0, HOLD_LINE);
 		}
-	}
+	} };
 	
 	/******************************************************************************/
 	
-	static WRITE_HANDLER( control_data_w )
+	public static WriteHandlerPtr control_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		control_port_select=data;
-	}
+	} };
 	
-	static READ_HANDLER( control_data_r )
+	public static ReadHandlerPtr control_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (control_port_select) {
 			case 0xfe: return readinputport(0); /* Player 1 */
@@ -72,44 +65,50 @@ public class battlera
 		}
 	
 	    return 0xff;
-	}
+	} };
 	
 	/******************************************************************************/
 	
-	static MEMORY_READ_START( battlera_readmem )
-		{ 0x000000, 0x0fffff, MRA_ROM },
-		{ 0x100000, 0x10ffff, HuC6270_debug_r }, /* Cheat to view vram data */
-		{ 0x1f0000, 0x1f1fff, MRA_BANK8 },
-		{ 0x1fe000, 0x1fe001, HuC6270_register_r },
-		{ 0x1ff000, 0x1ff001, control_data_r },
-	MEMORY_END
+	public static Memory_ReadAddress battlera_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x000000, 0x0fffff, MRA_ROM ),
+		new Memory_ReadAddress( 0x100000, 0x10ffff, HuC6270_debug_r ), /* Cheat to view vram data */
+		new Memory_ReadAddress( 0x1f0000, 0x1f1fff, MRA_BANK8 ),
+		new Memory_ReadAddress( 0x1fe000, 0x1fe001, HuC6270_register_r ),
+		new Memory_ReadAddress( 0x1ff000, 0x1ff001, control_data_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( battlera_writemem )
-		{ 0x000000, 0x0fffff, MWA_ROM },
-		{ 0x100000, 0x10ffff, HuC6270_debug_w }, /* Cheat to edit vram data */
-		{ 0x1e0800, 0x1e0801, battlera_sound_w },
-		{ 0x1e1000, 0x1e13ff, battlera_palette_w, &paletteram },
-		{ 0x1f0000, 0x1f1fff, MWA_BANK8 }, /* Main ram */
-		{ 0x1fe000, 0x1fe001, HuC6270_register_w },
-		{ 0x1fe002, 0x1fe003, HuC6270_data_w },
-		{ 0x1ff000, 0x1ff001, control_data_w },
-		{ 0x1ff402, 0x1ff403, H6280_irq_status_w },
-	MEMORY_END
+	public static Memory_WriteAddress battlera_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x000000, 0x0fffff, MWA_ROM ),
+		new Memory_WriteAddress( 0x100000, 0x10ffff, HuC6270_debug_w ), /* Cheat to edit vram data */
+		new Memory_WriteAddress( 0x1e0800, 0x1e0801, battlera_sound_w ),
+		new Memory_WriteAddress( 0x1e1000, 0x1e13ff, battlera_palette_w, paletteram ),
+		new Memory_WriteAddress( 0x1f0000, 0x1f1fff, MWA_BANK8 ), /* Main ram */
+		new Memory_WriteAddress( 0x1fe000, 0x1fe001, HuC6270_register_w ),
+		new Memory_WriteAddress( 0x1fe002, 0x1fe003, HuC6270_data_w ),
+		new Memory_WriteAddress( 0x1ff000, 0x1ff001, control_data_w ),
+		new Memory_WriteAddress( 0x1ff402, 0x1ff403, H6280_irq_status_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( battlera_portwrite )
-		{ 0x00, 0x01, HuC6270_register_w },
-		{ 0x02, 0x03, HuC6270_data_w },
-	PORT_END
+	public static IO_WritePort battlera_portwrite[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x01, HuC6270_register_w ),
+		new IO_WritePort( 0x02, 0x03, HuC6270_data_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	/******************************************************************************/
 	
-	static WRITE_HANDLER( YM2203_w )
+	public static WriteHandlerPtr YM2203_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset) {
 		case 0: YM2203_control_port_0_w(0,data); break;
 		case 1: YM2203_write_port_0_w(0,data); break;
 		}
-	}
+	} };
 	
 	static int msm5205next;
 	
@@ -125,142 +124,146 @@ public class battlera
 			cpu_set_irq_line(1, 1, HOLD_LINE);
 	}
 	
-	static WRITE_HANDLER( battlera_adpcm_data_w )
+	public static WriteHandlerPtr battlera_adpcm_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		msm5205next=data;
-	}
+	} };
 	
-	static WRITE_HANDLER( battlera_adpcm_reset_w )
+	public static WriteHandlerPtr battlera_adpcm_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		MSM5205_reset_w(0,0);
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x000000, 0x00ffff, MRA_ROM },
-		{ 0x1f0000, 0x1f1fff, MRA_BANK7 }, /* Main ram */
-		{ 0x1ff000, 0x1ff001, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x000000, 0x00ffff, MRA_ROM ),
+		new Memory_ReadAddress( 0x1f0000, 0x1f1fff, MRA_BANK7 ), /* Main ram */
+		new Memory_ReadAddress( 0x1ff000, 0x1ff001, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-	 	{ 0x000000, 0x00ffff, MWA_ROM },
-		{ 0x040000, 0x040001, YM2203_w },
-		{ 0x080000, 0x080001, battlera_adpcm_data_w },
-		{ 0x1fe800, 0x1fe80f, C6280_0_w },
-		{ 0x1f0000, 0x1f1fff, MWA_BANK7 }, /* Main ram */
-		{ 0x1ff000, 0x1ff001, battlera_adpcm_reset_w },
-		{ 0x1ff402, 0x1ff403, H6280_irq_status_w },
-	MEMORY_END
-	
-	/******************************************************************************/
-	
-	INPUT_PORTS_START( battlera )
-		PORT_START  /* Player 1 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
-	
-		PORT_START  /* Player 2 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
-	
-		PORT_START	/* Coins */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* Dip switch bank 1 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	
-		PORT_START	/* Dip switch bank 2 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x01, "1" )
-		PORT_DIPSETTING(    0x02, "2" )
-		PORT_DIPSETTING(    0x03, "3" )
-		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x08, "Easy" )
-		PORT_DIPSETTING(    0x0c, "Normal" )
-		PORT_DIPSETTING(    0x04, "Hard" )
-		PORT_DIPSETTING(    0x00, "Very Hard" )
-		PORT_DIPNAME( 0x10, 0x10, "Allow Continue" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+	 	new Memory_WriteAddress( 0x000000, 0x00ffff, MWA_ROM ),
+		new Memory_WriteAddress( 0x040000, 0x040001, YM2203_w ),
+		new Memory_WriteAddress( 0x080000, 0x080001, battlera_adpcm_data_w ),
+		new Memory_WriteAddress( 0x1fe800, 0x1fe80f, C6280_0_w ),
+		new Memory_WriteAddress( 0x1f0000, 0x1f1fff, MWA_BANK7 ), /* Main ram */
+		new Memory_WriteAddress( 0x1ff000, 0x1ff001, battlera_adpcm_reset_w ),
+		new Memory_WriteAddress( 0x1ff402, 0x1ff403, H6280_irq_status_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	/******************************************************************************/
 	
-	static struct GfxLayout tiles =
-	{
+	static InputPortPtr input_ports_battlera = new InputPortPtr(){ public void handler() { 
+		PORT_START();   /* Player 1 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
+	
+		PORT_START();   /* Player 2 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
+	
+		PORT_START(); 	/* Coins */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0xf8, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* Dip switch bank 1 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	
+		PORT_START(); 	/* Dip switch bank 2 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x01, "1" );
+		PORT_DIPSETTING(    0x02, "2" );
+		PORT_DIPSETTING(    0x03, "3" );
+		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x08, "Easy" );
+		PORT_DIPSETTING(    0x0c, "Normal" );
+		PORT_DIPSETTING(    0x04, "Hard" );
+		PORT_DIPSETTING(    0x00, "Very Hard" );
+		PORT_DIPNAME( 0x10, 0x10, "Allow Continue" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
+	
+	/******************************************************************************/
+	
+	static GfxLayout tiles = new GfxLayout
+	(
 		8,8,
 		4096,
 		4,
-		{ 16*8, 16*8+8, 0, 8 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 16*8, 16*8+8, 0, 8 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		32*8
-	};
+	);
 	
-	static struct GfxLayout sprites =
-	{
+	static GfxLayout sprites = new GfxLayout
+	(
 		16,16,
 		1024,
 		4,
-		{ 96*8, 64*8, 32*8, 0 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 96*8, 64*8, 32*8, 0 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		128*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tiles,       0,  16 }, /* Dynamically modified */
-		{ REGION_GFX1, 0, &sprites,   256,  16 }, /* Dynamically modified */
-		{ REGION_GFX1, 0, &tiles  ,   256,  16 }, /* Blank tile */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, tiles,       0,  16 ), /* Dynamically modified */
+		new GfxDecodeInfo( REGION_GFX1, 0, sprites,   256,  16 ), /* Dynamically modified */
+		new GfxDecodeInfo( REGION_GFX1, 0, tiles  ,   256,  16 ), /* Blank tile */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	/******************************************************************************/
@@ -329,50 +332,50 @@ public class battlera
 	
 	/******************************************************************************/
 	
-	ROM_START( bldwolf )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* Main cpu code */
-		ROM_LOAD( "es00-1.rom", 0x00000, 0x10000, CRC(ff4aa252) SHA1(3c190e49020bb6923abb3f3c2632d3c86443c292) )
-		ROM_LOAD( "es01.rom",   0x10000, 0x10000, CRC(9fea3189) SHA1(0692df6df533dfe55f61df8aa0c5c11944ba3ae3) )
-		ROM_LOAD( "es02-1.rom", 0x20000, 0x10000, CRC(49792753) SHA1(4f3fb6912607d373fc0c1096ac0a8cc939e33617) )
+	static RomLoadPtr rom_bldwolf = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* Main cpu code */
+		ROM_LOAD( "es00-1.rom", 0x00000, 0x10000, CRC(ff4aa252);SHA1(3c190e49020bb6923abb3f3c2632d3c86443c292) )
+		ROM_LOAD( "es01.rom",   0x10000, 0x10000, CRC(9fea3189);SHA1(0692df6df533dfe55f61df8aa0c5c11944ba3ae3) )
+		ROM_LOAD( "es02-1.rom", 0x20000, 0x10000, CRC(49792753);SHA1(4f3fb6912607d373fc0c1096ac0a8cc939e33617) )
 		/* Rom sockets 0x30000 - 0x70000 are unused */
-		ROM_LOAD( "es05.rom",   0x80000, 0x10000, CRC(551fa331) SHA1(a70c627c572ba1b8029f61eae6eaad9825c56339) )
-		ROM_LOAD( "es06.rom",   0x90000, 0x10000, CRC(ab91aac8) SHA1(81d820c8b70281a4a52f7ec75a3c54377011d9d9) )
-		ROM_LOAD( "es07.rom",   0xa0000, 0x10000, CRC(8d15a3d0) SHA1(afae081ee5e0de359cae6a7ea8401237c5ab7095) )
-		ROM_LOAD( "es08.rom",   0xb0000, 0x10000, CRC(38f06039) SHA1(cc394f161b2c4423cd2da763701ceaad7d27f741) )
-		ROM_LOAD( "es09.rom",   0xc0000, 0x10000, CRC(b718c47d) SHA1(1d5b2ec819b0848e5b883373887445a63ebddb06) )
-		ROM_LOAD( "es10-1.rom", 0xd0000, 0x10000, CRC(d3cddc02) SHA1(d212127a9d7aff384171d79c563f1516c0bd46ae) )
+		ROM_LOAD( "es05.rom",   0x80000, 0x10000, CRC(551fa331);SHA1(a70c627c572ba1b8029f61eae6eaad9825c56339) )
+		ROM_LOAD( "es06.rom",   0x90000, 0x10000, CRC(ab91aac8);SHA1(81d820c8b70281a4a52f7ec75a3c54377011d9d9) )
+		ROM_LOAD( "es07.rom",   0xa0000, 0x10000, CRC(8d15a3d0);SHA1(afae081ee5e0de359cae6a7ea8401237c5ab7095) )
+		ROM_LOAD( "es08.rom",   0xb0000, 0x10000, CRC(38f06039);SHA1(cc394f161b2c4423cd2da763701ceaad7d27f741) )
+		ROM_LOAD( "es09.rom",   0xc0000, 0x10000, CRC(b718c47d);SHA1(1d5b2ec819b0848e5b883373887445a63ebddb06) )
+		ROM_LOAD( "es10-1.rom", 0xd0000, 0x10000, CRC(d3cddc02);SHA1(d212127a9d7aff384171d79c563f1516c0bd46ae) )
 		/* Rom sockets 0xe0000 - 0x100000 are unused */
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* Sound CPU */
-		ROM_LOAD( "es11.rom",   0x00000, 0x10000, CRC(f5b29c9c) SHA1(44dcdf96f8deb9a29aa9d94a8b9cf91a0ed808d4) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "es11.rom",   0x00000, 0x10000, CRC(f5b29c9c);SHA1(44dcdf96f8deb9a29aa9d94a8b9cf91a0ed808d4) )
 	
-		ROM_REGION( 0x80000, REGION_GFX1, 0 )
+		ROM_REGION( 0x80000, REGION_GFX1, 0 );
 		/* Nothing */
-	ROM_END
+	ROM_END(); }}; 
 	
-	ROM_START( battlera )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 ) /* Main cpu code */
-		ROM_LOAD( "00_e1.bin", 0x00000, 0x10000, CRC(aa1cbe69) SHA1(982530f3202bc7b8d94d2b818873b71f02c0e8de) ) /* ET00 */
-		ROM_LOAD( "es01.rom",  0x10000, 0x10000, CRC(9fea3189) SHA1(0692df6df533dfe55f61df8aa0c5c11944ba3ae3) ) /* ET01 */
-		ROM_LOAD( "02_e4.bin", 0x20000, 0x10000, CRC(cd72f580) SHA1(43b476c8f554348b02aa9558c0773f47cdb47fe0) ) /* ET02, etc */
+	static RomLoadPtr rom_battlera = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* Main cpu code */
+		ROM_LOAD( "00_e1.bin", 0x00000, 0x10000, CRC(aa1cbe69);SHA1(982530f3202bc7b8d94d2b818873b71f02c0e8de) ) /* ET00 */
+		ROM_LOAD( "es01.rom",  0x10000, 0x10000, CRC(9fea3189);SHA1(0692df6df533dfe55f61df8aa0c5c11944ba3ae3) ) /* ET01 */
+		ROM_LOAD( "02_e4.bin", 0x20000, 0x10000, CRC(cd72f580);SHA1(43b476c8f554348b02aa9558c0773f47cdb47fe0) ) /* ET02, etc */
 		/* Rom sockets 0x30000 - 0x70000 are unused */
-		ROM_LOAD( "es05.rom",  0x80000, 0x10000, CRC(551fa331) SHA1(a70c627c572ba1b8029f61eae6eaad9825c56339) )
-		ROM_LOAD( "es06.rom",  0x90000, 0x10000, CRC(ab91aac8) SHA1(81d820c8b70281a4a52f7ec75a3c54377011d9d9) )
-		ROM_LOAD( "es07.rom",  0xa0000, 0x10000, CRC(8d15a3d0) SHA1(afae081ee5e0de359cae6a7ea8401237c5ab7095) )
-		ROM_LOAD( "es08.rom",  0xb0000, 0x10000, CRC(38f06039) SHA1(cc394f161b2c4423cd2da763701ceaad7d27f741) )
-		ROM_LOAD( "es09.rom",  0xc0000, 0x10000, CRC(b718c47d) SHA1(1d5b2ec819b0848e5b883373887445a63ebddb06) )
-		ROM_LOAD( "es10-1.rom",0xd0000, 0x10000, CRC(d3cddc02) SHA1(d212127a9d7aff384171d79c563f1516c0bd46ae) )
+		ROM_LOAD( "es05.rom",  0x80000, 0x10000, CRC(551fa331);SHA1(a70c627c572ba1b8029f61eae6eaad9825c56339) )
+		ROM_LOAD( "es06.rom",  0x90000, 0x10000, CRC(ab91aac8);SHA1(81d820c8b70281a4a52f7ec75a3c54377011d9d9) )
+		ROM_LOAD( "es07.rom",  0xa0000, 0x10000, CRC(8d15a3d0);SHA1(afae081ee5e0de359cae6a7ea8401237c5ab7095) )
+		ROM_LOAD( "es08.rom",  0xb0000, 0x10000, CRC(38f06039);SHA1(cc394f161b2c4423cd2da763701ceaad7d27f741) )
+		ROM_LOAD( "es09.rom",  0xc0000, 0x10000, CRC(b718c47d);SHA1(1d5b2ec819b0848e5b883373887445a63ebddb06) )
+		ROM_LOAD( "es10-1.rom",0xd0000, 0x10000, CRC(d3cddc02);SHA1(d212127a9d7aff384171d79c563f1516c0bd46ae) )
 		/* Rom sockets 0xe0000 - 0x100000 are unused */
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* Sound CPU */
-		ROM_LOAD( "es11.rom",  0x00000, 0x10000, CRC(f5b29c9c) SHA1(44dcdf96f8deb9a29aa9d94a8b9cf91a0ed808d4) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "es11.rom",  0x00000, 0x10000, CRC(f5b29c9c);SHA1(44dcdf96f8deb9a29aa9d94a8b9cf91a0ed808d4) )
 	
-		ROM_REGION( 0x80000, REGION_GFX1, 0 )
+		ROM_REGION( 0x80000, REGION_GFX1, 0 );
 		/* Nothing */
-	ROM_END
+	ROM_END(); }}; 
 	
 	/******************************************************************************/
 	
-	GAMEX( 1988, battlera, 0,        battlera, battlera,  0,   ROT0, "Data East Corporation", "Battle Rangers (World)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
-	GAMEX( 1988, bldwolf,  battlera, battlera, battlera,  0,   ROT0, "Data East USA", "Bloody Wolf (US)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_battlera	   = new GameDriver("1988"	,"battlera"	,"battlera.java"	,rom_battlera,null	,machine_driver_battlera	,input_ports_battlera	,null	,ROT0	,	"Data East Corporation", "Battle Rangers (World)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_bldwolf	   = new GameDriver("1988"	,"bldwolf"	,"battlera.java"	,rom_bldwolf,driver_battlera	,machine_driver_battlera	,input_ports_battlera	,null	,ROT0	,	"Data East USA", "Bloody Wolf (US)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS )
 }

@@ -42,12 +42,9 @@ public class window
 	//============================================================
 	
 	// from input.c
-	extern void win_pause_input(int pause);
-	extern int win_is_mouse_captured(void);
 	extern UINT8 win_trying_to_quit;
 	
 	// from wind3dfx.c
-	int win_d3d_effects_in_use(void);
 	
 	
 	
@@ -198,14 +195,12 @@ public class window
 	//============================================================
 	
 	static void compute_multipliers_internal(const RECT *rect, int visible_width, int visible_height, int *xmult, int *ymult);
-	static void update_system_menu(void);
-	static LRESULT CALLBACK video_window_proc(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam);
+	static static LRESULT CALLBACK video_window_proc(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam);
 	static void draw_video_contents(HDC dc, struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels, int update);
 	
 	static void dib_draw_window(HDC dc, struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels, int update);
 	
-	static int create_debug_window(void);
-	static void draw_debug_contents(HDC dc, struct mame_bitmap *bitmap, const rgb_t *palette);
+	static static void draw_debug_contents(HDC dc, struct mame_bitmap *bitmap, const rgb_t *palette);
 	static LRESULT CALLBACK debug_window_proc(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam);
 	
 	
@@ -217,7 +212,7 @@ public class window
 	INLINE int wnd_extra_width(void)
 	{
 		RECT window = { 100, 100, 200, 200 };
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 			return 0;
 		AdjustWindowRectEx(&window, WINDOW_STYLE, win_has_menu(), WINDOW_STYLE_EX);
 		return (window.right - window.left) - 100;
@@ -232,7 +227,7 @@ public class window
 	INLINE int wnd_extra_height(void)
 	{
 		RECT window = { 100, 100, 200, 200 };
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 			return 0;
 		AdjustWindowRectEx(&window, WINDOW_STYLE, win_has_menu(), WINDOW_STYLE_EX);
 		return (window.bottom - window.top) - 100;
@@ -247,7 +242,7 @@ public class window
 	INLINE int wnd_extra_left(void)
 	{
 		RECT window = { 100, 100, 200, 200 };
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 			return 0;
 		AdjustWindowRectEx(&window, WINDOW_STYLE, win_has_menu(), WINDOW_STYLE_EX);
 		return 100 - window.left;
@@ -420,7 +415,7 @@ public class window
 			win_old_scanlines = 0;
 	
 		// set up window class and register it
-		if (!classes_created)
+		if (classes_created == 0)
 		{
 			WNDCLASS wc = { 0 };
 	
@@ -464,7 +459,7 @@ public class window
 		win_video_window = CreateWindowEx(win_window_mode ? WINDOW_STYLE_EX : FULLSCREEN_STYLE_EX,
 				TEXT("MAME"), title, win_window_mode ? WINDOW_STYLE : FULLSCREEN_STYLE,
 				20, 20, 100, 100, NULL, menu, GetModuleHandle(NULL), NULL);
-		if (!win_video_window)
+		if (win_video_window == 0)
 			return 1;
 	
 		// possibly create the debug window, but don't show it yet
@@ -495,12 +490,12 @@ public class window
 		vector_game			= ((attributes & VIDEO_TYPE_VECTOR) != 0);
 	
 		// handle failure if we couldn't create the video window
-		if (!win_video_window)
+		if (win_video_window == 0)
 			return 1;
 	
 		// allocate a temporary bitmap in case we need it
 		converted_bitmap = malloc(MAX_VIDEO_WIDTH * MAX_VIDEO_HEIGHT * 4);
-		if (!converted_bitmap)
+		if (converted_bitmap == 0)
 			return 1;
 	
 		// adjust the window position
@@ -552,14 +547,14 @@ public class window
 			aspect_ratio = (double)width / (double)height;
 			if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_2_1)
 			{
-				if (!blit_swapxy)
+				if (blit_swapxy == 0)
 					aspect_ratio *= 2.0;
 				else
 					aspect_ratio /= 2.0;
 			}
 			else if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_1_2)
 			{
-				if (!blit_swapxy)
+				if (blit_swapxy == 0)
 					aspect_ratio /= 2.0;
 				else
 					aspect_ratio *= 2.0;
@@ -755,8 +750,7 @@ public class window
 	
 	static LRESULT CALLBACK video_window_proc(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam)
 	{
-		extern void win_timer_enable(int enabled);
-	
+		
 		// handle a few messages
 		switch (message)
 		{
@@ -909,7 +903,7 @@ public class window
 		IntersectRect(&rectcopy, &temp, &maxrect);
 	
 		// if we're not forcing the aspect ratio, just return the intersection
-		if (!win_keep_aspect)
+		if (win_keep_aspect == 0)
 			return;
 	
 		if (constraints == CONSTRAIN_INTEGER_WIDTH)
@@ -1039,14 +1033,14 @@ public class window
 			aspect_ratio = (double)win_visible_width / (double)win_visible_height;
 			if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_2_1)
 			{
-				if (!blit_swapxy)
+				if (blit_swapxy == 0)
 					aspect_ratio *= 2.0;
 				else
 					aspect_ratio /= 2.0;
 			}
 			else if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_1_2)
 			{
-				if (!blit_swapxy)
+				if (blit_swapxy == 0)
 					aspect_ratio /= 2.0;
 				else
 					aspect_ratio *= 2.0;
@@ -1077,7 +1071,7 @@ public class window
 	 	}
 	
 		// first time through here, we need to show the window
-		if (!visible_area_set)
+		if (visible_area_set == 0)
 		{
 			// let's also win_start_maximized the window
 			if (win_window_mode)
@@ -1650,7 +1644,7 @@ public class window
 		// adjust for pixel aspect ratio
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_1_2)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 			{
 				if (*ymult > 1)
 					*ymult &= ~1;
@@ -1663,7 +1657,7 @@ public class window
 		}
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_2_1)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 			{
 				if (*xmult > 1)
 					*xmult &= ~1;
@@ -1722,7 +1716,7 @@ public class window
 				work_bounds.bottom - (bounds.bottom - bounds.top),
 				bounds.right - bounds.left, bounds.bottom - bounds.top,
 				win_video_window, NULL, GetModuleHandle(NULL), NULL);
-		if (!win_debug_window)
+		if (win_debug_window == 0)
 			return 1;
 	#endif
 	
@@ -1866,7 +1860,7 @@ public class window
 		if (debug_focus && win_debug_window)
 		{
 			// if full screen, turn it off
-			if (!win_window_mode)
+			if (win_window_mode == 0)
 				win_toggle_full_screen();
 	
 			// store frameskip/throttle settings

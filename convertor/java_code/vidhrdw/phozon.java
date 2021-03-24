@@ -38,22 +38,22 @@ public class phozon
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -143,9 +143,9 @@ public class phozon
 					sy = my - 2;
 				}
 	
-				drawgfx(tmpbitmap,Machine->gfx[(colorram[offs] & 0x80) ? 1 : 0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+				drawgfx(tmpbitmap,Machine->gfx[(colorram.read(offs)& 0x80) ? 1 : 0],
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						0,0,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_NONE,0);
@@ -157,28 +157,28 @@ public class phozon
 		/* Draw the sprites. */
 		for (offs = 0;offs < spriteram_size;offs += 2){
 			/* is it on? */
-			if ((spriteram_3[offs+1] & 2) == 0){
-				int sprite = spriteram[offs];
-				int color = spriteram[offs+1];
-				int x = (spriteram_2[offs+1]-69) + 0x100*(spriteram_3[offs+1] & 1);
-				int y = ( Machine->drv->screen_height ) - spriteram_2[offs] - 8;
-				int flipx = spriteram_3[offs] & 1;
-				int flipy = spriteram_3[offs] & 2;
+			if ((spriteram_3.read(offs+1)& 2) == 0){
+				int sprite = spriteram.read(offs);
+				int color = spriteram.read(offs+1);
+				int x = (spriteram_2.read(offs+1)-69) + 0x100*(spriteram_3.read(offs+1)& 1);
+				int y = ( Machine->drv->screen_height ) - spriteram_2.read(offs)- 8;
+				int flipx = spriteram_3.read(offs)& 1;
+				int flipy = spriteram_3.read(offs)& 2;
 	
-				switch (spriteram_3[offs] & 0x3c)
+				switch (spriteram_3.read(offs)& 0x3c)
 				{
 					case 0x00:		/* 16x16 */
 						phozon_draw_sprite(bitmap,sprite,color,flipx,flipy,x,y);
 						break;
 	
 					case 0x14:		/* 8x8 */
-						sprite = (sprite << 2) | ((spriteram_3[offs] & 0xc0) >> 6);
+						sprite = (sprite << 2) | ((spriteram_3.read(offs)& 0xc0) >> 6);
 						phozon_draw_sprite8(bitmap,sprite,color,flipx,flipy,x,y+8);
 						break;
 	
 					case 0x04:		/* 8x16 */
-						sprite = (sprite << 2) | ((spriteram_3[offs] & 0xc0) >> 6);
-						if (!flipy){
+						sprite = (sprite << 2) | ((spriteram_3.read(offs)& 0xc0) >> 6);
+						if (flipy == 0){
 							phozon_draw_sprite8(bitmap,2+sprite,color,flipx,flipy,x,y+8);
 							phozon_draw_sprite8(bitmap,sprite,color,flipx,flipy,x,y);
 						}
@@ -189,8 +189,8 @@ public class phozon
 						break;
 	
 					case 0x24:		/* 8x32 */
-						sprite = (sprite << 2) | ((spriteram_3[offs] & 0xc0) >> 6);
-						if (!flipy){
+						sprite = (sprite << 2) | ((spriteram_3.read(offs)& 0xc0) >> 6);
+						if (flipy == 0){
 							phozon_draw_sprite8(bitmap,10+sprite,color,flipx,flipy,x,y+8);
 							phozon_draw_sprite8(bitmap,8+sprite,color,flipx,flipy,x,y);
 							phozon_draw_sprite8(bitmap,2+sprite,color,flipx,flipy,x,y-8);
@@ -206,7 +206,7 @@ public class phozon
 	
 					default:
 	#ifdef MAME_DEBUG
-	usrintf_showmessage("%02x",spriteram_3[offs] & 0x3c);
+	usrintf_showmessage("%02x",spriteram_3.read(offs)& 0x3c);
 	#endif
 						phozon_draw_sprite(bitmap,rand(),color,flipx,flipy,x,y);
 						break;
@@ -218,7 +218,7 @@ public class phozon
 		/* redraw high priority chars */
 		for (offs = videoram_size - 1;offs >= 0;offs--)
 		{
-			if (colorram[offs] & 0x40)
+			if (colorram.read(offs)& 0x40)
 			{
 				int sx,sy,mx,my;
 	
@@ -248,9 +248,9 @@ public class phozon
 					sy = my - 2;
 				}
 	
-				drawgfx(bitmap,Machine->gfx[(colorram[offs] & 0x80) ? 1 : 0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+				drawgfx(bitmap,Machine->gfx[(colorram.read(offs)& 0x80) ? 1 : 0],
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						0,0,
 						8*sx,8*sy,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);

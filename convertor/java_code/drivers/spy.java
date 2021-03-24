@@ -43,7 +43,7 @@ public class spy
 	static int rambank,pmcbank;
 	static unsigned char *ram;
 	
-	static READ_HANDLER( spy_bankedram1_r )
+	public static ReadHandlerPtr spy_bankedram1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (rambank & 1)
 		{
@@ -64,9 +64,9 @@ public class spy
 		}
 		else
 			return ram[offset];
-	}
+	} };
 	
-	static WRITE_HANDLER( spy_bankedram1_w )
+	public static WriteHandlerPtr spy_bankedram1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rambank & 1)
 		{
@@ -84,7 +84,7 @@ public class spy
 		}
 		else
 			ram[offset] = data;
-	}
+	} };
 	
 	/*
 	this is the data written to internal ram on startup:
@@ -154,7 +154,7 @@ public class spy
 	3f: 5f 7e 00 ce 08
 	*/
 	
-	static WRITE_HANDLER( bankswitch_w )
+	public static WriteHandlerPtr bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *rom = memory_region(REGION_CPU1);
 		int offs;
@@ -166,7 +166,7 @@ public class spy
 		if (data & 0x10) offs = 0x20000 + (data & 0x06) * 0x1000;
 		else offs = 0x10000 + (data & 0x0e) * 0x1000;
 		cpu_setbank(1,&rom[offs]);
-	}
+	} };
 	
 	//AT
 	void spy_collision(void)
@@ -231,7 +231,7 @@ public class spy
 	
 			// fail safe
 			if (loopend > MAX_SPRITES) loopend = MAX_SPRITES;
-			if (!nearplane) nearplane = DEF_NEAR_PLANE;
+			if (nearplane == 0) nearplane = DEF_NEAR_PLANE;
 	
 			loopend = (loopend<<1) + 4;
 	
@@ -248,10 +248,9 @@ public class spy
 	}
 	//ZT
 	
-	static WRITE_HANDLER( spy_3f90_w )
+	public static WriteHandlerPtr spy_3f90_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		extern int spy_video_enable;
-		static int old;
+			static int old;
 	
 		/*********************************************************************
 		*
@@ -330,15 +329,15 @@ public class spy
 		}
 	
 		old = data;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( spy_sh_irqtrigger_w )
+	public static WriteHandlerPtr spy_sh_irqtrigger_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0xff);
-	}
+	} };
 	
-	static WRITE_HANDLER( sound_bank_w )
+	public static WriteHandlerPtr sound_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bank_A,bank_B;
 	
@@ -348,153 +347,161 @@ public class spy
 		bank_A = (data >> 4) & 0x03;
 		bank_B = (data >> 6) & 0x03;
 		K007232_set_bank(1,bank_A,bank_B);
-	}
+	} };
 	
 	
 	
-	static MEMORY_READ_START( spy_readmem )
-		{ 0x0000, 0x07ff, spy_bankedram1_r },
-		{ 0x0800, 0x1aff, MRA_RAM },
-		{ 0x3fd0, 0x3fd0, input_port_4_r },
-		{ 0x3fd1, 0x3fd1, input_port_0_r },
-		{ 0x3fd2, 0x3fd2, input_port_1_r },
-		{ 0x3fd3, 0x3fd3, input_port_2_r },
-		{ 0x3fe0, 0x3fe0, input_port_3_r },
-		{ 0x2000, 0x5fff, K052109_051960_r },
-		{ 0x6000, 0x7fff, MRA_BANK1 },
-		{ 0x8000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress spy_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x07ff, spy_bankedram1_r ),
+		new Memory_ReadAddress( 0x0800, 0x1aff, MRA_RAM ),
+		new Memory_ReadAddress( 0x3fd0, 0x3fd0, input_port_4_r ),
+		new Memory_ReadAddress( 0x3fd1, 0x3fd1, input_port_0_r ),
+		new Memory_ReadAddress( 0x3fd2, 0x3fd2, input_port_1_r ),
+		new Memory_ReadAddress( 0x3fd3, 0x3fd3, input_port_2_r ),
+		new Memory_ReadAddress( 0x3fe0, 0x3fe0, input_port_3_r ),
+		new Memory_ReadAddress( 0x2000, 0x5fff, K052109_051960_r ),
+		new Memory_ReadAddress( 0x6000, 0x7fff, MRA_BANK1 ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( spy_writemem )
-		{ 0x0000, 0x07ff, spy_bankedram1_w, &ram },
-		{ 0x0800, 0x1aff, MWA_RAM },
-		{ 0x3f80, 0x3f80, bankswitch_w },
-		{ 0x3f90, 0x3f90, spy_3f90_w },
-		{ 0x3fa0, 0x3fa0, watchdog_reset_w },
-		{ 0x3fb0, 0x3fb0, soundlatch_w },
-		{ 0x3fc0, 0x3fc0, spy_sh_irqtrigger_w },
-		{ 0x2000, 0x5fff, K052109_051960_w },
-		{ 0x6000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress spy_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x07ff, spy_bankedram1_w, ram ),
+		new Memory_WriteAddress( 0x0800, 0x1aff, MWA_RAM ),
+		new Memory_WriteAddress( 0x3f80, 0x3f80, bankswitch_w ),
+		new Memory_WriteAddress( 0x3f90, 0x3f90, spy_3f90_w ),
+		new Memory_WriteAddress( 0x3fa0, 0x3fa0, watchdog_reset_w ),
+		new Memory_WriteAddress( 0x3fb0, 0x3fb0, soundlatch_w ),
+		new Memory_WriteAddress( 0x3fc0, 0x3fc0, spy_sh_irqtrigger_w ),
+		new Memory_WriteAddress( 0x2000, 0x5fff, K052109_051960_w ),
+		new Memory_WriteAddress( 0x6000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( spy_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0xa000, 0xa00d, K007232_read_port_0_r },
-		{ 0xb000, 0xb00d, K007232_read_port_1_r },
-		{ 0xc000, 0xc000, YM3812_status_port_0_r },
-		{ 0xd000, 0xd000, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress spy_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xa000, 0xa00d, K007232_read_port_0_r ),
+		new Memory_ReadAddress( 0xb000, 0xb00d, K007232_read_port_1_r ),
+		new Memory_ReadAddress( 0xc000, 0xc000, YM3812_status_port_0_r ),
+		new Memory_ReadAddress( 0xd000, 0xd000, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( spy_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM },
-		{ 0x9000, 0x9000, sound_bank_w },
-		{ 0xa000, 0xa00d, K007232_write_port_0_w },
-		{ 0xb000, 0xb00d, K007232_write_port_1_w },
-		{ 0xc000, 0xc000, YM3812_control_port_0_w },
-		{ 0xc001, 0xc001, YM3812_write_port_0_w },
-	MEMORY_END
+	public static Memory_WriteAddress spy_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x9000, 0x9000, sound_bank_w ),
+		new Memory_WriteAddress( 0xa000, 0xa00d, K007232_write_port_0_w ),
+		new Memory_WriteAddress( 0xb000, 0xb00d, K007232_write_port_1_w ),
+		new Memory_WriteAddress( 0xc000, 0xc000, YM3812_control_port_0_w ),
+		new Memory_WriteAddress( 0xc001, 0xc001, YM3812_write_port_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	INPUT_PORTS_START( spy )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* button 3 */
+	static InputPortPtr input_ports_spy = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );/* button 3 */
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* button 3 */
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );/* button 3 */
 	
-		PORT_START
-		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 3C_2C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 3C_4C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x09, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x50, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 3C_2C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 4C_3C ) )
-		PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 3C_4C ) )
-		PORT_DIPSETTING(    0x70, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_5C ) )
-		PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )
-	//  PORT_DIPSETTING(    0x00, "Invalid" )
+		PORT_START(); 
+		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "3C_2C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0x0f, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "3C_4C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x0e, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0x0d, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x0b, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x0a, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x09, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x50, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "3C_2C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "4C_3C") );
+		PORT_DIPSETTING(    0xf0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "3C_4C") );
+		PORT_DIPSETTING(    0x70, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_5C") );
+		PORT_DIPSETTING(    0xd0, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0xb0, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(    0x90, DEF_STR( "1C_7C") );
+	//  PORT_DIPSETTING(    0x00, "Invalid" );
 	
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x03, "2" )
-		PORT_DIPSETTING(    0x02, "3" )
-		PORT_DIPSETTING(    0x01, "5" )
-		PORT_DIPSETTING(    0x00, "7" )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x18, 0x08, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x18, "10k and every 20k" )
-		PORT_DIPSETTING(    0x10, "20k and every 30k" )
-		PORT_DIPSETTING(    0x08, "20k only" )
-		PORT_DIPSETTING(    0x00, "30k only" )
-		PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x60, "Easy" )
-		PORT_DIPSETTING(    0x40, "Normal" )
-		PORT_DIPSETTING(    0x20, "Difficult" )
-		PORT_DIPSETTING(    0x00, "Very Difficult" )
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x02, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x03, "2" );
+		PORT_DIPSETTING(    0x02, "3" );
+		PORT_DIPSETTING(    0x01, "5" );
+		PORT_DIPSETTING(    0x00, "7" );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x18, 0x08, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x18, "10k and every 20k" );
+		PORT_DIPSETTING(    0x10, "20k and every 30k" );
+		PORT_DIPSETTING(    0x08, "20k only" );
+		PORT_DIPSETTING(    0x00, "30k only" );
+		PORT_DIPNAME( 0x60, 0x40, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x60, "Easy" );
+		PORT_DIPSETTING(    0x40, "Normal" );
+		PORT_DIPSETTING(    0x20, "Difficult" );
+		PORT_DIPSETTING(    0x00, "Very Difficult" );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL )	/* PMCFIRQ signal from the PMC */
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unused ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x80, 0x80, "Continues" )
-		PORT_DIPSETTING(    0x80, "Unlimited" )
-		PORT_DIPSETTING(    0x00, "5 Times" )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SPECIAL );/* PMCFIRQ signal from the PMC */
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unused") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x40, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x80, 0x80, "Continues" );
+		PORT_DIPSETTING(    0x80, "Unlimited" );
+		PORT_DIPSETTING(    0x00, "5 Times" );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -571,59 +578,59 @@ public class spy
 	
 	***************************************************************************/
 	
-	ROM_START( spy )
-		ROM_REGION( 0x29000, REGION_CPU1, 0 ) /* code + banked roms + space for banked ram */
-		ROM_LOAD( "857n03.bin",   0x10000, 0x10000, CRC(97993b38) SHA1(0afd561bc85fcbfe30f2d16807424ceec7188ce7) )
-		ROM_LOAD( "857n02.bin",   0x20000, 0x08000, CRC(31a97efe) SHA1(6c9ec3954e4d16634bf95835b8b404d3a6ef6e24) )
-		ROM_CONTINUE(             0x08000, 0x08000 )
+	static RomLoadPtr rom_spy = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x29000, REGION_CPU1, 0 );/* code + banked roms + space for banked ram */
+		ROM_LOAD( "857n03.bin",   0x10000, 0x10000, CRC(97993b38);SHA1(0afd561bc85fcbfe30f2d16807424ceec7188ce7) )
+		ROM_LOAD( "857n02.bin",   0x20000, 0x08000, CRC(31a97efe);SHA1(6c9ec3954e4d16634bf95835b8b404d3a6ef6e24) )
+		ROM_CONTINUE(             0x08000, 0x08000 );
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* Z80 code */
-		ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f) SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Z80 code */
+		ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f);SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
 	
-		ROM_REGION( 0x080000, REGION_GFX1, 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-		ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
-		ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50) SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
+		ROM_REGION( 0x080000, REGION_GFX1, 0 );/* graphics ( dont dispose as the program can read them, 0 ) */
+		ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966);SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
+		ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50);SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-		ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
-		ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b) SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
+		ROM_REGION( 0x100000, REGION_GFX2, 0 );/* graphics ( dont dispose as the program can read them, 0 ) */
+		ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1);SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
+		ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b);SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
 	
-		ROM_REGION( 0x0200, REGION_PROMS, 0 )
-		ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
+		ROM_REGION( 0x0200, REGION_PROMS, 0 );
+		ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507);SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* samples for 007232 #0 */
-		ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4) SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* samples for 007232 #0 */
+		ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4);SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
 	
-		ROM_REGION( 0x40000, REGION_SOUND2, 0 ) /* samples for 007232 #1 */
-		ROM_LOAD( "857b04.bin",   0x00000, 0x40000, CRC(20b83c13) SHA1(63062f1c0a9adbbced3d3d73682a2cd1217bee7d) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND2, 0 );/* samples for 007232 #1 */
+		ROM_LOAD( "857b04.bin",   0x00000, 0x40000, CRC(20b83c13);SHA1(63062f1c0a9adbbced3d3d73682a2cd1217bee7d) )
+	ROM_END(); }}; 
 	
-	ROM_START( spyu )
-		ROM_REGION( 0x29000, REGION_CPU1, 0 ) /* code + banked roms + space for banked ram */
-		ROM_LOAD( "857m03.bin",   0x10000, 0x10000, CRC(3bd87fa4) SHA1(257371ef31c8adcdc04f46e989b7a2f3531c2ab1) )
-		ROM_LOAD( "857m02.bin",   0x20000, 0x08000, CRC(306cc659) SHA1(91d150b8d320bf19c12bc46103ffdffacf4387c3) )
-		ROM_CONTINUE(             0x08000, 0x08000 )
+	static RomLoadPtr rom_spyu = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x29000, REGION_CPU1, 0 );/* code + banked roms + space for banked ram */
+		ROM_LOAD( "857m03.bin",   0x10000, 0x10000, CRC(3bd87fa4);SHA1(257371ef31c8adcdc04f46e989b7a2f3531c2ab1) )
+		ROM_LOAD( "857m02.bin",   0x20000, 0x08000, CRC(306cc659);SHA1(91d150b8d320bf19c12bc46103ffdffacf4387c3) )
+		ROM_CONTINUE(             0x08000, 0x08000 );
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* Z80 code */
-		ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f) SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Z80 code */
+		ROM_LOAD( "857d01.bin",   0x0000, 0x8000, CRC(aad4210f);SHA1(bb40b8673939b5ce51012606da86b4dcbfc52a57) )
 	
-		ROM_REGION( 0x080000, REGION_GFX1, 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-		ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966) SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
-		ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50) SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
+		ROM_REGION( 0x080000, REGION_GFX1, 0 );/* graphics ( dont dispose as the program can read them, 0 ) */
+		ROM_LOAD( "857b09.bin",   0x00000, 0x40000, CRC(b8780966);SHA1(6c255f1e4d1398fa9010a1ae0f5172dc524df109) )	/* characters */
+		ROM_LOAD( "857b08.bin",   0x40000, 0x40000, CRC(3e4d8d50);SHA1(70f45a725bf1e9d15285ffb6b280945f7ce7faf0) )
 	
-		ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* graphics ( dont dispose as the program can read them, 0 ) */
-		ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1) SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
-		ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b) SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
+		ROM_REGION( 0x100000, REGION_GFX2, 0 );/* graphics ( dont dispose as the program can read them, 0 ) */
+		ROM_LOAD( "857b06.bin",   0x00000, 0x80000, CRC(7b515fb1);SHA1(3830649d47964940023760b76e2bf94bb9163f23) )	/* sprites */
+		ROM_LOAD( "857b05.bin",   0x80000, 0x80000, CRC(27b0f73b);SHA1(6b6a3da11c3005e3a62e6280818c18ae2ea31800) )
 	
-		ROM_REGION( 0x0200, REGION_PROMS, 0 )
-		ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507) SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
+		ROM_REGION( 0x0200, REGION_PROMS, 0 );
+		ROM_LOAD( "857a10.bin",   0x0000, 0x0100, CRC(32758507);SHA1(c21f89ad253502968a755fb0d23da98319f9cd93) )	/* priority encoder (not used) */
 	
-		ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* samples for 007232 #0 */
-		ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4) SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
+		ROM_REGION( 0x40000, REGION_SOUND1, 0 );/* samples for 007232 #0 */
+		ROM_LOAD( "857b07.bin",   0x00000, 0x40000, CRC(ce3512d4);SHA1(1e7c3feabfc3ac89056982b76de39e283cf5894d) )
 	
-		ROM_REGION( 0x40000, REGION_SOUND2, 0 ) /* samples for 007232 #1 */
-		ROM_LOAD( "857b04.bin",   0x00000, 0x40000, CRC(20b83c13) SHA1(63062f1c0a9adbbced3d3d73682a2cd1217bee7d) )
-	ROM_END
+		ROM_REGION( 0x40000, REGION_SOUND2, 0 );/* samples for 007232 #1 */
+		ROM_LOAD( "857b04.bin",   0x00000, 0x40000, CRC(20b83c13);SHA1(63062f1c0a9adbbced3d3d73682a2cd1217bee7d) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -642,6 +649,6 @@ public class spy
 	
 	
 	
-	GAME( 1989, spy,  0,   spy, spy, spy, ROT0, "Konami", "S.P.Y. - Special Project Y (World ver. N)")
-	GAME( 1989, spyu, spy, spy, spy, spy, ROT0, "Konami", "S.P.Y. - Special Project Y (US ver. M)")
+	public static GameDriver driver_spy	   = new GameDriver("1989"	,"spy"	,"spy.java"	,rom_spy,null	,machine_driver_spy	,input_ports_spy	,init_spy	,ROT0	,	"Konami", "S.P.Y. - Special Project Y (World ver. N)")
+	public static GameDriver driver_spyu	   = new GameDriver("1989"	,"spyu"	,"spy.java"	,rom_spyu,driver_spy	,machine_driver_spy	,input_ports_spy	,init_spy	,ROT0	,	"Konami", "S.P.Y. - Special Project Y (US ver. M)")
 }

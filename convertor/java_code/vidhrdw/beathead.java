@@ -54,7 +54,7 @@ public class beathead
 	VIDEO_START( beathead )
 	{
 		hsyncram = auto_malloc(0x800);
-		if (!hsyncram)
+		if (hsyncram == 0)
 			return 1;
 		return 0;
 	}

@@ -10,10 +10,7 @@ public class neogeo
 	
 	static int sram_locked;
 	static offs_t sram_protection_hack;
-	extern void *record;
-	extern void *playback;
 	
-	extern int neogeo_rng;
 	
 	data16_t *neogeo_ram16;
 	data16_t *neogeo_sram16;
@@ -31,9 +28,7 @@ public class neogeo
 	
 	
 	
-	static void neogeo_custom_memory(void);
-	static void neogeo_register_sub_savestate(void);
-	
+	static static 
 	
 	/* This function is called on every reset */
 	MACHINE_INIT( neogeo )
@@ -170,7 +165,7 @@ public class neogeo
 	
 		/* Allocate ram banks */
 		neogeo_ram16 = auto_malloc (0x10000);
-		if (!neogeo_ram16)
+		if (neogeo_ram16 == 0)
 			return;
 		cpu_setbank(1, neogeo_ram16);
 	
@@ -188,7 +183,7 @@ public class neogeo
 	
 		/* Allocate and point to the memcard - bank 5 */
 		neogeo_memcard = auto_malloc(0x800);
-		if (!neogeo_memcard)
+		if (neogeo_memcard == 0)
 			return;
 		memset(neogeo_memcard, 0, 0x800);
 		memcard_status=0;

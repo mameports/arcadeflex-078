@@ -110,13 +110,11 @@ public class atarigen
 	static void decompress_eeprom_word(const data16_t *data);
 	static void decompress_eeprom_byte(const data16_t *data);
 	
-	static void update_6502_irq(void);
-	static void sound_comm_timer(int reps_left);
+	static static void sound_comm_timer(int reps_left);
 	static void delayed_sound_reset(int param);
 	static void delayed_sound_w(int param);
 	static void delayed_6502_sound_w(int param);
 	
-	static READ_HANDLER( m6502_speedup_r );
 	static void atarigen_set_vol(int volume, const char *string);
 	
 	static void vblank_timer(int param);
@@ -321,7 +319,7 @@ public class atarigen
 	
 	WRITE16_HANDLER( atarigen_eeprom_w )
 	{
-		if (!eeprom_unlocked)
+		if (eeprom_unlocked == 0)
 			return;
 	
 		COMBINE_DATA(&atarigen_eeprom[offset]);
@@ -330,7 +328,7 @@ public class atarigen
 	
 	WRITE32_HANDLER( atarigen_eeprom32_w )
 	{
-		if (!eeprom_unlocked)
+		if (eeprom_unlocked == 0)
 			return;
 	
 		COMBINE_DATA(&atarigen_eeprom[offset * 2 + 1]);
@@ -564,18 +562,18 @@ public class atarigen
 		sound processor. Both reads and writes can be used.
 	---------------------------------------------------------------*/
 	
-	READ_HANDLER( atarigen_6502_irq_ack_r )
+	public static ReadHandlerPtr atarigen_6502_irq_ack_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		timed_int = 0;
 		update_6502_irq();
 		return 0;
-	}
+	} };
 	
-	WRITE_HANDLER( atarigen_6502_irq_ack_w )
+	public static WriteHandlerPtr atarigen_6502_irq_ack_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		timed_int = 0;
 		update_6502_irq();
-	}
+	} };
 	
 	
 	/*---------------------------------------------------------------
@@ -672,10 +670,10 @@ public class atarigen
 		CPU to the main CPU.
 	---------------------------------------------------------------*/
 	
-	WRITE_HANDLER( atarigen_6502_sound_w )
+	public static WriteHandlerPtr atarigen_6502_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		timer_set(TIME_NOW, data, delayed_6502_sound_w);
-	}
+	} };
 	
 	
 	/*---------------------------------------------------------------
@@ -683,12 +681,12 @@ public class atarigen
 		from the main CPU to the sound CPU.
 	---------------------------------------------------------------*/
 	
-	READ_HANDLER( atarigen_6502_sound_r )
+	public static ReadHandlerPtr atarigen_6502_sound_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		atarigen_cpu_to_sound_ready = 0;
 		cpu_set_nmi_line(sound_cpu_num, CLEAR_LINE);
 		return atarigen_cpu_to_sound;
-	}
+	} };
 	
 	
 	/*---------------------------------------------------------------
@@ -871,7 +869,7 @@ public class atarigen
 		m6502_speedup_r: Handles speeding up the 6502.
 	---------------------------------------------------------------*/
 	
-	static READ_HANDLER( m6502_speedup_r )
+	public static ReadHandlerPtr m6502_speedup_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = speed_b[0];
 	
@@ -879,7 +877,7 @@ public class atarigen
 			cpu_spinuntil_int();
 	
 		return result;
-	}
+	} };
 	
 	
 	
@@ -1014,7 +1012,7 @@ public class atarigen
 		if (keyboard_pressed(KEYCODE_8))
 		{
 			static FILE *out;
-			if (!out) out = fopen("scroll.log", "w");
+			if (out == 0) out = fopen("scroll.log", "w");
 			if (out)
 			{
 				for (i = 0; i < 64; i++)

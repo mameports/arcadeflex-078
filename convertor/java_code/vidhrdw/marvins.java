@@ -30,11 +30,11 @@ public class marvins
 	**
 	***************************************************************************/
 	
-	WRITE_HANDLER( marvins_palette_bank_w )
+	public static WriteHandlerPtr marvins_palette_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg_color = data>>4;
 		fg_color = data&0xf;
-	}
+	} };
 	
 	static void stuff_palette( int source_index, int dest_index, int num_colors )
 	{
@@ -45,22 +45,22 @@ public class marvins
 			int bit0=0,bit1,bit2,bit3;
 			int red, green, blue;
 	
-			bit0 = (color_prom[0x800] >> 2) & 0x01; // ?
-			bit1 = (color_prom[0x000] >> 1) & 0x01;
-			bit2 = (color_prom[0x000] >> 2) & 0x01;
-			bit3 = (color_prom[0x000] >> 3) & 0x01;
+			bit0 = (color_prom.read(0x800)>> 2) & 0x01; // ?
+			bit1 = (color_prom.read(0x000)>> 1) & 0x01;
+			bit2 = (color_prom.read(0x000)>> 2) & 0x01;
+			bit3 = (color_prom.read(0x000)>> 3) & 0x01;
 			red = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[0x800] >> 1) & 0x01; // ?
-			bit1 = (color_prom[0x400] >> 2) & 0x01;
-			bit2 = (color_prom[0x400] >> 3) & 0x01;
-			bit3 = (color_prom[0x000] >> 0) & 0x01;
+			bit0 = (color_prom.read(0x800)>> 1) & 0x01; // ?
+			bit1 = (color_prom.read(0x400)>> 2) & 0x01;
+			bit2 = (color_prom.read(0x400)>> 3) & 0x01;
+			bit3 = (color_prom.read(0x000)>> 0) & 0x01;
 			green = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[0x800] >> 0) & 0x01; // ?
-			bit1 = (color_prom[0x800] >> 3) & 0x01; // ?
-			bit2 = (color_prom[0x400] >> 0) & 0x01;
-			bit3 = (color_prom[0x400] >> 1) & 0x01;
+			bit0 = (color_prom.read(0x800)>> 0) & 0x01; // ?
+			bit1 = (color_prom.read(0x800)>> 3) & 0x01; // ?
+			bit2 = (color_prom.read(0x400)>> 0) & 0x01;
+			bit3 = (color_prom.read(0x400)>> 1) & 0x01;
 			blue = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color( dest_index++, red, green, blue );
@@ -94,47 +94,47 @@ public class marvins
 	**
 	***************************************************************************/
 	
-	WRITE_HANDLER( marvins_spriteram_w )
+	public static WriteHandlerPtr marvins_spriteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		spriteram[offset] = data;
-	}
-	READ_HANDLER( marvins_spriteram_r )
+		spriteram.write(offset,data);
+	} };
+	public static ReadHandlerPtr marvins_spriteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return spriteram[offset];
-	}
+		return spriteram.read(offset);
+	} };
 	
-	READ_HANDLER( marvins_foreground_ram_r )
+	public static ReadHandlerPtr marvins_foreground_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return spriteram_2[offset];
-	}
-	WRITE_HANDLER( marvins_foreground_ram_w )
+		return spriteram_2.read(offset);
+	} };
+	public static WriteHandlerPtr marvins_foreground_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (offset < 0x800 && spriteram_2[offset] != data) tilemap_mark_tile_dirty(fg_tilemap,offset);
+		if (offset < 0x800 && spriteram_2.read(offset)!= data) tilemap_mark_tile_dirty(fg_tilemap,offset);
 	
-		spriteram_2[offset] = data;
-	}
+		spriteram_2.write(offset,data);
+	} };
 	
-	READ_HANDLER( marvins_background_ram_r )
+	public static ReadHandlerPtr marvins_background_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return spriteram_3[offset];
-	}
-	WRITE_HANDLER( marvins_background_ram_w )
+		return spriteram_3.read(offset);
+	} };
+	public static WriteHandlerPtr marvins_background_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (offset < 0x800 && spriteram_3[offset] != data) tilemap_mark_tile_dirty(bg_tilemap,offset);
+		if (offset < 0x800 && spriteram_3.read(offset)!= data) tilemap_mark_tile_dirty(bg_tilemap,offset);
 	
-		spriteram_3[offset] = data;
-	}
+		spriteram_3.write(offset,data);
+	} };
 	
-	READ_HANDLER( marvins_text_ram_r )
+	public static ReadHandlerPtr marvins_text_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
-	WRITE_HANDLER( marvins_text_ram_w )
+		return videoram.read(offset);
+	} };
+	public static WriteHandlerPtr marvins_text_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (offset < 0x400 && videoram[offset] != data) tilemap_mark_tile_dirty(tx_tilemap,offset);
+		if (offset < 0x400 && videoram.read(offset)!= data) tilemap_mark_tile_dirty(tx_tilemap,offset);
 	
-		videoram[offset] = data;
-	}
+		videoram.write(offset,data);
+	} };
 	
 	/***************************************************************************
 	**
@@ -146,7 +146,7 @@ public class marvins
 	{
 		SET_TILE_INFO(
 				2,
-				spriteram_3[tile_index],
+				spriteram_3.read(tile_index),
 				0,
 				0)
 	}
@@ -155,14 +155,14 @@ public class marvins
 	{
 		SET_TILE_INFO(
 				1,
-				spriteram_2[tile_index],
+				spriteram_2.read(tile_index),
 				0,
 				0)
 	}
 	
 	static void get_tx_tilemap_info(int tile_index)
 	{
-		int tile_number = videoram[tile_index];
+		int tile_number = videoram.read(tile_index);
 		SET_TILE_INFO(
 				0,
 				tile_number,

@@ -26,8 +26,6 @@ public class malzak
 	
 	static INT8 frame_count;
 	
-	extern int s2636_x_offset;
-	extern int s2636_y_offset;
 	
 	#define SAA5050_DBLHI	0x0001
 	#define SAA5050_SEPGR	0x0002
@@ -226,7 +224,7 @@ public class malzak
 		Update_Bitmap(bitmap,s2636_2_ram,s2636_2_dirty,2,collision_bitmap);
 	}
 	
-	WRITE_HANDLER( playfield_w )
+	public static WriteHandlerPtr playfield_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int tile = ((temp_x / 16) * 16) + (offset / 16);
 	
@@ -234,5 +232,5 @@ public class malzak
 	//	field[tile].y = temp_y;
 		field[tile].code = (data & 0x1f);
 	
-	}
+	} };
 }

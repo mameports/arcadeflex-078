@@ -113,18 +113,18 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( ultratnk_videoram_w )
+	public static WriteHandlerPtr ultratnk_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = videoram[tile_index];
+		int attr = videoram.read(tile_index);
 		int code = attr & 0x3f;
 		int color = attr >> 6;
 	
@@ -136,7 +136,7 @@ public class ultratnk
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -158,7 +158,7 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( da_latch_w )
+	public static WriteHandlerPtr da_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int joybits = readinputport(4);
 		ultratnk_controls = readinputport(3); /* start and fire buttons */
@@ -181,22 +181,22 @@ public class ultratnk
 			if( joybits&0x10 ) ultratnk_controls &= ~0x01;
 			break;
 		}
-	}
+	} };
 	
 	
-	static READ_HANDLER( ultratnk_controls_r )
+	public static ReadHandlerPtr ultratnk_controls_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (ultratnk_controls << offset) & 0x80;
-	}
+	} };
 	
 	
-	static READ_HANDLER( ultratnk_barrier_r )
+	public static ReadHandlerPtr ultratnk_barrier_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return readinputport(2) & 0x80;
-	}
+	} };
 	
 	
-	static READ_HANDLER( ultratnk_coin_r )
+	public static ReadHandlerPtr ultratnk_coin_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (offset & 0x06)
 		{
@@ -207,16 +207,16 @@ public class ultratnk
 		}
 	
 		return 0;
-	}
+	} };
 	
 	
-	static READ_HANDLER( ultratnk_tilt_r )
+	public static ReadHandlerPtr ultratnk_tilt_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(2) << 5) & 0x80;	/* tilt */
-	}
+	} };
 	
 	
-	static READ_HANDLER( ultratnk_dipsw_r )
+	public static ReadHandlerPtr ultratnk_dipsw_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int dipsw = readinputport(0);
 		switch( offset )
@@ -227,7 +227,7 @@ public class ultratnk
 			case 0x03: return ((dipsw & 0x03) >> 0); /* extended time */
 		}
 		return 0;
-	}
+	} };
 	
 	
 	
@@ -236,20 +236,20 @@ public class ultratnk
 	 *	Sound handlers
 	 *
 	 *************************************/
-	WRITE_HANDLER( ultratnk_fire_w )
+	public static WriteHandlerPtr ultratnk_fire_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(offset/2, offset&1);
-	}
+	} };
 	
-	WRITE_HANDLER( ultratnk_attract_w )
+	public static WriteHandlerPtr ultratnk_attract_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(5, (data & 1));
-	}
+	} };
 	
-	WRITE_HANDLER( ultratnk_explosion_w )
+	public static WriteHandlerPtr ultratnk_explosion_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(4, data % 16);
-	}
+	} };
 	
 	
 	
@@ -276,7 +276,7 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( ultratnk_collision_r )
+	public static ReadHandlerPtr ultratnk_collision_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/**	Note: hardware collision detection is not emulated.
 		 *	However, the game is fully playable, since the game software uses it
@@ -288,25 +288,25 @@ public class ultratnk
 			case 0x03:	return 0x80;	/* black tank = D7 */
 		}
 		return 0;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( ultratnk_leds_w )
+	public static WriteHandlerPtr ultratnk_leds_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(offset/2,offset&1);
-	}
+	} };
 	
 	
-	static READ_HANDLER( mirror_r )
+	public static ReadHandlerPtr mirror_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return mirror_ram[offset];
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( mirror_w )
+	public static WriteHandlerPtr mirror_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		mirror_ram[offset] = data;
-	}
+	} };
 	
 	
 	
@@ -316,40 +316,44 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x00ff, MRA_RAM },
-		{ 0x0100, 0x01ff, mirror_r },
-		{ 0x0800, 0x0bff, MRA_RAM },
-		{ 0x0c00, 0x0cff, MRA_RAM },
-		{ 0x1000, 0x1000, input_port_1_r }, /* self test, vblank */
-		{ 0x1800, 0x1800, ultratnk_barrier_r }, /* barrier */
-		{ 0x2000, 0x2007, ultratnk_controls_r },
-		{ 0x2020, 0x2026, ultratnk_coin_r },
-		{ 0x2040, 0x2043, ultratnk_collision_r },
-		{ 0x2046, 0x2046, ultratnk_tilt_r },
-		{ 0x2060, 0x2063, ultratnk_dipsw_r },
-		{ 0x2800, 0x2fff, MRA_NOP }, /* diagnostic ROM (see code at B1F3) */
-		{ 0xb000, 0xbfff, MRA_ROM },
-		{ 0xf000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x00ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x0100, 0x01ff, mirror_r ),
+		new Memory_ReadAddress( 0x0800, 0x0bff, MRA_RAM ),
+		new Memory_ReadAddress( 0x0c00, 0x0cff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1000, 0x1000, input_port_1_r ), /* self test, vblank */
+		new Memory_ReadAddress( 0x1800, 0x1800, ultratnk_barrier_r ), /* barrier */
+		new Memory_ReadAddress( 0x2000, 0x2007, ultratnk_controls_r ),
+		new Memory_ReadAddress( 0x2020, 0x2026, ultratnk_coin_r ),
+		new Memory_ReadAddress( 0x2040, 0x2043, ultratnk_collision_r ),
+		new Memory_ReadAddress( 0x2046, 0x2046, ultratnk_tilt_r ),
+		new Memory_ReadAddress( 0x2060, 0x2063, ultratnk_dipsw_r ),
+		new Memory_ReadAddress( 0x2800, 0x2fff, MRA_NOP ), /* diagnostic ROM (see code at B1F3) */
+		new Memory_ReadAddress( 0xb000, 0xbfff, MRA_ROM ),
+		new Memory_ReadAddress( 0xf000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x00ff, MWA_RAM, &mirror_ram },
-		{ 0x0100, 0x01ff, mirror_w },
-		{ 0x0800, 0x0bff, ultratnk_videoram_w, &videoram },
-		{ 0x0c00, 0x0cff, MWA_RAM }, /* ? */
-		{ 0x2000, 0x201f, ultratnk_attract_w }, /* attract */
-		{ 0x2020, 0x203f, MWA_NOP }, /* collision reset 1-4, 2020-21=cr1, 22-23=cr2, 24-25=cr3, 26,27=cr4 */
-		{ 0x2040, 0x2041, da_latch_w }, /* D/A LATCH */
-		{ 0x2042, 0x2043, ultratnk_explosion_w }, /* EXPLOSION (sound) */
-		{ 0x2044, 0x2045, MWA_NOP }, /* TIMER (watchdog) RESET */
-		{ 0x2066, 0x2067, MWA_NOP }, /* LOCKOUT */
-		{ 0x2068, 0x206b, ultratnk_leds_w },
-		{ 0x206c, 0x206f, ultratnk_fire_w }, /* fire 1/2 */
-		{ 0xb000, 0xbfff, MWA_ROM },
-		{ 0xf000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x00ff, MWA_RAM, mirror_ram ),
+		new Memory_WriteAddress( 0x0100, 0x01ff, mirror_w ),
+		new Memory_WriteAddress( 0x0800, 0x0bff, ultratnk_videoram_w, videoram ),
+		new Memory_WriteAddress( 0x0c00, 0x0cff, MWA_RAM ), /* ? */
+		new Memory_WriteAddress( 0x2000, 0x201f, ultratnk_attract_w ), /* attract */
+		new Memory_WriteAddress( 0x2020, 0x203f, MWA_NOP ), /* collision reset 1-4, 2020-21=cr1, 22-23=cr2, 24-25=cr3, 26,27=cr4 */
+		new Memory_WriteAddress( 0x2040, 0x2041, da_latch_w ), /* D/A LATCH */
+		new Memory_WriteAddress( 0x2042, 0x2043, ultratnk_explosion_w ), /* EXPLOSION (sound) */
+		new Memory_WriteAddress( 0x2044, 0x2045, MWA_NOP ), /* TIMER (watchdog) RESET */
+		new Memory_WriteAddress( 0x2066, 0x2067, MWA_NOP ), /* LOCKOUT */
+		new Memory_WriteAddress( 0x2068, 0x206b, ultratnk_leds_w ),
+		new Memory_WriteAddress( 0x206c, 0x206f, ultratnk_fire_w ), /* fire 1/2 */
+		new Memory_WriteAddress( 0xb000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xf000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -359,61 +363,61 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( ultratnk )
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x01, "Extended Play" )
-		PORT_DIPSETTING(	0x01, "25 Points" )
-		PORT_DIPSETTING(	0x02, "50 Points" )
-		PORT_DIPSETTING(	0x03, "75 Points" )
-		PORT_DIPSETTING(	0x00, "None" )
-		PORT_DIPNAME( 0x0c, 0x04, "Game Length" )
-		PORT_DIPSETTING(	0x00, "60 Seconds" )
-		PORT_DIPSETTING(	0x04, "90 Seconds" )
-		PORT_DIPSETTING(	0x08, "120 Seconds" )
-		PORT_DIPSETTING(	0x0c, "150 Seconds" )
-		PORT_DIPNAME( 0x30, 0x20, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x30, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(	0x20, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(	0x10, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0xc0, 0x00, "Spare" ) /* Language?  Doesn't have any effect. */
-		PORT_DIPSETTING(	0x00, "A" )
-		PORT_DIPSETTING(	0x40, "B" )
-		PORT_DIPSETTING(	0x80, "C" )
-		PORT_DIPSETTING(	0xc0, "D" )
+	static InputPortPtr input_ports_ultratnk = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x01, "Extended Play" );
+		PORT_DIPSETTING(	0x01, "25 Points" );
+		PORT_DIPSETTING(	0x02, "50 Points" );
+		PORT_DIPSETTING(	0x03, "75 Points" );
+		PORT_DIPSETTING(	0x00, "None" );
+		PORT_DIPNAME( 0x0c, 0x04, "Game Length" );
+		PORT_DIPSETTING(	0x00, "60 Seconds" );
+		PORT_DIPSETTING(	0x04, "90 Seconds" );
+		PORT_DIPSETTING(	0x08, "120 Seconds" );
+		PORT_DIPSETTING(	0x0c, "150 Seconds" );
+		PORT_DIPNAME( 0x30, 0x20, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x30, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(	0x20, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(	0x10, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0xc0, 0x00, "Spare" );/* Language?  Doesn't have any effect. */
+		PORT_DIPSETTING(	0x00, "A" );
+		PORT_DIPSETTING(	0x40, "B" );
+		PORT_DIPSETTING(	0x80, "C" );
+		PORT_DIPSETTING(	0xc0, "D" );
 	
-		PORT_START
-		PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+		PORT_START(); 
+		PORT_SERVICE( 0x40, IP_ACTIVE_LOW );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK );
 	
-		PORT_START /* input#2 (arbitrarily arranged) */
-		PORT_BITX(0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 | IPF_TOGGLE, "Option 1", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_SERVICE2 | IPF_TOGGLE, "Option 2", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_SERVICE3 | IPF_TOGGLE, "Option 3", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )
+		PORT_START();  /* input#2 (arbitrarily arranged) */
+		PORT_BITX(0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 | IPF_TOGGLE, "Option 1", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_SERVICE2 | IPF_TOGGLE, "Option 2", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_SERVICE3 | IPF_TOGGLE, "Option 3", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT );
 	
-		PORT_START /* input#3 */
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
+		PORT_START();  /* input#3 */
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL );/* joystick (taken from below) */
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SPECIAL );/* joystick (taken from below) */
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL );/* joystick (taken from below) */
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL );/* joystick (taken from below) */
 	
-		PORT_START /* input#4 - fake */
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER1 )
-		PORT_BIT( 0x0a, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER1 )	/* note that this sets 2 bits */
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER1 )
-		PORT_BIT( 0x05, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER1 )	/* note that this sets 2 bits */
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER2 )
-		PORT_BIT( 0xa0, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER2 )	/* note that this sets 2 bits */
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER2 )
-		PORT_BIT( 0x50, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER2 )	/* note that this sets 2 bits */
-	INPUT_PORTS_END
+		PORT_START();  /* input#4 - fake */
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER1 );
+		PORT_BIT( 0x0a, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER1 );/* note that this sets 2 bits */
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER1 );
+		PORT_BIT( 0x05, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER1 );/* note that this sets 2 bits */
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER2 );
+		PORT_BIT( 0xa0, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER2 );/* note that this sets 2 bits */
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER2 );
+		PORT_BIT( 0x50, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER2 );/* note that this sets 2 bits */
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -423,38 +427,38 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	static struct GfxLayout playfield_layout =
-	{
+	static GfxLayout playfield_layout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,2),
 		1,
-		{ 0 },
-		{ 4, 5, 6, 7, 4 + RGN_FRAC(1,2), 5 + RGN_FRAC(1,2), 6 + RGN_FRAC(1,2), 7 + RGN_FRAC(1,2) },
-		{ 0, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0 },
+		new int[] { 4, 5, 6, 7, 4 + RGN_FRAC(1,2), 5 + RGN_FRAC(1,2), 6 + RGN_FRAC(1,2), 7 + RGN_FRAC(1,2) },
+		new int[] { 0, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
 	
-	static struct GfxLayout motion_layout =
-	{
+	static GfxLayout motion_layout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		1,
-		{ 0 },
-		{ 7, 6, 5, 4, 7 + RGN_FRAC(1,4), 6 + RGN_FRAC(1,4), 5 + RGN_FRAC(1,4), 4 + RGN_FRAC(1,4),
+		new int[] { 0 },
+		new int[] { 7, 6, 5, 4, 7 + RGN_FRAC(1,4), 6 + RGN_FRAC(1,4), 5 + RGN_FRAC(1,4), 4 + RGN_FRAC(1,4),
 		  7 + RGN_FRAC(2,4), 6 + RGN_FRAC(2,4), 5 + RGN_FRAC(2,4), 4 + RGN_FRAC(2,4),
 		  7 + RGN_FRAC(3,4), 6 + RGN_FRAC(3,4), 5 + RGN_FRAC(3,4), 4 + RGN_FRAC(3,4) },
-		{ 0, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		new int[] { 0, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 },
 		16*8
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &playfield_layout, 0, 4 }, 	/* playfield graphics */
-		{ REGION_GFX2, 0, &motion_layout,    0, 4 }, 	/* motion graphics */
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, playfield_layout, 0, 4 ), 	/* playfield graphics */
+		new GfxDecodeInfo( REGION_GFX2, 0, motion_layout,    0, 4 ), 	/* motion graphics */
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -674,25 +678,25 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	ROM_START( ultratnk )
-		ROM_REGION( 0x12000, REGION_CPU1, 0 )
-		ROM_LOAD_NIB_LOW ( "030180.n1",	 0xb000, 0x0800, CRC(b6aa6056) SHA1(6de094017b5d87a238053fac88129d20260f8222) ) /* ROM 3 D0-D3 */
-		ROM_LOAD_NIB_HIGH( "030181.k1",	 0xb000, 0x0800, CRC(17145c97) SHA1(afe0c9c562c27cd1fba57ea83377b0a4c12496db) ) /* ROM 3 D4-D7 */
-		ROM_LOAD_NIB_LOW ( "030182.m1",	 0xb800, 0x0800, CRC(034366a2) SHA1(dc289ce4c79e9937977ca8804ce07b4c8e40e969) ) /* ROM 4 D0-D3 */
-		ROM_RELOAD(                      0xf800, 0x0800 ) /* for 6502 vectors */
-		ROM_LOAD_NIB_HIGH( "030183.l1",	 0xb800, 0x0800, CRC(be141602) SHA1(17aad9bab9bf6bd22dc3c2214b049bbd68c87380) ) /* ROM 4 D4-D7 */
-		ROM_RELOAD(                      0xf800, 0x0800 ) /* for 6502 vectors */
+	static RomLoadPtr rom_ultratnk = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x12000, REGION_CPU1, 0 );
+		ROM_LOAD_NIB_LOW ( "030180.n1",	 0xb000, 0x0800, CRC(b6aa6056);SHA1(6de094017b5d87a238053fac88129d20260f8222) ) /* ROM 3 D0-D3 */
+		ROM_LOAD_NIB_HIGH( "030181.k1",	 0xb000, 0x0800, CRC(17145c97);SHA1(afe0c9c562c27cd1fba57ea83377b0a4c12496db) ) /* ROM 3 D4-D7 */
+		ROM_LOAD_NIB_LOW ( "030182.m1",	 0xb800, 0x0800, CRC(034366a2);SHA1(dc289ce4c79e9937977ca8804ce07b4c8e40e969) ) /* ROM 4 D0-D3 */
+		ROM_RELOAD(                      0xf800, 0x0800 );/* for 6502 vectors */
+		ROM_LOAD_NIB_HIGH( "030183.l1",	 0xb800, 0x0800, CRC(be141602);SHA1(17aad9bab9bf6bd22dc3c2214b049bbd68c87380) ) /* ROM 4 D4-D7 */
+		ROM_RELOAD(                      0xf800, 0x0800 );/* for 6502 vectors */
 	
-		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "30172-01.j6", 0x0000, 0x0200, CRC(1d364b23) SHA1(44c5792ed3f33f40cd8632718b0e82152559ecdf) )
-		ROM_LOAD( "30173-01.h6", 0x0200, 0x0200, CRC(5c32f331) SHA1(c1d675891490fbc533eaa0da57545398d7325df8) )
+		ROM_REGION( 0x0400, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "30172-01.j6", 0x0000, 0x0200, CRC(1d364b23);SHA1(44c5792ed3f33f40cd8632718b0e82152559ecdf) )
+		ROM_LOAD( "30173-01.h6", 0x0200, 0x0200, CRC(5c32f331);SHA1(c1d675891490fbc533eaa0da57545398d7325df8) )
 	
-		ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "30174-01.n6", 0x0000, 0x0400, CRC(d0e20e73) SHA1(0df1ed4a73255032bb809fb4d0a4bf3f151c749d) )
-		ROM_LOAD( "30175-01.m6", 0x0400, 0x0400, CRC(a47459c9) SHA1(4ca92edc172fbac923ba71731a25546c04ffc7b0) )
-		ROM_LOAD( "30176-01.l6", 0x0800, 0x0400, CRC(1cc7c2dd) SHA1(7f8aebe8375751183afeae35ea2d241d22ee7a4f) )
-		ROM_LOAD( "30177-01.k6", 0x0c00, 0x0400, CRC(3a91b09f) SHA1(1e713cb612eb7d78fc4a003e4e60308f62e0b169) )
-	ROM_END
+		ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "30174-01.n6", 0x0000, 0x0400, CRC(d0e20e73);SHA1(0df1ed4a73255032bb809fb4d0a4bf3f151c749d) )
+		ROM_LOAD( "30175-01.m6", 0x0400, 0x0400, CRC(a47459c9);SHA1(4ca92edc172fbac923ba71731a25546c04ffc7b0) )
+		ROM_LOAD( "30176-01.l6", 0x0800, 0x0400, CRC(1cc7c2dd);SHA1(7f8aebe8375751183afeae35ea2d241d22ee7a4f) )
+		ROM_LOAD( "30177-01.k6", 0x0c00, 0x0400, CRC(3a91b09f);SHA1(1e713cb612eb7d78fc4a003e4e60308f62e0b169) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -702,5 +706,5 @@ public class ultratnk
 	 *
 	 *************************************/
 	
-	GAME( 1978, ultratnk, 0, ultratnk, ultratnk, 0, 0, "Atari", "Ultra Tank" )
+	public static GameDriver driver_ultratnk	   = new GameDriver("1978"	,"ultratnk"	,"ultratnk.java"	,rom_ultratnk,null	,machine_driver_ultratnk	,input_ports_ultratnk	,null	,0	,	"Atari", "Ultra Tank" )
 }

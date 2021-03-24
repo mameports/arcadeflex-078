@@ -68,8 +68,6 @@ public class stactics
 {
 	
 	/* These are defined in machine/stactics.c */
-	extern int stactics_vert_pos;
-	extern int stactics_horiz_pos;
 	extern unsigned char *stactics_motor_on;
 	
 	/* These are needed by machine/stactics.c  */
@@ -203,25 +201,25 @@ public class stactics
 	        for(j=0;j<16;j++)
 	        {
 	            *(colortable++) = 0;
-	            *(colortable++) = color_prom[i*0x100+0x01*0x10+j];
+	            *(colortable++) = color_prom.read(i*0x100+0x01*0x10+j);
 	        }
 	        /* For page F - Close Aliens (these are all the same color) */
 	        for(j=0;j<16;j++)
 	        {
 	            *(colortable++) = 0;
-	            *(colortable++) = color_prom[i*0x100+0x02*0x10];
+	            *(colortable++) = color_prom.read(i*0x100+0x02*0x10);
 	        }
 	        /* For page E - Medium Aliens (these are all the same color) */
 	        for(j=0;j<16;j++)
 	        {
 	            *(colortable++) = 0;
-	            *(colortable++) = color_prom[i*0x100+0x04*0x10+j];
+	            *(colortable++) = color_prom.read(i*0x100+0x04*0x10+j);
 	        }
 	        /* For page D - Far Aliens (these are all the same color) */
 	        for(j=0;j<16;j++)
 	        {
 	            *(colortable++) = 0;
-	            *(colortable++) = color_prom[i*0x100+0x08*0x10+j];
+	            *(colortable++) = color_prom.read(i*0x100+0x08*0x10+j);
 	        }
 	    }
 	}
@@ -337,7 +335,7 @@ public class stactics
 	}
 	
 	
-	WRITE_HANDLER( stactics_palette_w )
+	public static WriteHandlerPtr stactics_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int old_palette_select = palette_select;
 	
@@ -355,16 +353,16 @@ public class stactics
 	
 	    if (old_palette_select != palette_select)
 	    {
-	        memset(dirty_videoram_b,1,videoram_size);
-	        memset(dirty_videoram_d,1,videoram_size);
-	        memset(dirty_videoram_e,1,videoram_size);
-	        memset(dirty_videoram_f,1,videoram_size);
+	        memset(dirty_videoram_b,1,videoram_size[0]);
+	        memset(dirty_videoram_d,1,videoram_size[0]);
+	        memset(dirty_videoram_e,1,videoram_size[0]);
+	        memset(dirty_videoram_f,1,videoram_size[0]);
 	    }
 	    return;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( stactics_scroll_ram_w )
+	public static WriteHandlerPtr stactics_scroll_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int temp;
 	
@@ -394,9 +392,9 @@ public class stactics
 	            }
 	        }
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_speed_latch_w )
+	public static WriteHandlerPtr stactics_speed_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    /* This writes to a shift register which is clocked by   */
 	    /* a 555 oscillator.  This value determines the speed of */
@@ -418,89 +416,89 @@ public class stactics
 	    }
 	
 	    states_per_frame = num_rising_edges*19/8;
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_shot_trigger_w )
+	public static WriteHandlerPtr stactics_shot_trigger_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    stactics_shot_standby = 0;
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_shot_flag_clear_w )
+	public static WriteHandlerPtr stactics_shot_flag_clear_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    stactics_shot_arrive = 0;
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_videoram_b_w )
+	public static WriteHandlerPtr stactics_videoram_b_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_videoram_b[offset] != data)
 	    {
 	        stactics_videoram_b[offset] = data;
 	        dirty_videoram_b[offset] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_chardata_b_w )
+	public static WriteHandlerPtr stactics_chardata_b_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_chardata_b[offset] != data)
 	    {
 	        stactics_chardata_b[offset] = data;
 	        dirty_chardata_b[offset>>3] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_videoram_d_w )
+	public static WriteHandlerPtr stactics_videoram_d_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_videoram_d[offset] != data)
 	    {
 	        stactics_videoram_d[offset] = data;
 	        dirty_videoram_d[offset] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_chardata_d_w )
+	public static WriteHandlerPtr stactics_chardata_d_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_chardata_d[offset] != data)
 	    {
 	        stactics_chardata_d[offset] = data;
 	        dirty_chardata_d[offset>>3] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_videoram_e_w )
+	public static WriteHandlerPtr stactics_videoram_e_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_videoram_e[offset] != data)
 	    {
 	        stactics_videoram_e[offset] = data;
 	        dirty_videoram_e[offset] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_chardata_e_w )
+	public static WriteHandlerPtr stactics_chardata_e_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_chardata_e[offset] != data)
 	    {
 	        stactics_chardata_e[offset] = data;
 	        dirty_chardata_e[offset>>3] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_videoram_f_w )
+	public static WriteHandlerPtr stactics_videoram_f_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_videoram_f[offset] != data)
 	    {
 	        stactics_videoram_f[offset] = data;
 	        dirty_videoram_f[offset] = 1;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( stactics_chardata_f_w )
+	public static WriteHandlerPtr stactics_chardata_f_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if (stactics_chardata_f[offset] != data)
 	    {
 	        stactics_chardata_f[offset] = data;
 	        dirty_chardata_f[offset>>3] = 1;
 	    }
-	}
+	} };
 	
 	/* Actual area for visible monitor stuff is only 30*8 lines */
 	/* The rest is used for the score, etc. */

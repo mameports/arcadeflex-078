@@ -94,14 +94,14 @@ public class mrdo
 			a1 = ((i >> 3) & 0x1c) + (i & 0x03) + 32;
 			a2 = ((i >> 0) & 0x1c) + (i & 0x03);
 	
-			bits0 = (color_prom[a1] >> 0) & 0x03;
-			bits2 = (color_prom[a2] >> 0) & 0x03;
+			bits0 = (color_prom.read(a1)>> 0) & 0x03;
+			bits2 = (color_prom.read(a2)>> 0) & 0x03;
 			r = weight[bits0 + (bits2 << 2)];
-			bits0 = (color_prom[a1] >> 2) & 0x03;
-			bits2 = (color_prom[a2] >> 2) & 0x03;
+			bits0 = (color_prom.read(a1)>> 2) & 0x03;
+			bits2 = (color_prom.read(a2)>> 2) & 0x03;
 			g = weight[bits0 + (bits2 << 2)];
-			bits0 = (color_prom[a1] >> 4) & 0x03;
-			bits2 = (color_prom[a2] >> 4) & 0x03;
+			bits0 = (color_prom.read(a1)>> 4) & 0x03;
+			bits2 = (color_prom.read(a2)>> 4) & 0x03;
 			b = weight[bits0 + (bits2 << 2)];
 			palette_set_color(i,r,g,b);
 		}
@@ -114,9 +114,9 @@ public class mrdo
 			int bits;
 	
 			if (i < 32)
-				bits = color_prom[i] & 0x0f;		/* low 4 bits are for sprite color n */
+				bits = color_prom.read(i)& 0x0f;		/* low 4 bits are for sprite color n */
 			else
-				bits = color_prom[i & 0x1f] >> 4;	/* high 4 bits are for sprite color n + 8 */
+				bits = color_prom.read(i & 0x1f)>> 4;	/* high 4 bits are for sprite color n + 8 */
 	
 			COLOR(2,i) = bits + ((bits & 0x0c) << 3);
 		}
@@ -180,47 +180,47 @@ public class mrdo
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( mrdo_bgvideoram_w )
+	public static WriteHandlerPtr mrdo_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (mrdo_bgvideoram[offset] != data)
 		{
 			mrdo_bgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mrdo_fgvideoram_w )
+	public static WriteHandlerPtr mrdo_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (mrdo_fgvideoram[offset] != data)
 		{
 			mrdo_fgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( mrdo_scrollx_w )
+	public static WriteHandlerPtr mrdo_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap,0,data);
-	}
+	} };
 	
-	WRITE_HANDLER( mrdo_scrolly_w )
+	public static WriteHandlerPtr mrdo_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* This is NOT affected by flipscreen (so stop it happening) */
 	
 		if (flipscreen) tilemap_set_scrolly(bg_tilemap,0,((256-data) & 0xff));
 		else tilemap_set_scrolly(bg_tilemap,0,data);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( mrdo_flipscreen_w )
+	public static WriteHandlerPtr mrdo_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 1-3 control the playfield priority, but they are not used by */
 		/* Mr. Do! so we don't emulate them */
 	
 		flipscreen = data & 0x01;
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-	}
+	} };
 	
 	
 	
@@ -237,12 +237,12 @@ public class mrdo
 	
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			if (spriteram[offs + 1] != 0)
+			if (spriteram.read(offs + 1)!= 0)
 			{
 				drawgfx(bitmap,Machine->gfx[2],
-						spriteram[offs],spriteram[offs + 2] & 0x0f,
-						spriteram[offs + 2] & 0x10,spriteram[offs + 2] & 0x20,
-						spriteram[offs + 3],256 - spriteram[offs + 1],
+						spriteram.read(offs),spriteram.read(offs + 2)& 0x0f,
+						spriteram.read(offs + 2)& 0x10,spriteram.read(offs + 2)& 0x20,
+						spriteram.read(offs + 3),256 - spriteram.read(offs + 1),
 						cliprect,TRANSPARENCY_PEN,0);
 			}
 		}

@@ -38,22 +38,22 @@ public class toypop
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 			// red component
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			// green component
-			bit0 = (color_prom[i+0x100] >> 0) & 0x01;
-			bit1 = (color_prom[i+0x100] >> 1) & 0x01;
-			bit2 = (color_prom[i+0x100] >> 2) & 0x01;
-			bit3 = (color_prom[i+0x100] >> 3) & 0x01;
+			bit0 = (color_prom.read(i+0x100)>> 0) & 0x01;
+			bit1 = (color_prom.read(i+0x100)>> 1) & 0x01;
+			bit2 = (color_prom.read(i+0x100)>> 2) & 0x01;
+			bit3 = (color_prom.read(i+0x100)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			// blue component
-			bit0 = (color_prom[i+0x200] >> 0) & 0x01;
-			bit1 = (color_prom[i+0x200] >> 1) & 0x01;
-			bit2 = (color_prom[i+0x200] >> 2) & 0x01;
-			bit3 = (color_prom[i+0x200] >> 3) & 0x01;
+			bit0 = (color_prom.read(i+0x200)>> 0) & 0x01;
+			bit1 = (color_prom.read(i+0x200)>> 1) & 0x01;
+			bit2 = (color_prom.read(i+0x200)>> 2) & 0x01;
+			bit3 = (color_prom.read(i+0x200)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			palette_set_color(i,r,g,b);
 		}
@@ -61,20 +61,20 @@ public class toypop
 		for (i = 0;i < 256;i++)
 		{
 			// characters
-			colortable[i]     = color_prom[i + 0x300] | 0x70;
-			colortable[i+256] = color_prom[i + 0x300] | 0xf0;
+			colortable[i]     = color_prom.read(i + 0x300)| 0x70;
+			colortable[i+256] = color_prom.read(i + 0x300)| 0xf0;
 			// sprites
-			colortable[i+512] = color_prom[i + 0x500];
+			colortable[i+512] = color_prom.read(i + 0x500);
 		}
 	}
 	
-	WRITE_HANDLER( toypop_palettebank_w )
+	public static WriteHandlerPtr toypop_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset)
 			palettebank = 1;
 		else
 			palettebank = 0;
-	}
+	} };
 	
 	WRITE16_HANDLER( toypop_flipscreen_w )
 	{
@@ -163,7 +163,7 @@ public class toypop
 				x = 280 - x;
 				y = 216 - y;
 			}
-			drawgfx(bitmap,Machine->gfx[0],videoram[offs],colorram[offs] + 64*palettebank,flipscreen,flipscreen,x,y,0,TRANSPARENCY_PEN,0);
+			drawgfx(bitmap,Machine->gfx[0],videoram.read(offs),colorram.read(offs)+ 64*palettebank,flipscreen,flipscreen,x,y,0,TRANSPARENCY_PEN,0);
 		}
 	}
 	
@@ -176,27 +176,27 @@ public class toypop
 		// Draw the sprites
 		for (offs = 0;offs < spriteram_size;offs += 2) {
 			// is it on?
-			if ((spriteram_2[offs]) != 0xe9) {
-				int sprite = spriteram[offs];
-				int color = spriteram[offs+1];
-				int flipx = spriteram_3[offs] & 1;
-				int flipy = spriteram_3[offs] & 2;
+			if ((spriteram_2.read(offs)) != 0xe9) {
+				int sprite = spriteram.read(offs);
+				int color = spriteram.read(offs+1);
+				int flipx = spriteram_3.read(offs)& 1;
+				int flipy = spriteram_3.read(offs)& 2;
 	
-				x = (spriteram_2[offs+1] | ((spriteram_3[offs+1] & 1) << 8)) - 71;
-				y = 217 - spriteram_2[offs];
+				x = (spriteram_2.read(offs+1)| ((spriteram_3.read(offs+1)& 1) << 8)) - 71;
+				y = 217 - spriteram_2.read(offs);
 				if (flipscreen) {
 					flipx = !flipx;
 					flipy = !flipy;
 				}
 	
-				switch (spriteram_3[offs] & 0x0c)
+				switch (spriteram_3.read(offs)& 0x0c)
 				{
 					case 0:		/* normal size */
 						toypop_draw_sprite(bitmap,sprite,color,flipx,flipy,x,y);
 						break;
 					case 4:		/* 2x horizontal */
 						sprite &= ~1;
-						if (!flipx) {
+						if (flipx == 0) {
 							toypop_draw_sprite(bitmap,1+sprite,color,0,flipy,x+16,y);
 							toypop_draw_sprite(bitmap,sprite,color,0,flipy,x,y);
 						} else {
@@ -206,7 +206,7 @@ public class toypop
 						break;
 					case 8:		/* 2x vertical */
 						sprite &= ~2;
-						if (!flipy) {
+						if (flipy == 0) {
 							toypop_draw_sprite(bitmap,sprite,color,flipx,0,x,y-16);
 							toypop_draw_sprite(bitmap,2+sprite,color,flipx,0,x,y);
 						} else {

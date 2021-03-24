@@ -68,11 +68,11 @@ public class mappy
 	
 		/* characters */
 		for (i = 0*4;i < 64*4;i++)
-			colortable[i] = (color_prom[(i^3)] & 0x0f) + 0x10;
+			colortable[i] = (color_prom.read((i^3))& 0x0f) + 0x10;
 	
 		/* sprites */
 		for (i = 64*4;i < Machine->drv->color_table_len;i++)
-			colortable[i] = color_prom[i] & 0x0f;
+			colortable[i] = color_prom.read(i)& 0x0f;
 	}
 	
 	
@@ -108,30 +108,30 @@ public class mappy
 	
 	
 	
-	WRITE_HANDLER( mappy_videoram_w )
+	public static WriteHandlerPtr mappy_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
 			dirtybuffer[offset] = 1;
-			videoram[offset] = data;
+			videoram.write(offset,data);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( mappy_colorram_w )
+	public static WriteHandlerPtr mappy_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
 			dirtybuffer[offset] = 1;
-			colorram[offset] = data;
+			colorram.write(offset,data);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( mappy_scroll_w )
+	public static WriteHandlerPtr mappy_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		mappy_scroll = offset >> 3;
-	}
+	} };
 	
 	
 	
@@ -144,14 +144,14 @@ public class mappy
 			TRANSPARENCY_COLOR,15);
 	}
 	
-	WRITE_HANDLER( mappy_flipscreen_w )
+	public static WriteHandlerPtr mappy_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (data & 1))
 		{
 			flipscreen = data & 1;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -231,8 +231,8 @@ public class mappy
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipscreen,flipscreen,8*sx,8*sy,
 						0,TRANSPARENCY_NONE,0);
 			}
@@ -262,14 +262,14 @@ public class mappy
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
 			/* is it on? */
-			if ((spriteram_3[offs+1] & 2) == 0)
+			if ((spriteram_3.read(offs+1)& 2) == 0)
 			{
-				int sprite = spriteram[offs];
-				int color = spriteram[offs+1];
-				int x = (spriteram_2[offs+1]-40) + 0x100*(spriteram_3[offs+1] & 1);
-				int y = 28*8-spriteram_2[offs];
-				int flipx = spriteram_3[offs] & 1;
-				int flipy = spriteram_3[offs] & 2;
+				int sprite = spriteram.read(offs);
+				int color = spriteram.read(offs+1);
+				int x = (spriteram_2.read(offs+1)-40) + 0x100*(spriteram_3.read(offs+1)& 1);
+				int y = 28*8-spriteram_2.read(offs);
+				int flipx = spriteram_3.read(offs)& 1;
+				int flipy = spriteram_3.read(offs)& 2;
 	
 				if (flipscreen)
 				{
@@ -277,7 +277,7 @@ public class mappy
 					flipy = !flipy;
 				}
 	
-				switch (spriteram_3[offs] & 0x0c)
+				switch (spriteram_3.read(offs)& 0x0c)
 				{
 					case 0:		/* normal size */
 						mappy_draw_sprite(bitmap,sprite,color,flipx,flipy,x,y);
@@ -285,7 +285,7 @@ public class mappy
 	
 					case 4:		/* 2x horizontal */
 						sprite &= ~1;
-						if (!flipx)
+						if (flipx == 0)
 						{
 							mappy_draw_sprite(bitmap,sprite,color,flipx,flipy,x,y);
 							mappy_draw_sprite(bitmap,1+sprite,color,flipx,flipy,x+16,y);
@@ -299,7 +299,7 @@ public class mappy
 	
 					case 8:		/* 2x vertical */
 						sprite &= ~2;
-						if (!flipy)
+						if (flipy == 0)
 						{
 							mappy_draw_sprite(bitmap,2+sprite,color,flipx,flipy,x,y);
 							mappy_draw_sprite(bitmap,sprite,color,flipx,flipy,x,y-16);
@@ -349,7 +349,7 @@ public class mappy
 		/* Draw the high priority characters */
 		for (offs = videoram_size - 1;offs >= 0;offs--)
 		{
-			if (colorram[offs] & 0x40)
+			if (colorram.read(offs)& 0x40)
 			{
 				int sx,sy,mx,my;
 	
@@ -394,8 +394,8 @@ public class mappy
 					}
 	
 					drawgfx(bitmap,Machine->gfx[0],
-							videoram[offs],
-							colorram[offs] & 0x3f,
+							videoram.read(offs),
+							colorram.read(offs)& 0x3f,
 							flipscreen,flipscreen,8*sx,sy,
 							0,TRANSPARENCY_COLOR,31);
 			}

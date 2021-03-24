@@ -32,7 +32,6 @@ public class wind3d
 	//============================================================
 	
 	// from input.c
-	extern int verbose;
 	
 	// from wind3dfx.c
 	extern UINT32 win_d3d_tfactor;
@@ -154,21 +153,12 @@ public class wind3d
 	//============================================================
 	
 	static double compute_mode_score(int width, int height, int depth, int refresh);
-	static int set_resolution(void);
-	static int create_surfaces(void);
-	static int create_blit_surface(void);
-	static int create_effects_surfaces(void);
-	static void set_brightness(void);
-	static int create_clipper(void);
-	static void erase_surfaces(void);
-	static int restore_surfaces(void);
-	static void release_surfaces(void);
-	static void compute_color_masks(const DDSURFACEDESC2 *desc);
+	static static static static static static static static static static void compute_color_masks(const DDSURFACEDESC2 *desc);
 	static int render_to_blit(struct mame_bitmap *bitmap, const struct rectangle *bounds, void *vector_dirty_pixels, int update);
 	static int render_and_flip(LPRECT src, LPRECT dst, int update, int wait_for_lock);
 	static HRESULT blit_rgb_pattern(LPRECT dst, LPDIRECTDRAWSURFACE7 surface);
-	static void init_vertices_preprocess(LPRECT src);
-	static void init_vertices_screen(LPRECT src, LPRECT dst);
+	public static InitDriverPtr init_vertices_preprocess = new InitDriverPtr() { public void handler() (LPRECT src);
+	public static InitDriverPtr init_vertices_screen = new InitDriverPtr() { public void handler() (LPRECT src, LPRECT dst);
 	
 	
 	
@@ -219,7 +209,7 @@ public class wind3d
 			if (surface)
 				IDirectDrawSurface7_Blt(surface, &clear, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &blitfx);
 		}
-	}
+	} };
 	
 	
 	
@@ -374,13 +364,13 @@ public class wind3d
 		int image_width = win_visible_width;
 		int image_height = win_visible_height;
 	
-		if (!image_width)
+		if (image_width == 0)
 			image_width = max_width;
-		if (!image_height)
+		if (image_height == 0)
 			image_height = max_height;
 	
 		// if prescale is disbled just set the levels to 1
-		if (!win_d3d_use_prescale)
+		if (win_d3d_use_prescale == 0)
 		{
 			current_prescalex = current_prescaley = 1;
 	#if SHOW_PRESCALE
@@ -792,7 +782,7 @@ public class wind3d
 		target_height = max_height * effect_min_yscale;
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_1_2)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 				target_height *= 2;
 			else
 				target_width *= 2;
@@ -801,7 +791,7 @@ public class wind3d
 			target_width *= 2, target_height *= 2;
 		if (pixel_aspect_ratio == VIDEO_PIXEL_ASPECT_RATIO_2_1)
 		{
-			if (!blit_swapxy)
+			if (blit_swapxy == 0)
 				target_width *= 2;
 			else
 				target_height *= 2;
@@ -922,12 +912,12 @@ public class wind3d
 				}
 	
 				// force to the current width/height
-				if (!win_switch_res)
+				if (win_switch_res == 0)
 				{
 					win_gfx_width = currmode.dwWidth;
 					win_gfx_height = currmode.dwHeight;
 				}
-				if (!win_switch_bpp)
+				if (win_switch_bpp == 0)
 					win_gfx_depth = currmode.DUMMYUNIONNAMEN(4).ddpfPixelFormat.DUMMYUNIONNAMEN(1).dwRGBBitCount;
 			}
 	
@@ -1034,7 +1024,7 @@ public class wind3d
 		primary_desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 	
 		// for full screen mode, allocate flipping surfaces
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 		{
 			int buffer_count = 1;
 			if (win_triple_buffer)
@@ -1350,7 +1340,7 @@ public class wind3d
 		blit_desc.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT | DDSD_CAPS;
 	
 		// determine the preferred blit/texture surface colour format
-		if (!needs_6bpp_per_gun)
+		if (needs_6bpp_per_gun == 0)
 			IDirect3DDevice7_EnumTextureFormats(d3d_device7, &enum_textures_callback, (LPVOID)&preferred_pixelformat);
 		// if we have a preferred colour format, use it
 		if (preferred_pixelformat.dwSize)
@@ -1386,7 +1376,7 @@ public class wind3d
 		texture_surface = blit_surface;
 	
 		// modify the description of our texture surface, based on the blit surface
-		if (!win_d3d_tex_manage)
+		if (win_d3d_tex_manage == 0)
 		{
 			// fill in the differences
 			texture_desc.dwWidth = texture_width;
@@ -1475,7 +1465,7 @@ public class wind3d
 					IDirectDrawSurface7_Release(previous_target);
 				}
 			}
-			if (!can_render_to_texture)
+			if (can_render_to_texture == 0)
 	#else
 			// create the pre-processing surface
 			result = IDirectDraw7_CreateSurface(ddraw7, &preprocess_desc, &preprocess_surface, NULL);
@@ -1654,7 +1644,7 @@ public class wind3d
 	
 		win_d3d_effects_init_surfaces();
 	
-		if (!win_window_mode)
+		if (win_window_mode == 0)
 		{
 			// loop through enough to get all the back buffers
 			for (i = 0; i < 5; i++)
@@ -2019,7 +2009,7 @@ public class wind3d
 		IDirectDrawSurface7_Unlock(blit_surface, NULL);
 	
 		// blit the image to the texture surface when texture management in't used
-		if (!win_d3d_tex_manage)
+		if (win_d3d_tex_manage == 0)
 		{
 			RECT blt_src = { params.dstxoffs, params.dstyoffs, params.dstxoffs, params.dstyoffs };
 	
@@ -2083,7 +2073,7 @@ public class wind3d
 			}
 		} while ((render_and_flip_result = render_and_flip(&src, &dst, update, wait_for_lock)) == 2);
 	
-		if (!render_and_flip_result)
+		if (render_and_flip_result == 0)
 			return 0;
 	
 		return 1;
@@ -2392,7 +2382,7 @@ public class wind3d
 			profiler_mark(PROFILER_IDLE);
 	
 			result = IDirectDraw7_GetVerticalBlankStatus(ddraw7, &is_vblank);
-			if (!is_vblank)
+			if (is_vblank == 0)
 				result = IDirectDraw7_WaitForVerticalBlank(ddraw7, DDWAITVB_BLOCKBEGIN, 0);
 	
 			// idle time done
@@ -2564,7 +2554,7 @@ public class wind3d
 	//	init_vertices_screen
 	//============================================================
 	
-	static void init_vertices_screen(LPRECT src, LPRECT dst)
+	public static InitDriverPtr init_vertices_screen = new InitDriverPtr() { public void handler() (LPRECT src, LPRECT dst)
 	{
 		int i;
 	
@@ -2613,7 +2603,7 @@ public class wind3d
 				screen_vertex[2].tv1 = screen_vertex[3].tv1 = win_d3d_effects_flipy ? 0 : (float)win_visible_height;
 			}
 		}
-	}
+	} };
 	
 	
 	
@@ -2621,7 +2611,7 @@ public class wind3d
 	//	init_vertices_preprocess
 	//============================================================
 	
-	static void init_vertices_preprocess(LPRECT src)
+	public static InitDriverPtr init_vertices_preprocess = new InitDriverPtr() { public void handler() (LPRECT src)
 	{
 		RECT rect = { 0, 0, (src->right - src->left) * current_prescalex, (src->bottom - src->top) * current_prescaley };
 		int i;
@@ -2657,5 +2647,5 @@ public class wind3d
 		preprocess_vertex[1].sx = -0.5f + rect.right; preprocess_vertex[1].sy = -0.5f + rect.top;
 		preprocess_vertex[2].sx = -0.5f + rect.left;  preprocess_vertex[2].sy = -0.5f + rect.bottom;
 		preprocess_vertex[3].sx = -0.5f + rect.right; preprocess_vertex[3].sy = -0.5f + rect.bottom;
-	}
+	} };
 }

@@ -51,11 +51,11 @@ public class tutankhm
 	
 	
 	
-	WRITE_HANDLER( tutankhm_videoram_w )
+	public static WriteHandlerPtr tutankhm_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		videowrite(offset,data);
-	}
+	} };
 	
 	
 	
@@ -73,7 +73,7 @@ public class tutankhm
 			int offs;
 	
 			for (offs = 0;offs < videoram_size;offs++)
-				tutankhm_videoram_w(offs,videoram[offs]);
+				tutankhm_videoram_w(offs,videoram.read(offs));
 		}
 	
 		/* copy the temporary bitmap to the screen */
@@ -132,7 +132,7 @@ public class tutankhm
 			The clear works properly.
 	*/
 	
-	WRITE_HANDLER( junofrst_blitter_w )
+	public static WriteHandlerPtr junofrst_blitter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char blitterdata[4];
 	
@@ -187,10 +187,10 @@ public class tutankhm
 	#define JUNOCLEARPIXEL(x) 						\
 		if ((JunoBLTRom[srcaddress+x] & 0xF0)) 		\
 			tutankhm_videoram_w( destaddress+x,		\
-				videoram[destaddress+x] & 0xF0);	\
+				videoram.read(destaddress+x)& 0xF0);	\
 		if ((JunoBLTRom[srcaddress+x] & 0x0F))		\
 			tutankhm_videoram_w( destaddress+x,		\
-				videoram[destaddress+x] & 0x0F);
+				videoram.read(destaddress+x)& 0x0F);
 	
 					JUNOCLEARPIXEL(0);
 					JUNOCLEARPIXEL(1);
@@ -205,5 +205,5 @@ public class tutankhm
 				}
 			}
 		}
-	}
+	} };
 }

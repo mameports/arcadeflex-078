@@ -134,7 +134,7 @@ public class fromance
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( fromance_gfxreg_w )
+	public static WriteHandlerPtr fromance_gfxreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int flipscreen_old = -1;
 	
@@ -148,7 +148,7 @@ public class fromance
 			flipscreen_old = flipscreen;
 			tilemap_set_flip(ALL_TILEMAPS, flipscreen ? (TILEMAP_FLIPX | TILEMAP_FLIPY) : 0);
 		}
-	}
+	} };
 	
 	
 	
@@ -158,15 +158,15 @@ public class fromance
 	 *
 	 *************************************/
 	
-	READ_HANDLER( fromance_paletteram_r )
+	public static ReadHandlerPtr fromance_paletteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* adjust for banking and read */
 		offset |= selected_paletteram << 11;
 		return local_paletteram[offset];
-	}
+	} };
 	
 	
-	WRITE_HANDLER( fromance_paletteram_w )
+	public static WriteHandlerPtr fromance_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int palword;
 		int r, g, b;
@@ -186,7 +186,7 @@ public class fromance
 		g = (g << 3) | (g >> 2);
 		b = (b << 3) | (b >> 2);
 		palette_set_color(offset / 2, r, g, b);
-	}
+	} };
 	
 	
 	
@@ -196,17 +196,17 @@ public class fromance
 	 *
 	 *************************************/
 	
-	READ_HANDLER( fromance_videoram_r )
+	public static ReadHandlerPtr fromance_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return local_videoram[selected_videoram][offset];
-	}
+	} };
 	
 	
-	WRITE_HANDLER( fromance_videoram_w )
+	public static WriteHandlerPtr fromance_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		local_videoram[selected_videoram][offset] = data;
 		tilemap_mark_tile_dirty(selected_videoram ? fg_tilemap : bg_tilemap, offset & 0x0fff);
-	}
+	} };
 	
 	
 	
@@ -216,7 +216,7 @@ public class fromance
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( fromance_scroll_w )
+	public static WriteHandlerPtr fromance_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen)
 		{
@@ -254,7 +254,7 @@ public class fromance
 					break;
 			}
 		}
-	}
+	} };
 	
 	
 	
@@ -272,7 +272,7 @@ public class fromance
 	}
 	
 	
-	WRITE_HANDLER( fromance_crtc_data_w )
+	public static WriteHandlerPtr fromance_crtc_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		crtc_data[crtc_register] = data;
 	
@@ -287,13 +287,13 @@ public class fromance
 				logerror("CRTC register %02X = %02X\n", crtc_register, data & 0xff);
 				break;
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( fromance_crtc_register_w )
+	public static WriteHandlerPtr fromance_crtc_register_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		crtc_register = data;
-	}
+	} };
 	
 	
 	
@@ -311,15 +311,15 @@ public class fromance
 		/* draw the sprites */
 		for (offs = 0; offs < spriteram_size; offs += 8)
 		{
-			int data2 = spriteram[offs + 4] | (spriteram[offs + 5] << 8);
+			int data2 = spriteram.read(offs + 4)| (spriteram.read(offs + 5)<< 8);
 			int priority = (data2 >> 4) & 1;
 	
 			/* turns out the sprites are the same as in aerofgt.c */
 			if ((data2 & 0x80) && priority == draw_priority)
 			{
-				int data0 = spriteram[offs + 0] | (spriteram[offs + 1] << 8);
-				int data1 = spriteram[offs + 2] | (spriteram[offs + 3] << 8);
-				int data3 = spriteram[offs + 6] | (spriteram[offs + 7] << 8);
+				int data0 = spriteram.read(offs + 0)| (spriteram.read(offs + 1)<< 8);
+				int data1 = spriteram.read(offs + 2)| (spriteram.read(offs + 3)<< 8);
+				int data3 = spriteram.read(offs + 6)| (spriteram.read(offs + 7)<< 8);
 				int code = data3 & 0xfff;
 				int color = data2 & 0x0f;
 				int y = (data0 & 0x1ff) - 6;
@@ -346,7 +346,7 @@ public class fromance
 				{
 					for (yt = 0; yt < ytiles; yt++)
 						for (xt = 0; xt < xtiles; xt++, code++)
-							if (!zoomed)
+							if (zoomed == 0)
 								drawgfx(bitmap, Machine->gfx[2], code, color, 0, 0,
 										x + xt * 16, y + yt * 16, cliprect, TRANSPARENCY_PEN, 15);
 							else
@@ -360,7 +360,7 @@ public class fromance
 				{
 					for (yt = 0; yt < ytiles; yt++)
 						for (xt = 0; xt < xtiles; xt++, code++)
-							if (!zoomed)
+							if (zoomed == 0)
 								drawgfx(bitmap, Machine->gfx[2], code, color, 1, 0,
 										x + (xtiles - 1 - xt) * 16, y + yt * 16, cliprect, TRANSPARENCY_PEN, 15);
 							else
@@ -374,7 +374,7 @@ public class fromance
 				{
 					for (yt = 0; yt < ytiles; yt++)
 						for (xt = 0; xt < xtiles; xt++, code++)
-							if (!zoomed)
+							if (zoomed == 0)
 								drawgfx(bitmap, Machine->gfx[2], code, color, 0, 1,
 										x + xt * 16, y + (ytiles - 1 - yt) * 16, cliprect, TRANSPARENCY_PEN, 15);
 							else
@@ -388,7 +388,7 @@ public class fromance
 				{
 					for (yt = 0; yt < ytiles; yt++)
 						for (xt = 0; xt < xtiles; xt++, code++)
-							if (!zoomed)
+							if (zoomed == 0)
 								drawgfx(bitmap, Machine->gfx[2], code, color, 1, 1,
 										x + (xtiles - 1 - xt) * 16, y + (ytiles - 1 - yt) * 16, cliprect, TRANSPARENCY_PEN, 15);
 							else

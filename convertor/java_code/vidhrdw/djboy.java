@@ -20,35 +20,35 @@ public class djboy
 		djboy_videoreg = data;
 	}
 	
-	WRITE_HANDLER( djboy_scrollx_w )
+	public static WriteHandlerPtr djboy_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		djboy_scrollx = data;
-	}
+	} };
 	
-	WRITE_HANDLER( djboy_scrolly_w )
+	public static WriteHandlerPtr djboy_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		djboy_scrolly = data;
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		unsigned char attr;
-		attr = videoram[tile_index + 0x400];
+		attr = videoram.read(tile_index + 0x400);
 		SET_TILE_INFO(
 				2,
-				videoram[tile_index] + ((attr & 0x0f) << 8),
+				videoram.read(tile_index)+ ((attr & 0x0f) << 8),
 				(attr >> 4),
 				0)
 	}
 	
-	WRITE_HANDLER( djboy_videoram_w )
+	public static WriteHandlerPtr djboy_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset] != data)
+		if( videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty( background, offset & 0x7ff);
 		}
-	}
+	} };
 	
 	VIDEO_START( djboy )
 	{
@@ -66,7 +66,7 @@ public class djboy
 		int page;
 		for( page=0; page<2; page++ )
 		{
-			const data8_t *pSource = &spriteram[page*0x800];
+			const data8_t *pSource = &spriteram.read(page*0x800);
 			int sx = 0;
 			int sy = 0;
 			int offs;
@@ -100,14 +100,14 @@ public class djboy
 		} /* next page */
 	} /* draw_sprites */
 	
-	WRITE_HANDLER( djboy_paletteram_w )
+	public static WriteHandlerPtr djboy_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 		int val;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		offset &= ~1;
-		val = (paletteram[offset]<<8) | paletteram[offset+1];
+		val = (paletteram.read(offset)<<8) | paletteram.read(offset+1);
 	
 		r = (val >> 8) & 0xf;
 		g = (val >> 4) & 0xf;
@@ -118,7 +118,7 @@ public class djboy
 			(r * 0xff) / 0xf,
 			(g * 0xff) / 0xf,
 			(b * 0xff) / 0xf );
-	}
+	} };
 	
 	VIDEO_UPDATE( djboy )
 	{

@@ -133,8 +133,7 @@ public class tilemap
 	static void recalculate_scroll( struct tilemap *tilemap );
 	
 	static void install_draw_handlers( struct tilemap *tilemap );
-	static void tilemap_reset(void);
-	
+	static 
 	static void update_tile_info( struct tilemap *tilemap, UINT32 cached_indx, UINT32 cached_col, UINT32 cached_row );
 	
 	/***********************************************************************************/

@@ -219,7 +219,7 @@ public class badlands
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( audio_io_r )
+	public static ReadHandlerPtr audio_io_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = 0xff;
 	
@@ -264,10 +264,10 @@ public class badlands
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( audio_io_w )
+	public static WriteHandlerPtr audio_io_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset & 0x206)
 		{
@@ -304,7 +304,7 @@ public class badlands
 				memcpy(bank_base, &bank_source_data[0x1000 * ((data >> 6) & 3)], 0x1000);
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -352,21 +352,25 @@ public class badlands
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( audio_readmem )
-		{ 0x0000, 0x1fff, MRA_RAM },
-		{ 0x2000, 0x2001, YM2151_status_port_0_r },
-		{ 0x2800, 0x2bff, audio_io_r },
-		{ 0x3000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress audio_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x2000, 0x2001, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0x2800, 0x2bff, audio_io_r ),
+		new Memory_ReadAddress( 0x3000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( audio_writemem )
-		{ 0x0000, 0x1fff, MWA_RAM },
-		{ 0x2000, 0x2000, YM2151_register_port_0_w },
-		{ 0x2001, 0x2001, YM2151_data_port_0_w },
-		{ 0x2800, 0x2bff, audio_io_w },
-		{ 0x3000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress audio_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_RAM ),
+		new Memory_WriteAddress( 0x2000, 0x2000, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0x2001, 0x2001, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0x2800, 0x2bff, audio_io_w ),
+		new Memory_WriteAddress( 0x3000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -376,40 +380,40 @@ public class badlands
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( badlands )
-		PORT_START		/* fe4000 */
-		PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_SERVICE( 0x0080, IP_ACTIVE_LOW )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+	static InputPortPtr input_ports_badlands = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 		/* fe4000 */
+		PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_SERVICE( 0x0080, IP_ACTIVE_LOW );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START      /* fe6000 */
-		PORT_ANALOG( 0x00ff, 0, IPT_DIAL | IPF_PLAYER1, 50, 10, 0, 0 )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START();       /* fe6000 */
+		PORT_ANALOG( 0x00ff, 0, IPT_DIAL | IPF_PLAYER1, 50, 10, 0, 0 );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START      /* fe6002 */
-		PORT_ANALOG( 0x00ff, 0, IPT_DIAL | IPF_PLAYER2, 50, 10, 0, 0 )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START();       /* fe6002 */
+		PORT_ANALOG( 0x00ff, 0, IPT_DIAL | IPF_PLAYER2, 50, 10, 0, 0 );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START		/* audio port */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
-		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* self test */
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* response buffer full */
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )	/* command buffer full */
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* self test */
+		PORT_START(); 		/* audio port */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED );
+		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL );/* self test */
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL );/* response buffer full */
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL );/* command buffer full */
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL );/* self test */
 	
-		PORT_START      /* fake for pedals */
-		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0xfffe, IP_ACTIVE_HIGH, IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START();       /* fake for pedals */
+		PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0xfffe, IP_ACTIVE_HIGH, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -419,35 +423,35 @@ public class badlands
 	 *
 	 *************************************/
 	
-	static struct GfxLayout pflayout =
-	{
+	static GfxLayout pflayout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28 },
-		{ 0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28 },
+		new int[] { 0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8 },
 		32*8
-	};
+	);
 	
 	
-	static struct GfxLayout molayout =
-	{
+	static GfxLayout molayout = new GfxLayout
+	(
 		16,8,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60 },
-		{ 0*8, 8*8, 16*8, 24*8, 32*8, 40*8, 48*8, 56*8 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60 },
+		new int[] { 0*8, 8*8, 16*8, 24*8, 32*8, 40*8, 48*8, 56*8 },
 		64*8
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &pflayout,    0, 8 },
-		{ REGION_GFX2, 0, &molayout,  128, 8 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, pflayout,    0, 8 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, molayout,  128, 8 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -512,30 +516,30 @@ public class badlands
 	 *
 	 *************************************/
 	
-	ROM_START( badlands )
-		ROM_REGION( 0x40000, REGION_CPU1, 0 )	/* 4*64k for 68000 code */
-		ROM_LOAD16_BYTE( "1008.20f",  0x00000, 0x10000, CRC(a3da5774) SHA1(5ab1eb61d25594b2d7c40400cb57e7f47a717598) )
-		ROM_LOAD16_BYTE( "1006.27f",  0x00001, 0x10000, CRC(aa03b4f3) SHA1(5eda60c715ffcefd4ad34bdb90579e8671dc384a) )
-		ROM_LOAD16_BYTE( "1009.17f",  0x20000, 0x10000, CRC(0e2e807f) SHA1(5b61de066dca12c44335aa68a13c821845657866) )
-		ROM_LOAD16_BYTE( "1007.24f",  0x20001, 0x10000, CRC(99a20c2c) SHA1(9b0a5a5dafb8816e72330d302c60339b600b49a8) )
+	static RomLoadPtr rom_badlands = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x40000, REGION_CPU1, 0 );/* 4*64k for 68000 code */
+		ROM_LOAD16_BYTE( "1008.20f",  0x00000, 0x10000, CRC(a3da5774);SHA1(5ab1eb61d25594b2d7c40400cb57e7f47a717598) )
+		ROM_LOAD16_BYTE( "1006.27f",  0x00001, 0x10000, CRC(aa03b4f3);SHA1(5eda60c715ffcefd4ad34bdb90579e8671dc384a) )
+		ROM_LOAD16_BYTE( "1009.17f",  0x20000, 0x10000, CRC(0e2e807f);SHA1(5b61de066dca12c44335aa68a13c821845657866) )
+		ROM_LOAD16_BYTE( "1007.24f",  0x20001, 0x10000, CRC(99a20c2c);SHA1(9b0a5a5dafb8816e72330d302c60339b600b49a8) )
 	
-		ROM_REGION( 0x14000, REGION_CPU2, 0 )	/* 64k for 6502 code */
-		ROM_LOAD( "1018.9c", 0x10000, 0x4000, CRC(a05fd146) SHA1(d97abbcf7897ca720cc18ff3a323f41cd3b23c34) )
-		ROM_CONTINUE(        0x04000, 0xc000 )
+		ROM_REGION( 0x14000, REGION_CPU2, 0 );/* 64k for 6502 code */
+		ROM_LOAD( "1018.9c", 0x10000, 0x4000, CRC(a05fd146);SHA1(d97abbcf7897ca720cc18ff3a323f41cd3b23c34) )
+		ROM_CONTINUE(        0x04000, 0xc000 );
 	
-		ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT )
-		ROM_LOAD( "1012.4n",  0x000000, 0x10000, CRC(5d124c6c) SHA1(afebaaf90b3751f5e873fc4c45f1d5385ef86a6e) )	/* playfield */
-		ROM_LOAD( "1013.2n",  0x010000, 0x10000, CRC(b1ec90d6) SHA1(8d4c7db8e1bf9c050f5869eb38fa573867fdc12b) )
-		ROM_LOAD( "1014.4s",  0x020000, 0x10000, CRC(248a6845) SHA1(086ef0840b889e790ce3fcd09f98589aae932456) )
-		ROM_LOAD( "1015.2s",  0x030000, 0x10000, CRC(792296d8) SHA1(833cdb968064151ca77bb3dbe416ff7127a12de4) )
-		ROM_LOAD( "1016.4u",  0x040000, 0x10000, CRC(878f7c66) SHA1(31159bea5d6aac8100fca8f3860220b97d63e72e) )
-		ROM_LOAD( "1017.2u",  0x050000, 0x10000, CRC(ad0071a3) SHA1(472b197e5d320b3424d8a8d8c051b1023a07ae08) )
+		ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT );
+		ROM_LOAD( "1012.4n",  0x000000, 0x10000, CRC(5d124c6c);SHA1(afebaaf90b3751f5e873fc4c45f1d5385ef86a6e) )	/* playfield */
+		ROM_LOAD( "1013.2n",  0x010000, 0x10000, CRC(b1ec90d6);SHA1(8d4c7db8e1bf9c050f5869eb38fa573867fdc12b) )
+		ROM_LOAD( "1014.4s",  0x020000, 0x10000, CRC(248a6845);SHA1(086ef0840b889e790ce3fcd09f98589aae932456) )
+		ROM_LOAD( "1015.2s",  0x030000, 0x10000, CRC(792296d8);SHA1(833cdb968064151ca77bb3dbe416ff7127a12de4) )
+		ROM_LOAD( "1016.4u",  0x040000, 0x10000, CRC(878f7c66);SHA1(31159bea5d6aac8100fca8f3860220b97d63e72e) )
+		ROM_LOAD( "1017.2u",  0x050000, 0x10000, CRC(ad0071a3);SHA1(472b197e5d320b3424d8a8d8c051b1023a07ae08) )
 	
-		ROM_REGION( 0x30000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT )
-		ROM_LOAD( "1010.14r", 0x000000, 0x10000, CRC(c15f629e) SHA1(944e3479dce6e420cf9a3f4c1438c5ca66e5cb97) )	/* mo */
-		ROM_LOAD( "1011.10r", 0x010000, 0x10000, CRC(fb0b6717) SHA1(694ab0f04d673682831a24027757d4b3c40a4e0e) )
-		ROM_LOAD( "1019.14t", 0x020000, 0x10000, CRC(0e26bff6) SHA1(ee018dd37a27c7e7c16a57ea0d32aeb9cdf26bb4) )
-	ROM_END
+		ROM_REGION( 0x30000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT );
+		ROM_LOAD( "1010.14r", 0x000000, 0x10000, CRC(c15f629e);SHA1(944e3479dce6e420cf9a3f4c1438c5ca66e5cb97) )	/* mo */
+		ROM_LOAD( "1011.10r", 0x010000, 0x10000, CRC(fb0b6717);SHA1(694ab0f04d673682831a24027757d4b3c40a4e0e) )
+		ROM_LOAD( "1019.14t", 0x020000, 0x10000, CRC(0e26bff6);SHA1(ee018dd37a27c7e7c16a57ea0d32aeb9cdf26bb4) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -563,5 +567,5 @@ public class badlands
 	 *
 	 *************************************/
 	
-	GAME( 1989, badlands, 0, badlands, badlands, badlands, ROT0, "Atari Games", "Bad Lands" )
+	public static GameDriver driver_badlands	   = new GameDriver("1989"	,"badlands"	,"badlands.java"	,rom_badlands,null	,machine_driver_badlands	,input_ports_badlands	,init_badlands	,ROT0	,	"Atari Games", "Bad Lands" )
 }

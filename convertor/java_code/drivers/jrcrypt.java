@@ -310,7 +310,7 @@ public class jrcrypt
 			}
 	
 			/* latch new flip flops on rising edge of pcbe */
-			if (!pcbe)
+			if (pcbe == 0)
 			{
 				s0 = ns0;
 				s1 = ns1;
@@ -407,10 +407,10 @@ public class jrcrypt
 	}
 	#endif
 	
-	WRITE_HANDLER( jrpacman_interrupt_enable_w )
+	public static WriteHandlerPtr jrpacman_interrupt_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		interrupt_enable = data;
-	}
+	} };
 	
 	
 	
@@ -495,7 +495,7 @@ public class jrcrypt
 	void Load(char *name,byte *buffer,int from, int length)
 	{
 		void *file = mame_fopen(Machine->gamedrv->name,0,FILETYPE_HIGHSCORE,0);
-		if (!file)
+		if (file == 0)
 			return;
 		while (length--)
 			buffer[from++]=fgetc(file);

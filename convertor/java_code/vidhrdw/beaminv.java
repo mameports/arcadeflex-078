@@ -20,13 +20,13 @@ public class beaminv
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( beaminv_videoram_w )
+	public static WriteHandlerPtr beaminv_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 x,y;
 		int i;
 	
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		y = ~(offset >> 8 << 3);
 		x = offset;
@@ -38,5 +38,5 @@ public class beaminv
 			y--;
 			data >>= 1;
 		}
-	}
+	} };
 }

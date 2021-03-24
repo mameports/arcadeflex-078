@@ -42,20 +42,20 @@ public class paradise
 	
 	static data8_t paradise_palbank, paradise_priority;
 	
-	WRITE_HANDLER( paradise_flipscreen_w )
+	public static WriteHandlerPtr paradise_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data ? 0 : 1);
-	}
+	} };
 	
 	/* 800 bytes for red, followed by 800 bytes for green & 800 bytes for blue */
-	WRITE_HANDLER( paradise_palette_w )
+	public static WriteHandlerPtr paradise_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		offset %= 0x800;
-		palette_set_color(offset,	paletteram[offset + 0x800 * 0],
-									paletteram[offset + 0x800 * 1],
-									paletteram[offset + 0x800 * 2]	);
-	}
+		palette_set_color(offset,	paletteram.read(offset + 0x800 * 0),
+									paletteram.read(offset + 0x800 * 1),
+									paletteram.read(offset + 0x800 * 2));
+	} };
 	
 	/***************************************************************************
 	
@@ -71,32 +71,32 @@ public class paradise
 	static struct tilemap *tilemap_0,*tilemap_1,*tilemap_2;
 	
 	/* Background */
-	WRITE_HANDLER( paradise_vram_0_w )
+	public static WriteHandlerPtr paradise_vram_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (paradise_vram_0[offset] != data)
 		{
 			paradise_vram_0[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_0, offset % 0x400);
 		}
-	}
+	} };
 	
 	/* 16 color tiles with paradise_palbank as color code */
-	WRITE_HANDLER( paradise_palbank_w )
+	public static WriteHandlerPtr paradise_palbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		int bank1 = (data & 0x0e) | 1;
 		int bank2 = (data & 0xf0);
 	
 		for (i = 0; i < 15; i++)
-			palette_set_color(0x800+i,	paletteram[0x200 + bank2 + i + 0x800 * 0],
-										paletteram[0x200 + bank2 + i + 0x800 * 1],
-										paletteram[0x200 + bank2 + i + 0x800 * 2]	);
+			palette_set_color(0x800+i,	paletteram.read(0x200 + bank2 + i + 0x800 * 0),
+										paletteram.read(0x200 + bank2 + i + 0x800 * 1),
+										paletteram.read(0x200 + bank2 + i + 0x800 * 2));
 		if (paradise_palbank != bank1)
 		{
 			paradise_palbank = bank1;
 			tilemap_mark_all_tiles_dirty(tilemap_0);
 		}
-	}
+	} };
 	
 	static void get_tile_info_0( int tile_index )
 	{
@@ -106,14 +106,14 @@ public class paradise
 	
 	
 	/* Midground */
-	WRITE_HANDLER( paradise_vram_1_w )
+	public static WriteHandlerPtr paradise_vram_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (paradise_vram_1[offset] != data)
 		{
 			paradise_vram_1[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_1, offset % 0x400);
 		}
-	}
+	} };
 	
 	static void get_tile_info_1( int tile_index )
 	{
@@ -123,14 +123,14 @@ public class paradise
 	
 	
 	/* Foreground */
-	WRITE_HANDLER( paradise_vram_2_w )
+	public static WriteHandlerPtr paradise_vram_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (paradise_vram_2[offset] != data)
 		{
 			paradise_vram_2[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_2, offset % 0x400);
 		}
-	}
+	} };
 	
 	static void get_tile_info_2( int tile_index )
 	{
@@ -140,18 +140,18 @@ public class paradise
 	
 	/* 256 x 256 bitmap. 4 bits per pixel so every byte encodes 2 pixels */
 	
-	WRITE_HANDLER( paradise_pixmap_w )
+	public static WriteHandlerPtr paradise_pixmap_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		x = (offset & 0x7f) << 1;
 		y = (offset >> 7);
 	
 		plot_pixel(tmpbitmap, x+0,y, 0x80f - (data >> 4));
 		plot_pixel(tmpbitmap, x+1,y, 0x80f - (data & 0x0f));
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -196,20 +196,20 @@ public class paradise
 	***************************************************************************/
 	
 	/* Sprites / Layers priority */
-	WRITE_HANDLER( paradise_priority_w )
+	public static WriteHandlerPtr paradise_priority_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		paradise_priority = data;
-	}
+	} };
 	
 	static void draw_sprites(struct mame_bitmap *bitmap,const struct rectangle *cliprect)
 	{
 		int i;
 		for (i = 0; i < spriteram_size ; i += 32)
 		{
-			int code	=	spriteram[i+0];	// Only 4 bytes out of 32 used?
-			int x		=	spriteram[i+1];
-			int y		=	spriteram[i+2];
-			int attr	=	spriteram[i+3];
+			int code	=	spriteram.read(i+0);	// Only 4 bytes out of 32 used?
+			int x		=	spriteram.read(i+1);
+			int y		=	spriteram.read(i+2);
+			int attr	=	spriteram.read(i+3);
 	
 			int flipx	=	0;	// ?
 			int flipy	=	0;

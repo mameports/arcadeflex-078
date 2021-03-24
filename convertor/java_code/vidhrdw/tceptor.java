@@ -13,7 +13,6 @@ public class tceptor
 {
 	
 	#ifdef MAME_DEBUG
-	extern int debug_key_pressed;
 	#endif
 	
 	#define TX_TILE_OFFSET_CENTER	(32 * 2)
@@ -59,20 +58,20 @@ public class tceptor
 		{
 			int bit0, bit1, bit2, bit3, r, g, b;
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[totcolors] >> 0) & 0x01;
-			bit1 = (color_prom[totcolors] >> 1) & 0x01;
-			bit2 = (color_prom[totcolors] >> 2) & 0x01;
-			bit3 = (color_prom[totcolors] >> 3) & 0x01;
+			bit0 = (color_prom.read(totcolors)>> 0) & 0x01;
+			bit1 = (color_prom.read(totcolors)>> 1) & 0x01;
+			bit2 = (color_prom.read(totcolors)>> 2) & 0x01;
+			bit3 = (color_prom.read(totcolors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*totcolors] >> 0) & 0x01;
-			bit1 = (color_prom[2*totcolors] >> 1) & 0x01;
-			bit2 = (color_prom[2*totcolors] >> 2) & 0x01;
-			bit3 = (color_prom[2*totcolors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*totcolors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*totcolors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*totcolors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*totcolors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i, r, g, b);
@@ -169,33 +168,33 @@ public class tceptor
 	}
 	
 	
-	READ_HANDLER( tceptor_tile_ram_r )
+	public static ReadHandlerPtr tceptor_tile_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return tceptor_tile_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( tceptor_tile_ram_w )
+	public static WriteHandlerPtr tceptor_tile_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tceptor_tile_ram[offset] != data)
 		{
 			tceptor_tile_ram[offset] = data;
 			tile_mark_dirty(offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( tceptor_tile_attr_r )
+	public static ReadHandlerPtr tceptor_tile_attr_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return tceptor_tile_attr[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( tceptor_tile_attr_w )
+	public static WriteHandlerPtr tceptor_tile_attr_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tceptor_tile_attr[offset] != data)
 		{
 			tceptor_tile_attr[offset] = data;
 			tile_mark_dirty(offset);
 		}
-	}
+	} };
 	
 	
 	/*******************************************************************/
@@ -218,12 +217,12 @@ public class tceptor
 		SET_TILE_INFO(bg, code, color, 0);
 	}
 	
-	READ_HANDLER( tceptor_bg_ram_r )
+	public static ReadHandlerPtr tceptor_bg_ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return tceptor_bg_ram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( tceptor_bg_ram_w )
+	public static WriteHandlerPtr tceptor_bg_ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (tceptor_bg_ram[offset] != data)
 		{
@@ -235,9 +234,9 @@ public class tceptor
 			else
 				tilemap_mark_tile_dirty(bg2_tilemap, offset - 0x800);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( tceptor_bg_scroll_w )
+	public static WriteHandlerPtr tceptor_bg_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset)
 		{
@@ -265,23 +264,23 @@ public class tceptor
 			bg2_scroll_y = data;
 			break;
 		}
-	}
+	} };
 	
 	
 	/*******************************************************************/
 	
 	static int decode_bg(int region)
 	{
-		static struct GfxLayout bg_layout =
-		{
+		static GfxLayout bg_layout = new GfxLayout
+		(
 			8, 8,
 			2048,
 			3,
-			{ 0x40000+4, 0, 4 },
-			{ 0, 1, 2, 3, 8, 9, 10, 11 },
-			{ 0, 16, 32, 48, 64, 80, 96, 112 },
+			new int[] { 0x40000+4, 0, 4 },
+			new int[] { 0, 1, 2, 3, 8, 9, 10, 11 },
+			new int[] { 0, 16, 32, 48, 64, 80, 96, 112 },
 			128
-		};
+		);
 	
 		int gfx_index = bg;
 		data8_t *src = memory_region(region) + 0x8000;
@@ -331,22 +330,22 @@ public class tceptor
 	// fix sprite order
 	static int decode_sprite16(int region)
 	{
-		static struct GfxLayout spr16_layout =
-		{
+		static GfxLayout spr16_layout = new GfxLayout
+		(
 			16, 16,
 			512,
 			4,
-			{ 0x00000, 0x00004, 0x40000, 0x40004 },
-			{
+			new int[] { 0x00000, 0x00004, 0x40000, 0x40004 },
+			new int[] {
 				0*8, 0*8+1, 0*8+2, 0*8+3, 1*8, 1*8+1, 1*8+2, 1*8+3,
 				2*8, 2*8+1, 2*8+2, 2*8+3, 3*8, 3*8+1, 3*8+2, 3*8+3
 			},
-			{
+			new int[] {
 				 0*2*16,  1*2*16,  2*2*16,  3*2*16,  4*2*16,  5*2*16,  6*2*16,  7*2*16,
 				 8*2*16,  9*2*16, 10*2*16, 11*2*16, 12*2*16, 13*2*16, 14*2*16, 15*2*16
 			},
 			2*16*16
-		};
+		);
 	
 		data8_t *src = memory_region(region);
 		int len = memory_region_length(region);
@@ -385,26 +384,26 @@ public class tceptor
 	// fix sprite order
 	static int decode_sprite32(int region)
 	{
-		static struct GfxLayout spr32_layout =
-		{
+		static GfxLayout spr32_layout = new GfxLayout
+		(
 			32, 32,
 			1024,
 			4,
-			{ 0x000000, 0x000004, 0x200000, 0x200004 },
-			{
+			new int[] { 0x000000, 0x000004, 0x200000, 0x200004 },
+			new int[] {
 				0*8, 0*8+1, 0*8+2, 0*8+3, 1*8, 1*8+1, 1*8+2, 1*8+3,
 				2*8, 2*8+1, 2*8+2, 2*8+3, 3*8, 3*8+1, 3*8+2, 3*8+3,
 				4*8, 4*8+1, 4*8+2, 4*8+3, 5*8, 5*8+1, 5*8+2, 5*8+3,
 				6*8, 6*8+1, 6*8+2, 6*8+3, 7*8, 7*8+1, 7*8+2, 7*8+3
 			},
-			{
+			new int[] {
 				 0*2*32,  1*2*32,  2*2*32,  3*2*32,  4*2*32,  5*2*32,  6*2*32,  7*2*32,
 				 8*2*32,  9*2*32, 10*2*32, 11*2*32, 12*2*32, 13*2*32, 14*2*32, 15*2*32,
 				16*2*32, 17*2*32, 18*2*32, 19*2*32, 20*2*32, 21*2*32, 22*2*32, 23*2*32,
 				24*2*32, 25*2*32, 26*2*32, 27*2*32, 28*2*32, 29*2*32, 30*2*32, 31*2*32
 			},
 			2*32*32
-		};
+		);
 	
 		data8_t *src = memory_region(region);
 		int len = memory_region_length(region);
@@ -470,7 +469,7 @@ public class tceptor
 	
 		/* allocate temp bitmaps */
 		temp_bitmap = auto_bitmap_alloc(Machine->drv->screen_width, Machine->drv->screen_height);
-		if (!temp_bitmap)
+		if (temp_bitmap == 0)
 			return 1;
 	
 		if (namco_road_init(gfx_index))
@@ -479,7 +478,7 @@ public class tceptor
 		namco_road_set_transparent_color(Machine->remapped_colortable[0xfff]);
 	
 		tx_tilemap = tilemap_create(get_tx_tile_info, tilemap_scan_cols, TILEMAP_TRANSPARENT_COLOR, 8, 8, 34, 28);
-		if (!tx_tilemap)
+		if (tx_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scrollx(tx_tilemap, 0, -2*8);
@@ -566,7 +565,7 @@ public class tceptor
 	
 				if (is_mask_spr[color])
 				{
-					if (!need_mask)
+					if (need_mask == 0)
 					{
 						// backup previous bitmap
 						copybitmap(temp_bitmap, bitmap, 0, 0, 0, 0, cliprect, TRANSPARENCY_NONE, 0);

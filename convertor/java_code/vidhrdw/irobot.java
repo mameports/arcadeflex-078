@@ -95,7 +95,7 @@ public class irobot
 	}
 	
 	
-	WRITE_HANDLER( irobot_paletteram_w )
+	public static WriteHandlerPtr irobot_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int r,g,b;
 		int bits,intensity;
@@ -110,7 +110,7 @@ public class irobot
 	    bits = (color >> 7) & 0x03;
 	    r = 12 * bits * intensity;
 	    palette_set_color((offset >> 1) & 0x3F,r,g,b);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -392,10 +392,10 @@ public class irobot
 		/* redraw the non-zero characters in the alpha layer */
 		for (y = offs = 0; y < 32; y++)
 			for (x = 0; x < 32; x++, offs++)
-				if (videoram[offs] != 0)
+				if (videoram.read(offs)!= 0)
 				{
-					int code = videoram[offs] & 0x3f;
-					int color = ((videoram[offs] & 0xC0) >> 6) | (irobot_alphamap >> 3);
+					int code = videoram.read(offs)& 0x3f;
+					int color = ((videoram.read(offs)& 0xC0) >> 6) | (irobot_alphamap >> 3);
 					int transp=color + 64;
 	
 					drawgfx(bitmap,Machine->gfx[0],

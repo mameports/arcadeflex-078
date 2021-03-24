@@ -36,20 +36,20 @@ public class kncljoe
 		{
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0x100] >> 0) & 0x01;
-			bit1 = (color_prom[0x100] >> 1) & 0x01;
-			bit2 = (color_prom[0x100] >> 2) & 0x01;
-			bit3 = (color_prom[0x100] >> 3) & 0x01;
+			bit0 = (color_prom.read(0x100)>> 0) & 0x01;
+			bit1 = (color_prom.read(0x100)>> 1) & 0x01;
+			bit2 = (color_prom.read(0x100)>> 2) & 0x01;
+			bit3 = (color_prom.read(0x100)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0x200] >> 0) & 0x01;
-			bit1 = (color_prom[0x200] >> 1) & 0x01;
-			bit2 = (color_prom[0x200] >> 2) & 0x01;
-			bit3 = (color_prom[0x200] >> 3) & 0x01;
+			bit0 = (color_prom.read(0x200)>> 0) & 0x01;
+			bit1 = (color_prom.read(0x200)>> 1) & 0x01;
+			bit2 = (color_prom.read(0x200)>> 2) & 0x01;
+			bit3 = (color_prom.read(0x200)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -101,8 +101,8 @@ public class kncljoe
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = videoram[2*tile_index+1];
-		int code = videoram[2*tile_index] + ((attr & 0xc0) << 2) + (tile_bank << 10);
+		int attr = videoram.read(2*tile_index+1);
+		int code = videoram.read(2*tile_index)+ ((attr & 0xc0) << 2) + (tile_bank << 10);
 	
 		SET_TILE_INFO(
 				0,
@@ -123,7 +123,7 @@ public class kncljoe
 	{
 		bg_tilemap = tilemap_create(get_bg_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,64,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap,4);
@@ -141,16 +141,16 @@ public class kncljoe
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( kncljoe_videoram_w )
+	public static WriteHandlerPtr kncljoe_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap,offset/2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kncljoe_control_w )
+	public static WriteHandlerPtr kncljoe_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -194,9 +194,9 @@ public class kncljoe
 				// ???
 			break;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kncljoe_scroll_w )
+	public static WriteHandlerPtr kncljoe_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int scrollx;
 	
@@ -206,7 +206,7 @@ public class kncljoe
 		tilemap_set_scrollx(bg_tilemap,1,scrollx);
 		tilemap_set_scrollx(bg_tilemap,2,scrollx);
 		tilemap_set_scrollx(bg_tilemap,3,0);
-	}
+	} };
 	
 	
 	
@@ -238,10 +238,10 @@ public class kncljoe
 		for (j=0x7c; j>=0; j-=4)
 		{
 			int offs = pribase[i] + j;
-			int sy = spriteram[offs];
-			int sx = spriteram[offs+3];
-			int code = spriteram[offs+2];
-			int attr = spriteram[offs+1];
+			int sy = spriteram.read(offs);
+			int sx = spriteram.read(offs+3);
+			int code = spriteram.read(offs+2);
+			int attr = spriteram.read(offs+1);
 			int flipx = attr & 0x40;
 			int flipy = !(attr & 0x80);
 			int color = attr & 0x0f;

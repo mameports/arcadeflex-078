@@ -46,22 +46,22 @@ public class r2dtank
 {
 	
 	static int dipsw_bank;
-	static WRITE_HANDLER( dipsw_bank_w )
+	public static WriteHandlerPtr dipsw_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	//	printf("bank = %x\n",data);
 		dipsw_bank = data;
-	}
+	} };
 	
 	static int r2dtank_video_flip;
-	WRITE_HANDLER( r2dtank_video_flip_w )
+	public static WriteHandlerPtr r2dtank_video_flip_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*	0 -> flipped
 			1 -> not flipped */
 	
 		r2dtank_video_flip = !data;
-	}
+	} };
 	
-	static READ_HANDLER( dipsw_r )
+	public static ReadHandlerPtr dipsw_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch( dipsw_bank )
 		{
@@ -107,155 +107,163 @@ public class r2dtank
 	//		logerror("Unknown dipsw_r bank = %x\n",dipsw_bank);
 			return 0xff;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( r2dtank_pia_0_w )
+	public static WriteHandlerPtr r2dtank_pia_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pia_0_w(offset, ~data);
-	}
+	} };
 	
-	WRITE_HANDLER( r2dtank_pia_1_w )
+	public static WriteHandlerPtr r2dtank_pia_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pia_1_w(offset, ~data);
-	}
+	} };
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_RAM },
-		{ 0x8000, 0x8003, pia_0_r },
-		{ 0x8004, 0x8004, dipsw_r },
-	//	{ 0x8004, 0x8007, pia_1_r },
-		{ 0xc000, 0xc007, MRA_RAM },
-		{ 0xc800, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0x8003, pia_0_r ),
+		new Memory_ReadAddress( 0x8004, 0x8004, dipsw_r ),
+	//	new Memory_ReadAddress( 0x8004, 0x8007, pia_1_r ),
+		new Memory_ReadAddress( 0xc000, 0xc007, MRA_RAM ),
+		new Memory_ReadAddress( 0xc800, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_RAM },	
-		{ 0x8000, 0x8003, r2dtank_pia_0_w },
-	//	{ 0x8004, 0x8007, r2dtank_pia_1_w },
-		{ 0x8004, 0x8004, dipsw_bank_w },
-		{ 0xb000, 0xb000, crtc6845_address_w }, 
-		{ 0xb001, 0xb001, crtc6845_register_w },
-		{ 0xc000, 0xc007, MWA_RAM, &generic_nvram, &generic_nvram_size },
-		{ 0xc800, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_RAM ),	
+		new Memory_WriteAddress( 0x8000, 0x8003, r2dtank_pia_0_w ),
+	//	new Memory_WriteAddress( 0x8004, 0x8007, r2dtank_pia_1_w ),
+		new Memory_WriteAddress( 0x8004, 0x8004, dipsw_bank_w ),
+		new Memory_WriteAddress( 0xb000, 0xb000, crtc6845_address_w ), 
+		new Memory_WriteAddress( 0xb001, 0xb001, crtc6845_register_w ),
+		new Memory_WriteAddress( 0xc000, 0xc007, MWA_RAM, generic_nvram, generic_nvram_size ),
+		new Memory_WriteAddress( 0xc800, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x00ff, MRA_RAM },
-		{ 0xd000, 0xd000, MRA_RAM }, // AY8910_read_port_0_r ?
-		{ 0xf000, 0xf000, MRA_RAM }, // soundlatch_r ?
-		{ 0xf800, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x00ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xd000, 0xd000, MRA_RAM ), // AY8910_read_port_0_r ?
+		new Memory_ReadAddress( 0xf000, 0xf000, MRA_RAM ), // soundlatch_r ?
+		new Memory_ReadAddress( 0xf800, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x0027, MWA_RAM },
-		{ 0x0077, 0x007f, MWA_RAM },
-		{ 0xd000, 0xd000, MWA_RAM },
-		{ 0xd001, 0xd001, MWA_RAM },
-		{ 0xd002, 0xd002, MWA_RAM },
-		{ 0xd003, 0xd003, MWA_RAM },
-		{ 0xf800, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x0027, MWA_RAM ),
+		new Memory_WriteAddress( 0x0077, 0x007f, MWA_RAM ),
+		new Memory_WriteAddress( 0xd000, 0xd000, MWA_RAM ),
+		new Memory_WriteAddress( 0xd001, 0xd001, MWA_RAM ),
+		new Memory_WriteAddress( 0xd002, 0xd002, MWA_RAM ),
+		new Memory_WriteAddress( 0xd003, 0xd003, MWA_RAM ),
+		new Memory_WriteAddress( 0xf800, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( r2dtank )
+	static InputPortPtr input_ports_r2dtank = new InputPortPtr(){ public void handler() { 
 	
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK );
 	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_COCKTAIL )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_COCKTAIL );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN );
 	
-		PORT_START	/* DSW A */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x10, "4" )
-		PORT_DIPSETTING(    0x00, "3" )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Upright ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( Free_Play ) )
+		PORT_START(); 	/* DSW A */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x10, "4" );
+		PORT_DIPSETTING(    0x00, "3" );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Upright") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0xc0, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "Free_Play") );
 	
-		PORT_START	/* DSW B */
-		PORT_DIPNAME( 0x01, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( On ) )
+		PORT_START(); 	/* DSW B */
+		PORT_DIPNAME( 0x01, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "On") );
 	
-		PORT_START	/* DSW C */
-		PORT_DIPNAME( 0x01, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x00, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( On ) )
+		PORT_START(); 	/* DSW C */
+		PORT_DIPNAME( 0x01, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "On") );
 	
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	PALETTE_INIT( r2dtank )
 	{
@@ -365,16 +373,16 @@ public class r2dtank
 		/* sound hardware */
 	MACHINE_DRIVER_END
 	
-	ROM_START( r2dtank )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "r2d1.1c",      0xc800, 0x0800, CRC(20606a0f) SHA1(9a55e595c7ea332bdc89142338947be8a28a92a3) )
-		ROM_LOAD( "r2d2.1a",      0xd000, 0x1000, CRC(7561c67f) SHA1(cccc7bbd7975db340fe571a4c31c25b41b2563b8) )
-		ROM_LOAD( "r2d3.2c",      0xe000, 0x1000, CRC(fc53c538) SHA1(8f9a2edcf7a2cb2a8ddd084828b52f1bf45f434a) )
-		ROM_LOAD( "r2d4.2a",      0xf000, 0x1000, CRC(56636225) SHA1(dcfc6e29b4c51a45cfbecf6790b7d88b89af433b) )
+	static RomLoadPtr rom_r2dtank = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "r2d1.1c",      0xc800, 0x0800, CRC(20606a0f);SHA1(9a55e595c7ea332bdc89142338947be8a28a92a3) )
+		ROM_LOAD( "r2d2.1a",      0xd000, 0x1000, CRC(7561c67f);SHA1(cccc7bbd7975db340fe571a4c31c25b41b2563b8) )
+		ROM_LOAD( "r2d3.2c",      0xe000, 0x1000, CRC(fc53c538);SHA1(8f9a2edcf7a2cb2a8ddd084828b52f1bf45f434a) )
+		ROM_LOAD( "r2d4.2a",      0xf000, 0x1000, CRC(56636225);SHA1(dcfc6e29b4c51a45cfbecf6790b7d88b89af433b) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )
-		ROM_LOAD( "r2d5.7l",      0xf800, 0x0800, CRC(c49bed15) SHA1(ffa635a65c024c532bb13fb91bbd3e54923e81bf) )
-	ROM_END
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );
+		ROM_LOAD( "r2d5.7l",      0xf800, 0x0800, CRC(c49bed15);SHA1(ffa635a65c024c532bb13fb91bbd3e54923e81bf) )
+	ROM_END(); }}; 
 	
-	GAMEX( 1980, r2dtank, 0, r2dtank, r2dtank, 0, ROT270, "Sigma Enterprises Inc.", "R2D Tank", GAME_NO_SOUND )
+	public static GameDriver driver_r2dtank	   = new GameDriver("1980"	,"r2dtank"	,"r2dtank.java"	,rom_r2dtank,null	,machine_driver_r2dtank	,input_ports_r2dtank	,null	,ROT270	,	"Sigma Enterprises Inc.", "R2D Tank", GAME_NO_SOUND )
 }

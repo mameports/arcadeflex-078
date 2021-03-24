@@ -140,10 +140,10 @@ public class itech8
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( itech8_palette_w )
+	public static WriteHandlerPtr itech8_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tlc34076_w(offset/2, data);
-	}
+	} };
 	
 	
 	
@@ -162,7 +162,7 @@ public class itech8
 	
 	INLINE void draw_byte_trans4(offs_t addr, UINT8 val, UINT8 mask, UINT8 latch)
 	{
-		if (!val)
+		if (val == 0)
 			return;
 	
 		if (val & 0xf0)
@@ -210,7 +210,7 @@ public class itech8
 	
 	INLINE void draw_byte_shift_trans4(offs_t addr, UINT8 val, UINT8 mask, UINT8 latch)
 	{
-		if (!val)
+		if (val == 0)
 			return;
 	
 		if (val & 0xf0)
@@ -400,7 +400,7 @@ public class itech8
 			for (xleft = width + skip[0] + skip[1]; xleft > 0; )								\
 			{																					\
 				/* load next RLE chunk if needed */												\
-				if (!count)																		\
+				if (count == 0)																		\
 				{																				\
 					count = *src++;																\
 					val = (count & 0x80) ? -1 : *src++;											\
@@ -431,7 +431,7 @@ public class itech8
 			for (xleft = skip[y & 1]; xleft > 0; )												\
 			{																					\
 				/* load next RLE chunk if needed */												\
-				if (!count)																		\
+				if (count == 0)																		\
 				{																				\
 					count = *src++;																\
 					val = (count & 0x80) ? -1 : *src++;											\
@@ -451,7 +451,7 @@ public class itech8
 			for (xleft = width; xleft > 0; )													\
 			{																					\
 				/* load next RLE chunk if needed */												\
-				if (!count)																		\
+				if (count == 0)																		\
 				{																				\
 					count = *src++;																\
 					val = (count & 0x80) ? -1 : *src++;											\
@@ -483,7 +483,7 @@ public class itech8
 			for (xleft = skip[~y & 1]; xleft > 0; )												\
 			{																					\
 				/* load next RLE chunk if needed */												\
-				if (!count)																		\
+				if (count == 0)																		\
 				{																				\
 					count = *src++;																\
 					val = (count & 0x80) ? -1 : *src++;											\
@@ -626,7 +626,7 @@ public class itech8
 	 *
 	 *************************************/
 	
-	READ_HANDLER( itech8_blitter_r )
+	public static ReadHandlerPtr itech8_blitter_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int result = blitter_data[offset / 2];
 	
@@ -647,10 +647,10 @@ public class itech8
 		}
 	
 		return result;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( itech8_blitter_w )
+	public static WriteHandlerPtr itech8_blitter_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* low bit seems to be ignored */
 		offset /= 2;
@@ -665,7 +665,7 @@ public class itech8
 			if (BLIT_LOGGING)
 			{
 				static FILE *blitlog;
-				if (!blitlog) blitlog = fopen("blitter.log", "w");
+				if (blitlog == 0) blitlog = fopen("blitter.log", "w");
 				if (blitlog) fprintf(blitlog, "Blit: XY=%1X%02X%02X SRC=%02X%02X%02X SIZE=%3dx%3d FLAGS=%02x",
 							tms34061_r(14*4+2, 0, 0) & 0x0f, tms34061_r(15*4+2, 0, 0), tms34061_r(15*4+0, 0, 0),
 							*itech8_grom_bank, blitter_data[0], blitter_data[1],
@@ -695,7 +695,7 @@ public class itech8
 	
 		/* debugging */
 		if (FULL_LOGGING) logerror("%04x:blitter_w(%02x)=%02x\n", activecpu_get_previouspc(), offset, data);
-	}
+	} };
 	
 	
 	
@@ -705,7 +705,7 @@ public class itech8
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( itech8_tms34061_w )
+	public static WriteHandlerPtr itech8_tms34061_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int func = (offset >> 9) & 7;
 		int col = offset & 0xff;
@@ -717,10 +717,10 @@ public class itech8
 	
 		/* Row address (RA0-RA8) is not dependent on the offset */
 		tms34061_w(col, 0xff, func, data);
-	}
+	} };
 	
 	
-	READ_HANDLER( itech8_tms34061_r )
+	public static ReadHandlerPtr itech8_tms34061_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int func = (offset >> 9) & 7;
 		int col = offset & 0xff;
@@ -732,7 +732,7 @@ public class itech8
 	
 		/* Row address (RA0-RA8) is not dependent on the offset */
 		return tms34061_r(col, 0xff, func);
-	}
+	} };
 	
 	
 	

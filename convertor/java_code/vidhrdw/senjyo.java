@@ -129,7 +129,7 @@ public class senjyo
 	VIDEO_START( senjyo )
 	{
 		bgbitmap = auto_bitmap_alloc(256,256);
-		if (!bgbitmap)
+		if (bgbitmap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,32,32);
@@ -169,52 +169,52 @@ public class senjyo
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( senjyo_fgvideoram_w )
+	public static WriteHandlerPtr senjyo_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (senjyo_fgvideoram[offset] != data)
 		{
 			senjyo_fgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset);
 		}
-	}
-	WRITE_HANDLER( senjyo_fgcolorram_w )
+	} };
+	public static WriteHandlerPtr senjyo_fgcolorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (senjyo_fgcolorram[offset] != data)
 		{
 			senjyo_fgcolorram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset);
 		}
-	}
-	WRITE_HANDLER( senjyo_bg1videoram_w )
+	} };
+	public static WriteHandlerPtr senjyo_bg1videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (senjyo_bg1videoram[offset] != data)
 		{
 			senjyo_bg1videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg1_tilemap,offset);
 		}
-	}
-	WRITE_HANDLER( senjyo_bg2videoram_w )
+	} };
+	public static WriteHandlerPtr senjyo_bg2videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (senjyo_bg2videoram[offset] != data)
 		{
 			senjyo_bg2videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg2_tilemap,offset);
 		}
-	}
-	WRITE_HANDLER( senjyo_bg3videoram_w )
+	} };
+	public static WriteHandlerPtr senjyo_bg3videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (senjyo_bg3videoram[offset] != data)
 		{
 			senjyo_bg3videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg3_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( senjyo_bgstripes_w )
+	public static WriteHandlerPtr senjyo_bgstripes_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		*senjyo_bgstripesram = data;
 		set_vh_global_attribute(&senjyo_bgstripes, data);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -313,19 +313,19 @@ public class senjyo
 		{
 			int big,sx,sy,flipx,flipy;
 	
-			if (((spriteram[offs+1] & 0x30) >> 4) == priority)
+			if (((spriteram.read(offs+1)& 0x30) >> 4) == priority)
 			{
 				if (senjyo)	/* Senjyo */
-					big = (spriteram[offs] & 0x80);
+					big = (spriteram.read(offs)& 0x80);
 				else	/* Star Force */
-					big = ((spriteram[offs] & 0xc0) == 0xc0);
-				sx = spriteram[offs+3];
+					big = ((spriteram.read(offs)& 0xc0) == 0xc0);
+				sx = spriteram.read(offs+3);
 				if (big)
-					sy = 224-spriteram[offs+2];
+					sy = 224-spriteram.read(offs+2);
 				else
-					sy = 240-spriteram[offs+2];
-				flipx = spriteram[offs+1] & 0x40;
-				flipy = spriteram[offs+1] & 0x80;
+					sy = 240-spriteram.read(offs+2);
+				flipx = spriteram.read(offs+1)& 0x40;
+				flipy = spriteram.read(offs+1)& 0x80;
 	
 				if (flip_screen)
 				{
@@ -346,8 +346,8 @@ public class senjyo
 	
 	
 				drawgfx(bitmap,Machine->gfx[big ? 5 : 4],
-						spriteram[offs],
-						spriteram[offs + 1] & 0x07,
+						spriteram.read(offs),
+						spriteram.read(offs + 1)& 0x07,
 						flipx,flipy,
 						sx,sy,
 						cliprect,TRANSPARENCY_PEN,0);

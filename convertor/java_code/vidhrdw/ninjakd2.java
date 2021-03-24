@@ -44,22 +44,22 @@ public class ninjakd2
 		return 0;
 	}
 	
-	WRITE_HANDLER( ninjakd2_bgvideoram_w )
+	public static WriteHandlerPtr ninjakd2_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (ninjakd2_background_videoram[offset] != data)
 		{
 			bg_dirtybuffer[offset >> 1] = 1;
 			ninjakd2_background_videoram[offset] = data;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ninjakd2_fgvideoram_w )
+	public static WriteHandlerPtr ninjakd2_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (ninjakd2_foreground_videoram[offset] != data)
 			ninjakd2_foreground_videoram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( ninjakd2_background_enable_w )
+	public static WriteHandlerPtr ninjakd2_background_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bg_enable!=data)
 		{
@@ -70,9 +70,9 @@ public class ninjakd2
 			else
 			 fillbitmap(bitmap_bg, Machine->pens[0],0);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ninjakd2_sprite_overdraw_w )
+	public static WriteHandlerPtr ninjakd2_sprite_overdraw_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (sp_overdraw!=data)
 		{
@@ -80,7 +80,7 @@ public class ninjakd2
 			fillbitmap(bitmap_sp,15,&Machine->visible_area);
 			sp_overdraw = data;
 		}
-	}
+	} };
 	
 	void ninjakd2_draw_foreground(struct mame_bitmap *bitmap)
 	{
@@ -161,15 +161,15 @@ public class ninjakd2
 		{
 			int sx,sy,tile,palette,flipx,flipy;
 	
-			if (spriteram[offs+2] & 2)
+			if (spriteram.read(offs+2)& 2)
 			{
-				sx = spriteram[offs+1];
-				sy = spriteram[offs];
-				if (spriteram[offs+2] & 1) sx-=256;
-				tile = spriteram[offs+3]+((spriteram[offs+2] & 0xc0)<<2);
-				flipx = spriteram[offs+2] & 0x10;
-				flipy = spriteram[offs+2] & 0x20;
-				palette = spriteram[offs+4] & 0x0f;
+				sx = spriteram.read(offs+1);
+				sy = spriteram.read(offs);
+				if (spriteram.read(offs+2)& 1) sx-=256;
+				tile = spriteram.read(offs+3)+((spriteram.read(offs+2)& 0xc0)<<2);
+				flipx = spriteram.read(offs+2)& 0x10;
+				flipy = spriteram.read(offs+2)& 0x20;
+				palette = spriteram.read(offs+4)& 0x0f;
 				drawgfx(bitmap,Machine->gfx[1],
 							tile,
 							palette,

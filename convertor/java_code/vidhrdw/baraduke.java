@@ -34,24 +34,24 @@ public class baraduke
 		for (i = 0; i < 2048; i++)
 		{
 			/* red component */
-			bit0 = (color_prom[2048] >> 0) & 0x01;
-			bit1 = (color_prom[2048] >> 1) & 0x01;
-			bit2 = (color_prom[2048] >> 2) & 0x01;
-			bit3 = (color_prom[2048] >> 3) & 0x01;
+			bit0 = (color_prom.read(2048)>> 0) & 0x01;
+			bit1 = (color_prom.read(2048)>> 1) & 0x01;
+			bit2 = (color_prom.read(2048)>> 2) & 0x01;
+			bit3 = (color_prom.read(2048)>> 3) & 0x01;
 			r = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			/* green component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			g = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			/* blue component */
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			b = 0x0e*bit0 + 0x1f*bit1 + 0x43*bit2 + 0x8f*bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -115,19 +115,19 @@ public class baraduke
 	
 	***************************************************************************/
 	
-	READ_HANDLER( baraduke_videoram_r )
+	public static ReadHandlerPtr baraduke_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return baraduke_videoram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( baraduke_videoram_w )
+	public static WriteHandlerPtr baraduke_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (baraduke_videoram[offset] != data)
 		{
 			baraduke_videoram[offset] = data;
 			tilemap_mark_tile_dirty(tilemap[offset/0x1000],(offset&0xfff)/2);
 		}
-	}
+	} };
 	
 	static void scroll_w(int layer,int offset,int data)
 	{
@@ -159,14 +159,14 @@ public class baraduke
 		tilemap_set_scrolly(tilemap[layer], 0, scrolly);
 	}
 	
-	WRITE_HANDLER( baraduke_scroll0_w )
+	public static WriteHandlerPtr baraduke_scroll0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(0, offset, data);
-	}
-	WRITE_HANDLER( baraduke_scroll1_w )
+	} };
+	public static WriteHandlerPtr baraduke_scroll1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll_w(1, offset, data);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -176,11 +176,11 @@ public class baraduke
 	
 	static void draw_sprites(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int priority)
 	{
-		const unsigned char *source = &spriteram[0];
-		const unsigned char *finish = &spriteram[0x0800-16];/* the last is NOT a sprite */
+		const unsigned char *source = &spriteram.read(0);
+		const unsigned char *finish = &spriteram.read(0x0800-16);/* the last is NOT a sprite */
 	
-		int sprite_xoffs = spriteram[0x07f5] - 256 * (spriteram[0x07f4] & 1) + 16;
-		int sprite_yoffs = spriteram[0x07f7] - 256 * (spriteram[0x07f6] & 1);
+		int sprite_xoffs = spriteram.read(0x07f5)- 256 * (spriteram.read(0x07f4)& 1) + 16;
+		int sprite_yoffs = spriteram.read(0x07f7)- 256 * (spriteram.read(0x07f6)& 1);
 	
 		while( source<finish )
 		{
@@ -215,7 +215,7 @@ public class baraduke
 					if( sx > 512 - 32 ) sx -= 512;
 	
 					if( flipx && !wide ) sx -= 16;
-					if( !tall ) sy += 16;
+					if (tall == 0) sy += 16;
 					if( !tall && (attr2 & 0x10) && flipy ) sy -= 16;
 	
 					sx += sprite_xoffs;
@@ -260,7 +260,7 @@ public class baraduke
 		int offs;
 	
 		/* this is the global sprite Y offset, actually */
-		flipscreen = spriteram[0x07f6] & 0x01;
+		flipscreen = spriteram.read(0x07f6)& 0x01;
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	
 		tilemap_draw(bitmap,cliprect,tilemap[1],TILEMAP_IGNORE_TRANSPARENCY,0);
@@ -306,7 +306,7 @@ public class baraduke
 		int offs;
 	
 		/* this is the global sprite Y offset, actually */
-		flipscreen = spriteram[0x07f6] & 0x01;
+		flipscreen = spriteram.read(0x07f6)& 0x01;
 		tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 	
 		tilemap_draw(bitmap,cliprect,tilemap[0],TILEMAP_IGNORE_TRANSPARENCY,0);

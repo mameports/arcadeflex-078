@@ -48,24 +48,21 @@ public class clshroad
 	data8_t *clshroad_vram_0, *clshroad_vram_1;
 	data8_t *clshroad_vregs;
 	
-	WRITE_HANDLER( clshroad_vram_0_w );
-	WRITE_HANDLER( clshroad_vram_1_w );
-	WRITE_HANDLER( clshroad_flipscreen_w );
 	
 	
-	WRITE_HANDLER( clshroad_flipscreen_w )
+	public static WriteHandlerPtr clshroad_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set( data & 1 );
-	}
+	} };
 	
 	
 	PALETTE_INIT( clshroad )
 	{
 		int i;
 		for (i = 0;i < 256;i++)
-			palette_set_color(i,	color_prom[i + 256 * 0] * 0x11,
-									color_prom[i + 256 * 1] * 0x11,
-									color_prom[i + 256 * 2] * 0x11	);
+			palette_set_color(i,	color_prom.read(i + 256 * 0)* 0x11,
+									color_prom.read(i + 256 * 1)* 0x11,
+									color_prom.read(i + 256 * 2)* 0x11	);
 	}
 	
 	PALETTE_INIT( firebatl )
@@ -82,22 +79,22 @@ public class clshroad
 	
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[i + 256] >> 0) & 0x01;
-			bit1 = (color_prom[i + 256] >> 1) & 0x01;
-			bit2 = (color_prom[i + 256] >> 2) & 0x01;
-			bit3 = (color_prom[i + 256] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 256)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 256)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 256)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 256)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[i + 2*256] >> 0) & 0x01;
-			bit1 = (color_prom[i + 2*256] >> 1) & 0x01;
-			bit2 = (color_prom[i + 2*256] >> 2) & 0x01;
-			bit3 = (color_prom[i + 2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 2*256)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -109,7 +106,7 @@ public class clshroad
 	
 	
 		for (i = 0;i < TOTAL_COLORS(2);i++)
-			COLOR(2,i) = ((color_prom[i] & 0x0f) << 4) + (color_prom[i+256] & 0x0f);
+			COLOR(2,i) = ((color_prom.read(i)& 0x0f) << 4) + (color_prom.read(i+256)& 0x0f);
 	}
 	
 	
@@ -160,7 +157,7 @@ public class clshroad
 				0)
 	}
 	
-	WRITE_HANDLER( clshroad_vram_0_w )
+	public static WriteHandlerPtr clshroad_vram_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (clshroad_vram_0[offset] != data)
 		{
@@ -170,7 +167,7 @@ public class clshroad
 			if (tile_index & 0x20)	tilemap_mark_tile_dirty(tilemap_0a, tile);
 			else					tilemap_mark_tile_dirty(tilemap_0b, tile);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -229,14 +226,14 @@ public class clshroad
 				0)
 	}
 	
-	WRITE_HANDLER( clshroad_vram_1_w )
+	public static WriteHandlerPtr clshroad_vram_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (clshroad_vram_1[offset] != data)
 		{
 			clshroad_vram_1[offset] = data;
 			tilemap_mark_tile_dirty(tilemap_1, offset % 0x400);
 		}
-	}
+	} };
 	
 	
 	VIDEO_START( firebatl )
@@ -333,10 +330,10 @@ public class clshroad
 	
 		for (i = 0; i < spriteram_size ; i += 8)
 		{
-			int y		=	 240 - spriteram[i+1];
-			int code	=	(spriteram[i+3] & 0x3f) + (spriteram[i+2] << 6);
-			int x		=	 spriteram[i+5]         + (spriteram[i+6] << 8);
-			int attr	=	 spriteram[i+7];
+			int y		=	 240 - spriteram.read(i+1);
+			int code	=	(spriteram.read(i+3)& 0x3f) + (spriteram.read(i+2)<< 6);
+			int x		=	 spriteram.read(i+5)+ (spriteram.read(i+6)<< 8);
+			int attr	=	 spriteram.read(i+7);
 	
 			int flipx	=	0;
 			int flipy	=	0;

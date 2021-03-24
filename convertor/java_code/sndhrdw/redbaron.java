@@ -24,7 +24,6 @@ public class redbaron
 {
 	
 	/* used in drivers/redbaron.c to select joystick pot */
-	extern int rb_input_select;
 	
 	/* Statics */
 	static INT16 *vol_lookup = NULL;
@@ -48,7 +47,7 @@ public class redbaron
 	static int squeal_on_counter;
 	static int squeal_out;
 	
-	WRITE_HANDLER( redbaron_sounds_w )
+	public static WriteHandlerPtr redbaron_sounds_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* If sound is off, don't bother playing samples */
 		if( data == latch )
@@ -57,13 +56,13 @@ public class redbaron
 		stream_update(channel, 0);
 	    latch = data;
 	    rb_input_select = data & 1;
-	}
+	} };
 	
-	WRITE_HANDLER( redbaron_pokey_w )
+	public static WriteHandlerPtr redbaron_pokey_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    if( latch & 0x20 )
 	        pokey1_w (offset, data);
-	}
+	} };
 	
 	static void redbaron_sound_update(int param, INT16 *buffer, int length)
 	{
@@ -176,7 +175,7 @@ public class redbaron
 	    int i;
 	
 		vol_lookup = (INT16 *)auto_malloc(32768 * sizeof(INT16));
-		if( !vol_lookup )
+		if (vol_lookup == 0)
 	        return 1;
 	
 	    for( i = 0; i < 0x8000; i++ )

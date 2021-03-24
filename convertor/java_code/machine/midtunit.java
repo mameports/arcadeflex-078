@@ -401,7 +401,7 @@ public class midtunit
 	 *
 	 *************************************/
 	
-	static void init_tunit_generic(int sound)
+	public static InitDriverPtr init_tunit_generic = new InitDriverPtr() { public void handler() (int sound)
 	{
 		offs_t gfx_chunk = midyunit_gfx_rom_size / 4;
 		UINT8 *base;
@@ -457,7 +457,7 @@ public class midtunit
 	
 		/* default graphics functionality */
 		midtunit_gfx_rom_large = 0;
-	}
+	} };
 	
 	
 	
@@ -469,7 +469,7 @@ public class midtunit
 	 *
 	 *************************************/
 	
-	static void init_mk_tunit_common(void)
+	public static InitDriverPtr init_mk_tunit_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* common init */
 		init_tunit_generic(SOUND_ADPCM);
@@ -481,7 +481,7 @@ public class midtunit
 	
 		/* sound chip protection (hidden RAM) */
 		install_mem_write_handler(1, 0xfb9c, 0xfbc6, MWA_RAM);
-	}
+	} };
 	
 	DRIVER_INIT( mk )
 	{
@@ -495,13 +495,13 @@ public class midtunit
 		INSTALL_SPEEDUP_3(0x01053360, 0xffce2190, 0x104f9d0, 0x104fa10, 0x104fa30);
 	}
 	
-	static void init_nbajam_common(int te_protection)
+	public static InitDriverPtr init_nbajam_common = new InitDriverPtr() { public void handler() (int te_protection)
 	{
 		/* common init */
 		init_tunit_generic(SOUND_ADPCM_LARGE);
 	
 		/* protection */
-		if (!te_protection)
+		if (te_protection == 0)
 		{
 			nbajam_prot_table = nbajam_prot_values;
 			install_mem_read16_handler (0, TOBYTE(0x1b14020), TOBYTE(0x1b2503f), nbajam_prot_r);
@@ -517,11 +517,11 @@ public class midtunit
 		}
 	
 		/* sound chip protection (hidden RAM) */
-		if (!te_protection)
+		if (te_protection == 0)
 			install_mem_write_handler(1, 0xfbaa, 0xfbd4, MWA_RAM);
 		else
 			install_mem_write_handler(1, 0xfbec, 0xfc16, MWA_RAM);
-	}
+	} };
 	
 	DRIVER_INIT( nbajam )
 	{
@@ -577,7 +577,7 @@ public class midtunit
 	 *
 	 *************************************/
 	
-	static void init_mk2_common(void)
+	public static InitDriverPtr init_mk2_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* common init */
 		init_tunit_generic(SOUND_DCS);
@@ -591,7 +591,7 @@ public class midtunit
 		install_mem_read16_handler (0, TOBYTE(0x01a3d0c0), TOBYTE(0x01a3d0ff), mk2_prot_r);
 		install_mem_read16_handler (0, TOBYTE(0x01d9d1e0), TOBYTE(0x01d9d1ff), mk2_prot_const_r);
 		install_mem_read16_handler (0, TOBYTE(0x01def920), TOBYTE(0x01def93f), mk2_prot_const_r);
-	}
+	} };
 	
 	DRIVER_INIT( mk2 )
 	{
@@ -672,7 +672,7 @@ public class midtunit
 	WRITE16_HANDLER( midtunit_sound_w )
 	{
 		/* check for out-of-bounds accesses */
-		if (!offset)
+		if (offset == 0)
 		{
 			logerror("%08X:Unexpected write to sound (lo) = %04X\n", activecpu_get_pc(), data);
 			return;

@@ -192,9 +192,7 @@ public class adsp2100
 	**	PRIVATE FUNCTION PROTOTYPES
 	**#################################################################################################*/
 	
-	static int create_tables(void);
-	static void check_irqs(void);
-	
+	static static 
 	
 	/*###################################################################################################
 	**	MEMORY ACCESSORS
@@ -536,11 +534,11 @@ public class adsp2100
 		int i;
 	
 		/* allocate the tables */
-		if (!reverse_table)
+		if (reverse_table == 0)
 			reverse_table = (UINT16 *)malloc(0x4000 * sizeof(UINT16));
-		if (!mask_table)
+		if (mask_table == 0)
 			mask_table = (UINT16 *)malloc(0x4000 * sizeof(UINT16));
-		if (!condition_table)
+		if (condition_table == 0)
 			condition_table = (UINT8 *)malloc(0x1000 * sizeof(UINT8));
 	
 		/* handle errors */
@@ -1668,7 +1666,7 @@ public class adsp2100
 		which = (which+1) % 16;
 	    buffer[which][0] = '\0';
 	
-		if (!context)
+		if (context == 0)
 			r = &adsp2100;
 	
 	    switch( regnum )

@@ -189,114 +189,6 @@ public class e132xs
 	int e132xs_ICount;
 	int h_clear;
 	
-	void e132xs_chk(void);
-	void e132xs_movd(void);
-	void e132xs_divu(void);
-	void e132xs_divs(void);
-	void e132xs_xm(void);
-	void e132xs_mask(void);
-	void e132xs_sum(void);
-	void e132xs_sums(void);
-	void e132xs_cmp(void);
-	void e132xs_mov(void);
-	void e132xs_add(void);
-	void e132xs_adds(void);
-	void e132xs_cmpb(void);
-	void e132xs_andn(void);
-	void e132xs_or(void);
-	void e132xs_xor(void);
-	void e132xs_subc(void);
-	void e132xs_not(void);
-	void e132xs_sub(void);
-	void e132xs_subs(void);
-	void e132xs_addc(void);
-	void e132xs_and(void);
-	void e132xs_neg(void);
-	void e132xs_negs(void);
-	void e132xs_cmpi(void);
-	void e132xs_movi(void);
-	void e132xs_addi(void);
-	void e132xs_addsi(void);
-	void e132xs_cmpbi(void);
-	void e132xs_andni(void);
-	void e132xs_ori(void);
-	void e132xs_xori(void);
-	void e132xs_shrdi(void);
-	void e132xs_shrd(void);
-	void e132xs_shr(void);
-	void e132xs_sardi(void);
-	void e132xs_sard(void);
-	void e132xs_sar(void);
-	void e132xs_shldi(void);
-	void e132xs_shld(void);
-	void e132xs_shl(void);
-	void reserved(void);
-	void e132xs_testlz(void);
-	void e132xs_rol(void);
-	void e132xs_ldxx1(void);
-	void e132xs_ldxx2(void);
-	void e132xs_stxx1(void);
-	void e132xs_stxx2(void);
-	void e132xs_shri(void);
-	void e132xs_sari(void);
-	void e132xs_shli(void);
-	void e132xs_mulu(void);
-	void e132xs_muls(void);
-	void e132xs_set(void);
-	void e132xs_mul(void);
-	void e132xs_fadd(void);
-	void e132xs_faddd(void);
-	void e132xs_fsub(void);
-	void e132xs_fsubd(void);
-	void e132xs_fmul(void);
-	void e132xs_fmuld(void);
-	void e132xs_fdiv(void);
-	void e132xs_fdivd(void);
-	void e132xs_fcmp(void);
-	void e132xs_fcmpd(void);
-	void e132xs_fcmpu(void);
-	void e132xs_fcmpud(void);
-	void e132xs_fcvt(void);
-	void e132xs_fcvtd(void);
-	void e132xs_extend(void);
-	void e132xs_do(void);
-	void e132xs_ldwr(void);
-	void e132xs_lddr(void);
-	void e132xs_ldwp(void);
-	void e132xs_lddp(void);
-	void e132xs_stwr(void);
-	void e132xs_stdr(void);
-	void e132xs_stwp(void);
-	void e132xs_stdp(void);
-	void e132xs_dbv(void);
-	void e132xs_dbnv(void);
-	void e132xs_dbe(void);
-	void e132xs_dbne(void);
-	void e132xs_dbc(void);
-	void e132xs_dbnc(void);
-	void e132xs_dbse(void);
-	void e132xs_dbht(void);
-	void e132xs_dbn(void);
-	void e132xs_dbnn(void);
-	void e132xs_dble(void);
-	void e132xs_dbgt(void);
-	void e132xs_dbr(void);
-	void e132xs_frame(void);
-	void e132xs_call(void);
-	void e132xs_bv(void);
-	void e132xs_bnv(void);
-	void e132xs_be(void);
-	void e132xs_bne(void);
-	void e132xs_bc(void);
-	void e132xs_bnc(void);
-	void e132xs_bse(void);
-	void e132xs_bht(void);
-	void e132xs_bn(void);
-	void e132xs_bnn(void);
-	void e132xs_ble(void);
-	void e132xs_bgt(void);
-	void e132xs_br(void);
-	void e132xs_trap(void);
 	
 	/* Registers */
 	enum
@@ -504,7 +396,7 @@ public class e132xs
 			}
 	
 	#define SET_LD(val,inc)										\
-			if( !D_CODE )										\
+			if (D_CODE == 0)										\
 				SET_L_REG(16 + inc, val);						\
 			else												\
 				SET_L_REG(D_CODE + inc, val);
@@ -1019,7 +911,7 @@ public class e132xs
 	
 		which = (which+1) % 16;
 		buffer[which][0] = '\0';
-		if( !context )
+		if (context == 0)
 			r = &e132xs;
 	
 		switch (regnum)
@@ -1612,7 +1504,7 @@ public class e132xs
 		}
 		else
 		{
-			if( !GET_H )
+			if (GET_H == 0)
 			{
 				val = GET_G_REG(S_CODE);
 			}
@@ -2190,7 +2082,7 @@ public class e132xs
 			op2 = GET_G_REG(D_CODE);
 		}
 	
-		if( !N_VALUE )
+		if (N_VALUE == 0)
 			op1 = GET_C & ((GET_Z == 0 ? 1 : 0) | (op2 & 0x01));
 		else
 			op1 = immediate_value();
@@ -2221,7 +2113,7 @@ public class e132xs
 			op2 = GET_G_REG(D_CODE);
 		}
 	
-		if( !N_VALUE )
+		if (N_VALUE == 0)
 			op1 = GET_C & ((GET_Z == 0 ? 1 : 0) | (op2 & 0x01));
 		else
 			op1 = immediate_value();
@@ -3656,7 +3548,7 @@ public class e132xs
 					break;
 	
 				case 7:
-					if( !GET_N )
+					if (GET_N == 0)
 					{
 						SET_RD(1, NOINC);
 					}
@@ -3704,7 +3596,7 @@ public class e132xs
 					break;
 	
 				case 11:
-					if( !GET_C )
+					if (GET_C == 0)
 					{
 						SET_RD(1, NOINC);
 					}
@@ -3728,7 +3620,7 @@ public class e132xs
 					break;
 	
 				case 13:
-					if( !GET_Z )
+					if (GET_Z == 0)
 					{
 						SET_RD(1, NOINC);
 					}
@@ -3752,7 +3644,7 @@ public class e132xs
 					break;
 	
 				case 15:
-					if( !GET_V )
+					if (GET_V == 0)
 					{
 						SET_RD(1, NOINC);
 					}
@@ -3805,7 +3697,7 @@ public class e132xs
 					break;
 	
 				case 23:
-					if( !GET_N )
+					if (GET_N == 0)
 					{
 						SET_RD(-1, NOINC);
 					}
@@ -3853,7 +3745,7 @@ public class e132xs
 					break;
 	
 				case 27:
-					if( !GET_C )
+					if (GET_C == 0)
 					{
 						SET_RD(-1, NOINC);
 					}
@@ -3877,7 +3769,7 @@ public class e132xs
 					break;
 	
 				case 29:
-					if( !GET_Z )
+					if (GET_Z == 0)
 					{
 						SET_RD(-1, NOINC);
 					}
@@ -3901,7 +3793,7 @@ public class e132xs
 					break;
 	
 				case 31:
-					if( !GET_V )
+					if (GET_V == 0)
 					{
 						SET_RD(-1, NOINC);
 					}
@@ -4403,7 +4295,7 @@ public class e132xs
 	
 	void e132xs_dbnv(void)
 	{
-		if( !GET_V )
+		if (GET_V == 0)
 			execute_dbr(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4419,7 +4311,7 @@ public class e132xs
 	
 	void e132xs_dbne(void) //or DBNZ
 	{
-		if( !GET_Z )
+		if (GET_Z == 0)
 			execute_dbr(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4435,7 +4327,7 @@ public class e132xs
 	
 	void e132xs_dbnc(void) //or DBHE
 	{
-		if( !GET_C )
+		if (GET_C == 0)
 			execute_dbr(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4467,7 +4359,7 @@ public class e132xs
 	
 	void e132xs_dbnn(void) //or DBGE
 	{
-		if( !GET_N )
+		if (GET_N == 0)
 			execute_dbr(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4593,7 +4485,7 @@ public class e132xs
 	
 	void e132xs_bnv(void)
 	{
-		if( !GET_V )
+		if (GET_V == 0)
 			execute_br(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4609,7 +4501,7 @@ public class e132xs
 	
 	void e132xs_bne(void) //or BNZ
 	{
-		if( !GET_Z )
+		if (GET_Z == 0)
 			execute_br(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4625,7 +4517,7 @@ public class e132xs
 	
 	void e132xs_bnc(void) //or BHE
 	{
-		if( !GET_C )
+		if (GET_C == 0)
 			execute_br(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4657,7 +4549,7 @@ public class e132xs
 	
 	void e132xs_bnn(void) //or BGE
 	{
-		if( !GET_N )
+		if (GET_N == 0)
 			execute_br(get_pcrel());
 		else
 			e132xs_ICount -= 1;
@@ -4721,7 +4613,7 @@ public class e132xs
 				break;
 	
 			case TRAPGE:
-				if( !GET_N )
+				if (GET_N == 0)
 					execute_trap(addr);
 	
 				break;
@@ -4745,7 +4637,7 @@ public class e132xs
 				break;
 	
 			case TRAPHE:
-				if( !GET_C )
+				if (GET_C == 0)
 					execute_trap(addr);
 	
 				break;
@@ -4757,7 +4649,7 @@ public class e132xs
 				break;
 	
 			case TRAPNE:
-				if( !GET_Z )
+				if (GET_Z == 0)
 					execute_trap(addr);
 	
 				break;

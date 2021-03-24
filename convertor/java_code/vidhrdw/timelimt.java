@@ -74,7 +74,7 @@ public class timelimt
 	
 	static void get_fg_tile_info(int tile_index)
 	{
-		SET_TILE_INFO(0, videoram[tile_index], 0, 0);
+		SET_TILE_INFO(0, videoram.read(tile_index), 0, 0);
 	}
 	
 	VIDEO_START( timelimt )
@@ -82,13 +82,13 @@ public class timelimt
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if (!fg_tilemap)
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -98,40 +98,40 @@ public class timelimt
 	
 	/***************************************************************************/
 	
-	WRITE_HANDLER( timelimt_videoram_w )
+	public static WriteHandlerPtr timelimt_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( timelimt_bg_videoram_w )
+	public static WriteHandlerPtr timelimt_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (timelimt_bg_videoram[offset] != data)
 		{
 			timelimt_bg_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( timelimt_scroll_x_lsb_w )
+	public static WriteHandlerPtr timelimt_scroll_x_lsb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollx &= 0x100;
 		scrollx |= data & 0xff;
-	}
+	} };
 	
-	WRITE_HANDLER( timelimt_scroll_x_msb_w )
+	public static WriteHandlerPtr timelimt_scroll_x_msb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollx &= 0xff;
 		scrollx |= ( data & 1 ) << 8;
-	}
+	} };
 	
-	WRITE_HANDLER( timelimt_scroll_y_w )
+	public static WriteHandlerPtr timelimt_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrolly = data;
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -144,12 +144,12 @@ public class timelimt
 	
 		for( offs = spriteram_size; offs >= 0; offs -= 4 )
 		{
-			int sy = 240 - spriteram[offs];
-			int sx = spriteram[offs+3];
-			int code = spriteram[offs+1] & 0x3f;
-			int attr = spriteram[offs+2];
-			int flipy = spriteram[offs+1] & 0x80;
-			int flipx = spriteram[offs+1] & 0x40;
+			int sy = 240 - spriteram.read(offs);
+			int sx = spriteram.read(offs+3);
+			int code = spriteram.read(offs+1)& 0x3f;
+			int attr = spriteram.read(offs+2);
+			int flipy = spriteram.read(offs+1)& 0x80;
+			int flipx = spriteram.read(offs+1)& 0x40;
 	
 			code += ( attr & 0x80 ) ? 0x40 : 0x00;
 			code += ( attr & 0x40 ) ? 0x80 : 0x00;

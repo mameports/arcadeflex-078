@@ -76,7 +76,6 @@ public class harddriv
 	
 	/* from slapstic.c */
 	int slapstic_tweak(offs_t offset);
-	void slapstic_reset(void);
 	
 	
 	/* from vidhrdw */
@@ -144,8 +143,7 @@ public class harddriv
 	static data32_t dataval[MAX_MSP_SYNC];
 	static int next_msp_sync;
 	
-	static void hd68k_update_interrupts(void);
-	static void duart_callback(int param);
+	static static void duart_callback(int param);
 	
 	
 	
@@ -919,7 +917,7 @@ public class harddriv
 		if (m68k_adsp_buffer_bank != data && keyboard_pressed(KEYCODE_L))
 		{
 			static FILE *commands;
-			if (!commands) commands = fopen("commands.log", "w");
+			if (commands == 0) commands = fopen("commands.log", "w");
 			if (commands)
 			{
 				INT16 *base = (INT16 *)&som_memory[data * 0x2000];
@@ -1212,7 +1210,7 @@ public class harddriv
 		if (ds3_g68flag) result ^= 0x8000;
 		if (ds3_gflag) result ^= 0x4000;
 		if (ds3_g68irqs) result ^= 0x2000;
-		if (!adsp_irq_state) result ^= 0x1000;
+		if (adsp_irq_state == 0) result ^= 0x1000;
 		return result;
 	}
 	

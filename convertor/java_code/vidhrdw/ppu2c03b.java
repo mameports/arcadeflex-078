@@ -181,16 +181,16 @@ public class ppu2c03b
 	}
 	
 	/* the charlayout we use for the chargen */
-	static struct GfxLayout ppu_charlayout =
-	{
+	static GfxLayout ppu_charlayout = new GfxLayout
+	(
 		8,8,	/* 8*8 characters */
 		512,	/* 512 characters - modified at runtime */
 		2,		/* 2 bits per pixel */
-		{ 8*8, 0 },	/* the two bitplanes are separated */
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 8*8, 0 },	/* the two bitplanes are separated */
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		16*8	/* every char takes 16 consecutive bytes */
-	};
+	);
 	
 	/*************************************
 	 *
@@ -699,7 +699,7 @@ public class ppu2c03b
 	#if 0	/* hmm... this only goes if we implement the osd_skip_this_frame functionality */
 	
 			/* check for sprite 0 hit */
-			if ( ( scanline == spriteram[0] + 7 ) && ( ppu_regs[PPU_CONTROL1] & PPU_CONTROL1_SPRITES ) )
+			if ( ( scanline == spriteram.read(0)+ 7 ) && ( ppu_regs[PPU_CONTROL1] & PPU_CONTROL1_SPRITES ) )
 				ppu_regs[PPU_STATUS] |= PPU_STATUS_SPRITE0_HIT;
 	
 	#endif
@@ -775,7 +775,7 @@ public class ppu2c03b
 			ppu_regs[PPU_STATUS] &= ~( PPU_STATUS_VBLANK | PPU_STATUS_SPRITE0_HIT );
 	
 			/* if background or sprites are enabled, copy the ppu address latch */
-			if ( !blanked )
+			if (blanked == 0)
 				chips[num].refresh_data = chips[num].refresh_latch;
 	
 			/* reset the scanline count */
@@ -893,7 +893,7 @@ public class ppu2c03b
 			break;
 	
 			case PPU_SPRITE_DATA:
-				ret = chips[num].spriteram[chips[num].regs[PPU_SPRITE_ADDRESS]];
+				ret = chips[num].spriteram.read(chips[num).regs[PPU_SPRITE_ADDRESS]];
 			break;
 	
 			case PPU_DATA:
@@ -906,7 +906,7 @@ public class ppu2c03b
 				if ( ( chips[num].videoram_addr >= 0x2000 ) && ( chips[num].videoram_addr <= 0x3fef ) )
 					chips[num].videoram_data_latch = chips[num].ppu_page[ ( chips[num].videoram_addr & 0xc00) >> 10][ chips[num].videoram_addr & 0x3ff ];
 				else
-					chips[num].videoram_data_latch = chips[num].videoram[ chips[num].videoram_addr & 0x3fff ];
+					chips[num].videoram_data_latch = chips[num].videoram.read( chips[num).videoram_addr & 0x3fff ];
 	
 				chips[num].videoram_addr += chips[num].add;
 			break;
@@ -974,7 +974,7 @@ public class ppu2c03b
 			break;
 	
 			case PPU_SPRITE_DATA:
-				chips[num].spriteram[chips[num].regs[PPU_SPRITE_ADDRESS]] = data;
+				chips[num].spriteram.read(chips[num).regs[PPU_SPRITE_ADDRESS]] = data;
 				chips[num].regs[PPU_SPRITE_ADDRESS] = ( chips[num].regs[PPU_SPRITE_ADDRESS] + 1 ) & 0xff;
 			break;
 	
@@ -1050,7 +1050,7 @@ public class ppu2c03b
 						else
 						{
 							/* store the data */
-							chips[num].videoram[tempAddr] = data;
+							chips[num].videoram.write(tempAddr,data);
 	
 							/* setup the master dirty switch */
 							chips[num].chars_are_dirty = 1;
@@ -1074,7 +1074,7 @@ public class ppu2c03b
 						int color_base = intf->color_base[num];
 	
 						/* store the data */
-						chips[num].videoram[tempAddr] = data;
+						chips[num].videoram.write(tempAddr,data);
 	
 						data &= 0x3f;
 	
@@ -1193,7 +1193,7 @@ public class ppu2c03b
 			int count = num_pages * 0x400;
 			int rom_start = bank * bank_size * 16;
 	
-			memcpy( &chips[num].videoram[vram_start], &memory_region( intf->vrom_region[num] )[rom_start], count );
+			memcpy( &chips[num].videoram.read(vram_start), &memory_region( intf->vrom_region[num] )[rom_start], count );
 		}
 	}
 	
@@ -1245,39 +1245,39 @@ public class ppu2c03b
 		switch( mirroring )
 		{
 			case PPU_MIRROR_VERT:
-				chips[num].ppu_page[0] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[1] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[2] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[3] = &(chips[num].videoram[0x2400]);
+				chips[num].ppu_page[0] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[1] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[2] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[3] = &(chips[num].videoram.read(0x2400));
 			break;
 	
 			case PPU_MIRROR_HORZ:
-				chips[num].ppu_page[0] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[1] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[2] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[3] = &(chips[num].videoram[0x2400]);
+				chips[num].ppu_page[0] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[1] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[2] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[3] = &(chips[num].videoram.read(0x2400));
 			break;
 	
 			case PPU_MIRROR_HIGH:
-				chips[num].ppu_page[0] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[1] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[2] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[3] = &(chips[num].videoram[0x2400]);
+				chips[num].ppu_page[0] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[1] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[2] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[3] = &(chips[num].videoram.read(0x2400));
 			break;
 	
 			case PPU_MIRROR_LOW:
-				chips[num].ppu_page[0] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[1] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[2] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[3] = &(chips[num].videoram[0x2000]);
+				chips[num].ppu_page[0] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[1] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[2] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[3] = &(chips[num].videoram.read(0x2000));
 			break;
 	
 			case PPU_MIRROR_NONE:
 			default:
-				chips[num].ppu_page[0] = &(chips[num].videoram[0x2000]);
-				chips[num].ppu_page[1] = &(chips[num].videoram[0x2400]);
-				chips[num].ppu_page[2] = &(chips[num].videoram[0x2800]);
-				chips[num].ppu_page[3] = &(chips[num].videoram[0x2c00]);
+				chips[num].ppu_page[0] = &(chips[num].videoram.read(0x2000));
+				chips[num].ppu_page[1] = &(chips[num].videoram.read(0x2400));
+				chips[num].ppu_page[2] = &(chips[num].videoram.read(0x2800));
+				chips[num].ppu_page[3] = &(chips[num].videoram.read(0x2c00));
 			break;
 		}
 	}
@@ -1336,23 +1336,23 @@ public class ppu2c03b
 	 *
 	 *************************************/
 	
-	READ_HANDLER( ppu2c03b_0_r )
+	public static ReadHandlerPtr ppu2c03b_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ppu2c03b_r( 0, offset );
-	}
+	} };
 	
-	READ_HANDLER( ppu2c03b_1_r )
+	public static ReadHandlerPtr ppu2c03b_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ppu2c03b_r( 1, offset );
-	}
+	} };
 	
-	WRITE_HANDLER( ppu2c03b_0_w )
+	public static WriteHandlerPtr ppu2c03b_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ppu2c03b_w( 0, offset, data );
-	}
+	} };
 	
-	WRITE_HANDLER( ppu2c03b_1_w )
+	public static WriteHandlerPtr ppu2c03b_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ppu2c03b_w( 1, offset, data );
-	}
+	} };
 }

@@ -27,17 +27,17 @@ public class rallyx
 	
 	
 	
-	static struct rectangle radarvisiblearea =
-	{
+	static rectangle radarvisiblearea = new rectangle
+	(
 		28*8, 36*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
-	static struct rectangle radarvisibleareaflip =
-	{
+	static rectangle radarvisibleareaflip = new rectangle
+	(
 		0*8, 8*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
 	
 	
@@ -177,7 +177,7 @@ public class rallyx
 	
 	
 	
-	WRITE_HANDLER( rallyx_videoram2_w )
+	public static WriteHandlerPtr rallyx_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rallyx_videoram2[offset] != data)
 		{
@@ -185,10 +185,10 @@ public class rallyx
 	
 			rallyx_videoram2[offset] = data;
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( rallyx_colorram2_w )
+	public static WriteHandlerPtr rallyx_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rallyx_colorram2[offset] != data)
 		{
@@ -196,19 +196,19 @@ public class rallyx
 	
 			rallyx_colorram2[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( rallyx_flipscreen_w )
+	public static WriteHandlerPtr rallyx_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 1))
 		{
 			flip_screen_set(data & 1);
-			memset(dirtybuffer,1,videoram_size);
-			memset(dirtybuffer2,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
+			memset(dirtybuffer2,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -284,8 +284,8 @@ public class rallyx
 	
 				sx = (offs % 32) ^ 4;
 				sy = offs / 32 - 2;
-				flipx = ~colorram[offs] & 0x40;
-				flipy = colorram[offs] & 0x80;
+				flipx = ~colorram.read(offs)& 0x40;
+				flipy = colorram.read(offs)& 0x80;
 				if (flip_screen)
 				{
 					sx = 7 - sx;
@@ -295,8 +295,8 @@ public class rallyx
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&radarvisibleareaflip,TRANSPARENCY_NONE,0);
@@ -311,13 +311,13 @@ public class rallyx
 		/* draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			sx = spriteram[offs + 1] + ((spriteram_2[offs + 1] & 0x80) << 1) - displacement;
-			sy = 225 - spriteram_2[offs] - displacement;
+			sx = spriteram.read(offs + 1)+ ((spriteram_2.read(offs + 1)& 0x80) << 1) - displacement;
+			sy = 225 - spriteram_2.read(offs)- displacement;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] & 0xfc) >> 2,
-					spriteram_2[offs + 1] & 0x3f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					(spriteram.read(offs)& 0xfc) >> 2,
+					spriteram_2.read(offs + 1)& 0x3f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
@@ -446,8 +446,8 @@ public class rallyx
 	
 				sx = (offs % 32) ^ 4;
 				sy = offs / 32 - 2;
-				flipx = ~colorram[offs] & 0x40;
-				flipy = colorram[offs] & 0x80;
+				flipx = ~colorram.read(offs)& 0x40;
+				flipy = colorram.read(offs)& 0x80;
 				if (flip_screen)
 				{
 					sx = 7 - sx;
@@ -457,8 +457,8 @@ public class rallyx
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&radarvisibleareaflip,TRANSPARENCY_NONE,0);
@@ -473,13 +473,13 @@ public class rallyx
 		/* draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			sx = spriteram[offs + 1] + ((spriteram_2[offs + 1] & 0x80) << 1) - displacement;
-			sy = 225 - spriteram_2[offs] - displacement;
+			sx = spriteram.read(offs + 1)+ ((spriteram_2.read(offs + 1)& 0x80) << 1) - displacement;
+			sy = 225 - spriteram_2.read(offs)- displacement;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] & 0xfc) >> 2,
-					spriteram_2[offs + 1] & 0x3f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					(spriteram.read(offs)& 0xfc) >> 2,
+					spriteram_2.read(offs + 1)& 0x3f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
@@ -563,8 +563,8 @@ public class rallyx
 				sx = (offs % 32) ^ 4;
 				sy = offs / 32 - 2;
 				/* not a mistake, one bit selects both  flips */
-				flipx = colorram[offs] & 0x80;
-				flipy = colorram[offs] & 0x80;
+				flipx = colorram.read(offs)& 0x80;
+				flipy = colorram.read(offs)& 0x80;
 				if (flip_screen)
 				{
 					sx = 7 - sx;
@@ -574,8 +574,8 @@ public class rallyx
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						(videoram[offs]&0x7f) + 2*(colorram[offs]&0x40) + 2*(videoram[offs]&0x80),
-						colorram[offs] & 0x3f,
+						(videoram.read(offs)&0x7f) + 2*(colorram.read(offs)&0x40) + 2*(videoram.read(offs)&0x80),
+						colorram.read(offs)& 0x3f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&radarvisibleareaflip,TRANSPARENCY_NONE,0);
@@ -613,16 +613,16 @@ public class rallyx
 		/* draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			sx = spriteram[offs + 1] + ((spriteram_2[offs + 1] & 0x80) << 1) - displacement;
-			sy = 225 - spriteram_2[offs] - displacement;
+			sx = spriteram.read(offs + 1)+ ((spriteram_2.read(offs + 1)& 0x80) << 1) - displacement;
+			sy = 225 - spriteram_2.read(offs)- displacement;
 	
 			/* handle reduced visible area in some games */
 			if (flip_screen && Machine->drv->default_visible_area.max_x == 32*8-1) sx += 32;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					((spriteram[offs] & 0x7c) >> 2) + 0x20*(spriteram[offs] & 0x01) + ((spriteram[offs] & 0x80) >> 1),
-					spriteram_2[offs + 1] & 0x3f,
-					spriteram[offs] & 2,spriteram[offs] & 2,
+					((spriteram.read(offs)& 0x7c) >> 2) + 0x20*(spriteram.read(offs)& 0x01) + ((spriteram.read(offs)& 0x80) >> 1),
+					spriteram_2.read(offs + 1)& 0x3f,
+					spriteram.read(offs)& 2,spriteram.read(offs)& 2,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_COLOR,0);
 		}
@@ -702,8 +702,8 @@ public class rallyx
 				sx = (offs % 32) ^ 4;
 				sy = offs / 32 - 2;
 				/* not a mistake, one bit selects both  flips */
-				flipx = colorram[offs] & 0x80;
-				flipy = colorram[offs] & 0x80;
+				flipx = colorram.read(offs)& 0x80;
+				flipy = colorram.read(offs)& 0x80;
 				if (flip_screen)
 				{
 					sx = 7 - sx;
@@ -713,8 +713,8 @@ public class rallyx
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						(videoram[offs]&0x7f) + 2*(colorram[offs]&0x40) + 2*(videoram[offs]&0x80),
-						colorram[offs] & 0x3f,
+						(videoram.read(offs)&0x7f) + 2*(colorram.read(offs)&0x40) + 2*(videoram.read(offs)&0x80),
+						colorram.read(offs)& 0x3f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&radarvisibleareaflip,TRANSPARENCY_NONE,0);
@@ -755,21 +755,21 @@ public class rallyx
 			int flipx,flipy;
 	
 	
-			sx = spriteram[offs + 1] - 1;
-			sy = 224 - spriteram_2[offs];
+			sx = spriteram.read(offs + 1)- 1;
+			sy = 224 - spriteram_2.read(offs);
 	if (flip_screen) sx += 32;
-			flipx = ~spriteram[offs] & 1;
-			flipy = ~spriteram[offs] & 2;
+			flipx = ~spriteram.read(offs)& 1;
+			flipy = ~spriteram.read(offs)& 2;
 			if (flip_screen)
 			{
 				flipx = !flipx;
 				flipy = !flipy;
 			}
 	
-			if (spriteram[offs] & 0x01)	/* ??? */
+			if (spriteram.read(offs)& 0x01)	/* ??? */
 				drawgfx(bitmap,Machine->gfx[1],
-						((spriteram[offs] & 0x7c) >> 2) + 0x20*(spriteram[offs] & 0x01) + ((spriteram[offs] & 0x80) >> 1),
-						spriteram_2[offs + 1] & 0x3f,
+						((spriteram.read(offs)& 0x7c) >> 2) + 0x20*(spriteram.read(offs)& 0x01) + ((spriteram.read(offs)& 0x80) >> 1),
+						spriteram_2.read(offs + 1)& 0x3f,
 						flipx,flipy,
 						sx,sy,
 						&Machine->visible_area,TRANSPARENCY_COLOR,0);

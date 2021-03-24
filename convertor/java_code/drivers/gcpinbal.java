@@ -231,90 +231,90 @@ public class gcpinbal
 	                   INPUT PORTS, DIPs
 	***********************************************************/
 	
-	INPUT_PORTS_START( gcpinbal )
-		PORT_START	/* DSW */
-		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(      0x0002, "Easy" )
-		PORT_DIPSETTING(      0x0003, "Normal" )
-		PORT_DIPSETTING(      0x0001, "Hard" )
-		PORT_DIPSETTING(      0x0000, "Hardest" )
-		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(      0x0004, "300k" )
-		PORT_DIPSETTING(      0x0008, "500k" )
-		PORT_DIPSETTING(      0x000c, "1000k" )
-		PORT_DIPSETTING(      0x0000, "None" )
-		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Flip_Screen ) )	// to be confirmed - code at 0x000508
-		PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unused ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Demo_Sounds ) )	// to be confirmed - code at 0x00b6d0, 0x00b7e4, 0x00bae4
-		PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0040, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unused ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0200, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x0300, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x0400, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0100, "2 Coins/1 Credit 3/2 4/3 6/5" )
-		PORT_DIPSETTING(      0x0700, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0500, "1 Coin/1 Credit 2/3" )
-		PORT_DIPSETTING(      0x0000, "1 Coin/1 Credit 5/6" )
-		PORT_DIPSETTING(      0x0600, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x3800, 0x3800, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x1000, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(      0x1800, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(      0x2000, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(      0x0800, "2 Coins/1 Credit 3/2 4/3 6/5" )
-		PORT_DIPSETTING(      0x3800, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x2800, "1 Coin/1 Credit 2/3" )
-		PORT_DIPSETTING(      0x0000, "1 Coin/1 Credit 5/6" )
-		PORT_DIPSETTING(      0x3000, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0xc000, 0xc000, DEF_STR( Lives ) )
-		PORT_DIPSETTING(      0x0000, "2" )
-		PORT_DIPSETTING(      0xc000, "3" )
-		PORT_DIPSETTING(      0x8000, "4" )
-		PORT_DIPSETTING(      0x4000, "5" )
+	static InputPortPtr input_ports_gcpinbal = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* DSW */
+		PORT_DIPNAME( 0x0003, 0x0003, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(      0x0002, "Easy" );
+		PORT_DIPSETTING(      0x0003, "Normal" );
+		PORT_DIPSETTING(      0x0001, "Hard" );
+		PORT_DIPSETTING(      0x0000, "Hardest" );
+		PORT_DIPNAME( 0x000c, 0x000c, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(      0x0004, "300k" );
+		PORT_DIPSETTING(      0x0008, "500k" );
+		PORT_DIPSETTING(      0x000c, "1000k" );
+		PORT_DIPSETTING(      0x0000, "None" );
+		PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( "Flip_Screen") );	// to be confirmed - code at 0x000508
+		PORT_DIPSETTING(      0x0010, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( "Unused") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( "Demo_Sounds") );	// to be confirmed - code at 0x00b6d0, 0x00b7e4, 0x00bae4
+		PORT_DIPSETTING(      0x0000, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0040, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Unused") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0700, 0x0700, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0200, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x0300, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x0400, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0100, "2 Coins/1 Credit 3/2 4/3 6/5" );
+		PORT_DIPSETTING(      0x0700, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0500, "1 Coin/1 Credit 2/3" );
+		PORT_DIPSETTING(      0x0000, "1 Coin/1 Credit 5/6" );
+		PORT_DIPSETTING(      0x0600, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x3800, 0x3800, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x1000, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(      0x1800, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(      0x2000, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(      0x0800, "2 Coins/1 Credit 3/2 4/3 6/5" );
+		PORT_DIPSETTING(      0x3800, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x2800, "1 Coin/1 Credit 2/3" );
+		PORT_DIPSETTING(      0x0000, "1 Coin/1 Credit 5/6" );
+		PORT_DIPSETTING(      0x3000, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0xc000, 0xc000, DEF_STR( "Lives") );
+		PORT_DIPSETTING(      0x0000, "2" );
+		PORT_DIPSETTING(      0xc000, "3" );
+		PORT_DIPSETTING(      0x8000, "4" );
+		PORT_DIPSETTING(      0x4000, "5" );
 	
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )	// Item right
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )	// Inner flipper right
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )	// Outer flipper right
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER1 )	// Tilt right
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )	// Item left
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )	// Inner flipper left
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )	// Outer flipper left
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER1 )	// Tilt left
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START1 )
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 );// Item right
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );// Inner flipper right
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 );// Outer flipper right
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER1 );// Tilt right
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 );// Item left
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );// Inner flipper left
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );// Outer flipper left
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER1 );// Tilt left
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START	/* IN1 */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )	// This bit gets tested (search for d8 00 87)
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	/* IN1 */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN );// This bit gets tested (search for d8 00 87)
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -322,46 +322,46 @@ public class gcpinbal
 	                       GFX DECODING
 	**************************************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		16,16,	/* 16*16 characters */
 		RGN_FRAC(1,1),
 		4,	/* 4 bits per pixel */
-		{ 0, 1, 2, 3 },
-		{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4, 2*4+32, 3*4+32, 0*4+32, 1*4+32, 6*4+32, 7*4+32, 4*4+32, 5*4+32 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4, 2*4+32, 3*4+32, 0*4+32, 1*4+32, 6*4+32, 7*4+32, 4*4+32, 5*4+32 },
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8	/* every sprite takes 128 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout char_8x8_layout =
-	{
+	static GfxLayout char_8x8_layout = new GfxLayout
+	(
 		8,8,	/* 8*8 characters */
 		RGN_FRAC(1,1),
 		4,	/* 4 bits per pixel */
-		{ 0, 1, 2, 3 },
-		{ 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
-		{ 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4 },
+		new int[] { 0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32 },
 		32*8	/* every sprite takes 32 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout tilelayout =
-	{
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		16,16,	/* 16*16 sprites */
 		RGN_FRAC(1,1),
 		4,	/* 4 bits per pixel */
-	//	{ 16, 48, 0, 32 },
-		{ 48, 16, 32, 0 },
-		{ 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 },
+	//	new int[] { 16, 48, 0, 32 },
+		new int[] { 48, 16, 32, 0 },
+		new int[] { 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 },
 		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8	/* every sprite takes 128 consecutive bytes */
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX3, 0, &tilelayout,       0, 256 },	/* sprites & playfield */
-		{ REGION_GFX1, 0, &charlayout,       0, 256 },	/* sprites & playfield */
-		{ REGION_GFX2, 0, &char_8x8_layout,  0, 256 },	/* sprites & playfield */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX3, 0, tilelayout,       0, 256 ),	/* sprites  playfield */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,       0, 256 ),	/* sprites  playfield */
+		new GfxDecodeInfo( REGION_GFX2, 0, char_8x8_layout,  0, 256 ),	/* sprites  playfield */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -426,31 +426,31 @@ public class gcpinbal
 	                                  DRIVERS
 	***************************************************************************/
 	
-	ROM_START( gcpinbal )
-		ROM_REGION( 0x200000, REGION_CPU1, 0 )     /* 512k for 68000 program */
+	static RomLoadPtr rom_gcpinbal = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x200000, REGION_CPU1, 0 );    /* 512k for 68000 program */
 		ROM_LOAD16_WORD_SWAP( "u43.2",  0x000000, 0x80000, CRC(d174bd7f) SHA1(0e6c17265e1400de941e3e2ca3be835aaaff6695) )
-		ROM_FILL            ( 0x80000,  0x080000, 0x0 )
+		ROM_FILL            ( 0x80000,  0x080000, 0x0 );
 		ROM_LOAD16_WORD_SWAP( "u45.3",  0x100000, 0x80000, CRC(0511ad56) SHA1(e0602ece514126ce719ebc9de6649ebe907be904) )
 		ROM_LOAD16_WORD_SWAP( "u46.4",  0x180000, 0x80000, CRC(e0f3a1b4) SHA1(761dddf374a92c1a1e4a211ead215d5be461a082) )
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "u1",      0x000000, 0x100000, CRC(afa459bb) SHA1(7a7c64bcb80d71b8cf3fdd3209ef109997b6417c) )	/* BG0 (16 x 16) */
-		ROM_LOAD( "u6",      0x100000, 0x100000, CRC(c3f024e5) SHA1(d197e2b715b154fc64ff9a61f8c6df111d6fd446) )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "u1",      0x000000, 0x100000, CRC(afa459bb);SHA1(7a7c64bcb80d71b8cf3fdd3209ef109997b6417c) )	/* BG0 (16 x 16) */
+		ROM_LOAD( "u6",      0x100000, 0x100000, CRC(c3f024e5);SHA1(d197e2b715b154fc64ff9a61f8c6df111d6fd446) )
 	
-		ROM_REGION( 0x020000, REGION_GFX2, ROMREGION_DISPOSE )
-		ROM_LOAD( "u10.1",   0x000000, 0x020000, CRC(79321550) SHA1(61f1b772ed8cf95bfee9df8394b0c3ff727e8702) )	/* FG0 (8 x 8) */
+		ROM_REGION( 0x020000, REGION_GFX2, ROMREGION_DISPOSE );
+		ROM_LOAD( "u10.1",   0x000000, 0x020000, CRC(79321550);SHA1(61f1b772ed8cf95bfee9df8394b0c3ff727e8702) )	/* FG0 (8 x 8) */
 	
-		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE )
-		ROM_LOAD( "u13",     0x000000, 0x200000, CRC(62f3952f) SHA1(7dc9ccb753d46b6aaa791bcbf6e18e6d872f6b79) )	/* Sprites (16 x 16) */
+		ROM_REGION( 0x200000, REGION_GFX3, ROMREGION_DISPOSE );
+		ROM_LOAD( "u13",     0x000000, 0x200000, CRC(62f3952f);SHA1(7dc9ccb753d46b6aaa791bcbf6e18e6d872f6b79) )	/* Sprites (16 x 16) */
 	
-		ROM_REGION( 0x080000, REGION_SOUND1, 0 )	/* M6295 acc to Raine */
-		ROM_LOAD( "u55",   0x000000, 0x080000, CRC(b3063351) SHA1(825e63e8a824d67d235178897528e5b0b41e4485) )
+		ROM_REGION( 0x080000, REGION_SOUND1, 0 );/* M6295 acc to Raine */
+		ROM_LOAD( "u55",   0x000000, 0x080000, CRC(b3063351);SHA1(825e63e8a824d67d235178897528e5b0b41e4485) )
 	
-		ROM_REGION( 0x200000, REGION_SOUND2, 0 )	/* M6585 acc to Raine */
-		ROM_LOAD( "u56",   0x000000, 0x200000, CRC(092b2c0f) SHA1(2ec1904e473ddddb50dbeaa0b561642064d45336) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND2, 0 );/* M6585 acc to Raine */
+		ROM_LOAD( "u56",   0x000000, 0x200000, CRC(092b2c0f);SHA1(2ec1904e473ddddb50dbeaa0b561642064d45336) )
+	ROM_END(); }}; 
 	
 	
 	
-	GAMEX( 1994, gcpinbal, 0, gcpinbal, gcpinbal, 0, ROT270, "Excellent System", "Grand Cross", GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL )
+	public static GameDriver driver_gcpinbal	   = new GameDriver("1994"	,"gcpinbal"	,"gcpinbal.java"	,rom_gcpinbal,null	,machine_driver_gcpinbal	,input_ports_gcpinbal	,null	,ROT270	,	"Excellent System", "Grand Cross", GAME_IMPERFECT_SOUND | GAME_NO_COCKTAIL )
 }

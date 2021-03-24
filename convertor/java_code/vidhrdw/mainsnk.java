@@ -44,22 +44,22 @@ public class mainsnk
 			int bit0=0,bit1,bit2,bit3;
 			int red, green, blue;
 	
-			bit0 = (color_prom[0x1000] >> 2) & 0x01; // ?
-			bit1 = (color_prom[0x000] >> 1) & 0x01;
-			bit2 = (color_prom[0x000] >> 2) & 0x01;
-			bit3 = (color_prom[0x000] >> 3) & 0x01;
+			bit0 = (color_prom.read(0x1000)>> 2) & 0x01; // ?
+			bit1 = (color_prom.read(0x000)>> 1) & 0x01;
+			bit2 = (color_prom.read(0x000)>> 2) & 0x01;
+			bit3 = (color_prom.read(0x000)>> 3) & 0x01;
 			red = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[0x1000] >> 1) & 0x01; // ?
-			bit1 = (color_prom[0x800] >> 2) & 0x01;
-			bit2 = (color_prom[0x800] >> 3) & 0x01;
-			bit3 = (color_prom[0x000] >> 0) & 0x01;
+			bit0 = (color_prom.read(0x1000)>> 1) & 0x01; // ?
+			bit1 = (color_prom.read(0x800)>> 2) & 0x01;
+			bit2 = (color_prom.read(0x800)>> 3) & 0x01;
+			bit3 = (color_prom.read(0x000)>> 0) & 0x01;
 			green = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-			bit0 = (color_prom[0x1000] >> 0) & 0x01; // ?
-			bit1 = (color_prom[0x1000] >> 3) & 0x01; // ?
-			bit2 = (color_prom[0x800] >> 0) & 0x01;
-			bit3 = (color_prom[0x800] >> 1) & 0x01;
+			bit0 = (color_prom.read(0x1000)>> 0) & 0x01; // ?
+			bit1 = (color_prom.read(0x1000)>> 3) & 0x01; // ?
+			bit2 = (color_prom.read(0x800)>> 0) & 0x01;
+			bit3 = (color_prom.read(0x800)>> 1) & 0x01;
 			blue = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color( dest_index++, red, green, blue );
@@ -78,17 +78,17 @@ public class mainsnk
 	}
 	
 	
-	READ_HANDLER( me_fgram_r )
+	public static ReadHandlerPtr me_fgram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return me_fgram[offset];
-	}
+	} };
 	
 	
-	WRITE_HANDLER( me_fgram_w )
+	public static WriteHandlerPtr me_fgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		me_fgram[offset] = data;
 		tilemap_mark_tile_dirty(me_fg_tilemap,offset);
-	}
+	} };
 	
 	
 	static void get_me_bg_tile_info(int tile_index)
@@ -103,17 +103,17 @@ public class mainsnk
 	}
 	
 	
-	READ_HANDLER( me_bgram_r )
+	public static ReadHandlerPtr me_bgram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return me_bgram[offset];
 	
-	}
+	} };
 	
-	WRITE_HANDLER( me_bgram_w )
+	public static WriteHandlerPtr me_bgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		me_bgram[offset] = data;
 		tilemap_mark_tile_dirty(me_bg_tilemap,offset);
-	}
+	} };
 	
 	
 	VIDEO_START(mainsnk)

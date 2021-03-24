@@ -32,15 +32,14 @@ public class xyonix
 	
 	/* in vidhrdw/xyonix.c */
 	PALETTE_INIT( xyonix );
-	WRITE_HANDLER( xyonix_vidram_w );
 	VIDEO_START(xyonix);
 	VIDEO_UPDATE(xyonix);
 	
 	
-	static WRITE_HANDLER( xyonix_irqack_w )
+	public static WriteHandlerPtr xyonix_irqack_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(0, 0, CLEAR_LINE);
-	}
+	} };
 	
 	
 	/* Inputs ********************************************************************/
@@ -153,104 +152,110 @@ public class xyonix
 	
 	/* Mem / Port Maps ***********************************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0xbfff, MRA_ROM },
-		{ 0xc000, 0xdfff, MRA_RAM },
-		{ 0xe000, 0xffff, MRA_RAM },
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0xbfff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe000, 0xffff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
+	
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM ),
+		new Memory_WriteAddress( 0xe000, 0xffff, xyonix_vidram_w, xyonix_vidram ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
+	
+	public static IO_ReadPort port_readmem[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x20, 0x21, IORP_NOP ),	/* SN76496 ready signal */
+		new IO_ReadPort( 0xe0, 0xe0, xyonix_io_r ),
 	MEMORY_END
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0xbfff, MWA_ROM },
-		{ 0xc000, 0xdfff, MWA_RAM },
-		{ 0xe000, 0xffff, xyonix_vidram_w, &xyonix_vidram },
-	MEMORY_END
-	
-	static PORT_READ_START( port_readmem )
-		{ 0x20, 0x21, IORP_NOP },	/* SN76496 ready signal */
-		{ 0xe0, 0xe0, xyonix_io_r },
-	MEMORY_END
-	
-	static PORT_WRITE_START( port_writemem )
-		{ 0x20, 0x20, SN76496_0_w },
-		{ 0x21, 0x21, SN76496_1_w },
-		{ 0xe0, 0xe0, xyonix_io_w },
-		{ 0x40, 0x40, IOWP_NOP },	// NMI ack?
-		{ 0x50, 0x50, xyonix_irqack_w },
-		{ 0x60, 0x61, IOWP_NOP },	// crtc6845
+	public static IO_WritePort port_writemem[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x20, 0x20, SN76496_0_w ),
+		new IO_WritePort( 0x21, 0x21, SN76496_1_w ),
+		new IO_WritePort( 0xe0, 0xe0, xyonix_io_w ),
+		new IO_WritePort( 0x40, 0x40, IOWP_NOP ),	// NMI ack?
+		new IO_WritePort( 0x50, 0x50, xyonix_irqack_w ),
+		new IO_WritePort( 0x60, 0x61, IOWP_NOP ),	// crtc6845
 	MEMORY_END
 	
 	/* Inputs Ports **************************************************************/
 	
-	INPUT_PORTS_START( xyonix )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )		/* handled by xyonix_io_r() */
+	static InputPortPtr input_ports_xyonix = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 );	/* handled by xyonix_io_r() */
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )		/* handled by xyonix_io_r() */
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );	/* handled by xyonix_io_r() */
 	
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x03, "Easy" )
-		PORT_DIPSETTING(    0x02, "Normal" )
-		PORT_DIPSETTING(    0x01, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )			// "Very Hard"
-		PORT_DIPNAME( 0x04, 0x00, "Allow Continue" )
-		PORT_DIPSETTING(    0x04, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-		PORT_SERVICE( 0x08, IP_ACTIVE_LOW )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_3C ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( 1C_2C ) )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x03, "Easy" );
+		PORT_DIPSETTING(    0x02, "Normal" );
+		PORT_DIPSETTING(    0x01, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );		// "Very Hard"
+		PORT_DIPNAME( 0x04, 0x00, "Allow Continue" );
+		PORT_DIPSETTING(    0x04, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Yes") );
+		PORT_SERVICE( 0x08, IP_ACTIVE_LOW );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_3C") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "1C_2C") );
+	INPUT_PORTS_END(); }}; 
 	
 	/* GFX Decode ****************************************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		4,8,
 		RGN_FRAC(1,2),
 		4,
-		{ 0, 4, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4 },
-		{ 3, 2, 1, 0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0, 4, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4 },
+		new int[] { 3, 2, 1, 0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		4*16
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout, 0, 16 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout, 0, 16 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	/* MACHINE driver *************************************************************/
 	
-	static struct SN76496interface sn76496_interface =
-	{
+	static SN76496interface sn76496_interface = new SN76496interface
+	(
 		2,						/* 2 chips */
-		{ 16000000/4, 16000000/4 },	/* 4 MHz??? */
-		{ 100, 100 }
-	};
+		new int[] { 16000000/4, 16000000/4 },	/* 4 MHz??? */
+		new int[] { 100, 100 }
+	);
 	
 	
 	static MACHINE_DRIVER_START( xyonix )
@@ -282,19 +287,19 @@ public class xyonix
 	
 	/* ROM Loading ***************************************************************/
 	
-	ROM_START( xyonix )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-		ROM_LOAD( "xyonix3.bin", 0x00000, 0x10000, CRC(1960a74e) SHA1(5fd7bc31ca2f5f1e114d3d0ccf6554ebd712cbd3) )
+	static RomLoadPtr rom_xyonix = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
+		ROM_LOAD( "xyonix3.bin", 0x00000, 0x10000, CRC(1960a74e);SHA1(5fd7bc31ca2f5f1e114d3d0ccf6554ebd712cbd3) )
 	
-		ROM_REGION( 0x10000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "xyonix1.bin", 0x00000, 0x08000, CRC(3dfa9596) SHA1(52cdbbe18f83cea7248c29588ea3a18c4bb7984f) )
-		ROM_LOAD( "xyonix2.bin", 0x08000, 0x08000, CRC(db87343e) SHA1(62bc30cd65b2f8976cd73a0b349a9ccdb3faaad2) )
+		ROM_REGION( 0x10000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "xyonix1.bin", 0x00000, 0x08000, CRC(3dfa9596);SHA1(52cdbbe18f83cea7248c29588ea3a18c4bb7984f) )
+		ROM_LOAD( "xyonix2.bin", 0x08000, 0x08000, CRC(db87343e);SHA1(62bc30cd65b2f8976cd73a0b349a9ccdb3faaad2) )
 	
-		ROM_REGION( 0x0100, REGION_PROMS, 0 )
-		ROM_LOAD( "xyonix.pr",   0x0000, 0x0100, CRC(0012cfc9) SHA1(c7454107a1a8083a370b662c617117b769c0dc1c) )
-	ROM_END
+		ROM_REGION( 0x0100, REGION_PROMS, 0 );
+		ROM_LOAD( "xyonix.pr",   0x0000, 0x0100, CRC(0012cfc9);SHA1(c7454107a1a8083a370b662c617117b769c0dc1c) )
+	ROM_END(); }}; 
 	
 	/* GAME drivers **************************************************************/
 	
-	GAME( 1989, xyonix, 0, xyonix, xyonix, 0, ROT0, "Philko", "Xyonix" )
+	public static GameDriver driver_xyonix	   = new GameDriver("1989"	,"xyonix"	,"xyonix.java"	,rom_xyonix,null	,machine_driver_xyonix	,input_ports_xyonix	,null	,ROT0	,	"Philko", "Xyonix" )
 }

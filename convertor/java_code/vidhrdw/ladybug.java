@@ -44,14 +44,14 @@ public class ladybug
 			int bit1,bit2,r,g,b;
 	
 	
-			bit1 = (~color_prom[i] >> 0) & 0x01;
-			bit2 = (~color_prom[i] >> 5) & 0x01;
+			bit1 = (~color_prom.read(i)>> 0) & 0x01;
+			bit2 = (~color_prom.read(i)>> 5) & 0x01;
 			r = 0x47 * bit1 + 0x97 * bit2;
-			bit1 = (~color_prom[i] >> 2) & 0x01;
-			bit2 = (~color_prom[i] >> 6) & 0x01;
+			bit1 = (~color_prom.read(i)>> 2) & 0x01;
+			bit2 = (~color_prom.read(i)>> 6) & 0x01;
 			g = 0x47 * bit1 + 0x97 * bit2;
-			bit1 = (~color_prom[i] >> 4) & 0x01;
-			bit2 = (~color_prom[i] >> 7) & 0x01;
+			bit1 = (~color_prom.read(i)>> 4) & 0x01;
+			bit2 = (~color_prom.read(i)>> 7) & 0x01;
 			b = 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i,r,g,b);
 		}
@@ -72,53 +72,53 @@ public class ladybug
 	
 	
 			/* low 4 bits are for sprite n */
-			bit0 = (color_prom[i + 32] >> 3) & 0x01;
-			bit1 = (color_prom[i + 32] >> 2) & 0x01;
-			bit2 = (color_prom[i + 32] >> 1) & 0x01;
-			bit3 = (color_prom[i + 32] >> 0) & 0x01;
+			bit0 = (color_prom.read(i + 32)>> 3) & 0x01;
+			bit1 = (color_prom.read(i + 32)>> 2) & 0x01;
+			bit2 = (color_prom.read(i + 32)>> 1) & 0x01;
+			bit3 = (color_prom.read(i + 32)>> 0) & 0x01;
 			colortable[i + 4 * 8] = 1 * bit0 + 2 * bit1 + 4 * bit2 + 8 * bit3;
 	
 			/* high 4 bits are for sprite n + 8 */
-			bit0 = (color_prom[i + 32] >> 7) & 0x01;
-			bit1 = (color_prom[i + 32] >> 6) & 0x01;
-			bit2 = (color_prom[i + 32] >> 5) & 0x01;
-			bit3 = (color_prom[i + 32] >> 4) & 0x01;
+			bit0 = (color_prom.read(i + 32)>> 7) & 0x01;
+			bit1 = (color_prom.read(i + 32)>> 6) & 0x01;
+			bit2 = (color_prom.read(i + 32)>> 5) & 0x01;
+			bit3 = (color_prom.read(i + 32)>> 4) & 0x01;
 			colortable[i + 4 * 16] = 1 * bit0 + 2 * bit1 + 4 * bit2 + 8 * bit3;
 		}
 	}
 	
-	WRITE_HANDLER( ladybug_videoram_w )
+	public static WriteHandlerPtr ladybug_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ladybug_colorram_w )
+	public static WriteHandlerPtr ladybug_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 	
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ladybug_flipscreen_w )
+	public static WriteHandlerPtr ladybug_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 32 * (colorram[tile_index] & 0x08);
-		int color = colorram[tile_index] & 0x07;
+		int code = videoram.read(tile_index)+ 32 * (colorram.read(tile_index)& 0x08);
+		int color = colorram.read(tile_index)& 0x07;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -128,7 +128,7 @@ public class ladybug
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -144,7 +144,7 @@ public class ladybug
 		{
 			int i = 0;
 	
-			while (i < 0x40 && spriteram[offs + i] != 0)
+			while (i < 0x40 && spriteram.read(offs + i)!= 0)
 				i += 4;
 	
 			while (i > 0)
@@ -164,23 +164,23 @@ public class ladybug
 	*/
 				i -= 4;
 	
-				if (spriteram[offs + i] & 0x80)
+				if (spriteram.read(offs + i)& 0x80)
 				{
-					if (spriteram[offs + i] & 0x40)	/* 16x16 */
+					if (spriteram.read(offs + i)& 0x40)	/* 16x16 */
 						drawgfx(bitmap,Machine->gfx[1],
-								(spriteram[offs + i + 1] >> 2) + 4 * (spriteram[offs + i + 2] & 0x10),
-								spriteram[offs + i + 2] & 0x0f,
-								spriteram[offs + i] & 0x20,spriteram[offs + i] & 0x10,
-								spriteram[offs + i + 3],
-								offs / 4 - 8 + (spriteram[offs + i] & 0x0f),
+								(spriteram.read(offs + i + 1)>> 2) + 4 * (spriteram.read(offs + i + 2)& 0x10),
+								spriteram.read(offs + i + 2)& 0x0f,
+								spriteram.read(offs + i)& 0x20,spriteram.read(offs + i)& 0x10,
+								spriteram.read(offs + i + 3),
+								offs / 4 - 8 + (spriteram.read(offs + i)& 0x0f),
 								&Machine->visible_area,TRANSPARENCY_PEN,0);
 					else	/* 8x8 */
 						drawgfx(bitmap,Machine->gfx[2],
-								spriteram[offs + i + 1] + 4 * (spriteram[offs + i + 2] & 0x10),
-								spriteram[offs + i + 2] & 0x0f,
-								spriteram[offs + i] & 0x20,spriteram[offs + i] & 0x10,
-								spriteram[offs + i + 3],
-								offs / 4 + (spriteram[offs + i] & 0x0f),
+								spriteram.read(offs + i + 1)+ 4 * (spriteram.read(offs + i + 2)& 0x10),
+								spriteram.read(offs + i + 2)& 0x0f,
+								spriteram.read(offs + i)& 0x20,spriteram.read(offs + i)& 0x10,
+								spriteram.read(offs + i + 3),
+								offs / 4 + (spriteram.read(offs + i)& 0x0f),
 								&Machine->visible_area,TRANSPARENCY_PEN,0);
 				}
 			}
@@ -197,9 +197,9 @@ public class ladybug
 			int sy = offs / 4;
 	
 			if (flip_screen)
-				tilemap_set_scrollx(bg_tilemap, offs, -videoram[32 * sx + sy]);
+				tilemap_set_scrollx(bg_tilemap, offs, -videoram.read(32 * sx + sy));
 			else
-				tilemap_set_scrollx(bg_tilemap, offs, videoram[32 * sx + sy]);
+				tilemap_set_scrollx(bg_tilemap, offs, videoram.read(32 * sx + sy));
 		}
 	
 		tilemap_draw(bitmap, &Machine->visible_area, bg_tilemap, 0, 0);

@@ -44,24 +44,11 @@ public class nitedrvr
 	
 	extern UINT8 *nitedrvr_ram;
 	
-	extern int nitedrvr_gear;
-	extern int nitedrvr_track;
 	
-	extern READ_HANDLER( nitedrvr_in0_r );
-	extern READ_HANDLER( nitedrvr_in1_r );
-	extern READ_HANDLER( nitedrvr_ram_r );
-	extern READ_HANDLER( nitedrvr_steering_reset_r );
-	extern WRITE_HANDLER( nitedrvr_steering_reset_w );
-	extern WRITE_HANDLER( nitedrvr_out0_w );
-	extern WRITE_HANDLER( nitedrvr_out1_w );
-	extern WRITE_HANDLER( nitedrvr_ram_w );
-	extern void nitedrvr_crash_toggle(int dummy);
-	
+	extern extern extern extern extern extern extern extern 
 	extern UINT8 *nitedrvr_hvc;
 	
-	extern WRITE_HANDLER( nitedrvr_videoram_w );
-	extern WRITE_HANDLER( nitedrvr_hvc_w );
-	
+	extern extern 
 	extern VIDEO_START( nitedrvr );
 	extern VIDEO_UPDATE( nitedrvr );
 	
@@ -101,38 +88,42 @@ public class nitedrvr
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x00ff, nitedrvr_ram_r }, /* SCRAM */
-		{ 0x0100, 0x01ff, nitedrvr_ram_r }, /* SCRAM */
-		{ 0x0600, 0x07ff, nitedrvr_in0_r },
-		{ 0x0800, 0x09ff, nitedrvr_in1_r },
-		{ 0x8000, 0x807f, videoram_r }, /* PFR */
-		{ 0x8080, 0x80ff, videoram_r }, /* PFR */
-		{ 0x8100, 0x817f, videoram_r }, /* PFR */
-		{ 0x8180, 0x81ff, videoram_r }, /* PFR */
-		{ 0x8200, 0x827f, videoram_r }, /* PFR */
-		{ 0x8280, 0x82ff, videoram_r }, /* PFR */
-		{ 0x8300, 0x837f, videoram_r }, /* PFR */
-		{ 0x8380, 0x83ff, videoram_r }, /* PFR */
-		{ 0x8400, 0x87ff, nitedrvr_steering_reset_r },
-		{ 0x9000, 0x9fff, MRA_ROM }, /* ROM1-ROM2 */
-		{ 0xfff0, 0xffff, MRA_ROM }, /* ROM2 for 6502 vectors */
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x00ff, nitedrvr_ram_r ), /* SCRAM */
+		new Memory_ReadAddress( 0x0100, 0x01ff, nitedrvr_ram_r ), /* SCRAM */
+		new Memory_ReadAddress( 0x0600, 0x07ff, nitedrvr_in0_r ),
+		new Memory_ReadAddress( 0x0800, 0x09ff, nitedrvr_in1_r ),
+		new Memory_ReadAddress( 0x8000, 0x807f, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8080, 0x80ff, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8100, 0x817f, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8180, 0x81ff, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8200, 0x827f, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8280, 0x82ff, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8300, 0x837f, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8380, 0x83ff, videoram_r ), /* PFR */
+		new Memory_ReadAddress( 0x8400, 0x87ff, nitedrvr_steering_reset_r ),
+		new Memory_ReadAddress( 0x9000, 0x9fff, MRA_ROM ), /* ROM1-ROM2 */
+		new Memory_ReadAddress( 0xfff0, 0xffff, MRA_ROM ), /* ROM2 for 6502 vectors */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x00ff, nitedrvr_ram_w, &nitedrvr_ram }, /* SCRAM */
-		{ 0x0100, 0x01ff, nitedrvr_ram_w }, /* SCRAM */
-		{ 0x0200, 0x027f, nitedrvr_videoram_w, &videoram }, /* PFW */
-		{ 0x0280, 0x02ff, nitedrvr_videoram_w }, /* PFW */
-		{ 0x0300, 0x037f, nitedrvr_videoram_w }, /* PFW */
-		{ 0x0380, 0x03ff, nitedrvr_videoram_w }, /* PFW */
-		{ 0x0400, 0x05ff, nitedrvr_hvc_w, &nitedrvr_hvc }, /* POSH, POSV, CHAR, Watchdog */
-		{ 0x0a00, 0x0bff, nitedrvr_out0_w },
-		{ 0x0c00, 0x0dff, nitedrvr_out1_w },
-		{ 0x8400, 0x87ff, nitedrvr_steering_reset_w },
-		{ 0x9000, 0x9fff, MWA_ROM }, /* ROM1-ROM2 */
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x00ff, nitedrvr_ram_w, nitedrvr_ram ), /* SCRAM */
+		new Memory_WriteAddress( 0x0100, 0x01ff, nitedrvr_ram_w ), /* SCRAM */
+		new Memory_WriteAddress( 0x0200, 0x027f, nitedrvr_videoram_w, videoram ), /* PFW */
+		new Memory_WriteAddress( 0x0280, 0x02ff, nitedrvr_videoram_w ), /* PFW */
+		new Memory_WriteAddress( 0x0300, 0x037f, nitedrvr_videoram_w ), /* PFW */
+		new Memory_WriteAddress( 0x0380, 0x03ff, nitedrvr_videoram_w ), /* PFW */
+		new Memory_WriteAddress( 0x0400, 0x05ff, nitedrvr_hvc_w, nitedrvr_hvc ), /* POSH, POSV, CHAR, Watchdog */
+		new Memory_WriteAddress( 0x0a00, 0x0bff, nitedrvr_out0_w ),
+		new Memory_WriteAddress( 0x0c00, 0x0dff, nitedrvr_out1_w ),
+		new Memory_WriteAddress( 0x8400, 0x87ff, nitedrvr_steering_reset_w ),
+		new Memory_WriteAddress( 0x9000, 0x9fff, MWA_ROM ), /* ROM1-ROM2 */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -142,57 +133,57 @@ public class nitedrvr
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( nitedrvr )
-		PORT_START		/* fake port, gets mapped to Night Driver ports */
-		PORT_DIPNAME( 0x30, 0x10, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x30, DEF_STR( 2C_1C ) )
-		//PORT_DIPSETTING(	0x20, DEF_STR( 1C_1C ) ) /* not a typo */
-		PORT_DIPSETTING(	0x10, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0xC0, 0x80, "Playing Time" )
-		PORT_DIPSETTING(	0x00, "50" )
-		PORT_DIPSETTING(	0x40, "75" )
-		PORT_DIPSETTING(	0x80, "100" )
-		PORT_DIPSETTING(	0xC0, "125" )
+	static InputPortPtr input_ports_nitedrvr = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 		/* fake port, gets mapped to Night Driver ports */
+		PORT_DIPNAME( 0x30, 0x10, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x30, DEF_STR( "2C_1C") );
+		//PORT_DIPSETTING(	0x20, DEF_STR( "1C_1C") ); /* not a typo */
+		PORT_DIPSETTING(	0x10, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0xC0, 0x80, "Playing Time" );
+		PORT_DIPSETTING(	0x00, "50" );
+		PORT_DIPSETTING(	0x40, "75" );
+		PORT_DIPSETTING(	0x80, "100" );
+		PORT_DIPSETTING(	0xC0, "125" );
 	
-		PORT_START		/* fake port, gets mapped to Night Driver ports */
-		PORT_DIPNAME( 0x10, 0x00, "Track Set" )
-		PORT_DIPSETTING(	0x00, "Normal" )
-		PORT_DIPSETTING(	0x10, "Reverse" )
-		PORT_DIPNAME( 0x20, 0x20, "Bonus Time" )
-		PORT_DIPSETTING(	0x00, DEF_STR ( No ) )
-		PORT_DIPSETTING(	0x20, "Score = 350" )
-		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE | IPF_TOGGLE, "Self Test", KEYCODE_F2, IP_JOY_NONE )
+		PORT_START(); 		/* fake port, gets mapped to Night Driver ports */
+		PORT_DIPNAME( 0x10, 0x00, "Track Set" );
+		PORT_DIPSETTING(	0x00, "Normal" );
+		PORT_DIPSETTING(	0x10, "Reverse" );
+		PORT_DIPNAME( 0x20, 0x20, "Bonus Time" );
+		PORT_DIPSETTING(	0x00, DEF_STR ( No );
+		PORT_DIPSETTING(	0x20, "Score = 350" );
+		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE | IPF_TOGGLE, "Self Test", KEYCODE_F2, IP_JOY_NONE );
 	
-		PORT_START		/* fake port, gets mapped to Night Driver ports */
-		PORT_BITX(0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_PLAYER2, "1st gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_PLAYER2, "2nd gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER2, "3rd gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER2, "4th gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+		PORT_START(); 		/* fake port, gets mapped to Night Driver ports */
+		PORT_BITX(0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_PLAYER2, "1st gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_PLAYER2, "2nd gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER2, "3rd gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER2, "4th gear", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
 	
-		PORT_START		/* fake port, gets mapped to Night Driver ports */
-		PORT_BIT (0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* Spare */
-		PORT_DIPNAME( 0x20, 0x00, "Difficult Bonus" )
-		PORT_DIPSETTING(	0x00, "Normal" )
-		PORT_DIPSETTING(	0x20, "Difficult" )
-		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 		/* fake port, gets mapped to Night Driver ports */
+		PORT_BIT (0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* Spare */
+		PORT_DIPNAME( 0x20, 0x00, "Difficult Bonus" );
+		PORT_DIPSETTING(	0x00, "Normal" );
+		PORT_DIPSETTING(	0x20, "Difficult" );
+		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START		/* fake port, gets mapped to Night Driver ports */
-		PORT_BIT (0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT (0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT (0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x10, IP_ACTIVE_HIGH, IPT_BUTTON2, "Novice Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_BUTTON3, "Expert Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_BUTTON4, "Pro Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* Alternating signal? */
+		PORT_START(); 		/* fake port, gets mapped to Night Driver ports */
+		PORT_BIT (0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT (0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT (0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x10, IP_ACTIVE_HIGH, IPT_BUTTON2, "Novice Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_BUTTON3, "Expert Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_BUTTON4, "Pro Track", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* Alternating signal? */
 	
-		PORT_START		/* fake port used for steering */
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL, 100, 10, 0, 0 )
+		PORT_START(); 		/* fake port used for steering */
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL, 100, 10, 0, 0 );
 	
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -202,22 +193,22 @@ public class nitedrvr
 	 *
 	 *************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		64,
 		1,
-		{ 0 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout, 0x00, 0x02 }, /* offset into colors, # of colors */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout, 0x00, 0x02 ), /* offset into colors, # of colors */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	
@@ -410,18 +401,18 @@ public class nitedrvr
 	 *
 	 *************************************/
 	
-	ROM_START( nitedrvr )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
-		ROM_LOAD( "6569-01.d2",   0x9000, 0x0800, CRC(7afa7542) SHA1(81018e25ebdeae1daf1308676661063b6fd7fd22) )
-		ROM_LOAD( "6570-01.f2",   0x9800, 0x0800, CRC(bf5d77b1) SHA1(6f603f8b0973bd89e0e721b66944aac8e9f904d9) )
-		ROM_RELOAD( 			  0xf800, 0x0800 )
+	static RomLoadPtr rom_nitedrvr = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
+		ROM_LOAD( "6569-01.d2",   0x9000, 0x0800, CRC(7afa7542);SHA1(81018e25ebdeae1daf1308676661063b6fd7fd22) )
+		ROM_LOAD( "6570-01.f2",   0x9800, 0x0800, CRC(bf5d77b1);SHA1(6f603f8b0973bd89e0e721b66944aac8e9f904d9) )
+		ROM_RELOAD( 			  0xf800, 0x0800 );
 	
-		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "6568-01.p2",   0x0000, 0x0200, CRC(f80d8889) SHA1(ca573543dcce1221459d5693c476cef14bfac4f4) )
+		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "6568-01.p2",   0x0000, 0x0200, CRC(f80d8889);SHA1(ca573543dcce1221459d5693c476cef14bfac4f4) )
 	
-		ROM_REGION( 0x0100, REGION_PROMS, 0 )
-		ROM_LOAD( "6559-01.h7",   0x0000, 0x0100, CRC(5a8d0e42) SHA1(772220c4c24f18769696ddba26db2bc2e5b0909d) )	/* unknown */
-	ROM_END
+		ROM_REGION( 0x0100, REGION_PROMS, 0 );
+		ROM_LOAD( "6559-01.h7",   0x0000, 0x0100, CRC(5a8d0e42);SHA1(772220c4c24f18769696ddba26db2bc2e5b0909d) )	/* unknown */
+	ROM_END(); }}; 
 	
 	
 	
@@ -431,5 +422,5 @@ public class nitedrvr
 	 *
 	 *************************************/
 	
-	GAMEX( 1976, nitedrvr, 0, nitedrvr, nitedrvr, 0, ROT0, "Atari", "Night Driver", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_nitedrvr	   = new GameDriver("1976"	,"nitedrvr"	,"nitedrvr.java"	,rom_nitedrvr,null	,machine_driver_nitedrvr	,input_ports_nitedrvr	,null	,ROT0	,	"Atari", "Night Driver", GAME_IMPERFECT_SOUND )
 }

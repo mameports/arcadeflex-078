@@ -21,59 +21,59 @@ public class pbaction
 	
 	static struct tilemap *bg_tilemap, *fg_tilemap;
 	
-	WRITE_HANDLER( pbaction_videoram_w )
+	public static WriteHandlerPtr pbaction_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pbaction_colorram_w )
+	public static WriteHandlerPtr pbaction_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pbaction_videoram2_w )
+	public static WriteHandlerPtr pbaction_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (pbaction_videoram2[offset] != data)
 		{
 			pbaction_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pbaction_colorram2_w )
+	public static WriteHandlerPtr pbaction_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (pbaction_colorram2[offset] != data)
 		{
 			pbaction_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pbaction_scroll_w )
+	public static WriteHandlerPtr pbaction_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll = data - 3;
 		if (flip_screen) scroll = -scroll;
 		tilemap_set_scrollx(bg_tilemap, 0, scroll);
 		tilemap_set_scrollx(fg_tilemap, 0, scroll);
-	}
+	} };
 	
-	WRITE_HANDLER( pbaction_flipscreen_w )
+	public static WriteHandlerPtr pbaction_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 0x01);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + 0x10 * (attr & 0x70);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ 0x10 * (attr & 0x70);
 		int color = attr & 0x0f;
 		int flags = (attr & 0x80) ? TILE_FLIPY : 0;
 	
@@ -95,13 +95,13 @@ public class pbaction
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -118,18 +118,18 @@ public class pbaction
 			int sx,sy,flipx,flipy;
 	
 			/* if next sprite is double size, skip this one */
-			if (offs > 0 && spriteram[offs - 4] & 0x80) continue;
+			if (offs > 0 && spriteram.read(offs - 4)& 0x80) continue;
 	
-			sx = spriteram[offs+3];
-			if (spriteram[offs] & 0x80)
-				sy = 225-spriteram[offs+2];
+			sx = spriteram.read(offs+3);
+			if (spriteram.read(offs)& 0x80)
+				sy = 225-spriteram.read(offs+2);
 			else
-				sy = 241-spriteram[offs+2];
-			flipx = spriteram[offs+1] & 0x40;
-			flipy =	spriteram[offs+1] & 0x80;
+				sy = 241-spriteram.read(offs+2);
+			flipx = spriteram.read(offs+1)& 0x40;
+			flipy =	spriteram.read(offs+1)& 0x80;
 			if (flip_screen)
 			{
-				if (spriteram[offs] & 0x80)
+				if (spriteram.read(offs)& 0x80)
 				{
 					sx = 224 - sx;
 					sy = 225 - sy;
@@ -143,9 +143,9 @@ public class pbaction
 				flipy = !flipy;
 			}
 	
-			drawgfx(bitmap,Machine->gfx[(spriteram[offs] & 0x80) ? 3 : 2],	/* normal or double size */
-					spriteram[offs],
-					spriteram[offs + 1] & 0x0f,
+			drawgfx(bitmap,Machine->gfx[(spriteram.read(offs)& 0x80) ? 3 : 2],	/* normal or double size */
+					spriteram.read(offs),
+					spriteram.read(offs + 1)& 0x0f,
 					flipx,flipy,
 					sx + (flip_screen ? scroll : -scroll), sy,
 					&Machine->visible_area,TRANSPARENCY_PEN,0);

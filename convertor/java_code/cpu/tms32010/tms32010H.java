@@ -57,9 +57,7 @@ public class tms32010H
 	 *	Public Functions
 	 */
 	
-	void tms32010_init(void);
 	void tms32010_reset(void *param);				/* Reset processor & registers	*/
-	void tms32010_exit(void);						/* Shutdown CPU core		*/
 	int tms32010_execute(int cycles);				/* Execute cycles T-States	*/
 	unsigned tms32010_get_context(void *dst);		/* Get registers			*/
 	void tms32010_set_context(void *src);			/* Set registers			*/
@@ -70,7 +68,6 @@ public class tms32010H
 	const char *tms32010_info(void *context, int regnum);
 	unsigned tms32010_dasm(char *buffer, unsigned pc);
 	
-	extern int tms32010_icount;						/* T-state count */
 	
 	
 	

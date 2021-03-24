@@ -76,8 +76,6 @@ public class suna8
 	
 	/* Functions defined in vidhrdw: */
 	
-	WRITE_HANDLER( suna8_spriteram_w );			// for debug
-	WRITE_HANDLER( suna8_banked_spriteram_w );	// for debug
 	
 	VIDEO_START( suna8 );
 	VIDEO_UPDATE( suna8 );
@@ -98,8 +96,8 @@ public class suna8
 			code = rom[ 2 * tile_index + 0 ];
 			attr = rom[ 2 * tile_index + 1 ];	}
 		else
-		{	code = spriteram[ 2 * tile_index + 0 ];
-			attr = spriteram[ 2 * tile_index + 1 ];	}
+		{	code = spriteram.read( 2 * tile_index + 0 );
+			attr = spriteram.read( 2 * tile_index + 1 );	}
 		SET_TILE_INFO(
 				0,
 				( (attr & 0x03) << 8 ) + code + tiles*0x400,
@@ -109,47 +107,47 @@ public class suna8
 	
 	
 	
-	READ_HANDLER( suna8_banked_paletteram_r )
+	public static ReadHandlerPtr suna8_banked_paletteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		offset += suna8_palettebank * 0x200;
-		return paletteram[offset];
-	}
+		return paletteram.read(offset);
+	} };
 	
-	READ_HANDLER( suna8_banked_spriteram_r )
+	public static ReadHandlerPtr suna8_banked_spriteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		offset += suna8_spritebank * 0x2000;
-		return spriteram[offset];
-	}
+		return spriteram.read(offset);
+	} };
 	
-	WRITE_HANDLER( suna8_spriteram_w )
+	public static WriteHandlerPtr suna8_spriteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (spriteram[offset] != data)
+		if (spriteram.read(offset)!= data)
 		{
-			spriteram[offset] = data;
+			spriteram.write(offset,data);
 			tilemap_mark_tile_dirty(tilemap,offset/2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( suna8_banked_spriteram_w )
+	public static WriteHandlerPtr suna8_banked_spriteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		offset += suna8_spritebank * 0x2000;
-		if (spriteram[offset] != data)
+		if (spriteram.read(offset)!= data)
 		{
-			spriteram[offset] = data;
+			spriteram.write(offset,data);
 			tilemap_mark_tile_dirty(tilemap,offset/2);
 		}
-	}
+	} };
 	
 	/*
 		Banked Palette RAM. The data is scrambled
 	*/
-	WRITE_HANDLER( brickzn_banked_paletteram_w )
+	public static WriteHandlerPtr brickzn_banked_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r,g,b;
 		UINT16 rgb;
 		offset += suna8_palettebank * 0x200;
-		paletteram[offset] = data;
-		rgb = (paletteram[offset&~1] << 8) + paletteram[offset|1];
+		paletteram.write(offset,data);
+		rgb = (paletteram.read(offset&~1)<< 8) + paletteram.read(offset|1);
 		r	=	(((rgb & (1<<0xc))?1:0)<<0) |
 				(((rgb & (1<<0xb))?1:0)<<1) |
 				(((rgb & (1<<0xe))?1:0)<<2) |
@@ -167,7 +165,7 @@ public class suna8
 		g = (g << 4) | g;
 		b = (b << 4) | b;
 		palette_set_color(offset/2,r,g,b);
-	}
+	} };
 	
 	
 	
@@ -217,10 +215,10 @@ public class suna8
 			int srcpg, srcx,srcy, dimx,dimy, tx, ty;
 			int gfxbank, flipx,flipy, multisprite;
 	
-			int y		=	spriteram[i + 0];
-			int code	=	spriteram[i + 1];
-			int x		=	spriteram[i + 2];
-			int bank	=	spriteram[i + 3];
+			int y		=	spriteram.read(i + 0);
+			int code	=	spriteram.read(i + 1);
+			int x		=	spriteram.read(i + 2);
+			int bank	=	spriteram.read(i + 3);
 	
 			if (suna8_text_dim > 0)
 			{
@@ -305,8 +303,8 @@ public class suna8
 									((srcx + (flipx?dimx-tx-1:tx)) & 0x1f) * 0x20 +
 									((srcy + (flipy?dimy-ty-1:ty)) & 0x1f);
 	
-					int tile	=	spriteram[addr*2 + 0];
-					int attr	=	spriteram[addr*2 + 1];
+					int tile	=	spriteram.read(addr*2 + 0);
+					int attr	=	spriteram.read(addr*2 + 1);
 	
 					int tile_flipx	=	attr & 0x40;
 					int tile_flipy	=	attr & 0x80;
@@ -347,10 +345,10 @@ public class suna8
 		{
 			int srcpg, srcx,srcy, dimx,dimy, tx, ty;
 	
-			int y		=	spriteram[i + 0];
-			int code	=	spriteram[i + 1];
-			int x		=	spriteram[i + 2];
-			int bank	=	spriteram[i + 3];
+			int y		=	spriteram.read(i + 0);
+			int code	=	spriteram.read(i + 1);
+			int x		=	spriteram.read(i + 2);
+			int bank	=	spriteram.read(i + 3);
 	
 			if (~code & 0x80)	continue;
 	
@@ -373,8 +371,8 @@ public class suna8
 									((srcx + tx) & 0x1f) * 0x20 +
 									((srcy + real_ty) & 0x1f);
 	
-					int tile	=	spriteram[addr*2 + 0];
-					int attr	=	spriteram[addr*2 + 1];
+					int tile	=	spriteram.read(addr*2 + 0);
+					int attr	=	spriteram.read(addr*2 + 1);
 	
 					int flipx	=	attr & 0x40;
 					int flipy	=	attr & 0x80;

@@ -58,7 +58,6 @@ enum
 /* ============================== PROTOTYPES ============================== */
 /* ======================================================================== */
 
-extern int g65816_ICount;				/* cycle count */
 
 
 
@@ -70,7 +69,6 @@ extern int g65816_ICount;				/* cycle count */
 /* CPU Peek and Poke API */
 /* --------------------- */
 
-void g65816_init(void);
 
 /* Get the current CPU context */
 unsigned g65816_get_context(void *dst);
@@ -146,7 +144,6 @@ void g65816_branching(unsigned int new_pc);
 /* ======================================================================== */
 
 /* Clean up after the emulation core - Not used in this core - */
-void g65816_exit(void);
 
 /* Save the current CPU state to disk */
 void g65816_state_save(void *file);

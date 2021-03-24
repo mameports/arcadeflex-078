@@ -192,7 +192,6 @@ public class chdH
 	int chd_create(const char *filename, UINT64 logicalbytes, UINT32 hunkbytes, UINT32 compression, struct chd_file *parent);
 	struct chd_file *chd_open(const char *filename, int writeable, struct chd_file *parent);
 	void chd_close(struct chd_file *chd);
-	void chd_close_all(void);
 	
 	UINT32 chd_get_metadata(struct chd_file *chd, UINT32 *metatag, UINT32 metaindex, void *outputbuf, UINT32 outputlen);
 	int chd_set_metadata(struct chd_file *chd, UINT32 metatag, UINT32 metaindex, const void *inputbuf, UINT32 inputlen);
@@ -200,7 +199,6 @@ public class chdH
 	UINT32 chd_read(struct chd_file *chd, UINT32 hunknum, UINT32 hunkcount, void *buffer);
 	UINT32 chd_write(struct chd_file *chd, UINT32 hunknum, UINT32 hunkcount, const void *buffer);
 	
-	int chd_get_last_error(void);
 	const struct chd_header *chd_get_header(struct chd_file *chd);
 	int chd_set_header(const char *filename, const struct chd_header *header);
 	

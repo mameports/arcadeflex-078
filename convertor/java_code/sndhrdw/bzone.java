@@ -57,7 +57,7 @@ public class bzone
 	static int motor_amp_step;
 	static int motor_amp_counter;
 	
-	WRITE_HANDLER( bzone_sounds_w )
+	public static WriteHandlerPtr bzone_sounds_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( data == latch )
 			return;
@@ -66,7 +66,7 @@ public class bzone
 	    latch = data;
 	
 	    mixer_sound_enable_global_w(latch & 0x20);
-	}
+	} };
 	
 	static void bzone_sound_update(int param, INT16 *buffer, int length)
 	{
@@ -276,7 +276,7 @@ public class bzone
 	    int i;
 	
 		discharge = (INT16 *)auto_malloc(32768 * sizeof(INT16));
-		if( !discharge )
+		if (discharge == 0)
 	        return 1;
 	
 	    for( i = 0; i < 0x8000; i++ )

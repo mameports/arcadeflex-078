@@ -48,30 +48,30 @@ public class bosco
 	
 	
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		0*8+3, 28*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
-	static struct rectangle spritevisibleareaflip =
-	{
+	static rectangle spritevisibleareaflip = new rectangle
+	(
 		8*8, 36*8-1-3,
 		0*8, 28*8-1
-	};
+	);
 	
 	
-	static struct rectangle radarvisiblearea =
-	{
+	static rectangle radarvisiblearea = new rectangle
+	(
 		28*8, 36*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
-	static struct rectangle radarvisibleareaflip =
-	{
+	static rectangle radarvisibleareaflip = new rectangle
+	(
 		0*8, 8*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
 	
 	
@@ -87,17 +87,17 @@ public class bosco
 			int bit0,bit1,bit2,r,g,b;
 	
 	
-			bit0 = (color_prom[31-i] >> 0) & 0x01;
-			bit1 = (color_prom[31-i] >> 1) & 0x01;
-			bit2 = (color_prom[31-i] >> 2) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 0) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 1) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[31-i] >> 3) & 0x01;
-			bit1 = (color_prom[31-i] >> 4) & 0x01;
-			bit2 = (color_prom[31-i] >> 5) & 0x01;
+			bit0 = (color_prom.read(31-i)>> 3) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 4) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[31-i] >> 6) & 0x01;
-			bit2 = (color_prom[31-i] >> 7) & 0x01;
+			bit1 = (color_prom.read(31-i)>> 6) & 0x01;
+			bit2 = (color_prom.read(31-i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -106,8 +106,8 @@ public class bosco
 		/* characters / sprites */
 		for (i = 0;i < 64*4;i++)
 		{
-			colortable[i] = 15 - (color_prom[i + 32] & 0x0f);	/* chars */
-			colortable[i+64*4] = 15 - (color_prom[i + 32] & 0x0f) + 0x10;	/* sprites */
+			colortable[i] = 15 - (color_prom.read(i + 32)& 0x0f);	/* chars */
+			colortable[i+64*4] = 15 - (color_prom.read(i + 32)& 0x0f) + 0x10;	/* sprites */
 			if (colortable[i+64*4] == 0x10) colortable[i+64*4] = 0;	/* preserve transparency */
 		}
 	
@@ -197,7 +197,7 @@ public class bosco
 	}
 	
 	
-	WRITE_HANDLER( bosco_videoram2_w )
+	public static WriteHandlerPtr bosco_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bosco_videoram2[offset] != data)
 		{
@@ -205,11 +205,11 @@ public class bosco
 	
 			bosco_videoram2[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( bosco_colorram2_w )
+	public static WriteHandlerPtr bosco_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bosco_colorram2[offset] != data)
 		{
@@ -217,33 +217,33 @@ public class bosco
 	
 			bosco_colorram2[offset] = data;
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( bosco_flipscreen_w )
+	public static WriteHandlerPtr bosco_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (~data & 1))
 		{
 			flipscreen = ~data & 1;
-			memset(dirtybuffer,1,videoram_size);
-			memset(dirtybuffer2,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
+			memset(dirtybuffer2,1,videoram_size[0]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bosco_scrollx_w )
+	public static WriteHandlerPtr bosco_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bosco_scrollx = data;
-	}
+	} };
 	
-	WRITE_HANDLER( bosco_scrolly_w )
+	public static WriteHandlerPtr bosco_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bosco_scrolly = data;
-	}
+	} };
 	
-	WRITE_HANDLER( bosco_starcontrol_w )
+	public static WriteHandlerPtr bosco_starcontrol_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bosco_starcontrol = data;
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -302,8 +302,8 @@ public class bosco
 	
 				sx = (offs % 32) ^ 4;
 				sy = offs / 32 - 2;
-				flipx = ~colorram[offs] & 0x40;
-				flipy = colorram[offs] & 0x80;
+				flipx = ~colorram.read(offs)& 0x40;
+				flipy = colorram.read(offs)& 0x80;
 				if (flipscreen)
 				{
 					sx = 7 - sx;
@@ -313,8 +313,8 @@ public class bosco
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
-						colorram[offs] & 0x3f,
+						videoram.read(offs),
+						colorram.read(offs)& 0x3f,
 						flipx,flipy,
 						8*sx,8*sy,
 						&radarvisibleareaflip,TRANSPARENCY_NONE,0);
@@ -328,14 +328,14 @@ public class bosco
 		/* draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 2)
 		{
-			sx = spriteram[offs + 1] - displacement;
+			sx = spriteram.read(offs + 1)- displacement;
 	if (flipscreen) sx += 32;
-			sy = 225 - spriteram_2[offs] - displacement;
+			sy = 225 - spriteram_2.read(offs)- displacement;
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					(spriteram[offs] & 0xfc) >> 2,
-					spriteram_2[offs + 1] & 0x3f,
-					spriteram[offs] & 1,spriteram[offs] & 2,
+					(spriteram.read(offs)& 0xfc) >> 2,
+					spriteram_2.read(offs + 1)& 0x3f,
+					spriteram.read(offs)& 1,spriteram.read(offs)& 2,
 					sx,sy,
 					flipscreen ? &spritevisibleareaflip : &spritevisiblearea,TRANSPARENCY_COLOR,0);
 		}

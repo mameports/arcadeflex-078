@@ -24,47 +24,47 @@ public class raiders5
 	static UINT8 flipscreen;
 	
 	
-	WRITE_HANDLER( raiders5_scroll_x_w )
+	public static WriteHandlerPtr raiders5_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		raiders5_xscroll = data;
-	}
-	WRITE_HANDLER( raiders5_scroll_y_w )
+	} };
+	public static WriteHandlerPtr raiders5_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		raiders5_yscroll = data;
-	}
+	} };
 	
-	WRITE_HANDLER( raiders5_flipscreen_w )
+	public static WriteHandlerPtr raiders5_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flipscreen = data & 0x01;
-	}
+	} };
 	
-	READ_HANDLER( raiders5_fgram_r )
+	public static ReadHandlerPtr raiders5_fgram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return raiders5_fgram[offset];
-	}
-	WRITE_HANDLER( raiders5_fgram_w )
+	} };
+	public static WriteHandlerPtr raiders5_fgram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		raiders5_fgram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( raiders5_videoram_w )
+	public static WriteHandlerPtr raiders5_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int y = (offset + ((raiders5_yscroll & 0xf8) << 2) ) & 0x3e0;
 		int x = (offset + (raiders5_xscroll >> 3) ) & 0x1f;
 		int offs = x+y+(offset & 0x400);
 	
-		videoram[offs] = data;
-	}
-	READ_HANDLER( raiders5_videoram_r )
+		videoram.write(offs,data);
+	} };
+	public static ReadHandlerPtr raiders5_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int y = (offset + ((raiders5_yscroll & 0xf8) << 2) ) & 0x3e0;
 		int x = (offset + (raiders5_xscroll >> 3) ) & 0x1f;
 		int offs = x+y+(offset & 0x400);
 	
-		return videoram[offs];
-	}
+		return videoram.read(offs);
+	} };
 	
-	WRITE_HANDLER( raiders5_paletteram_w )
+	public static WriteHandlerPtr raiders5_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -81,7 +81,7 @@ public class raiders5
 			}
 		}
 		paletteram_BBGGRRII_w(0x200+offset*16+1,data);
-	}
+	} };
 	
 	/****************************************************************************/
 	
@@ -108,8 +108,8 @@ public class raiders5
 				px = x*8;
 				py = y*8;
 	
-				chr = videoram[ offs ] ;
-				col = videoram[ offs + size];
+				chr = videoram.read( offs );
+				col = videoram.read( offs + size);
 	
 				b1 = (col >> 1) & 1; /* ? */
 				b2 = col & 1;
@@ -143,8 +143,8 @@ public class raiders5
 	
 		for (offs=0; offs<spriteram_size; offs +=32)
 		{
-			chr = spriteram[offs];
-			col = spriteram[offs+3];
+			chr = spriteram.read(offs);
+			col = spriteram.read(offs+3);
 	
 			b1 = (col >> 1) & 1;
 			b2 = col & 0x01;
@@ -152,8 +152,8 @@ public class raiders5
 			fx = ((chr >> 0) & 1) ^ flipscreen;
 			fy = ((chr >> 1) & 1) ^ flipscreen;
 	
-			x = spriteram[offs+1];
-			y = spriteram[offs+2];
+			x = spriteram.read(offs+1);
+			y = spriteram.read(offs+2);
 	
 			col = (col >> 4) & 0x0f ;
 			chr = (chr >> 2) | b2*0x40;

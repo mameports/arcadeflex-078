@@ -41,7 +41,7 @@ public class mjkjidai
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,64,32);
 	
-		if (!bg_tilemap) return 1;
+		if (bg_tilemap == 0) return 1;
 	
 		return 0;
 	}
@@ -54,16 +54,16 @@ public class mjkjidai
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( mjkjidai_videoram_w )
+	public static WriteHandlerPtr mjkjidai_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (mjkjidai_videoram[offset] != data)
 		{
 			mjkjidai_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mjkjidai_ctrl_w )
+	public static WriteHandlerPtr mjkjidai_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data8_t *rom = memory_region(REGION_CPU1);
 	
@@ -91,7 +91,7 @@ public class mjkjidai
 			/* there is code flowing from 7fff to this bank so they have to be contiguous in memory */
 			cpu_setbank(1,rom + 0x08000);
 		}
-	}
+	} };
 	
 	
 	
@@ -107,16 +107,16 @@ public class mjkjidai
 	
 		for (offs = 0x20-2;offs >= 0;offs -= 2)
 		{
-			int code = spriteram[offs] + ((spriteram_2[offs] & 0x1f) << 8);
-			int color = (spriteram_3[offs] & 0x78) >> 3;
-			int sx = 2*spriteram_2[offs+1];
-			int sy = 240 - spriteram[offs+1];
+			int code = spriteram.read(offs)+ ((spriteram_2.read(offs)& 0x1f) << 8);
+			int color = (spriteram_3.read(offs)& 0x78) >> 3;
+			int sx = 2*spriteram_2.read(offs+1);
+			int sy = 240 - spriteram.read(offs+1);
 			int flipx = code & 1;
 			int flipy = code & 2;
 	
 			code >>= 2;
 	
-			sx += (spriteram_2[offs] & 0x20) >> 5;	// not sure about this
+			sx += (spriteram_2.read(offs)& 0x20) >> 5;	// not sure about this
 	
 			if (flip_screen)
 			{
@@ -142,7 +142,7 @@ public class mjkjidai
 	
 	VIDEO_UPDATE( mjkjidai )
 	{
-		if (!display_enable)
+		if (display_enable == 0)
 		{
 			fillbitmap(bitmap,get_black_pen(),cliprect);
 		}

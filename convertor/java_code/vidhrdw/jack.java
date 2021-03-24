@@ -17,45 +17,45 @@ public class jack
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( jack_videoram_w )
+	public static WriteHandlerPtr jack_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( jack_colorram_w )
+	public static WriteHandlerPtr jack_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( jack_paletteram_w )
+	public static WriteHandlerPtr jack_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* RGB output is inverted */
 		paletteram_BBGGGRRR_w(offset,~data);
-	}
+	} };
 	
-	READ_HANDLER( jack_flipscreen_r )
+	public static ReadHandlerPtr jack_flipscreen_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		flip_screen_set(offset);
 		return 0;
-	}
+	} };
 	
-	WRITE_HANDLER( jack_flipscreen_w )
+	public static WriteHandlerPtr jack_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(offset);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 0x18) << 5);
-		int color = colorram[tile_index] & 0x07;
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x18) << 5);
+		int color = colorram.read(tile_index)& 0x07;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -71,7 +71,7 @@ public class jack
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols_flipy, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -85,12 +85,12 @@ public class jack
 		{
 			int sx,sy,num, color,flipx,flipy;
 	
-			sx    = spriteram[offs + 1];
-			sy    = spriteram[offs];
-			num   = spriteram[offs + 2] + ((spriteram[offs + 3] & 0x08) << 5);
-			color = spriteram[offs + 3] & 0x07;
-			flipx = (spriteram[offs + 3] & 0x80);
-			flipy = (spriteram[offs + 3] & 0x40);
+			sx    = spriteram.read(offs + 1);
+			sy    = spriteram.read(offs);
+			num   = spriteram.read(offs + 2)+ ((spriteram.read(offs + 3)& 0x08) << 5);
+			color = spriteram.read(offs + 3)& 0x07;
+			flipx = (spriteram.read(offs + 3)& 0x80);
+			flipy = (spriteram.read(offs + 3)& 0x40);
 	
 			if (flip_screen)
 			{

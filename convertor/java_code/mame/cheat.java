@@ -877,7 +877,6 @@ public class cheat
 	static int					dontPrintNewLabels = 0;
 	static int					autoSaveEnabled = 0;
 	
-	extern int					uirotcharwidth, uirotcharheight;
 	
 	static const char *	kCheatNameTemplates[] =
 	{
@@ -1084,13 +1083,9 @@ public class cheat
 	
 	/**** Function Prototypes ****************************************************/
 	
-	static int		ShiftKeyPressed(void);
-	static int		ControlKeyPressed(void);
-	static int		AltKeyPressed(void);
-	
+	static static static 
 	static int		UIPressedRepeatThrottle(int code, int baseSpeed);
-	static int		ReadHexInput(void);
-	
+	static 
 	static char *	DoDynamicEditTextField(char * buf);
 	static void		DoStaticEditTextField(char * buf, int size);
 	static UINT32	DoEditHexField(UINT32 data);
@@ -1101,11 +1096,8 @@ public class cheat
 	static UINT32	BCDToDecimal(UINT32 value);
 	static UINT32	DecimalToBCD(UINT32 value);
 	
-	static void		RebuildStringTables(void);
-	static void		RequestStrings(UINT32 length, UINT32 numStrings, UINT32 mainStringLength, UINT32 subStringLength);
-	static void		InitStringTable(void);
-	static void		FreeStringTable(void);
-	
+	static static void		RequestStrings(UINT32 length, UINT32 numStrings, UINT32 mainStringLength, UINT32 subStringLength);
+	static static 
 	static INT32	UserSelectValueMenu(struct mame_bitmap * bitmap, int selection, CheatEntry * entry);
 	static int		EnableDisableCheatMenu(struct mame_bitmap * bitmap, int selection, int firstTime);
 	static int		EditCheatMenu(struct mame_bitmap * bitmap, CheatEntry * entry, int selection);
@@ -1169,12 +1161,9 @@ public class cheat
 	static void		HandleLocalCommandCheat(UINT32 type, UINT32 address, UINT32 data, UINT32 extendData, char * name, char * description);
 	
 	static void		LoadCheatFile(char * fileName);
-	static void		LoadCheatDatabase(void);
-	static void		DisposeCheatDatabase(void);
-	
+	static static 
 	static void		SaveCheat(CheatEntry * entry);
-	static void		DoAutoSaveCheats(void);
-	static void		AddCheatFromResult(SearchInfo * search, SearchRegion * region, UINT32 address);
+	static static void		AddCheatFromResult(SearchInfo * search, SearchRegion * region, UINT32 address);
 	static void		AddCheatFromFirstResult(SearchInfo * search);
 	static void		AddWatchFromResult(SearchInfo * search, SearchRegion * region, UINT32 address);
 	
@@ -1228,13 +1217,11 @@ public class cheat
 	static void		DoCheatAction(CheatAction * action);
 	static void		DoCheatEntry(CheatEntry * entry);
 	
-	static void		UpdateAllCheatInfo(void);
-	static void		UpdateCheatInfo(CheatEntry * entry, UINT8 isLoadTime);
+	static static void		UpdateCheatInfo(CheatEntry * entry, UINT8 isLoadTime);
 	
 	static int		IsAddressInRange(CheatAction * action, UINT32 length);
 	
-	static void		BuildCPUInfoList(void);
-	
+	static 
 	/**** Imports ****************************************************************/
 	
 	/**** Code *******************************************************************/
@@ -1589,7 +1576,7 @@ public class cheat
 		char	code = osd_readkey_unicode(0) & 0xFF;
 		UINT32	length;
 	
-		if(!buf)
+		if (buf == 0)
 			return;
 	
 		length = strlen(buf);
@@ -2198,7 +2185,7 @@ public class cheat
 		if(input_ui_pressed(IPT_UI_SELECT))
 		{
 			// ### redundant?? probably can be removed
-			if(!firstTime)
+			if (firstTime == 0)
 			{
 				int	i;
 	
@@ -2300,7 +2287,7 @@ public class cheat
 		int		sel;
 		const char	* comment;
 	
-		if(!entry)
+		if (entry == 0)
 			return 0;
 	
 		sel = selection - 1;
@@ -3035,7 +3022,7 @@ public class cheat
 		UINT8				dirty = 0;
 		static INT32		currentNameTemplate = 0;
 	
-		if(!entry)
+		if (entry == 0)
 			return 0;
 	
 		if(menuItemInfoLength < (kType_Max * entry->actionListLength) + 2)
@@ -3189,7 +3176,7 @@ public class cheat
 				total++;
 			}
 	
-			if(!wasCommentOrSelect)
+			if (wasCommentOrSelect == 0)
 			{
 				if(type != kType_Watch)
 				{
@@ -3800,7 +3787,7 @@ public class cheat
 						}
 					}
 	
-					if(!handled)
+					if (handled == 0)
 					{
 						UINT32	type = EXTRACT_FIELD(action->type, Type);
 	
@@ -4073,7 +4060,7 @@ public class cheat
 						}
 					}
 	
-					if(!handled)
+					if (handled == 0)
 					{
 						UINT32	type = EXTRACT_FIELD(action->type, Type);
 	
@@ -4661,7 +4648,7 @@ public class cheat
 		menu_item[kMenu_Max] =			NULL;
 		menu_subitem[kMenu_Max] =		NULL;
 	
-		if(!startNew)
+		if (startNew == 0)
 		{
 			if(search->oldOptions.delta & kSearchByteSignBitTable[search->bytes])
 			{
@@ -5615,7 +5602,7 @@ public class cheat
 			}
 		}
 	
-		if(!hadResults)
+		if (hadResults == 0)
 		{
 			if(search->numResults)
 				menu_item[total] = "no results for this region";
@@ -6044,7 +6031,7 @@ public class cheat
 		UINT32			increment = 1;
 		static UINT8	editActive = 0;
 	
-		if(!entry)
+		if (entry == 0)
 			return 0;
 	
 		RequestStrings(kMenu_Return + 2, kMenu_Return, 0, 20);
@@ -6534,7 +6521,7 @@ public class cheat
 		INT32			total = 0;
 		SearchRegion	* region;
 	
-		if(!search)
+		if (search == 0)
 			return 0;
 	
 		sel = selection - 1;
@@ -7593,7 +7580,7 @@ public class cheat
 			}
 		}
 	
-		if(!theWatch)
+		if (theWatch == 0)
 		{
 			AddWatchBefore(watchListLength);
 	
@@ -8454,7 +8441,7 @@ public class cheat
 	
 		theFile = mame_fopen(NULL, fileName, FILETYPE_CHEAT, 0);
 	
-		if(!theFile)
+		if (theFile == 0)
 			return;
 	
 		foundCheatDatabase = 1;
@@ -8629,7 +8616,7 @@ public class cheat
 		int		first = 1;
 		char	data;
 	
-		if(!cheatfile)
+		if (cheatfile == 0)
 			cheatfile = "cheat.dat";
 	
 		inTraverse = cheatfile;
@@ -8701,7 +8688,7 @@ public class cheat
 	
 		theFile = mame_fopen(NULL, mainDatabaseName, FILETYPE_CHEAT, 1);
 	
-		if(!theFile)
+		if (theFile == 0)
 			return;
 	
 		mame_fseek(theFile, 0, SEEK_END);
@@ -9335,7 +9322,7 @@ public class cheat
 	{
 		UINT32	data = 0;
 	
-		if(!info)
+		if (info == 0)
 		{
 			switch(bytes)
 			{
@@ -9454,7 +9441,7 @@ public class cheat
 	
 	static void DoMemoryWrite(UINT32 data, UINT8 * buf, UINT32 address, UINT8 bytes, UINT8 swap, CPUInfo * info)
 	{
-		if(!info)
+		if (info == 0)
 		{
 			switch(bytes)
 			{
@@ -9755,7 +9742,7 @@ public class cheat
 		if(associate)
 			associateEntry = entry;
 	
-		if(!entry)
+		if (entry == 0)
 			return;
 	
 		for(i = 0; i < entry->actionListLength; i++)

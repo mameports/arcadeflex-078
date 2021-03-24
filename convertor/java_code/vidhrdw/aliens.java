@@ -60,7 +60,7 @@ public class aliens
 	VIDEO_START( aliens )
 	{
 		paletteram = auto_malloc(0x400);
-		if (!paletteram)
+		if (paletteram == 0)
 			return 1;
 	
 		layer_colorbase[0] = 0;

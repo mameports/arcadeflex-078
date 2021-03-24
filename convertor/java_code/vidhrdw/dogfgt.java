@@ -106,12 +106,12 @@ public class dogfgt
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( dogfgt_plane_select_w )
+	public static WriteHandlerPtr dogfgt_plane_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bm_plane = data;
-	}
+	} };
 	
-	READ_HANDLER( dogfgt_bitmapram_r )
+	public static ReadHandlerPtr dogfgt_bitmapram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (bm_plane > 2)
 		{
@@ -120,9 +120,9 @@ public class dogfgt
 		}
 	
 		return bitmapram[offset + BITMAPRAM_SIZE/3 * bm_plane];
-	}
+	} };
 	
-	static WRITE_HANDLER( internal_bitmapram_w )
+	public static WriteHandlerPtr internal_bitmapram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y,subx;
 	
@@ -144,9 +144,9 @@ public class dogfgt
 			else
 				plot_pixel(pixbitmap,x+subx,y,PIXMAP_COLOR_BASE + 8*pixcolor + color);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( dogfgt_bitmapram_w )
+	public static WriteHandlerPtr dogfgt_bitmapram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bm_plane > 2)
 		{
@@ -155,15 +155,15 @@ public class dogfgt
 		}
 	
 		internal_bitmapram_w(offset + BITMAPRAM_SIZE/3 * bm_plane,data);
-	}
+	} };
 	
-	WRITE_HANDLER( dogfgt_bgvideoram_w )
+	public static WriteHandlerPtr dogfgt_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dogfgt_bgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( dogfgt_scroll_w )
+	public static WriteHandlerPtr dogfgt_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int scroll[4];
 	
@@ -171,9 +171,9 @@ public class dogfgt
 	
 		tilemap_set_scrollx(bg_tilemap,0,scroll[0] + 256 * scroll[1] + 256);
 		tilemap_set_scrolly(bg_tilemap,0,scroll[2] + 256 * scroll[3]);
-	}
+	} };
 	
-	WRITE_HANDLER( dogfgt_1800_w )
+	public static WriteHandlerPtr dogfgt_1800_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0 and 1 are probably text color (not verified because PROM is missing) */
 		pixcolor = ((data & 0x01) << 1) | ((data & 0x02) >> 1);
@@ -187,7 +187,7 @@ public class dogfgt
 	
 		/* other bits unused? */
 		logerror("PC %04x: 1800 = %02x\n",activecpu_get_pc(),data);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -202,14 +202,14 @@ public class dogfgt
 	
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			if (spriteram[offs] & 0x01)
+			if (spriteram.read(offs)& 0x01)
 			{
 				int sx,sy,flipx,flipy;
 	
-				sx = spriteram[offs+3];
-				sy = (240 - spriteram[offs+2]) & 0xff;
-				flipx = spriteram[offs] & 0x04;
-				flipy = spriteram[offs] & 0x02;
+				sx = spriteram.read(offs+3);
+				sy = (240 - spriteram.read(offs+2)) & 0xff;
+				flipx = spriteram.read(offs)& 0x04;
+				flipy = spriteram.read(offs)& 0x02;
 				if (flip_screen)
 				{
 					sx = 240 - sx;
@@ -219,8 +219,8 @@ public class dogfgt
 				}
 	
 				drawgfx(bitmap,Machine->gfx[1],
-						spriteram[offs+1] + ((spriteram[offs] & 0x30) << 4),
-						(spriteram[offs] & 0x08) >> 3,
+						spriteram.read(offs+1)+ ((spriteram.read(offs)& 0x30) << 4),
+						(spriteram.read(offs)& 0x08) >> 3,
 						flipx,flipy,
 						sx,sy,
 						cliprect,TRANSPARENCY_PEN,0);

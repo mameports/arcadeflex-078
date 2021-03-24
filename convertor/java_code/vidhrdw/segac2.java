@@ -17,7 +17,6 @@ public class segac2
 {
 	
 	/* in vidhrdw/segasyse.c */
-	int start_megatech_video_normal(void);
 	void update_megatech_video_normal(struct mame_bitmap *bitmap, const struct rectangle *cliprect );
 	
 	/******************************************************************************
@@ -49,16 +48,12 @@ public class segac2
 		Function Prototypes
 	******************************************************************************/
 	
-	static int  vdp_data_r(void);
-	static void vdp_data_w(int data);
-	static int  vdp_control_r(void);
-	static void vdp_control_w(int data);
+	static static void vdp_data_w(int data);
+	static static void vdp_control_w(int data);
 	static void vdp_register_w(int data);
 	static void vdp_control_dma(int data);
-	static void vdp_dma_68k(void);
-	static void vdp_dma_fill(int);
-	static void vdp_dma_copy(void);
-	
+	static static void vdp_dma_fill(int);
+	static 
 	static void drawline(UINT16 *bitmap, int line);
 	static void get_scroll_tiles(int line, int scrollnum, UINT32 scrollbase, UINT32 *tiles, int *offset);
 	static void get_window_tiles(int line, UINT32 scrollbase, UINT32 *tiles);
@@ -186,16 +181,16 @@ public class segac2
 	******************************************************************************/
 	
 	#if GEN_TILEMAP_WIP
-	static struct GfxLayout genvdp_charlayout =
-	{
+	static GfxLayout genvdp_charlayout = new GfxLayout
+	(
 		8, 8,	/* 8x8 pixels */
 		2048,	/* 2048 chars */
 		4,		/* 3 bits per pixel */
-		{ 0,1,2,3 },
-		{ 0, 4, 8, 12, 16, 20, 24, 28 },
-		{ 0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32 },
+		new int[] { 0,1,2,3 },
+		new int[] { 0, 4, 8, 12, 16, 20, 24, 28 },
+		new int[] { 0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32 },
 		8*32
-	};
+	);
 	#endif
 	
 	VIDEO_START( segac2 )
@@ -418,7 +413,7 @@ public class segac2
 	/* set the display enable bit */
 	void segac2_enable_display(int enable)
 	{
-		if (!internal_vblank)
+		if (internal_vblank == 0)
 			force_partial_update((cpu_getscanline()) + scanbase);
 		display_enable = enable;
 	}
@@ -725,7 +720,7 @@ public class segac2
 			case 0x05:		/* VSRAM write */
 	
 				/* if the vscroll RAM is changing during screen refresh, force an update */
-				if (!internal_vblank)
+				if (internal_vblank == 0)
 					force_partial_update((cpu_getscanline()) + scanbase);
 	
 				/* write to VSRAM */
@@ -803,7 +798,7 @@ public class segac2
 	static void vdp_control_w(int data)
 	{
 		/* case 1: we're not expecting the 2nd half of a command */
-		if (!vdp_cmdpart)
+		if (vdp_cmdpart == 0)
 		{
 			/* if 10xxxxxx xxxxxxxx this is a register setting command */
 			if ((data & 0xc000) == 0x8000)
@@ -951,7 +946,7 @@ public class segac2
 		int count;
 	
 		/* length of 0 means 64k likely */
-		if (!length)
+		if (length == 0)
 			length = 0xffff;
 	
 		/* handle the DMA */
@@ -970,7 +965,7 @@ public class segac2
 		int count;
 	
 		/* length of 0 means 64k likely */
-		if (!length)
+		if (length == 0)
 			length = 0xffff;
 	
 		/* handle the DMA */
@@ -988,7 +983,7 @@ public class segac2
 		int count;
 	
 		/* length of 0 means 64k likely */
-		if (!length)
+		if (length == 0)
 			length = 0xffff;
 	
 		/* handle the fill */
@@ -1095,7 +1090,7 @@ public class segac2
 	
 			/* get the link; if 0, stop processing */
 			link = spritebase[3] & 0x7F;
-			if (!link)
+			if (link == 0)
 				break;
 		}
 	
@@ -1241,7 +1236,7 @@ public class segac2
 					mytile = tp[(tile >> 16) ^ 7];
 	
 				/* skip if all-transparent */
-				if (!mytile)
+				if (mytile == 0)
 					continue;
 	
 				/* non-clipped */
@@ -1324,7 +1319,7 @@ public class segac2
 		int col;
 	
 		/* skip if all-transparent */
-		if (!tile)
+		if (tile == 0)
 			return;
 	
 		/* non-transparent */
@@ -1402,7 +1397,7 @@ public class segac2
 		int col;
 	
 		/* skip if all-transparent */
-		if (!tile)
+		if (tile == 0)
 			return;
 	
 		/* non-transparent */

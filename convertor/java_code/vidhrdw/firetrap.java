@@ -59,20 +59,20 @@ public class firetrap
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i] >> 4) & 0x01;
-			bit1 = (color_prom[i] >> 5) & 0x01;
-			bit2 = (color_prom[i] >> 6) & 0x01;
-			bit3 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 4) & 0x01;
+			bit1 = (color_prom.read(i)>> 5) & 0x01;
+			bit2 = (color_prom.read(i)>> 6) & 0x01;
+			bit3 = (color_prom.read(i)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -163,56 +163,56 @@ public class firetrap
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( firetrap_fgvideoram_w )
+	public static WriteHandlerPtr firetrap_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		firetrap_fgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( firetrap_bg1videoram_w )
+	public static WriteHandlerPtr firetrap_bg1videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		firetrap_bg1videoram[offset] = data;
 		tilemap_mark_tile_dirty(bg1_tilemap,offset & 0x6ff);
-	}
+	} };
 	
-	WRITE_HANDLER( firetrap_bg2videoram_w )
+	public static WriteHandlerPtr firetrap_bg2videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		firetrap_bg2videoram[offset] = data;
 		tilemap_mark_tile_dirty(bg2_tilemap,offset & 0x6ff);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( firetrap_bg1_scrollx_w )
+	public static WriteHandlerPtr firetrap_bg1_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(bg1_tilemap,0,scroll[0] | (scroll[1] << 8));
-	}
+	} };
 	
-	WRITE_HANDLER( firetrap_bg1_scrolly_w )
+	public static WriteHandlerPtr firetrap_bg1_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrolly(bg1_tilemap,0,-(scroll[0] | (scroll[1] << 8)));
-	}
+	} };
 	
-	WRITE_HANDLER( firetrap_bg2_scrollx_w )
+	public static WriteHandlerPtr firetrap_bg2_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(bg2_tilemap,0,scroll[0] | (scroll[1] << 8));
-	}
+	} };
 	
-	WRITE_HANDLER( firetrap_bg2_scrolly_w )
+	public static WriteHandlerPtr firetrap_bg2_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrolly(bg2_tilemap,0,-(scroll[0] | (scroll[1] << 8)));
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -233,12 +233,12 @@ public class firetrap
 	
 			/* the meaning of bit 3 of [offs] is unknown */
 	
-			sy = spriteram[offs];
-			sx = spriteram[offs + 2];
-			code = spriteram[offs + 3] + 4 * (spriteram[offs + 1] & 0xc0);
-			color = ((spriteram[offs + 1] & 0x08) >> 2) | (spriteram[offs + 1] & 0x01);
-			flipx = spriteram[offs + 1] & 0x04;
-			flipy = spriteram[offs + 1] & 0x02;
+			sy = spriteram.read(offs);
+			sx = spriteram.read(offs + 2);
+			code = spriteram.read(offs + 3)+ 4 * (spriteram.read(offs + 1)& 0xc0);
+			color = ((spriteram.read(offs + 1)& 0x08) >> 2) | (spriteram.read(offs + 1)& 0x01);
+			flipx = spriteram.read(offs + 1)& 0x04;
+			flipy = spriteram.read(offs + 1)& 0x02;
 			if (flip_screen)
 			{
 				sx = 240 - sx;
@@ -247,7 +247,7 @@ public class firetrap
 				flipy = !flipy;
 			}
 	
-			if (spriteram[offs + 1] & 0x10)	/* double width */
+			if (spriteram.read(offs + 1)& 0x10)	/* double width */
 			{
 				if (flip_screen) sy -= 16;
 	

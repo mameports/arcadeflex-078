@@ -13,26 +13,26 @@ public class deadang
 	
 	/******************************************************************************/
 	
-	WRITE_HANDLER( deadang_foreground_w )
+	public static WriteHandlerPtr deadang_foreground_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		deadang_video_data[offset]=data;
 		tilemap_mark_tile_dirty( pf1_layer, offset/2 );
-	}
+	} };
 	
-	WRITE_HANDLER( deadang_text_w )
+	public static WriteHandlerPtr deadang_text_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty( text_layer, offset/2 );
-	}
+	} };
 	
-	WRITE_HANDLER( deadang_bank_w )
+	public static WriteHandlerPtr deadang_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		deadangle_tilebank = data&1;
 		if (deadangle_tilebank!=deadangle_oldtilebank) {
 			deadangle_oldtilebank = deadangle_tilebank;
 			tilemap_mark_all_tiles_dirty (pf1_layer);
 		}
-	}
+	} };
 	
 	/******************************************************************************/
 	
@@ -68,8 +68,8 @@ public class deadang
 	static void get_text_tile_info( int tile_index )
 	{
 		int offs=tile_index*2;
-		int tile=videoram[offs]+((videoram[offs+1]&0xc0)<<2);
-		int color=videoram[offs+1]&0xf;
+		int tile=videoram.read(offs)+((videoram.read(offs+1)&0xc0)<<2);
+		int color=videoram.read(offs+1)&0xf;
 	
 		SET_TILE_INFO(0,tile,color,0)
 	}
@@ -98,9 +98,9 @@ public class deadang
 		for (offs = 0; offs<0x800; offs+=8)
 		{
 			/* Don't draw empty sprite table entries */
-			if (spriteram[offs+7]!=0xf) continue;
+			if (spriteram.read(offs+7)!=0xf) continue;
 	
-			switch (spriteram[offs+5]&0xc0) {
+			switch (spriteram.read(offs+5)&0xc0) {
 			default:
 			case 0xc0: pri=0; break; /* Unknown */
 			case 0x80: pri=0; break; /* Over all playfields */
@@ -108,15 +108,15 @@ public class deadang
 			case 0x00: pri=0xf0|0xcc; break; /* Under middle playfield */
 			}
 	
-			fx= spriteram[offs+1]&0x20;
-			fy= spriteram[offs+1]&0x40;
-			y = spriteram[offs+0];
-			x = spriteram[offs+4];
+			fx= spriteram.read(offs+1)&0x20;
+			fy= spriteram.read(offs+1)&0x40;
+			y = spriteram.read(offs+0);
+			x = spriteram.read(offs+4);
 			if (fy) fy=0; else fy=1;
-			if (spriteram[offs+5]&1) x=0-(0xff-x);
+			if (spriteram.read(offs+5)&1) x=0-(0xff-x);
 	
-			color = (spriteram[offs+3]>>4)&0xf;
-			sprite = (spriteram[offs+2]+(spriteram[offs+3]<<8))&0xfff;
+			color = (spriteram.read(offs+3)>>4)&0xf;
+			sprite = (spriteram.read(offs+2)+(spriteram.read(offs+3)<<8))&0xfff;
 	
 			if (flip_screen) {
 				x=240-x;

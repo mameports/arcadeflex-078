@@ -58,19 +58,19 @@ public class espial
 	
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -108,7 +108,7 @@ public class espial
 	{
 		tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32);
 	
-		if (!tilemap)
+		if (tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_cols(tilemap, 32);
@@ -121,7 +121,7 @@ public class espial
 		/* Net Wars has a tile map that's twice as big as Espial's */
 		tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,64);
 	
-		if (!tilemap)
+		if (tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_cols(tilemap, 32);
@@ -137,49 +137,49 @@ public class espial
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( espial_videoram_w )
+	public static WriteHandlerPtr espial_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (espial_videoram[offset] != data)
 		{
 			espial_videoram[offset] = data;
 			tilemap_mark_tile_dirty(tilemap, offset);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( espial_colorram_w )
+	public static WriteHandlerPtr espial_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (espial_colorram[offset] != data)
 		{
 			espial_colorram[offset] = data;
 			tilemap_mark_tile_dirty(tilemap, offset);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( espial_attributeram_w )
+	public static WriteHandlerPtr espial_attributeram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (espial_attributeram[offset] != data)
 		{
 			espial_attributeram[offset] = data;
 			tilemap_mark_tile_dirty(tilemap, offset);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( espial_scrollram_w )
+	public static WriteHandlerPtr espial_scrollram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		espial_scrollram[offset] = data;
 		tilemap_set_scrolly(tilemap, offset, data);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( espial_flipscreen_w )
+	public static WriteHandlerPtr espial_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flipscreen = data;
 	
 		tilemap_set_flip(0, flipscreen ? TILEMAP_FLIPX | TILEMAP_FLIPY : 0);
-	}
+	} };
 	
 	
 	/*************************************

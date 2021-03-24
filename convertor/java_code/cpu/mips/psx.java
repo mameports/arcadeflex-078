@@ -241,8 +241,7 @@ public class psx
 	void mips_stop( void )
 	{
 	#ifdef MAME_DEBUG
-		extern int debug_key_pressed;
-		debug_key_pressed = 1;
+			debug_key_pressed = 1;
 		CALL_MAME_DEBUG;
 	#endif
 	}
@@ -1978,7 +1977,7 @@ public class psx
 		which++;
 		which %= 64;
 		buffer[ which ][ 0 ] = '\0';
-		if( !context )
+		if (context == 0)
 		{
 			static mips_cpu_context tmp;
 			mips_get_context( &tmp );

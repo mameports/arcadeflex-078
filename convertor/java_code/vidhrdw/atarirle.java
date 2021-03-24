@@ -143,8 +143,7 @@ public class atarirle
 		STATIC FUNCTION DECLARATIONS
 	##########################################################################*/
 	
-	static int build_rle_tables(void);
-	static int count_objects(const data16_t *base, int length);
+	static static int count_objects(const data16_t *base, int length);
 	static void prescan_rle(const struct atarirle_data *mo, int which);
 	static void sort_and_render(struct atarirle_data *mo);
 	static void compute_checksum(struct atarirle_data *mo);
@@ -344,12 +343,12 @@ public class atarirle
 			prescan_rle(mo, i);
 	
 		/* allocate the spriteram */
-		mo->spriteram = auto_malloc(sizeof(mo->spriteram[0]) * mo->spriteramsize);
+		mo->spriteram = auto_malloc(sizeof(mo->spriteram.read(0)) * mo->spriteramsize);
 		if (!mo->spriteram)
 			return 0;
 	
 		/* clear it to zero */
-		memset(mo->spriteram, 0, sizeof(mo->spriteram[0]) * mo->spriteramsize);
+		memset(mo->spriteram, 0, sizeof(mo->spriteram.read(0)) * mo->spriteramsize);
 	
 		/* allocate bitmaps */
 		mo->vram[0][0] = auto_bitmap_alloc_depth(Machine->drv->screen_width, Machine->drv->screen_height, 16);
@@ -496,7 +495,7 @@ public class atarirle
 		COMBINE_DATA(&atarirle_0_spriteram[offset]);
 	
 		/* store a copy in our local spriteram */
-		atarirle[0].spriteram[entry].data[idx] = atarirle_0_spriteram[offset];
+		atarirle[0].spriteram.read(entry).data[idx] = atarirle_0_spriteram[offset];
 		atarirle[0].is32bit = 0;
 	}
 	
@@ -515,8 +514,8 @@ public class atarirle
 		COMBINE_DATA(&atarirle_0_spriteram32[offset]);
 	
 		/* store a copy in our local spriteram */
-		atarirle[0].spriteram[entry].data[idx+0] = atarirle_0_spriteram32[offset] >> 16;
-		atarirle[0].spriteram[entry].data[idx+1] = atarirle_0_spriteram32[offset];
+		atarirle[0].spriteram.read(entry).data[idx+0] = atarirle_0_spriteram32[offset] >> 16;
+		atarirle[0].spriteram.read(entry).data[idx+1] = atarirle_0_spriteram32[offset];
 		atarirle[0].is32bit = 1;
 	}
 	
@@ -550,7 +549,7 @@ public class atarirle
 	
 		/* allocate all 5 tables */
 		base = auto_malloc(0x500 * sizeof(UINT16));
-		if (!base)
+		if (base == 0)
 			return 0;
 	
 		/* assign the tables */
@@ -712,7 +711,7 @@ public class atarirle
 	
 	static void compute_checksum(struct atarirle_data *mo)
 	{
-		int reqsums = mo->spriteram[0].data[0] + 1;
+		int reqsums = mo->spriteram.read(0).data[0] + 1;
 		int i;
 	
 		/* number of checksums is in the first word */
@@ -771,7 +770,7 @@ public class atarirle
 				int scale, code;
 	
 				/* extract scale and code */
-				obj = &mo->spriteram[current->entry];
+				obj = &mo->spriteram.read(current->entry);
 				scale = EXTRACT_DATA(obj, mo->scalemask);
 				code = EXTRACT_DATA(obj, mo->codemask);
 	
@@ -943,7 +942,7 @@ public class atarirle
 		/* 16-bit case */
 		if (bitmap->depth == 16)
 		{
-			if (!hflip)
+			if (hflip == 0)
 				draw_rle_zoom(bitmap, info, palettebase, x, y, xscale << 4, yscale << 4, clip);
 			else
 				draw_rle_zoom_hflip(bitmap, info, palettebase, x, y, xscale << 4, yscale << 4, clip);
@@ -1031,7 +1030,7 @@ public class atarirle
 			entry_count = *base++;
 	
 			/* non-clipped case */
-			if (!xclipped)
+			if (xclipped == 0)
 			{
 				/* decode the pixels */
 				for (j = 0; j < entry_count; j++)
@@ -1220,7 +1219,7 @@ public class atarirle
 			entry_count = *base++;
 	
 			/* non-clipped case */
-			if (!xclipped)
+			if (xclipped == 0)
 			{
 				/* decode the pixels */
 				for (j = 0; j < entry_count; j++)

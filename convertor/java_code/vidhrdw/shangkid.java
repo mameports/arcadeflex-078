@@ -16,8 +16,8 @@ public class shangkid
 	
 	
 	static void get_bg_tile_info(int tile_index){
-		int attributes = videoram[tile_index+0x800];
-		int tile_number = videoram[tile_index]+0x100*(attributes&0x3);
+		int attributes = videoram.read(tile_index+0x800);
+		int tile_number = videoram.read(tile_index)+0x100*(attributes&0x3);
 		int color;
 	
 		if( shangkid_gfx_type==1 )
@@ -60,13 +60,13 @@ public class shangkid
 		return background?0:1;
 	}
 	
-	WRITE_HANDLER( shangkid_videoram_w )
+	public static WriteHandlerPtr shangkid_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset]!=data ){
-			videoram[offset] = data;
+		if( videoram.read(offset)!=data ){
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty( background, offset&0x7ff );
 		}
-	}
+	} };
 	
 	static void draw_sprite( const UINT8 *source, struct mame_bitmap *bitmap, const struct rectangle *cliprect ){
 		const struct GfxElement *gfx;
@@ -194,7 +194,7 @@ public class shangkid
 	
 		for (i = 0;i < Machine->drv->total_colors;i++)
 		{
-			int data = color_prom[i] + 256 * color_prom[i+32];
+			int data = color_prom.read(i)+ 256 * color_prom.read(i+32);
 			int r = (data >>  1) & 0x1f;
 			int g = (data >>  6) & 0x1f;
 			int b = (data >> 11) & 0x1f;
@@ -210,12 +210,12 @@ public class shangkid
 	
 		/* sprites */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
-			COLOR(1,i) = (color_prom[i] & 0x0f) + 0x10;
+			COLOR(1,i) = (color_prom.read(i)& 0x0f) + 0x10;
 		color_prom += 0x100;
 	
 		/* characters */
 		for (i = 0;i < TOTAL_COLORS(0);i++)
-			COLOR(0,i) = (color_prom[i] & 0x0f);
+			COLOR(0,i) = (color_prom.read(i)& 0x0f);
 	}
 	
 	
@@ -251,8 +251,8 @@ public class shangkid
 				sx+=16;
 			}
 	
-			tile = videoram[i];
-			attr = videoram[i+0x400];
+			tile = videoram.read(i);
+			attr = videoram.read(i+0x400);
 			/*
 				x---.----	priority?
 				-xx-.----	bank
@@ -283,13 +283,13 @@ public class shangkid
 		int color;
 		for( i=0x7e; i>=0x00; i-=2 )
 		{
-			bank = videoram[0x1b80+i];
-			attr = videoram[0x1b81+i];
-			tile = videoram[0xb80+i];
-			color = videoram[0xb81+i];
-			sy = 240-videoram[0x1380+i];
+			bank = videoram.read(0x1b80+i);
+			attr = videoram.read(0x1b81+i);
+			tile = videoram.read(0xb80+i);
+			color = videoram.read(0xb81+i);
+			sy = 240-videoram.read(0x1380+i);
 	
-			sx = videoram[0x1381+i]-64+8+16;
+			sx = videoram.read(0x1381+i)-64+8+16;
 			if( attr&1 ) sx += 0x100;
 	
 			drawgfx(

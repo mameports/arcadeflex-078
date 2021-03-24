@@ -37,7 +37,6 @@ enum
 /* implementation APIs below.                                       */
 
 
-void spc700_init(void);
 
 /* Pulse the RESET pin on the CPU */
 void spc700_reset(void* param);
@@ -46,7 +45,6 @@ void spc700_reset(void* param);
 void spc700_set_reset_line(int state, void* param);
 
 /* Clean up after the emulation core - Not used in this core - */
-void spc700_exit(void);
 
 /* Get the current CPU context */
 unsigned spc700_get_context(void *dst);
@@ -98,9 +96,7 @@ unsigned spc700_dasm(char *buffer, unsigned pc);
 
 
 /* Pulse the SO (Set Overflow) pin on the CPU */
-void spc700_pulse_so(void);
 
-extern int spc700_ICount;				/* cycle count */
 
 int spc700_execute(int clocks);
 

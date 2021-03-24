@@ -90,81 +90,81 @@ public class dec8
 		{
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i] >> 4) & 0x01;
-			bit1 = (color_prom[i] >> 5) & 0x01;
-			bit2 = (color_prom[i] >> 6) & 0x01;
-			bit3 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 4) & 0x01;
+			bit1 = (color_prom.read(i)>> 5) & 0x01;
+			bit2 = (color_prom.read(i)>> 6) & 0x01;
+			bit3 = (color_prom.read(i)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
 		}
 	}
 	
-	WRITE_HANDLER( dec8_bac06_0_w )
+	public static WriteHandlerPtr dec8_bac06_0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dec8_pf0_control[offset]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_bac06_1_w )
+	public static WriteHandlerPtr dec8_bac06_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dec8_pf1_control[offset]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_pf0_data_w )
+	public static WriteHandlerPtr dec8_pf0_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dec8_pf0_data[offset]=data;
 		tilemap_mark_tile_dirty(dec8_pf0_tilemap,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_pf1_data_w )
+	public static WriteHandlerPtr dec8_pf1_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		dec8_pf1_data[offset]=data;
 		tilemap_mark_tile_dirty(dec8_pf1_tilemap,offset/2);
-	}
+	} };
 	
-	READ_HANDLER( dec8_pf0_data_r )
+	public static ReadHandlerPtr dec8_pf0_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return dec8_pf0_data[offset];
-	}
+	} };
 	
-	READ_HANDLER( dec8_pf1_data_r )
+	public static ReadHandlerPtr dec8_pf1_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return dec8_pf1_data[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_videoram_w )
+	public static WriteHandlerPtr dec8_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty( dec8_fix_tilemap,offset/2 );
-	}
+	} };
 	
-	WRITE_HANDLER( srdarwin_videoram_w )
+	public static WriteHandlerPtr srdarwin_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty( dec8_fix_tilemap,offset );
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_scroll1_w )
+	public static WriteHandlerPtr dec8_scroll1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll1[offset]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( dec8_scroll2_w )
+	public static WriteHandlerPtr dec8_scroll2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll2[offset]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( srdarwin_control_w )
+	public static WriteHandlerPtr srdarwin_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		unsigned char *RAM = memory_region(REGION_CPU1);
@@ -180,9 +180,9 @@ public class dec8
 	        	scroll2[1]=data;
 	        	return;
 	    }
-	}
+	} };
 	
-	WRITE_HANDLER( lastmiss_control_w )
+	public static WriteHandlerPtr lastmiss_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		unsigned char *RAM = memory_region(REGION_CPU1);
 	
@@ -202,9 +202,9 @@ public class dec8
 			cpu_set_reset_line(1,CLEAR_LINE);
 		else
 			cpu_set_reset_line(1,ASSERT_LINE);
-	}
+	} };
 	
-	WRITE_HANDLER( shackled_control_w )
+	public static WriteHandlerPtr shackled_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		unsigned char *RAM = memory_region(REGION_CPU1);
@@ -215,19 +215,19 @@ public class dec8
 	
 		scroll2[0]=(data>>5)&1;
 		scroll2[2]=(data>>6)&1;
-	}
+	} };
 	
-	WRITE_HANDLER( lastmiss_scrollx_w )
+	public static WriteHandlerPtr lastmiss_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll2[1]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( lastmiss_scrolly_w )
+	public static WriteHandlerPtr lastmiss_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll2[3]=data;
-	}
+	} };
 	
-	WRITE_HANDLER( gondo_scroll_w )
+	public static WriteHandlerPtr gondo_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset) {
 			case 0x0:
@@ -242,7 +242,7 @@ public class dec8
 				/* Bit 2 is also used in Gondo & Garyoret */
 				break;
 		}
-	}
+	} };
 	
 	/******************************************************************************/
 	
@@ -387,7 +387,7 @@ public class dec8
 			if (pri==1 && color==0) continue;
 	
 			code = buffered_spriteram[offs+3] + ( ( buffered_spriteram[offs+1] & 0xe0 ) << 3 );
-			if (!code) continue;
+			if (code == 0) continue;
 	
 			sy = buffered_spriteram[offs];
 			if (sy == 0xf8) continue;
@@ -428,11 +428,11 @@ public class dec8
 		int mx,my,tile,color,offs;
 	
 		for (offs = 0x800 - 2;offs >= 0;offs -= 2) {
-			tile=videoram[offs+1]+((videoram[offs]&0xf)<<8);
+			tile=videoram.read(offs+1)+((videoram.read(offs)&0xf)<<8);
 	
-			if (!tile) continue;
+			if (tile == 0) continue;
 	
-			color=(videoram[offs]&mask)>>shift;
+			color=(videoram.read(offs)&mask)>>shift;
 			mx = (offs/2) % 32;
 			my = (offs/2) / 32;
 	
@@ -501,7 +501,7 @@ public class dec8
 	static void get_cobracom_fix_tile_info( int tile_index )
 	{
 		int offs=tile_index<<1;
-		int tile=videoram[offs+1]+(videoram[offs]<<8);
+		int tile=videoram.read(offs+1)+(videoram.read(offs)<<8);
 		int color=(tile&0xe000) >> 13;
 	
 		SET_TILE_INFO(
@@ -553,7 +553,7 @@ public class dec8
 	static void get_ghostb_fix_tile_info( int tile_index )
 	{
 		int offs=tile_index<<1;
-		int tile=videoram[offs+1]+(videoram[offs]<<8);
+		int tile=videoram.read(offs+1)+(videoram.read(offs)<<8);
 		int color=(tile&0xc00) >> 10;
 	
 		SET_TILE_INFO(
@@ -597,7 +597,7 @@ public class dec8
 	static void get_oscar_fix_tile_info( int tile_index )
 	{
 		int offs=tile_index<<1;
-		int tile=videoram[offs+1]+(videoram[offs]<<8);
+		int tile=videoram.read(offs+1)+(videoram.read(offs)<<8);
 		int color=(tile&0xf000) >> 14;
 	
 		SET_TILE_INFO(
@@ -673,7 +673,7 @@ public class dec8
 	static void get_lastmiss_fix_tile_info( int tile_index )
 	{
 		int offs=tile_index<<1;
-		int tile=videoram[offs+1]+(videoram[offs]<<8);
+		int tile=videoram.read(offs+1)+(videoram.read(offs)<<8);
 		int color=(tile&0xc000) >> 14;
 	
 		SET_TILE_INFO(
@@ -727,7 +727,7 @@ public class dec8
 	
 	static void get_srdarwin_fix_tile_info( int tile_index )
 	{
-		int tile=videoram[tile_index];
+		int tile=videoram.read(tile_index);
 		int color=0; /* ? */
 	
 		if (color>1) tile_info.priority=1; else tile_info.priority=0;
@@ -802,7 +802,7 @@ public class dec8
 	static void get_gondo_fix_tile_info( int tile_index )
 	{
 		int offs=tile_index*2;
-		int tile=videoram[offs+1]+(videoram[offs]<<8);
+		int tile=videoram.read(offs+1)+(videoram.read(offs)<<8);
 		int color=(tile&0x7000) >> 12;
 	
 		SET_TILE_INFO(

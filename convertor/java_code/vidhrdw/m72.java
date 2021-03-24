@@ -309,7 +309,7 @@ public class m72
 	
 	***************************************************************************/
 	
-	READ_HANDLER( m72_palette1_r )
+	public static ReadHandlerPtr m72_palette1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* only D0-D4 are connected */
 		if (offset & 1) return 0xff;
@@ -317,10 +317,10 @@ public class m72
 		/* A9 isn't connected, so 0x200-0x3ff mirrors 0x000-0x1ff etc. */
 		offset &= ~0x200;
 	
-		return paletteram[offset] | 0xe0;	/* only D0-D4 are connected */
-	}
+		return paletteram.read(offset)| 0xe0;	/* only D0-D4 are connected */
+	} };
 	
-	READ_HANDLER( m72_palette2_r )
+	public static ReadHandlerPtr m72_palette2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* only D0-D4 are connected */
 		if (offset & 1) return 0xff;
@@ -329,7 +329,7 @@ public class m72
 		offset &= ~0x200;
 	
 		return paletteram_2[offset] | 0xe0;	/* only D0-D4 are connected */
-	}
+	} };
 	
 	INLINE void changecolor(int color,int r,int g,int b)
 	{
@@ -340,7 +340,7 @@ public class m72
 		palette_set_color(color,r,g,b);
 	}
 	
-	WRITE_HANDLER( m72_palette1_w )
+	public static WriteHandlerPtr m72_palette1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* only D0-D4 are connected */
 		if (offset & 1) return;
@@ -348,15 +348,15 @@ public class m72
 		/* A9 isn't connected, so 0x200-0x3ff mirrors 0x000-0x1ff etc. */
 		offset &= ~0x200;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		offset &= 0x1ff;
 		changecolor(offset / 2,
-				paletteram[offset + 0x000],
-				paletteram[offset + 0x400],
-				paletteram[offset + 0x800]);
-	}
+				paletteram.read(offset + 0x000),
+				paletteram.read(offset + 0x400),
+				paletteram.read(offset + 0x800));
+	} };
 	
-	WRITE_HANDLER( m72_palette2_w )
+	public static WriteHandlerPtr m72_palette2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* only D0-D4 are connected */
 		if (offset & 1) return;
@@ -370,43 +370,43 @@ public class m72
 				paletteram_2[offset + 0x000],
 				paletteram_2[offset + 0x400],
 				paletteram_2[offset + 0x800]);
-	}
+	} };
 	
-	READ_HANDLER( m72_videoram1_r )
+	public static ReadHandlerPtr m72_videoram1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return m72_videoram1[offset];
-	}
+	} };
 	
-	READ_HANDLER( m72_videoram2_r )
+	public static ReadHandlerPtr m72_videoram2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return m72_videoram2[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( m72_videoram1_w )
+	public static WriteHandlerPtr m72_videoram1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (m72_videoram1[offset] != data)
 		{
 			m72_videoram1[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset/4);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( m72_videoram2_w )
+	public static WriteHandlerPtr m72_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (m72_videoram2[offset] != data)
 		{
 			m72_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset/4);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( m72_irq_line_w )
+	public static WriteHandlerPtr m72_irq_line_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		offset *= 8;
 		splitline = (splitline & (0xff00 >> offset)) | (data << offset);
-	}
+	} };
 	
-	WRITE_HANDLER( m72_scrollx1_w )
+	public static WriteHandlerPtr m72_scrollx1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -415,9 +415,9 @@ public class m72
 	
 		for (i = rastersplit+1;i < 256;i++)
 			scrollx1[i] = scrollx1[rastersplit];
-	}
+	} };
 	
-	WRITE_HANDLER( m72_scrollx2_w )
+	public static WriteHandlerPtr m72_scrollx2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -426,9 +426,9 @@ public class m72
 	
 		for (i = rastersplit+1;i < 256;i++)
 			scrollx2[i] = scrollx2[rastersplit];
-	}
+	} };
 	
-	WRITE_HANDLER( m72_scrolly1_w )
+	public static WriteHandlerPtr m72_scrolly1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -437,9 +437,9 @@ public class m72
 	
 		for (i = rastersplit+1;i < 256;i++)
 			scrolly1[i] = scrolly1[rastersplit];
-	}
+	} };
 	
-	WRITE_HANDLER( m72_scrolly2_w )
+	public static WriteHandlerPtr m72_scrolly2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -448,18 +448,18 @@ public class m72
 	
 		for (i = rastersplit+1;i < 256;i++)
 			scrolly2[i] = scrolly2[rastersplit];
-	}
+	} };
 	
-	WRITE_HANDLER( m72_dmaon_w )
+	public static WriteHandlerPtr m72_dmaon_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset == 0)
 		{
-			memcpy(m72_spriteram,spriteram,spriteram_size);
+			memcpy(m72_spriteram,spriteram,spriteram_size[0]);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( m72_port02_w )
+	public static WriteHandlerPtr m72_port02_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset != 0)
 		{
@@ -485,9 +485,9 @@ public class m72
 			cpu_set_reset_line(1,ASSERT_LINE);
 	
 		/* bit 5 = "bank"? */
-	}
+	} };
 	
-	WRITE_HANDLER( rtype2_port02_w )
+	public static WriteHandlerPtr rtype2_port02_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset != 0)
 		{
@@ -507,20 +507,20 @@ public class m72
 		video_off = data & 0x08;
 	
 		/* other bits unknown */
-	}
+	} };
 	
 	
 	static int majtitle_rowscroll;
 	
 	/* the following is mostly a kludge. This register seems to be used for something else */
-	WRITE_HANDLER( majtitle_gfx_ctrl_w )
+	public static WriteHandlerPtr majtitle_gfx_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset == 1)
 		{
 			if (data) majtitle_rowscroll = 1;
 			else majtitle_rowscroll = 0;
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -591,15 +591,15 @@ public class m72
 			int code,color,sx,sy,flipx,flipy,w,h,x,y;
 	
 	
-			code = spriteram_2[offs+2] | (spriteram_2[offs+3] << 8);
-			color = spriteram_2[offs+4] & 0x0f;
-			sx = -256+(spriteram_2[offs+6] | ((spriteram_2[offs+7] & 0x03) << 8));
-			sy = 512-(spriteram_2[offs+0] | ((spriteram_2[offs+1] & 0x01) << 8));
-			flipx = spriteram_2[offs+5] & 0x08;
-			flipy = spriteram_2[offs+5] & 0x04;
+			code = spriteram_2.read(offs+2)| (spriteram_2.read(offs+3)<< 8);
+			color = spriteram_2.read(offs+4)& 0x0f;
+			sx = -256+(spriteram_2.read(offs+6)| ((spriteram_2.read(offs+7)& 0x03) << 8));
+			sy = 512-(spriteram_2.read(offs+0)| ((spriteram_2.read(offs+1)& 0x01) << 8));
+			flipx = spriteram_2.read(offs+5)& 0x08;
+			flipy = spriteram_2.read(offs+5)& 0x04;
 	
-			w = 1;// << ((spriteram_2[offs+5] & 0xc0) >> 6);
-			h = 1 << ((spriteram_2[offs+5] & 0x30) >> 4);
+			w = 1;// << ((spriteram_2.read(offs+5)& 0xc0) >> 6);
+			h = 1 << ((spriteram_2.read(offs+5)& 0x30) >> 4);
 			sy -= 16 * h;
 	
 			if (flip_screen)

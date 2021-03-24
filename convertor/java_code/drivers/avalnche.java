@@ -80,22 +80,26 @@ public class avalnche
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x1fff, MRA_RAM }, /* RAM SEL */
-		{ 0x2000, 0x2fff, avalnche_input_r }, /* INSEL */
-		{ 0x6000, 0x7fff, MRA_ROM }, /* ROM1-ROM2 */
-		{ 0xe000, 0xffff, MRA_ROM }, /* ROM2 for 6502 vectors */
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_RAM ), /* RAM SEL */
+		new Memory_ReadAddress( 0x2000, 0x2fff, avalnche_input_r ), /* INSEL */
+		new Memory_ReadAddress( 0x6000, 0x7fff, MRA_ROM ), /* ROM1-ROM2 */
+		new Memory_ReadAddress( 0xe000, 0xffff, MRA_ROM ), /* ROM2 for 6502 vectors */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x1fff, avalnche_videoram_w, &videoram, &videoram_size }, /* DISPLAY */
-		{ 0x3000, 0x3fff, MWA_NOP }, /* WATCHDOG */
-		{ 0x4000, 0x4fff, avalnche_output_w }, /* OUTSEL */
-		{ 0x5000, 0x5fff, avalnche_noise_amplitude_w }, /* SOUNDLVL */
-		{ 0x6000, 0x7fff, MWA_ROM }, /* ROM1-ROM2 */
-		{ 0xe000, 0xffff, MWA_ROM }, /* ROM1-ROM2 */
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, avalnche_videoram_w, videoram, videoram_size ), /* DISPLAY */
+		new Memory_WriteAddress( 0x3000, 0x3fff, MWA_NOP ), /* WATCHDOG */
+		new Memory_WriteAddress( 0x4000, 0x4fff, avalnche_output_w ), /* OUTSEL */
+		new Memory_WriteAddress( 0x5000, 0x5fff, avalnche_noise_amplitude_w ), /* SOUNDLVL */
+		new Memory_WriteAddress( 0x6000, 0x7fff, MWA_ROM ), /* ROM1-ROM2 */
+		new Memory_WriteAddress( 0xe000, 0xffff, MWA_ROM ), /* ROM1-ROM2 */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -105,39 +109,39 @@ public class avalnche
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( avalnche )
-		PORT_START /* IN0 */
-		PORT_BIT (0x03, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* Spare */
-		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x30, 0x00, "Language" )
-		PORT_DIPSETTING(    0x00, "English" )
-		PORT_DIPSETTING(    0x30, "German" )
-		PORT_DIPSETTING(    0x20, "French" )
-		PORT_DIPSETTING(    0x10, "Spanish" )
-		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_START2 )
-		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_START1 )
+	static InputPortPtr input_ports_avalnche = new InputPortPtr(){ public void handler() { 
+		PORT_START();  /* IN0 */
+		PORT_BIT (0x03, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* Spare */
+		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x30, 0x00, "Language" );
+		PORT_DIPSETTING(    0x00, "English" );
+		PORT_DIPSETTING(    0x30, "German" );
+		PORT_DIPSETTING(    0x20, "French" );
+		PORT_DIPSETTING(    0x10, "Spanish" );
+		PORT_BIT (0x40, IP_ACTIVE_HIGH, IPT_START2 );
+		PORT_BIT (0x80, IP_ACTIVE_HIGH, IPT_START1 );
 	
-		PORT_START /* IN1 */
-		PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_DIPNAME( 0x04, 0x04, "Allow Extended Play" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x08, 0x00, "Lives/Extended Play" )
-		PORT_DIPSETTING(    0x00, "3/450 points" )
-		PORT_DIPSETTING(    0x08, "5/750 points" )
-		PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* SLAM */
-		PORT_BITX( 0x20, IP_ACTIVE_HIGH, IPT_SERVICE | IPF_TOGGLE, DEF_STR ( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 )	/* Serve */
-		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )	/* VBLANK */
+		PORT_START();  /* IN1 */
+		PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_DIPNAME( 0x04, 0x04, "Allow Extended Play" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x08, 0x00, "Lives/Extended Play" );
+		PORT_DIPSETTING(    0x00, "3/450 points" );
+		PORT_DIPSETTING(    0x08, "5/750 points" );
+		PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );/* SLAM */
+		PORT_BITX( 0x20, IP_ACTIVE_HIGH, IPT_SERVICE | IPF_TOGGLE, DEF_STR ( Service_Mode ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 );/* Serve */
+		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_VBLANK );/* VBLANK */
 	
-		PORT_START /* IN2 */
-		PORT_ANALOG( 0xff, 0x80, IPT_PADDLE, 50, 10, 0x40, 0xb7 )
-	INPUT_PORTS_END
+		PORT_START();  /* IN2 */
+		PORT_ANALOG( 0xff, 0x80, IPT_PADDLE, 50, 10, 0x40, 0xb7 );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -263,20 +267,20 @@ public class avalnche
 	 *
 	 *************************************/
 	
-	ROM_START( avalnche )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+	static RomLoadPtr rom_avalnche = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );/* 64k for code */
 		/* Note: These are being loaded into a bogus location, */
 		/*		 They are nibble wide rom images which will be */
 		/*		 merged and loaded into the proper place by    */
 		/*		 orbit_rom_init()							   */
-		ROM_LOAD( "30612.d2",     	0x8800, 0x0800, CRC(3f975171) SHA1(afe680865da97824f1ebade4c7a2ba5d7ee2cbab) )
-		ROM_LOAD( "30613.e2",     	0x9000, 0x0800, CRC(47a224d3) SHA1(9feb7444a2e5a3d90a4fe78ae5d23c3a5039bfaa) )
-		ROM_LOAD( "30611.c2",     	0x9800, 0x0800, CRC(0ad07f85) SHA1(5a1a873b14e63dbb69ee3686ba53f7ca831fe9d0) )
+		ROM_LOAD( "30612.d2",     	0x8800, 0x0800, CRC(3f975171);SHA1(afe680865da97824f1ebade4c7a2ba5d7ee2cbab) )
+		ROM_LOAD( "30613.e2",     	0x9000, 0x0800, CRC(47a224d3);SHA1(9feb7444a2e5a3d90a4fe78ae5d23c3a5039bfaa) )
+		ROM_LOAD( "30611.c2",     	0x9800, 0x0800, CRC(0ad07f85);SHA1(5a1a873b14e63dbb69ee3686ba53f7ca831fe9d0) )
 	
-		ROM_LOAD( "30615.d3",     	0xa800, 0x0800, CRC(3e1a86b4) SHA1(3ff4cffea5b7a32231c0996473158f24c3bbe107) )
-		ROM_LOAD( "30616.e3",     	0xb000, 0x0800, CRC(f620f0f8) SHA1(7802b399b3469fc840796c3145b5f63781090956) )
-		ROM_LOAD( "30614.c3",     	0xb800, 0x0800, CRC(a12d5d64) SHA1(1647d7416bf9266d07f066d3797bda943e004d24) )
-	ROM_END
+		ROM_LOAD( "30615.d3",     	0xa800, 0x0800, CRC(3e1a86b4);SHA1(3ff4cffea5b7a32231c0996473158f24c3bbe107) )
+		ROM_LOAD( "30616.e3",     	0xb000, 0x0800, CRC(f620f0f8);SHA1(7802b399b3469fc840796c3145b5f63781090956) )
+		ROM_LOAD( "30614.c3",     	0xb800, 0x0800, CRC(a12d5d64);SHA1(1647d7416bf9266d07f066d3797bda943e004d24) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -311,5 +315,5 @@ public class avalnche
 	 *
 	 *************************************/
 	
-	GAME( 1978, avalnche, 0, avalnche, avalnche, avalnche, ROT0, "Atari", "Avalanche" )
+	public static GameDriver driver_avalnche	   = new GameDriver("1978"	,"avalnche"	,"avalnche.java"	,rom_avalnche,null	,machine_driver_avalnche	,input_ports_avalnche	,init_avalnche	,ROT0	,	"Atari", "Avalanche" )
 }

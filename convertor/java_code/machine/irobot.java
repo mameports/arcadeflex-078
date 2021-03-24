@@ -54,14 +54,13 @@ public class irobot
 	UINT8 irobot_bufsel;
 	UINT8 irobot_alphamap;
 	
-	static void irmb_run(void);
-	
+	static 
 	
 	/***********************************************************************/
 	
 	
 	
-	READ_HANDLER( irobot_sharedmem_r )
+	public static ReadHandlerPtr irobot_sharedmem_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (irobot_outx == 3)
 			return mbRAM[BYTE_XOR_BE(offset)];
@@ -76,17 +75,17 @@ public class irobot
 			return mbROM[0x4000 + ((irobot_mpage & 3) << 13) + BYTE_XOR_BE(offset)];
 	
 		return 0xFF;
-	}
+	} };
 	
 	/* Comment out the mbRAM =, comRAM2 = or comRAM1 = and it will start working */
-	WRITE_HANDLER( irobot_sharedmem_w )
+	public static WriteHandlerPtr irobot_sharedmem_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (irobot_outx == 3)
 			mbRAM[BYTE_XOR_BE(offset)] = data;
 	
 		if (irobot_outx == 2)
 			irobot_combase[BYTE_XOR_BE(offset & 0xFFF)] = data;
-	}
+	} };
 	
 	static void irvg_done_callback (int param)
 	{
@@ -95,7 +94,7 @@ public class irobot
 		irvg_running = 0;
 	}
 	
-	WRITE_HANDLER( irobot_statwr_w )
+	public static WriteHandlerPtr irobot_statwr_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		logerror("write %2x ", data);
 		IR_CPU_STATE;
@@ -124,9 +123,9 @@ public class irobot
 		if ((data & 0x10) && !(irobot_statwr & 0x10))
 			irmb_run();
 		irobot_statwr = data;
-	}
+	} };
 	
-	WRITE_HANDLER( irobot_out0_w )
+	public static WriteHandlerPtr irobot_out0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 *RAM = memory_region(REGION_CPU1);
 	
@@ -146,9 +145,9 @@ public class irobot
 		irobot_outx = (data & 0x18) >> 3;
 		irobot_mpage = (data & 0x06) >> 1;
 		irobot_alphamap = (data & 0x80);
-	}
+	} };
 	
-	WRITE_HANDLER( irobot_rom_banksel_w )
+	public static WriteHandlerPtr irobot_rom_banksel_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		UINT8 *RAM = memory_region(REGION_CPU1);
 	
@@ -175,7 +174,7 @@ public class irobot
 		}
 		set_led_status(0,data & 0x10);
 		set_led_status(1,data & 0x20);
-	}
+	} };
 	
 	static void scanline_callback(int scanline)
 	{
@@ -218,13 +217,13 @@ public class irobot
 		irobot_outx = 0;
 	}
 	
-	WRITE_HANDLER( irobot_control_w )
+	public static WriteHandlerPtr irobot_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	
 		irobot_control_num = offset & 0x03;
-	}
+	} };
 	
-	READ_HANDLER( irobot_control_r )
+	public static ReadHandlerPtr irobot_control_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	
 		if (irobot_control_num == 0)
@@ -233,18 +232,18 @@ public class irobot
 			return readinputport (6);
 		return 0;
 	
-	}
+	} };
 	
 	/*  we allow irmb_running and irvg_running to appear running before clearing
 		them to simulate the mathbox and vector generator running in real time */
-	READ_HANDLER( irobot_status_r )
+	public static ReadHandlerPtr irobot_status_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int d=0;
 	
 		logerror("status read. ");
 		IR_CPU_STATE;
 	
-		if (!irmb_running) d |= 0x20;
+		if (irmb_running == 0) d |= 0x20;
 		if (irvg_running) d |= 0x40;
 	
 		//        d = (irmb_running * 0x20) | (irvg_running * 0x40);
@@ -256,7 +255,7 @@ public class irobot
 		irvg_running=0;
 	#endif
 		return d;
-	}
+	} };
 	
 	
 	/***********************************************************************
@@ -379,7 +378,7 @@ public class irobot
 	
 		/* allocate RAM */
 		mbops = auto_malloc(sizeof(irmb_ops) * 1024);
-		if (!mbops) return;
+		if (mbops == 0) return;
 	
 		for (i = 0; i < 1024; i++)
 		{
@@ -570,8 +569,8 @@ public class irobot
 	
 	#define JUMP0 	curop++;
 	#define JUMP1	if (cflag) curop = curop->nxtop; else curop++;
-	#define JUMP2	if (!zresult) curop = curop->nxtop; else curop++;
-	#define JUMP3	if (!nflag) curop = curop->nxtop; else curop++;
+	#define JUMP2	if (zresult == 0) curop = curop->nxtop; else curop++;
+	#define JUMP3	if (nflag == 0) curop = curop->nxtop; else curop++;
 	#define JUMP4	if (nflag) curop = curop->nxtop; else curop++;
 	#define JUMP5	curop = curop->nxtop;
 	#define JUMP6	irmb_stack[SP] = curop + 1; SP = (SP + 1) & 15; curop = curop->nxtop;

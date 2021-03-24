@@ -971,7 +971,7 @@ public class psx
 		psx_gpu_write( (UINT32 *)&m_p_n_ram[ n_address ], n_size );
 	}
 	
-	void psx_machine_init( void )
+	public static InitMachinePtr psx_machine_init = new InitMachinePtr() { public void handler() 
 	{
 		int n_channel;
 	
@@ -995,7 +995,7 @@ public class psx
 		}
 	
 		psx_gpu_reset();
-	}
+	} };
 	
 	static void psx_postload( void )
 	{

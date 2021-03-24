@@ -486,7 +486,6 @@ public class cpuintrfH
 	 *************************************/
 	
 	/* reset the internal CPU tracking */
-	int cpuintrf_init(void);
 	
 	/* set up the interface for one CPU of a given type */
 	int	cpuintrf_init_cpu(int cpunum, int cputype);
@@ -498,7 +497,6 @@ public class cpuintrfH
 	void cpuintrf_push_context(int cpunum);
 	
 	/* restore the previous context */
-	void cpuintrf_pop_context(void);
 	
 	/* set the dasm override handler */
 	void cpuintrf_set_dasm_override(unsigned (*dasm_override)(int cpunum, char *buffer, unsigned pc));
@@ -515,10 +513,8 @@ public class cpuintrfH
 	void activecpu_adjust_icount(int delta);
 	
 	/* return the current icount */
-	int activecpu_get_icount(void);
 	
 	/* ensure banking is reset properly */
-	void activecpu_reset_banking(void);
 	
 	/* set the IRQ line on a CPU -- drivers use cpu_set_irq_line() */
 	void activecpu_set_irq_line(int irqline, int state);
@@ -554,7 +550,6 @@ public class cpuintrfH
 	const char *activecpu_dump_state(void);
 	
 	/* return the default IRQ vector for the active CPU */
-	int activecpu_default_irq_vector(void);
 	
 	/* return the width of the address bus on the active CPU */
 	unsigned activecpu_address_bits(void);
@@ -563,7 +558,6 @@ public class cpuintrfH
 	unsigned activecpu_address_mask(void);
 	
 	/* return the shift value to convert from address to bytes on the active CPU */
-	int activecpu_address_shift(void);
 	
 	/* return the endianess of the active CPU */
 	unsigned activecpu_endianess(void);
@@ -759,7 +753,6 @@ public class cpuintrfH
 	 *************************************/
 	
 	/* dump the states of all CPUs */
-	void cpu_dump_states(void);
 	
 	/* set a callback function for reset on the 68k */
 	void cpu_set_m68k_reset(int cpunum, void (*resetfn)(void));
@@ -806,24 +799,21 @@ public class cpuintrfH
 	/* return a the index of the active CPU */
 	INLINE int cpu_getactivecpu(void)
 	{
-		extern int activecpu;
-		return activecpu;
+			return activecpu;
 	}
 	
 	
 	/* return a the index of the executing CPU */
 	INLINE int cpu_getexecutingcpu(void)
 	{
-		extern int executingcpu;
-		return executingcpu;
+			return executingcpu;
 	}
 	
 	
 	/* return a the total number of registered CPUs */
 	INLINE int cpu_gettotalcpu(void)
 	{
-		extern int totalcpu;
-		return totalcpu;
+			return totalcpu;
 	}
 	
 	

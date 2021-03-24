@@ -29,22 +29,22 @@ public class spdodgeb
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -87,7 +87,7 @@ public class spdodgeb
 	{
 		bg_tilemap = tilemap_create(get_bg_tile_info,background_scan,TILEMAP_OPAQUE,8,8,64,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap,32);
@@ -113,16 +113,16 @@ public class spdodgeb
 			scrollx[31-iloop] = lastscroll;
 			cpu_set_irq_line(0, M6502_IRQ_LINE, HOLD_LINE);
 		}
-		else if (!iloop)
+		else if (iloop == 0)
 			cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
 	}
 	
-	WRITE_HANDLER( spdodgeb_scrollx_lo_w )
+	public static WriteHandlerPtr spdodgeb_scrollx_lo_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		lastscroll = (lastscroll & 0x100) | data;
-	}
+	} };
 	
-	WRITE_HANDLER( spdodgeb_ctrl_w )
+	public static WriteHandlerPtr spdodgeb_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		const UINT8 *rom = memory_region(REGION_CPU1);
 	
@@ -144,16 +144,16 @@ public class spdodgeb
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
 		sprite_palbank = (data & 0xc0) >> 6;
-	}
+	} };
 	
-	WRITE_HANDLER( spdodgeb_videoram_w )
+	public static WriteHandlerPtr spdodgeb_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (spdodgeb_videoram[offset] != data)
 		{
 			spdodgeb_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
 	
 	

@@ -61,19 +61,19 @@ public class momoko
 	{
 		momoko_bg_scrolly[ offset ] = data;
 	}
-	WRITE_HANDLER( momoko_bg_select_w )
+	public static WriteHandlerPtr momoko_bg_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		momoko_bg_select = data & 0x0f;
 		momoko_bg_mask = data & 0x10;
-	}
-	WRITE_HANDLER( momoko_bg_priority_w )
+	} };
+	public static WriteHandlerPtr momoko_bg_priority_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		momoko_bg_priority = data & 0x01;
-	}
-	WRITE_HANDLER( momoko_flipscreen_w )
+	} };
+	public static WriteHandlerPtr momoko_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		momoko_flipscreen = data & 0x01;
-	}
+	} };
 	/****************************************************************************/
 	
 	void momoko_draw_bg_pri(struct mame_bitmap *bitmap, int chr, int col, int flipx, int flipy, int x,int y, int pri)
@@ -166,13 +166,13 @@ public class momoko
 	
 		for (offs=0; offs<9*4; offs +=4)
 		{
-			chr = spriteram[offs+1] | ((spriteram[offs+2]&0x60)<<3);
+			chr = spriteram.read(offs+1)| ((spriteram.read(offs+2)&0x60)<<3);
 			chr = ((chr & 0x380) << 1) | (chr & 0x7f);
-			col = spriteram[offs+2] & 0x07;
-			fx = ((spriteram[offs+2] & 0x10) >> 4) ^ flip;
-			fy = ((spriteram[offs+2] & 0x08) >> 3) ^ flip; /* ??? */
-			x = spriteram[offs+3];
-			y = spriteram[offs+0];
+			col = spriteram.read(offs+2)& 0x07;
+			fx = ((spriteram.read(offs+2)& 0x10) >> 4) ^ flip;
+			fy = ((spriteram.read(offs+2)& 0x08) >> 3) ^ flip; /* ??? */
+			x = spriteram.read(offs+3);
+			y = spriteram.read(offs+0);
 			if (flip==0)
 			{
 				px = x;
@@ -231,13 +231,13 @@ public class momoko
 	
 		for (offs=9*4; offs<spriteram_size; offs +=4)
 		{
-			chr = spriteram[offs+1] | ((spriteram[offs+2]&0x60)<<3);
+			chr = spriteram.read(offs+1)| ((spriteram.read(offs+2)&0x60)<<3);
 			chr = ((chr & 0x380) << 1) | (chr & 0x7f);
-			col = spriteram[offs+2] & 0x07;
-			fx = ((spriteram[offs+2] & 0x10) >> 4) ^ flip;
-			fy = ((spriteram[offs+2] & 0x08) >> 3) ^ flip; /* ??? */
-			x = spriteram[offs+3];
-			y = spriteram[offs+0];
+			col = spriteram.read(offs+2)& 0x07;
+			fx = ((spriteram.read(offs+2)& 0x10) >> 4) ^ flip;
+			fy = ((spriteram.read(offs+2)& 0x08) >> 3) ^ flip; /* ??? */
+			x = spriteram.read(offs+3);
+			y = spriteram.read(offs+0);
 			if (flip==0)
 			{
 				px = x;
@@ -284,7 +284,7 @@ public class momoko
 					py = 255-y;
 				}
 				drawgfx(bitmap,Machine->gfx[0],
-					videoram[(sy>>3)*32+x]*8+dy,
+					videoram.read((sy>>3)*32+x)*8+dy,
 					col,
 					flip,0,
 					px,py,

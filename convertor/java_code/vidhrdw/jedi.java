@@ -40,35 +40,35 @@ public class jedi
 	{
 		/* allocate dirty buffer for the foreground characters */
 		fgdirty = dirtybuffer = auto_malloc(videoram_size);
-		if (!fgdirty)
+		if (fgdirty == 0)
 			return 1;
 		memset(fgdirty, 1, videoram_size);
 	
 		/* allocate an 8bpp bitmap for the raw foreground characters */
 		fgbitmap = auto_bitmap_alloc(Machine->drv->screen_width, Machine->drv->screen_height);
-		if (!fgbitmap)
+		if (fgbitmap == 0)
 			return 1;
 	
 		/* allocate an 8bpp bitmap for the motion objects */
 		mobitmap = auto_bitmap_alloc(Machine->drv->screen_width, Machine->drv->screen_height);
-		if (!mobitmap)
+		if (mobitmap == 0)
 			return 1;
 		fillbitmap(mobitmap, 0, &Machine->visible_area);
 	
 		/* allocate dirty buffer for the background characters */
 		bgdirty = auto_malloc(jedi_backgroundram_size);
-		if (!bgdirty)
+		if (bgdirty == 0)
 			return 1;
 		memset(bgdirty, 1, jedi_backgroundram_size);
 	
 		/* the background area is 256x256, doubled by the hardware*/
 		bgbitmap = auto_bitmap_alloc(256, 256);
-		if (!bgbitmap)
+		if (bgbitmap == 0)
 			return 1;
 	
 		/* the expanded background area is 512x512 */
 		bgexbitmap = auto_bitmap_alloc(512, 512);
-		if (!bgexbitmap)
+		if (bgexbitmap == 0)
 			return 1;
 	
 		/* reserve color 1024 for black (disabled display) */
@@ -104,13 +104,13 @@ public class jedi
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( jedi_paletteram_w )
+	public static WriteHandlerPtr jedi_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    int r, g, b, bits, intensity;
 	    UINT32 color;
 	
-		paletteram[offset] = data;
-		color = paletteram[offset & 0x3FF] | (paletteram[offset | 0x400] << 8);
+		paletteram.write(offset,data);
+		color = paletteram.read(offset & 0x3FF)| (paletteram.read(offset | 0x400)<< 8);
 	
 		intensity = (color >> 9) & 7;
 		bits = (color >> 6) & 7;
@@ -121,7 +121,7 @@ public class jedi
 		b = 5 * bits * intensity;
 	
 		palette_set_color(offset & 0x3ff, r, g, b);
-	}
+	} };
 	
 	
 	
@@ -131,14 +131,14 @@ public class jedi
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( jedi_backgroundram_w )
+	public static WriteHandlerPtr jedi_backgroundram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (jedi_backgroundram[offset] != data)
 		{
 			bgdirty[offset] = 1;
 			jedi_backgroundram[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
@@ -148,14 +148,14 @@ public class jedi
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( jedi_alpha_banksel_w )
+	public static WriteHandlerPtr jedi_alpha_banksel_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (jedi_alpha_bank != 2 * (data & 0x80))
 		{
 			jedi_alpha_bank = 2 * (data & 0x80);
-			memset(fgdirty, 1, videoram_size);
+			memset(fgdirty, 1, videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -165,16 +165,16 @@ public class jedi
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( jedi_vscroll_w )
+	public static WriteHandlerPtr jedi_vscroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    jedi_vscroll = data | (offset << 8);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( jedi_hscroll_w )
+	public static WriteHandlerPtr jedi_hscroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    jedi_hscroll = data | (offset << 8);
-	}
+	} };
 	
 	
 	
@@ -184,17 +184,17 @@ public class jedi
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( jedi_video_off_w )
+	public static WriteHandlerPtr jedi_video_off_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		video_off = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( jedi_PIXIRAM_w )
+	public static WriteHandlerPtr jedi_PIXIRAM_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		smooth_table = data & 0x03;
 		memset(bgdirty, 1, jedi_backgroundram_size);
-	}
+	} };
 	
 	
 	
@@ -300,7 +300,7 @@ public class jedi
 	
 				fgdirty[offs] = 0;
 	
-				drawgfx(fgbitmap, Machine->gfx[0], videoram[offs] + jedi_alpha_bank,
+				drawgfx(fgbitmap, Machine->gfx[0], videoram.read(offs)+ jedi_alpha_bank,
 						0, 0, 0, 8*sx, 8*sy, &Machine->visible_area, TRANSPARENCY_NONE_RAW, 0);
 			}
 	
@@ -342,18 +342,18 @@ public class jedi
 	    for (offs = 0; offs < 0x30; offs++)
 		{
 			/* coordinates adjustments made to match screenshot */
-			int x = spriteram[offs + 0x100] + ((spriteram[offs + 0x40] & 0x01) << 8) - 2;
-			int y = 240 - spriteram[offs + 0x80] + 1;
-			int flipx = spriteram[offs + 0x40] & 0x10;
-			int flipy = spriteram[offs + 0x40] & 0x20;
-			int tall = spriteram[offs + 0x40] & 0x08;
+			int x = spriteram.read(offs + 0x100)+ ((spriteram.read(offs + 0x40)& 0x01) << 8) - 2;
+			int y = 240 - spriteram.read(offs + 0x80)+ 1;
+			int flipx = spriteram.read(offs + 0x40)& 0x10;
+			int flipy = spriteram.read(offs + 0x40)& 0x20;
+			int tall = spriteram.read(offs + 0x40)& 0x08;
 			int code, bank;
 	
 			/* shuffle the bank bits in */
-			bank  = ((spriteram[offs + 0x40] & 0x02) >> 1);
-			bank |= ((spriteram[offs + 0x40] & 0x40) >> 5);
-			bank |=  (spriteram[offs + 0x40] & 0x04);
-			code = spriteram[offs] + (bank * 256);
+			bank  = ((spriteram.read(offs + 0x40)& 0x02) >> 1);
+			bank |= ((spriteram.read(offs + 0x40)& 0x40) >> 5);
+			bank |=  (spriteram.read(offs + 0x40)& 0x04);
+			code = spriteram.read(offs)+ (bank * 256);
 	
 			/* adjust for double-height */
 			if (tall)
@@ -382,9 +382,9 @@ public class jedi
 	    for (offs = 0; offs < 0x30; offs++)
 		{
 			/* coordinates adjustments made to match screenshot */
-			int x = spriteram[offs + 0x100] + ((spriteram[offs + 0x40] & 0x01) << 8) - 2;
-			int y = 240 - spriteram[offs + 0x80] + 1;
-			int tall = spriteram[offs + 0x40] & 0x08;
+			int x = spriteram.read(offs + 0x100)+ ((spriteram.read(offs + 0x40)& 0x01) << 8) - 2;
+			int y = 240 - spriteram.read(offs + 0x80)+ 1;
+			int tall = spriteram.read(offs + 0x40)& 0x08;
 			struct rectangle bounds;
 	
 			/* compute the bounds */

@@ -15,7 +15,6 @@ public class sprcros2
 	static struct tilemap *sprcros2_bgtilemap, *sprcros2_fgtilemap;
 	data8_t *sprcros2_fgvideoram, *sprcros2_spriteram, *sprcros2_bgvideoram;
 	size_t sprcros2_spriteram_size;
-	extern int sprcros2_m_port7;
 	
 	PALETTE_INIT( sprcros2 )
 	{
@@ -24,18 +23,18 @@ public class sprcros2
 		for (i = 0;i < Machine->drv->total_colors; i++)
 		{
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* green component */
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			/* blue component */
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x47 * bit1 + 0xb8 * bit2;
 			palette_set_color(i,r,g,b);
 		}
@@ -43,42 +42,42 @@ public class sprcros2
 		//cluts
 		for (i = 0;i < 0x100; i++)
 		{
-			colortable[i]=color_prom[i+0x20]+(color_prom[i+0x120]<<4);		//bg
-			colortable[i+0x100]=color_prom[i+0x220];						//sprites
-			colortable[i+0x200]=color_prom[i+0x320];						//fg
+			colortable[i]=color_prom.read(i+0x20)+(color_prom.read(i+0x120)<<4);		//bg
+			colortable[i+0x100]=color_prom.read(i+0x220);						//sprites
+			colortable[i+0x200]=color_prom.read(i+0x320);						//fg
 		}
 	}
 	
-	WRITE_HANDLER( sprcros2_fgvideoram_w )
+	public static WriteHandlerPtr sprcros2_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (sprcros2_fgvideoram[offset] != data)
 		{
 			sprcros2_fgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(sprcros2_fgtilemap,offset&0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sprcros2_bgvideoram_w )
+	public static WriteHandlerPtr sprcros2_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (sprcros2_bgvideoram[offset] != data)
 		{
 			sprcros2_bgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(sprcros2_bgtilemap,offset&0x3ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sprcros2_bgscrollx_w )
+	public static WriteHandlerPtr sprcros2_bgscrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if(sprcros2_m_port7&0x02)
 			tilemap_set_scrollx(sprcros2_bgtilemap,0,0x100-data);
 		else
 			tilemap_set_scrollx(sprcros2_bgtilemap,0,data);
-	}
+	} };
 	
-	WRITE_HANDLER( sprcros2_bgscrolly_w )
+	public static WriteHandlerPtr sprcros2_bgscrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(sprcros2_bgtilemap,0,data);
-	}
+	} };
 	
 	static void get_sprcros2_bgtile_info(int tile_index)
 	{

@@ -155,82 +155,82 @@ public class xorworld
 		{ -1 }
 	};
 	
-	static struct GfxLayout xorworld_tilelayout =
-	{
+	static GfxLayout xorworld_tilelayout = new GfxLayout
+	(
 		8,8,															/* 8x8 tiles */
 		0x10000/16,														/* 4096 tiles */
 		4,																/* 4 bpp */
-		{ 1*0x10000*8, 1*0x10000*8+4, 0, 4 },							/* plane offsets */
-		{ 0*8, 0*8+1, 0*8+2, 0*8+3, 1*8+0, 1*8+1, 1*8+2, 1*8+3 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		new int[] { 1*0x10000*8, 1*0x10000*8+4, 0, 4 },							/* plane offsets */
+		new int[] { 0*8, 0*8+1, 0*8+2, 0*8+3, 1*8+0, 1*8+1, 1*8+2, 1*8+3 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 		16*8
-	};
+	);
 	
 	
-	static struct GfxLayout xorworld_spritelayout =
-	{
+	static GfxLayout xorworld_spritelayout = new GfxLayout
+	(
 		16,16,																/* 16x16 sprites */
 		0x10000/64,															/* 1024 sprites */
 		4,																	/* 4 bpp */
-		{ 1*0x10000*8, 1*0x10000*8+4, 0, 4 },								/* plane offsets */
-		{ 0*8, 0*8+1, 0*8+2, 0*8+3, 1*8+0, 1*8+1, 1*8+2, 1*8+3,
+		new int[] { 1*0x10000*8, 1*0x10000*8+4, 0, 4 },								/* plane offsets */
+		new int[] { 0*8, 0*8+1, 0*8+2, 0*8+3, 1*8+0, 1*8+1, 1*8+2, 1*8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3},
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		64*8
-	};
+	);
 	
-	static struct GfxDecodeInfo xorworld_gfxdecodeinfo[] =
+	static GfxDecodeInfo xorworld_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0x000000, &xorworld_tilelayout,	0,64 },
-		{ REGION_GFX1, 0x000000, &xorworld_spritelayout,0,64 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0x000000, xorworld_tilelayout,	0,64 ),
+		new GfxDecodeInfo( REGION_GFX1, 0x000000, xorworld_spritelayout,0,64 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
-	INPUT_PORTS_START( xorworld )
+	static InputPortPtr input_ports_xorworld = new InputPortPtr(){ public void handler() { 
 	
-	PORT_START	/* DSW #1 */
-		PORT_DIPNAME( 0x07, 0x07, "Coin A & B" )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 2C_2C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )	
+	PORT_START(); 	/* DSW #1 */
+		PORT_DIPNAME( 0x07, 0x07, "Coin A & B" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "2C_2C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x08, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );	
 		/* 0x10 is used for accessing the NVRAM */
-		PORT_DIPNAME( 0x60, 0x40, DEF_STR( Difficulty ) )	
-		PORT_DIPSETTING(    0x40, "Easy" )
-		PORT_DIPSETTING(    0x60, "Normal" )
-		PORT_DIPSETTING(    0x20, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+		PORT_DIPNAME( 0x60, 0x40, DEF_STR( "Difficulty") );	
+		PORT_DIPSETTING(    0x40, "Easy" );
+		PORT_DIPSETTING(    0x60, "Normal" );
+		PORT_DIPSETTING(    0x20, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
 	
-	PORT_START	/* 1P INPUTS & COINSW */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_START(); 	/* 1P INPUTS & COINSW */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
 	
-	PORT_START	/* 2P INPUTS & STARTSW */
-		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 )
-	INPUT_PORTS_END
+	PORT_START(); 	/* 2P INPUTS & STARTSW */
+		PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START2 );
+	INPUT_PORTS_END(); }}; 
 	
 	static struct SAA1099_interface	xorworld_saa1099_interface = 
 	{
@@ -269,22 +269,22 @@ public class xorworld
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( xorworld )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )	/* 68000 code */
-		ROM_LOAD16_BYTE( "c13.bin", 0x000000, 0x010000, CRC(615a864d) SHA1(db07eef19d26a4daa0bcc17ac24d237483f93bf6) )
-		ROM_LOAD16_BYTE( "b13.bin", 0x000001, 0x010000, CRC(632e8ee5) SHA1(ec53e632c762f72ad1fe3fab85111bdcc1e818ae) )
+	static RomLoadPtr rom_xorworld = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );/* 68000 code */
+		ROM_LOAD16_BYTE( "c13.bin", 0x000000, 0x010000, CRC(615a864d);SHA1(db07eef19d26a4daa0bcc17ac24d237483f93bf6) )
+		ROM_LOAD16_BYTE( "b13.bin", 0x000001, 0x010000, CRC(632e8ee5);SHA1(ec53e632c762f72ad1fe3fab85111bdcc1e818ae) )
 	
-		ROM_REGION( 0x020000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "d9.bin",	0x000000, 0x010000, CRC(da8d4d65) SHA1(41bcc15f26066bd820b44c0f258e70d0102953c9) )
-		ROM_LOAD( "d10.bin",	0x010000, 0x010000, CRC(3b1d6f24) SHA1(bedf60a4cbf20492b8a846b6a7b578f8fe8dbde9) )
+		ROM_REGION( 0x020000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "d9.bin",	0x000000, 0x010000, CRC(da8d4d65);SHA1(41bcc15f26066bd820b44c0f258e70d0102953c9) )
+		ROM_LOAD( "d10.bin",	0x010000, 0x010000, CRC(3b1d6f24);SHA1(bedf60a4cbf20492b8a846b6a7b578f8fe8dbde9) )
 	
-		ROM_REGION( 0x0300, REGION_PROMS, 0 )
-		ROM_LOAD( "b4.bin",   0x0000, 0x0100, CRC(75e468af) SHA1(b5fd1a086c27ca2e837cbbf1b7e57dfdd369b0d0) )  /* Red palette ROM (4 bits) */	
-		ROM_LOAD( "b7.bin",   0x0100, 0x0100, CRC(7e1cd146) SHA1(fd26a28f90c50ffcb0fe7718820c81eb9fe79e66) )  /* Green palette ROM (4 bits) */
-		ROM_LOAD( "b5.bin",   0x0200, 0x0100, CRC(c1b9d9f9) SHA1(c4b02bf60db449fb308a5eb3e41c43299ad8e3e3) )  /* Blue palette ROM (4 bits) */
-	ROM_END
+		ROM_REGION( 0x0300, REGION_PROMS, 0 );
+		ROM_LOAD( "b4.bin",   0x0000, 0x0100, CRC(75e468af);SHA1(b5fd1a086c27ca2e837cbbf1b7e57dfdd369b0d0) )  /* Red palette ROM (4 bits) */	
+		ROM_LOAD( "b7.bin",   0x0100, 0x0100, CRC(7e1cd146);SHA1(fd26a28f90c50ffcb0fe7718820c81eb9fe79e66) )  /* Green palette ROM (4 bits) */
+		ROM_LOAD( "b5.bin",   0x0200, 0x0100, CRC(c1b9d9f9);SHA1(c4b02bf60db449fb308a5eb3e41c43299ad8e3e3) )  /* Blue palette ROM (4 bits) */
+	ROM_END(); }}; 
 	
 	
 	
-	GAME( 1990, xorworld, 0, xorworld, xorworld, xorworld, ROT0, "Gaelco", "Xor World (prototype)" )
+	public static GameDriver driver_xorworld	   = new GameDriver("1990"	,"xorworld"	,"xorworld.java"	,rom_xorworld,null	,machine_driver_xorworld	,input_ports_xorworld	,init_xorworld	,ROT0	,	"Gaelco", "Xor World (prototype)" )
 }

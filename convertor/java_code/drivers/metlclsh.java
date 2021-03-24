@@ -46,10 +46,6 @@ public class metlclsh
 	
 	/* Functions defined in vidhrdw: */
 	
-	WRITE_HANDLER( metlclsh_bgram_w );
-	WRITE_HANDLER( metlclsh_fgram_w );
-	WRITE_HANDLER( metlclsh_gfxbank_w );
-	WRITE_HANDLER( metlclsh_rambank_w );
 	
 	VIDEO_START( metlclsh );
 	VIDEO_UPDATE( metlclsh );
@@ -63,51 +59,55 @@ public class metlclsh
 	static data8_t *sharedram;
 	
 	static READ_HANDLER ( sharedram_r )	{ return sharedram[offset]; }
-	static WRITE_HANDLER( sharedram_w )	{ sharedram[offset] = data; }
+	public static WriteHandlerPtr sharedram_w = new WriteHandlerPtr() {public void handler(int offset, int data)	{ sharedram[offset] = data; } };
 	
-	static WRITE_HANDLER( metlclsh_cause_irq )
+	public static WriteHandlerPtr metlclsh_cause_irq = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
-	}
+	} };
 	
-	static WRITE_HANDLER( metlclsh_ack_nmi )
+	public static WriteHandlerPtr metlclsh_ack_nmi = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(0,IRQ_LINE_NMI,CLEAR_LINE);
-	}
+	} };
 	
-	static MEMORY_READ_START( metlclsh_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM					},
-		{ 0x8000, 0x9fff, sharedram_r				},
-		{ 0xa000, 0xbfff, MRA_ROM					},
-		{ 0xc000, 0xc000, input_port_0_r			},
-		{ 0xc001, 0xc001, input_port_1_r			},
-		{ 0xc002, 0xc002, input_port_2_r			},
-		{ 0xc003, 0xc003, input_port_3_r			},
-	//	{ 0xc800, 0xc82f, MRA_RAM					},	// not actually read
-	//	{ 0xcc00, 0xcc2f, MRA_RAM					},	// ""
-		{ 0xd000, 0xd000, YM2203_status_port_0_r	},
-	//	{ 0xd800, 0xdfff, MRA_RAM					},	// not actually read
-		{ 0xe800, 0xe9ff, MRA_RAM					},
-		{ 0xfff0, 0xffff, MRA_ROM					},	// Reset/IRQ vectors
-	MEMORY_END
+	public static Memory_ReadAddress metlclsh_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM					),
+		new Memory_ReadAddress( 0x8000, 0x9fff, sharedram_r				),
+		new Memory_ReadAddress( 0xa000, 0xbfff, MRA_ROM					),
+		new Memory_ReadAddress( 0xc000, 0xc000, input_port_0_r			),
+		new Memory_ReadAddress( 0xc001, 0xc001, input_port_1_r			),
+		new Memory_ReadAddress( 0xc002, 0xc002, input_port_2_r			),
+		new Memory_ReadAddress( 0xc003, 0xc003, input_port_3_r			),
+	//	new Memory_ReadAddress( 0xc800, 0xc82f, MRA_RAM					),	// not actually read
+	//	new Memory_ReadAddress( 0xcc00, 0xcc2f, MRA_RAM					),	// ""
+		new Memory_ReadAddress( 0xd000, 0xd000, YM2203_status_port_0_r	),
+	//	new Memory_ReadAddress( 0xd800, 0xdfff, MRA_RAM					),	// not actually read
+		new Memory_ReadAddress( 0xe800, 0xe9ff, MRA_RAM					),
+		new Memory_ReadAddress( 0xfff0, 0xffff, MRA_ROM					),	// Reset/IRQ vectors
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( metlclsh_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM					},
-		{ 0x8000, 0x9fff, sharedram_w, &sharedram	},
-		{ 0xa000, 0xbfff, MWA_ROM					},
-		{ 0xc080, 0xc080, MWA_NOP					},	// ? 0
-		{ 0xc0c2, 0xc0c2, metlclsh_cause_irq		},	// cause irq on cpu #2
-		{ 0xc0c3, 0xc0c3, metlclsh_ack_nmi			},	// nmi ack
-		{ 0xc800, 0xc82f, paletteram_xxxxBBBBGGGGRRRR_split1_w, &paletteram		},
-		{ 0xcc00, 0xcc2f, paletteram_xxxxBBBBGGGGRRRR_split2_w, &paletteram_2	},
-		{ 0xd000, 0xd000, YM2203_control_port_0_w	},
-		{ 0xd001, 0xd001, YM2203_write_port_0_w		},
-		{ 0xe000, 0xe000, YM3526_control_port_0_w	},
-		{ 0xe001, 0xe001, YM3526_write_port_0_w		},
-		{ 0xe800, 0xe9ff, MWA_RAM, &spriteram, &spriteram_size	},
-		{ 0xd800, 0xdfff, metlclsh_fgram_w, &metlclsh_fgram		},
-		{ 0xfff0, 0xffff, MWA_ROM					},
-	MEMORY_END
+	public static Memory_WriteAddress metlclsh_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM					),
+		new Memory_WriteAddress( 0x8000, 0x9fff, sharedram_w, sharedram	),
+		new Memory_WriteAddress( 0xa000, 0xbfff, MWA_ROM					),
+		new Memory_WriteAddress( 0xc080, 0xc080, MWA_NOP					),	// ? 0
+		new Memory_WriteAddress( 0xc0c2, 0xc0c2, metlclsh_cause_irq		),	// cause irq on cpu #2
+		new Memory_WriteAddress( 0xc0c3, 0xc0c3, metlclsh_ack_nmi			),	// nmi ack
+		new Memory_WriteAddress( 0xc800, 0xc82f, paletteram_xxxxBBBBGGGGRRRR_split1_w, paletteram		),
+		new Memory_WriteAddress( 0xcc00, 0xcc2f, paletteram_xxxxBBBBGGGGRRRR_split2_w, paletteram_2	),
+		new Memory_WriteAddress( 0xd000, 0xd000, YM2203_control_port_0_w	),
+		new Memory_WriteAddress( 0xd001, 0xd001, YM2203_write_port_0_w		),
+		new Memory_WriteAddress( 0xe000, 0xe000, YM3526_control_port_0_w	),
+		new Memory_WriteAddress( 0xe001, 0xe001, YM3526_write_port_0_w		),
+		new Memory_WriteAddress( 0xe800, 0xe9ff, MWA_RAM, spriteram, spriteram_size	),
+		new Memory_WriteAddress( 0xd800, 0xdfff, metlclsh_fgram_w, metlclsh_fgram		),
+		new Memory_WriteAddress( 0xfff0, 0xffff, MWA_ROM					),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
@@ -116,52 +116,56 @@ public class metlclsh
 	
 	***************************************************************************/
 	
-	static WRITE_HANDLER( metlclsh_cause_nmi2 )
+	public static WriteHandlerPtr metlclsh_cause_nmi2 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(0,IRQ_LINE_NMI,ASSERT_LINE);
-	}
+	} };
 	
-	static WRITE_HANDLER( metlclsh_ack_irq2 )
+	public static WriteHandlerPtr metlclsh_ack_irq2 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(1,M6809_IRQ_LINE,CLEAR_LINE);
-	}
+	} };
 	
-	static WRITE_HANDLER( metlclsh_ack_nmi2 )
+	public static WriteHandlerPtr metlclsh_ack_nmi2 = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line(1,IRQ_LINE_NMI,CLEAR_LINE);
-	}
+	} };
 	
-	static WRITE_HANDLER( metlclsh_flipscreen_w )
+	public static WriteHandlerPtr metlclsh_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 1);
-	}
+	} };
 	
-	static MEMORY_READ_START( metlclsh_readmem2 )
-		{ 0x0000, 0x7fff, MRA_ROM			},
-		{ 0x8000, 0x9fff, sharedram_r		},
-		{ 0xc000, 0xc000, input_port_0_r	},
-		{ 0xc001, 0xc001, input_port_1_r	},
-		{ 0xc002, 0xc002, input_port_2_r	},
-		{ 0xc003, 0xc003, input_port_3_r	},
-		{ 0xd000, 0xd7ff, MRA_BANK1			},
-		{ 0xfff0, 0xffff, MRA_ROM			},	// Reset/IRQ vectors
-	MEMORY_END
+	public static Memory_ReadAddress metlclsh_readmem2[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM			),
+		new Memory_ReadAddress( 0x8000, 0x9fff, sharedram_r		),
+		new Memory_ReadAddress( 0xc000, 0xc000, input_port_0_r	),
+		new Memory_ReadAddress( 0xc001, 0xc001, input_port_1_r	),
+		new Memory_ReadAddress( 0xc002, 0xc002, input_port_2_r	),
+		new Memory_ReadAddress( 0xc003, 0xc003, input_port_3_r	),
+		new Memory_ReadAddress( 0xd000, 0xd7ff, MRA_BANK1			),
+		new Memory_ReadAddress( 0xfff0, 0xffff, MRA_ROM			),	// Reset/IRQ vectors
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( metlclsh_writemem2 )
-		{ 0x0000, 0x7fff, MWA_ROM						},
-		{ 0x8000, 0x9fff, sharedram_w					},
-		{ 0xc000, 0xc000, metlclsh_gfxbank_w			},	// bg tiles bank
-		{ 0xc0c0, 0xc0c0, metlclsh_cause_nmi2			},	// cause nmi on cpu #1
-		{ 0xc0c1, 0xc0c1, metlclsh_ack_irq2				},	// irq ack
-		{ 0xd000, 0xd7ff, metlclsh_bgram_w, &metlclsh_bgram	},	// this is banked
-		{ 0xe417, 0xe417, metlclsh_ack_nmi2				},	// nmi ack
-		{ 0xe301, 0xe301, metlclsh_flipscreen_w			},	// 0/1
-		{ 0xe401, 0xe401, metlclsh_rambank_w			},
-		{ 0xe402, 0xe403, MWA_RAM, &metlclsh_scrollx	},
-	//	{ 0xe404, 0xe404, MWA_NOP						},	// ? 0
-	//	{ 0xe410, 0xe410, MWA_NOP						},	// ? 0 on startup only
-		{ 0xfff0, 0xffff, MWA_ROM						},
-	MEMORY_END
+	public static Memory_WriteAddress metlclsh_writemem2[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM						),
+		new Memory_WriteAddress( 0x8000, 0x9fff, sharedram_w					),
+		new Memory_WriteAddress( 0xc000, 0xc000, metlclsh_gfxbank_w			),	// bg tiles bank
+		new Memory_WriteAddress( 0xc0c0, 0xc0c0, metlclsh_cause_nmi2			),	// cause nmi on cpu #1
+		new Memory_WriteAddress( 0xc0c1, 0xc0c1, metlclsh_ack_irq2				),	// irq ack
+		new Memory_WriteAddress( 0xd000, 0xd7ff, metlclsh_bgram_w, metlclsh_bgram	),	// this is banked
+		new Memory_WriteAddress( 0xe417, 0xe417, metlclsh_ack_nmi2				),	// nmi ack
+		new Memory_WriteAddress( 0xe301, 0xe301, metlclsh_flipscreen_w			),	// 0/1
+		new Memory_WriteAddress( 0xe401, 0xe401, metlclsh_rambank_w			),
+		new Memory_WriteAddress( 0xe402, 0xe403, MWA_RAM, metlclsh_scrollx	),
+	//	new Memory_WriteAddress( 0xe404, 0xe404, MWA_NOP						),	// ? 0
+	//	new Memory_WriteAddress( 0xe410, 0xe410, MWA_NOP						),	// ? 0 on startup only
+		new Memory_WriteAddress( 0xfff0, 0xffff, MWA_ROM						),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
@@ -170,72 +174,72 @@ public class metlclsh
 	
 	***************************************************************************/
 	
-	INPUT_PORTS_START( metlclsh )
-		PORT_START	/* IN0 - c000 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_3C ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Infinite Energy", IP_KEY_NONE, IP_JOY_NONE )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BITX(    0x80, 0x80, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Infinite Lives", IP_KEY_NONE, IP_JOY_NONE )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	static InputPortPtr input_ports_metlclsh = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 - c000 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_3C") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Infinite Energy", IP_KEY_NONE, IP_JOY_NONE );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BITX(    0x80, 0x80, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Infinite Lives", IP_KEY_NONE, IP_JOY_NONE );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* IN1 - c001 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	)
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	)
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		)
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	)
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1			)
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2			)
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1			)
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2			)
+		PORT_START(); 	/* IN1 - c001 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	);
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	);
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		);
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	);
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1			);
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2			);
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1			);
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2			);
 	
-		PORT_START	/* IN2 - c002 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	|	IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_COCKTAIL )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	|	IPF_COCKTAIL )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_COCKTAIL )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_COCKTAIL )
-		PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN1, 1 )
-		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN2, 1 )
+		PORT_START(); 	/* IN2 - c002 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	|	IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	|	IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		|	IPF_COCKTAIL );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	|	IPF_COCKTAIL );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1			|	IPF_COCKTAIL );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2			|	IPF_COCKTAIL );
+		PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN1, 1 );
+		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN2, 1 );
 	
-		PORT_START      /* IN3 - c003 */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPSETTING(    0x01, "3" )
-		PORT_DIPNAME( 0x02, 0x02, "Enemies Speed" )
-		PORT_DIPSETTING(    0x02, "Low" )
-		PORT_DIPSETTING(    0x00, "High" )
-		PORT_DIPNAME( 0x04, 0x04, "Enemies Energy" )
-		PORT_DIPSETTING(    0x04, "Low" )
-		PORT_DIPSETTING(    0x00, "High" )
-		PORT_DIPNAME( 0x08, 0x08, "Time" )
-		PORT_DIPSETTING(    0x00, "75" )
-		PORT_DIPSETTING(    0x08, "90" )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )	// cpu2 will clr c040 on startup forever
-		PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1, 1 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
-	INPUT_PORTS_END
+		PORT_START();       /* IN3 - c003 */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPSETTING(    0x01, "3" );
+		PORT_DIPNAME( 0x02, 0x02, "Enemies Speed" );
+		PORT_DIPSETTING(    0x02, "Low" );
+		PORT_DIPSETTING(    0x00, "High" );
+		PORT_DIPNAME( 0x04, 0x04, "Enemies Energy" );
+		PORT_DIPSETTING(    0x04, "Low" );
+		PORT_DIPSETTING(    0x00, "High" );
+		PORT_DIPNAME( 0x08, 0x08, "Time" );
+		PORT_DIPSETTING(    0x00, "75" );
+		PORT_DIPSETTING(    0x08, "90" );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN );// cpu2 will clr c040 on startup forever
+		PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_SERVICE1, 1 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -244,45 +248,45 @@ public class metlclsh
 	
 	***************************************************************************/
 	
-	static struct GfxLayout spritelayout =
-	{
+	static GfxLayout spritelayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,3),
 		3,
-		{ RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
-		{ STEP8(8*8*2,1), STEP8(8*8*0,1) },
-		{ STEP8(8*8*0,8), STEP8(8*8*1,8) },
+		new int[] { RGN_FRAC(2,3), RGN_FRAC(1,3), RGN_FRAC(0,3) },
+		new int[] { STEP8(8*8*2,1), STEP8(8*8*0,1) },
+		new int[] { STEP8(8*8*0,8), STEP8(8*8*1,8) },
 		16*16
-	};
+	);
 	
-	static struct GfxLayout tilelayout16 =
-	{
+	static GfxLayout tilelayout16 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		3,
-		{ RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
-		{ STEP8(8*8*0+7,-1), STEP8(8*8*2+7,-1) },
-		{ STEP8(8*8*0,8), STEP8(8*8*1,8) },
+		new int[] { RGN_FRAC(2,4), RGN_FRAC(1,4), RGN_FRAC(0,4) },
+		new int[] { STEP8(8*8*0+7,-1), STEP8(8*8*2+7,-1) },
+		new int[] { STEP8(8*8*0,8), STEP8(8*8*1,8) },
 		16*16
-	};
+	);
 	
-	static struct GfxLayout tilelayout8 =
-	{
+	static GfxLayout tilelayout8 = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,2),
 		2,
-		{ 0, 4 },
-		{ STEP4(RGN_FRAC(1,2),1), STEP4(0,1) },
-		{ STEP8(0,8) },
+		new int[] { 0, 4 },
+		new int[] { STEP4(RGN_FRAC(1,2),1), STEP4(0,1) },
+		new int[] { STEP8(0,8) },
 		8*8
-	};
+	);
 	
-	static struct GfxDecodeInfo metlclsh_gfxdecodeinfo[] =
+	static GfxDecodeInfo metlclsh_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &spritelayout, 0x00, 2 }, // [0] Sprites
-		{ REGION_GFX2, 0, &tilelayout16, 0x10, 1 }, // [1] Background
-		{ REGION_GFX3, 0, &tilelayout8,  0x20, 4 }, // [2] Foreground
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, spritelayout, 0x00, 2 ), // [0] Sprites
+		new GfxDecodeInfo( REGION_GFX2, 0, tilelayout16, 0x10, 1 ), // [1] Background
+		new GfxDecodeInfo( REGION_GFX3, 0, tilelayout8,  0x20, 4 ), // [2] Foreground
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -425,47 +429,47 @@ public class metlclsh
 	
 	***************************************************************************/
 	
-	ROM_START( metlclsh )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "cs04.bin",    0x00000, 0x8000, CRC(c2cc79a6) SHA1(0f586d4145afabbb45ea4865ed7a6590b14a2ab0) )
-		ROM_LOAD( "cs00.bin",    0x0a000, 0x2000, CRC(af0f2998) SHA1(09dd2516406168660d5cd3a36be1e5f0adbcdb8a) )
-		ROM_COPY( REGION_CPU1, 0x7ff0, 0xfff0, 0x10 )
+	static RomLoadPtr rom_metlclsh = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "cs04.bin",    0x00000, 0x8000, CRC(c2cc79a6);SHA1(0f586d4145afabbb45ea4865ed7a6590b14a2ab0) )
+		ROM_LOAD( "cs00.bin",    0x0a000, 0x2000, CRC(af0f2998);SHA1(09dd2516406168660d5cd3a36be1e5f0adbcdb8a) )
+		ROM_COPY( REGION_CPU1, 0x7ff0, 0xfff0, 0x10 );
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )
-		ROM_LOAD( "cs03.bin",    0x00000, 0x8000, CRC(51c4720c) SHA1(7fd93bdcf029e7d2509b73b32f61fddf85f3453f) )
-		ROM_COPY( REGION_CPU2, 0x7ff0, 0xfff0, 0x10 )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );
+		ROM_LOAD( "cs03.bin",    0x00000, 0x8000, CRC(51c4720c);SHA1(7fd93bdcf029e7d2509b73b32f61fddf85f3453f) )
+		ROM_COPY( REGION_CPU2, 0x7ff0, 0xfff0, 0x10 );
 	
-		ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )	// Sprites
-		ROM_LOAD( "cs06.bin",    0x00000, 0x8000, CRC(9f61403f) SHA1(0ebb1cb9d4983746b6b32ec948e7b9efd90783d1) )
-		ROM_LOAD( "cs07.bin",    0x08000, 0x8000, CRC(d0610ea5) SHA1(3dfa16cbe93a4c08993111f78a8dd22c874fdd28) )
-		ROM_LOAD( "cs08.bin",    0x10000, 0x8000, CRC(a8b02125) SHA1(145a22b2910b2fbfb28925f58968ee2bdeae1dda) )
+		ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE );// Sprites
+		ROM_LOAD( "cs06.bin",    0x00000, 0x8000, CRC(9f61403f);SHA1(0ebb1cb9d4983746b6b32ec948e7b9efd90783d1) )
+		ROM_LOAD( "cs07.bin",    0x08000, 0x8000, CRC(d0610ea5);SHA1(3dfa16cbe93a4c08993111f78a8dd22c874fdd28) )
+		ROM_LOAD( "cs08.bin",    0x10000, 0x8000, CRC(a8b02125);SHA1(145a22b2910b2fbfb28925f58968ee2bdeae1dda) )
 	
-		ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE )	// Background
-		ROM_LOAD( "cs01.bin",    0x00000, 0x1000, CRC(9c72343d) SHA1(c5618be7874ab6c930b0e68935c93f1958a1916d) )
-		ROM_CONTINUE(            0x04000, 0x1000 )
-		ROM_CONTINUE(            0x08000, 0x1000 )
-		ROM_CONTINUE(            0x0c000, 0x1000 )
-		ROM_CONTINUE(            0x01000, 0x1000 )
-		ROM_CONTINUE(            0x05000, 0x1000 )
-		ROM_CONTINUE(            0x09000, 0x1000 )
-		ROM_CONTINUE(            0x0d000, 0x1000 )
-		ROM_LOAD( "cs02.bin",    0x02000, 0x1000, CRC(3674673e) SHA1(8ba8864cefcb79afe5fe6821005a9d19742756e9) )
-		ROM_CONTINUE(            0x06000, 0x1000 )
-		ROM_CONTINUE(            0x0a000, 0x1000 )
-		ROM_CONTINUE(            0x0e000, 0x1000 )
-		ROM_CONTINUE(            0x03000, 0x1000 )
-		ROM_CONTINUE(            0x07000, 0x1000 )
-		ROM_CONTINUE(            0x0b000, 0x1000 )
-		ROM_CONTINUE(            0x0f000, 0x1000 )
+		ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE );// Background
+		ROM_LOAD( "cs01.bin",    0x00000, 0x1000, CRC(9c72343d);SHA1(c5618be7874ab6c930b0e68935c93f1958a1916d) )
+		ROM_CONTINUE(            0x04000, 0x1000 );
+		ROM_CONTINUE(            0x08000, 0x1000 );
+		ROM_CONTINUE(            0x0c000, 0x1000 );
+		ROM_CONTINUE(            0x01000, 0x1000 );
+		ROM_CONTINUE(            0x05000, 0x1000 );
+		ROM_CONTINUE(            0x09000, 0x1000 );
+		ROM_CONTINUE(            0x0d000, 0x1000 );
+		ROM_LOAD( "cs02.bin",    0x02000, 0x1000, CRC(3674673e);SHA1(8ba8864cefcb79afe5fe6821005a9d19742756e9) )
+		ROM_CONTINUE(            0x06000, 0x1000 );
+		ROM_CONTINUE(            0x0a000, 0x1000 );
+		ROM_CONTINUE(            0x0e000, 0x1000 );
+		ROM_CONTINUE(            0x03000, 0x1000 );
+		ROM_CONTINUE(            0x07000, 0x1000 );
+		ROM_CONTINUE(            0x0b000, 0x1000 );
+		ROM_CONTINUE(            0x0f000, 0x1000 );
 	
-		ROM_REGION( 0x04000, REGION_GFX3, ROMREGION_DISPOSE )	// Foreground
-		ROM_LOAD( "cs05.bin",    0x00000, 0x4000, CRC(f90c9c6b) SHA1(ca8e497e9c388078343dd1303beef6ee38748d6a) )
-		ROM_CONTINUE(            0x00000, 0x4000 )	// first half is empty
+		ROM_REGION( 0x04000, REGION_GFX3, ROMREGION_DISPOSE );// Foreground
+		ROM_LOAD( "cs05.bin",    0x00000, 0x4000, CRC(f90c9c6b);SHA1(ca8e497e9c388078343dd1303beef6ee38748d6a) )
+		ROM_CONTINUE(            0x00000, 0x4000 );// first half is empty
 	
-		ROM_REGION( 0x020, REGION_PROMS, 0 )	// ?
-		ROM_LOAD( "82s123.prm",   0x0000, 0x20, CRC(6844cc88) SHA1(89d23367aa6ff541205416e82781fe938dfeeb52) )
-	ROM_END
+		ROM_REGION( 0x020, REGION_PROMS, 0 );// ?
+		ROM_LOAD( "82s123.prm",   0x0000, 0x20, CRC(6844cc88);SHA1(89d23367aa6ff541205416e82781fe938dfeeb52) )
+	ROM_END(); }}; 
 	
-	GAME( 1985, metlclsh, 0, metlclsh, metlclsh, 0, ROT0, "Data East", "Metal Clash (Japan)" )
+	public static GameDriver driver_metlclsh	   = new GameDriver("1985"	,"metlclsh"	,"metlclsh.java"	,rom_metlclsh,null	,machine_driver_metlclsh	,input_ports_metlclsh	,null	,ROT0	,	"Data East", "Metal Clash (Japan)" )
 	
 }

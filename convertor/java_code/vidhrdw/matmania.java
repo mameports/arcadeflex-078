@@ -70,20 +70,20 @@ public class matmania
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[64] >> 0) & 0x01;
-			bit1 = (color_prom[64] >> 1) & 0x01;
-			bit2 = (color_prom[64] >> 2) & 0x01;
-			bit3 = (color_prom[64] >> 3) & 0x01;
+			bit0 = (color_prom.read(64)>> 0) & 0x01;
+			bit1 = (color_prom.read(64)>> 1) & 0x01;
+			bit2 = (color_prom.read(64)>> 2) & 0x01;
+			bit3 = (color_prom.read(64)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -93,31 +93,31 @@ public class matmania
 	
 	
 	
-	WRITE_HANDLER( matmania_paletteram_w )
+	public static WriteHandlerPtr matmania_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bit0,bit1,bit2,bit3,val;
 		int r,g,b;
 		int offs2;
 	
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 		offs2 = offset & 0x0f;
 	
-		val = paletteram[offs2];
+		val = paletteram.read(offs2);
 		bit0 = (val >> 0) & 0x01;
 		bit1 = (val >> 1) & 0x01;
 		bit2 = (val >> 2) & 0x01;
 		bit3 = (val >> 3) & 0x01;
 		r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-		val = paletteram[offs2 | 0x10];
+		val = paletteram.read(offs2 | 0x10);
 		bit0 = (val >> 0) & 0x01;
 		bit1 = (val >> 1) & 0x01;
 		bit2 = (val >> 2) & 0x01;
 		bit3 = (val >> 3) & 0x01;
 		g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
-		val = paletteram[offs2 | 0x20];
+		val = paletteram.read(offs2 | 0x20);
 		bit0 = (val >> 0) & 0x01;
 		bit1 = (val >> 1) & 0x01;
 		bit2 = (val >> 2) & 0x01;
@@ -125,7 +125,7 @@ public class matmania
 		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 		palette_set_color(offs2 + 64,r,g,b);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -156,7 +156,7 @@ public class matmania
 	
 	
 	
-	WRITE_HANDLER( matmania_videoram3_w )
+	public static WriteHandlerPtr matmania_videoram3_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (matmania_videoram3[offset] != data)
 		{
@@ -164,11 +164,11 @@ public class matmania
 	
 			matmania_videoram3[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( matmania_colorram3_w )
+	public static WriteHandlerPtr matmania_colorram3_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (matmania_colorram3[offset] != data)
 		{
@@ -176,7 +176,7 @@ public class matmania
 	
 			matmania_colorram3[offset] = data;
 		}
-	}
+	} };
 	
 	
 	VIDEO_UPDATE( matmania )
@@ -198,8 +198,8 @@ public class matmania
 				sy = offs % 32;
 	
 				drawgfx(tmpbitmap,Machine->gfx[1],
-						videoram[offs] + ((colorram[offs] & 0x08) << 5),
-						(colorram[offs] & 0x30) >> 4,
+						videoram.read(offs)+ ((colorram.read(offs)& 0x08) << 5),
+						(colorram.read(offs)& 0x30) >> 4,
 						0,sy >= 16,	/* flip horizontally tiles on the right half of the bitmap */
 						16*sx,16*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -245,13 +245,13 @@ public class matmania
 		/* Draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			if (spriteram[offs] & 0x01)
+			if (spriteram.read(offs)& 0x01)
 			{
 				drawgfx(bitmap,Machine->gfx[2],
-						spriteram[offs+1] + ((spriteram[offs] & 0xf0) << 4),
-						(spriteram[offs] & 0x08) >> 3,
-						spriteram[offs] & 0x04,spriteram[offs] & 0x02,
-						239 - spriteram[offs+3],(240 - spriteram[offs+2]) & 0xff,
+						spriteram.read(offs+1)+ ((spriteram.read(offs)& 0xf0) << 4),
+						(spriteram.read(offs)& 0x08) >> 3,
+						spriteram.read(offs)& 0x04,spriteram.read(offs)& 0x02,
+						239 - spriteram.read(offs+3),(240 - spriteram.read(offs+2)) & 0xff,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);
 			}
 		}
@@ -294,8 +294,8 @@ public class matmania
 				sy = offs % 32;
 	
 				drawgfx(tmpbitmap,Machine->gfx[1],
-						videoram[offs] + ((colorram[offs] & 0x03) << 8),
-						(colorram[offs] & 0x30) >> 4,
+						videoram.read(offs)+ ((colorram.read(offs)& 0x03) << 8),
+						(colorram.read(offs)& 0x30) >> 4,
 						0,sy >= 16,	/* flip horizontally tiles on the right half of the bitmap */
 						16*sx,16*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -341,13 +341,13 @@ public class matmania
 		/* Draw the sprites */
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
-			if (spriteram[offs] & 0x01)
+			if (spriteram.read(offs)& 0x01)
 			{
 				drawgfx(bitmap,Machine->gfx[2],
-						spriteram[offs+1] + ((spriteram[offs] & 0xf0) << 4),
-						(spriteram[offs] & 0x08) >> 3,
-						spriteram[offs] & 0x04,spriteram[offs] & 0x02,
-						239 - spriteram[offs+3],(240 - spriteram[offs+2]) & 0xff,
+						spriteram.read(offs+1)+ ((spriteram.read(offs)& 0xf0) << 4),
+						(spriteram.read(offs)& 0x08) >> 3,
+						spriteram.read(offs)& 0x04,spriteram.read(offs)& 0x02,
+						239 - spriteram.read(offs+3),(240 - spriteram.read(offs+2)) & 0xff,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);
 			}
 		}

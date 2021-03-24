@@ -239,49 +239,49 @@ public class mpatrol
 	
 	
 	
-	WRITE_HANDLER( mpatrol_scroll_w )
+	public static WriteHandlerPtr mpatrol_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollreg[offset] = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_bg1xpos_w )
+	public static WriteHandlerPtr mpatrol_bg1xpos_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg1xpos = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_bg1ypos_w )
+	public static WriteHandlerPtr mpatrol_bg1ypos_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg1ypos = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_bg2xpos_w )
+	public static WriteHandlerPtr mpatrol_bg2xpos_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg2xpos = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_bg2ypos_w )
+	public static WriteHandlerPtr mpatrol_bg2ypos_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bg2ypos = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_bgcontrol_w )
+	public static WriteHandlerPtr mpatrol_bgcontrol_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bgcontrol = data;
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( mpatrol_flipscreen_w )
+	public static WriteHandlerPtr mpatrol_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* screen flip is handled both by software and hardware */
 		data ^= ~readinputport(4) & 1;
@@ -289,10 +289,10 @@ public class mpatrol
 	
 		coin_counter_w(0,data & 0x02);
 		coin_counter_w(1,data & 0x20);
-	}
+	} };
 	
 	
-	READ_HANDLER( mpatrol_input_port_3_r )
+	public static ReadHandlerPtr mpatrol_input_port_3_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int ret = input_port_3_r(0);
 	
@@ -309,7 +309,7 @@ public class mpatrol
 		}
 	
 		return ret;
-	}
+	} };
 	
 	
 	
@@ -379,7 +379,7 @@ public class mpatrol
 				sx = offs % 32;
 				sy = offs / 32;
 	
-				color = colorram[offs] & 0x1f;
+				color = colorram.read(offs)& 0x1f;
 				if (sy >= 7) color += 32;	/* lines 7-31 are transparent */
 	
 				if (flip_screen)
@@ -389,7 +389,7 @@ public class mpatrol
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs] + 2 * (colorram[offs] & 0x80),
+						videoram.read(offs)+ 2 * (colorram.read(offs)& 0x80),
 						color,
 						flip_screen,flip_screen,
 						8*sx,8*sy,
@@ -459,10 +459,10 @@ public class mpatrol
 			int sx,sy,flipx,flipy;
 	
 	
-			sx = spriteram_2[offs + 3];
-			sy = 241 - spriteram_2[offs];
-			flipx = spriteram_2[offs + 1] & 0x40;
-			flipy = spriteram_2[offs + 1] & 0x80;
+			sx = spriteram_2.read(offs + 3);
+			sy = 241 - spriteram_2.read(offs);
+			flipx = spriteram_2.read(offs + 1)& 0x40;
+			flipy = spriteram_2.read(offs + 1)& 0x80;
 			if (flip_screen)
 			{
 				flipx = !flipx;
@@ -472,8 +472,8 @@ public class mpatrol
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					spriteram_2[offs + 2],
-					spriteram_2[offs + 1] & 0x3f,
+					spriteram_2.read(offs + 2),
+					spriteram_2.read(offs + 1)& 0x3f,
 					flipx,flipy,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_COLOR,128+32);
@@ -482,10 +482,10 @@ public class mpatrol
 		{
 			int sx,sy,flipx,flipy;
 	
-			sx = spriteram[offs + 3];
-			sy = 241 - spriteram[offs];
-			flipx = spriteram[offs + 1] & 0x40;
-			flipy = spriteram[offs + 1] & 0x80;
+			sx = spriteram.read(offs + 3);
+			sy = 241 - spriteram.read(offs);
+			flipx = spriteram.read(offs + 1)& 0x40;
+			flipy = spriteram.read(offs + 1)& 0x80;
 			if (flip_screen)
 			{
 				flipx = !flipx;
@@ -495,8 +495,8 @@ public class mpatrol
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					spriteram[offs + 2],
-					spriteram[offs + 1] & 0x3f,
+					spriteram.read(offs + 2),
+					spriteram.read(offs + 1)& 0x3f,
 					flipx,flipy,
 					sx,sy,
 					&Machine->visible_area,TRANSPARENCY_COLOR,128+32);

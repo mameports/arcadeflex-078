@@ -67,20 +67,20 @@ public class blueprnt
 	
 	
 	
-	WRITE_HANDLER( blueprnt_flipscreen_w )
+	public static WriteHandlerPtr blueprnt_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flipscreen != (~data & 2))
 		{
 			flipscreen = ~data & 2;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
 	
 		if (gfx_bank != ((data & 4) >> 2))
 		{
 			gfx_bank = ((data & 4) >> 2);
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -117,8 +117,8 @@ public class blueprnt
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs] + 256 * gfx_bank,
-						colorram[offs] & 0x7f,
+						videoram.read(offs)+ 256 * gfx_bank,
+						colorram.read(offs)& 0x7f,
 						flipscreen,flipscreen,
 						8*sx,8*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -156,10 +156,10 @@ public class blueprnt
 			int sx,sy,flipx,flipy;
 	
 	
-			sx = spriteram[offs + 3];
-			sy = 240 - spriteram[offs + 0];
-			flipx = spriteram[offs + 2] & 0x40;
-			flipy = spriteram[offs + 2 - 4] & 0x80;	/* -4? Awkward, isn't it? */
+			sx = spriteram.read(offs + 3);
+			sy = 240 - spriteram.read(offs + 0);
+			flipx = spriteram.read(offs + 2)& 0x40;
+			flipy = spriteram.read(offs + 2 - 4)& 0x80;	/* -4? Awkward, isn't it? */
 			if (flipscreen)
 			{
 				sx = 248 - sx;
@@ -169,7 +169,7 @@ public class blueprnt
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
-					spriteram[offs + 1],
+					spriteram.read(offs + 1),
 					0,
 					flipx,flipy,
 					2+sx,sy-1,	/* sprites are slightly misplaced, regardless of the screen flip */
@@ -180,7 +180,7 @@ public class blueprnt
 		/* redraw the characters which have priority over sprites */
 		for (offs = videoram_size - 1;offs >= 0;offs--)
 		{
-			if (colorram[offs] & 0x80)
+			if (colorram.read(offs)& 0x80)
 			{
 				int sx,sy;
 	
@@ -194,8 +194,8 @@ public class blueprnt
 				}
 	
 				drawgfx(bitmap,Machine->gfx[0],
-						videoram[offs] + 256 * gfx_bank,
-						colorram[offs] & 0x7f,
+						videoram.read(offs)+ 256 * gfx_bank,
+						colorram.read(offs)& 0x7f,
 						flipscreen,flipscreen,
 						8*sx,(8*sy+scroll[sx]) & 0xff,
 						&Machine->visible_area,TRANSPARENCY_PEN,0);

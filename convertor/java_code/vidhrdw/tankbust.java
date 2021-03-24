@@ -41,8 +41,8 @@ public class tankbust
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int attr = colorram[tile_index];
+		int code = videoram.read(tile_index);
+		int attr = colorram.read(tile_index);
 	
 		int color = ((attr>>4) & 0x07);
 	
@@ -111,49 +111,49 @@ public class tankbust
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( tankbust_background_videoram_w )
+	public static WriteHandlerPtr tankbust_background_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( videoram[offset]!=data )
+		if( videoram.read(offset)!=data )
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
-	READ_HANDLER( tankbust_background_videoram_r )
+	} };
+	public static ReadHandlerPtr tankbust_background_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
-	WRITE_HANDLER( tankbust_background_colorram_w )
+	public static WriteHandlerPtr tankbust_background_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if( colorram[offset]!=data )
+		if( colorram.read(offset)!=data )
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
-	READ_HANDLER( tankbust_background_colorram_r )
+	} };
+	public static ReadHandlerPtr tankbust_background_colorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return colorram[offset];
-	}
+		return colorram.read(offset);
+	} };
 	
-	WRITE_HANDLER( tankbust_txtram_w )
+	public static WriteHandlerPtr tankbust_txtram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( txt_ram[offset]!=data )
 		{
 			txt_ram[offset] = data;
 			tilemap_mark_tile_dirty(txt_tilemap, offset);
 		}
-	}
-	READ_HANDLER( tankbust_txtram_r )
+	} };
+	public static ReadHandlerPtr tankbust_txtram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return txt_ram[offset];
-	}
+	} };
 	
 	
 	static UINT8 xscroll[2];
 	
-	WRITE_HANDLER( tankbust_xscroll_w )
+	public static WriteHandlerPtr tankbust_xscroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( xscroll[offset] != data )
 		{
@@ -166,11 +166,11 @@ public class tankbust
 			tilemap_set_scrollx(bg_tilemap, 0, x );
 		}
 	//usrintf_showmessage("x=%02x %02x", xscroll[0], xscroll[1]);
-	}
+	} };
 	
 	static UINT8 yscroll[2];
 	
-	WRITE_HANDLER( tankbust_yscroll_w )
+	public static WriteHandlerPtr tankbust_yscroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if( yscroll[offset] != data )
 		{
@@ -182,7 +182,7 @@ public class tankbust
 			tilemap_set_scrolly(bg_tilemap, 0, y );
 		}
 	//usrintf_showmessage("y=%02x %02x", yscroll[0], yscroll[1]);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -213,12 +213,12 @@ public class tankbust
 		{
 			int code,color,sx,sy,flipx,flipy;
 	
-			code  = spriteram[offs+0] & 0x3f;
-			flipy = spriteram[offs+0] & 0x40;
-			flipx = spriteram[offs+0] & 0x80;
+			code  = spriteram.read(offs+0)& 0x3f;
+			flipy = spriteram.read(offs+0)& 0x40;
+			flipx = spriteram.read(offs+0)& 0x80;
 	
-			sy = (240- spriteram[offs+1]) - 14;
-			sx = (spriteram[offs+2] & 0x01) * 256 + spriteram[offs+3] - 7;
+			sy = (240- spriteram.read(offs+1)) - 14;
+			sx = (spriteram.read(offs+2)& 0x01) * 256 + spriteram.read(offs+3)- 7;
 	
 			color = 0;
 	
@@ -230,13 +230,13 @@ public class tankbust
 			//0x40 - not used
 			//0x80 - not used
 	#if 0
-			if ((spriteram[offs+2] & 0x02))
+			if ((spriteram.read(offs+2)& 0x02))
 			{
 				code = ((int)rand()) & 63;
 			}
 	#endif
 	
-			if ((spriteram[offs+1]!=4))	//otherwise - ghost sprites
+			if ((spriteram.read(offs+1)!=4))	//otherwise - ghost sprites
 			{
 	
 				drawgfx(bitmap,Machine->gfx[0],
@@ -256,7 +256,7 @@ public class tankbust
 	
 		for (i=0; i<0x800; i++)
 		{
-			int tile_attrib = colorram[i];
+			int tile_attrib = colorram.read(i);
 	
 			if ( (tile_attrib&8) || (tile_attrib&0x80) )
 			{

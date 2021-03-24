@@ -36,10 +36,8 @@ public class m6502H
 	
 	#ifdef RUNTIME_LOADER
 	# ifdef __cplusplus
-		extern "C" void m6502_runtime_loader_init(void);
-	# else
-		extern void m6502_runtime_loader_init(void);
-	# endif
+		extern "C" # else
+		# endif
 	#endif
 	
 	/* set to 1 to test cur_mrhard/cur_wmhard to avoid calls */
@@ -74,18 +72,9 @@ public class m6502H
 	   positiv edge sets overflow flag */
 	#define M6502_SET_OVERFLOW	1
 	
-	extern int m6502_ICount;				/* cycle count */
 	
-	extern void m6502_init(void);
-	extern void m6502_reset(void *param);
-	extern void m6502_exit(void);
-	extern int	m6502_execute(int cycles);
 	extern unsigned m6502_get_context(void *dst);
-	extern void m6502_set_context(void *src);
 	extern unsigned m6502_get_reg(int regnum);
-	extern void m6502_set_reg(int regnum, unsigned val);
-	extern void m6502_set_irq_line(int irqline, int state);
-	extern void m6502_set_irq_callback(int (*callback)(int irqline));
 	extern const char *m6502_info(void *context, int regnum);
 	extern unsigned m6502_dasm(char *buffer, unsigned pc);
 	
@@ -108,16 +97,8 @@ public class m6502H
 	
 	#define m6510_ICount					m6502_ICount
 	
-	extern void m6510_init(void);
-	extern void m6510_reset(void *param);
-	extern void m6510_exit(void);
-	extern int	m6510_execute(int cycles);
 	extern unsigned m6510_get_context(void *dst);
-	extern void m6510_set_context(void *src);
 	extern unsigned m6510_get_reg(int regnum);
-	extern void m6510_set_reg(int regnum, unsigned val);
-	extern void m6510_set_irq_line(int irqline, int state);
-	extern void m6510_set_irq_callback(int (*callback)(int irqline));
 	extern const char *m6510_info(void *context, int regnum);
 	extern unsigned m6510_dasm(char *buffer, unsigned pc);
 	
@@ -243,16 +224,8 @@ public class m6502H
 	
 	#define n2a03_ICount					m6502_ICount
 	
-	extern void n2a03_init(void);
-	extern void n2a03_reset(void *param);
-	extern void n2a03_exit(void);
-	extern int	n2a03_execute(int cycles);
 	extern unsigned n2a03_get_context(void *dst);
-	extern void n2a03_set_context(void *src);
 	extern unsigned n2a03_get_reg(int regnum);
-	extern void n2a03_set_reg (int regnum, unsigned val);
-	extern void n2a03_set_irq_line(int irqline, int state);
-	extern void n2a03_set_irq_callback(int (*callback)(int irqline));
 	extern const char *n2a03_info(void *context, int regnum);
 	extern unsigned n2a03_dasm(char *buffer, unsigned pc);
 	
@@ -263,7 +236,6 @@ public class m6502H
 	   Bit 7 of address $4011 (the PSG's DPCM control register), when set,
 	   causes an IRQ to be generated.  This function allows the IRQ to be called
 	   from the PSG core when such an occasion arises. */
-	extern void n2a03_irq(void);
 	#endif
 	
 	
@@ -286,16 +258,8 @@ public class m6502H
 	
 	#define m65c02_ICount					m6502_ICount
 	
-	extern void m65c02_init(void);
-	extern void m65c02_reset(void *param);
-	extern void m65c02_exit(void);
-	extern int	m65c02_execute(int cycles);
 	extern unsigned m65c02_get_context(void *dst);
-	extern void m65c02_set_context(void *src);
 	extern unsigned m65c02_get_reg(int regnum);
-	extern void m65c02_set_reg(int regnum, unsigned val);
-	extern void m65c02_set_irq_line(int irqline, int state);
-	extern void m65c02_set_irq_callback(int (*callback)(int irqline));
 	extern const char *m65c02_info(void *context, int regnum);
 	extern unsigned m65c02_dasm(char *buffer, unsigned pc);
 	#endif
@@ -319,16 +283,8 @@ public class m6502H
 	
 	#define m65sc02_ICount					m6502_ICount
 	
-	extern void m65sc02_init(void);
-	extern void m65sc02_reset(void *param);
-	extern void m65sc02_exit(void);
-	extern int	m65sc02_execute(int cycles);
 	extern unsigned m65sc02_get_context(void *dst);
-	extern void m65sc02_set_context(void *src);
 	extern unsigned m65sc02_get_reg(int regnum);
-	extern void m65sc02_set_reg(int regnum, unsigned val);
-	extern void m65sc02_set_irq_line(int irqline, int state);
-	extern void m65sc02_set_irq_callback(int (*callback)(int irqline));
 	extern const char *m65sc02_info(void *context, int regnum);
 	extern unsigned m65sc02_dasm(char *buffer, unsigned pc);
 	#endif
@@ -352,16 +308,8 @@ public class m6502H
 	
 	#define deco16_ICount					m6502_ICount
 	
-	extern void deco16_init(void);
-	extern void deco16_reset(void *param);
-	extern void deco16_exit(void);
-	extern int	deco16_execute(int cycles);
 	extern unsigned deco16_get_context(void *dst);
-	extern void deco16_set_context(void *src);
 	extern unsigned deco16_get_reg(int regnum);
-	extern void deco16_set_reg(int regnum, unsigned val);
-	extern void deco16_set_irq_line(int irqline, int state);
-	extern void deco16_set_irq_callback(int (*callback)(int irqline));
 	extern const char *deco16_info(void *context, int regnum);
 	extern unsigned deco16_dasm(char *buffer, unsigned pc);
 	#endif

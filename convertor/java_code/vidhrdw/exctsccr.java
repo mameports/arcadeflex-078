@@ -34,17 +34,17 @@ public class exctsccr
 		{
 			int bit0,bit1,bit2,r,g,b;
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i,r,g,b);
@@ -56,14 +56,14 @@ public class exctsccr
 		idx = 0;
 		for (i = 0;i < 32;i++)
 		{
-			COLOR(0,idx++) = color_prom[256+0+(i*4)];
-			COLOR(0,idx++) = color_prom[256+1+(i*4)];
-			COLOR(0,idx++) = color_prom[256+2+(i*4)];
-			COLOR(0,idx++) = color_prom[256+3+(i*4)];
-			COLOR(0,idx++) = color_prom[256+128+0+(i*4)];
-			COLOR(0,idx++) = color_prom[256+128+1+(i*4)];
-			COLOR(0,idx++) = color_prom[256+128+2+(i*4)];
-			COLOR(0,idx++) = color_prom[256+128+3+(i*4)];
+			COLOR(0,idx++) = color_prom.read(256+0+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+1+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+2+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+3+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+128+0+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+128+1+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+128+2+(i*4));
+			COLOR(0,idx++) = color_prom.read(256+128+3+(i*4));
 		}
 	
 		/* sprites */
@@ -74,7 +74,7 @@ public class exctsccr
 		{
 			if ( (i%16) < 8 )
 			{
-				COLOR(2,idx) = color_prom[i]+16;
+				COLOR(2,idx) = color_prom.read(i)+16;
 				idx++;
 			}
 		}
@@ -82,20 +82,20 @@ public class exctsccr
 		{
 			if ( (i%16) > 7 )
 			{
-				COLOR(2,idx) = color_prom[i]+16;
+				COLOR(2,idx) = color_prom.read(i)+16;
 				idx++;
 			}
 		}
 		for (i = 16;i < 32;i++)
 		{
-			COLOR(2,idx++) = color_prom[256+0+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+1+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+2+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+3+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+128+0+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+128+1+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+128+2+(i*4)]+16;
-			COLOR(2,idx++) = color_prom[256+128+3+(i*4)]+16;
+			COLOR(2,idx++) = color_prom.read(256+0+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+1+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+2+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+3+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+128+0+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+128+1+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+128+2+(i*4))+16;
+			COLOR(2,idx++) = color_prom.read(256+128+3+(i*4))+16;
 		}
 	
 		/* Patch for goalkeeper */
@@ -108,46 +108,46 @@ public class exctsccr
 		cpu_set_irq_line_and_vector( 1, 0, HOLD_LINE, 0xff );
 	}
 	
-	WRITE_HANDLER( exctsccr_videoram_w )
+	public static WriteHandlerPtr exctsccr_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exctsccr_colorram_w )
+	public static WriteHandlerPtr exctsccr_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exctsccr_gfx_bank_w )
+	public static WriteHandlerPtr exctsccr_gfx_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfx_bank != (data & 0x01))
 		{
 			gfx_bank = data & 0x01;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( exctsccr_flipscreen_w )
+	public static WriteHandlerPtr exctsccr_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != data)
 		{
 			flip_screen_set(data);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index] & 0x1f;
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index)& 0x1f;
 	
 		SET_TILE_INFO(gfx_bank, code, color, 0)
 	}
@@ -157,7 +157,7 @@ public class exctsccr
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		timer_pulse( TIME_IN_HZ( 75.0 ), 0, exctsccr_fm_callback ); /* updates fm */
@@ -170,7 +170,7 @@ public class exctsccr
 		UINT8 *OBJ1, *OBJ2;
 	
 		OBJ1 = videoram;
-		OBJ2 = &(spriteram[0x20]);
+		OBJ2 = &(spriteram.read(0x20));
 	
 		for ( offs = 0x0e; offs >= 0; offs -= 2 ) {
 			int sx,sy,code,bank,flipx,flipy,color;

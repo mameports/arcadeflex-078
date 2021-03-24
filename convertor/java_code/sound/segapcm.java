@@ -94,7 +94,7 @@ public class segapcm
 	
 		spcm.bankshift = (UINT8)(intf->bank);
 		mask = intf->bank >> 16;
-		if(!mask)
+		if (mask == 0)
 			mask = BANK_MASK7>>16;
 	
 		for(rom_mask = 1; rom_mask < memory_region_length(intf->region); rom_mask *= 2);
@@ -116,13 +116,13 @@ public class segapcm
 	}
 	
 	
-	WRITE_HANDLER( SegaPCM_w )
+	public static WriteHandlerPtr SegaPCM_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		spcm.ram[offset & 0x07ff] = data;
-	}
+	} };
 	
-	READ_HANDLER( SegaPCM_r )
+	public static ReadHandlerPtr SegaPCM_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return spcm.ram[offset & 0x07ff];
-	}
+	} };
 }

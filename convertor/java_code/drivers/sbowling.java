@@ -73,19 +73,19 @@ public class sbowling
 		plot_pixel(tmpbitmap,x,y,Machine->pens[col]);
 	}
 	
-	static WRITE_HANDLER( sbw_videoram_w )
+	public static WriteHandlerPtr sbw_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int x,y,i,v1,v2;
 	
-		videoram[offset] = data;
+		videoram.write(offset,data);
 	
 		offset &= 0x1fff;
 	
 		y = offset / 32;
 		x = (offset % 32) * 8;
 	
-		v1 = videoram[offset];
-		v2 = videoram[offset+0x2000];
+		v1 = videoram.read(offset);
+		v2 = videoram.read(offset+0x2000);
 		
 		for(i = 0; i < 8; i++)
 		{
@@ -93,7 +93,7 @@ public class sbowling
 			v1 >>= 1;
 			v2 >>= 1;
 		}
-	}
+	} };
 	
 	VIDEO_UPDATE(sbowling)
 	{
@@ -109,16 +109,16 @@ public class sbowling
 		return 0;
 	}
 	
-	static WRITE_HANDLER( pix_shift_w )
+	public static WriteHandlerPtr pix_shift_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pix_sh = data;
-	}
-	static WRITE_HANDLER( pix_data_w )
+	} };
+	public static WriteHandlerPtr pix_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		pix[0] = pix[1];
 		pix[1] = data;
-	}
-	static READ_HANDLER( pix_data_r )
+	} };
+	public static ReadHandlerPtr pix_data_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT32 p1, p0;
 		int res;
@@ -130,7 +130,7 @@ public class sbowling
 		res = (((p1 << (sh+8)) | (p0 << sh)) & 0xff00) >> 8;
 	
 		return res;
-	}
+	} };
 	
 	
 	
@@ -156,7 +156,7 @@ public class sbowling
 		{
 			int offs;
 			for (offs = 0;offs < videoram_size; offs++)
-				sbw_videoram_w(offs, videoram[offs]);
+				sbw_videoram_w(offs, videoram.read(offs));
 		}
 		sbw_system = data;
 	}
@@ -185,138 +185,146 @@ public class sbowling
 			return input_port_3_r(0);
 	}
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x2fff, MRA_RAM },
-		{ 0x8000, 0xbfff, MRA_RAM },
-		{ 0xf801, 0xf801, AY8910_read_port_0_r },
-		{ 0xfc00, 0xffff, MRA_RAM },		
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x2fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xf801, 0xf801, AY8910_read_port_0_r ),
+		new Memory_ReadAddress( 0xfc00, 0xffff, MRA_RAM ),		
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x2fff, MWA_ROM },
-		{ 0x8000, 0xbfff, sbw_videoram_w, &videoram, &videoram_size },
-		{ 0xf800, 0xf800, AY8910_control_port_0_w },
-		{ 0xf801, 0xf801, AY8910_write_port_0_w },
-		{ 0xfc00, 0xffff, MWA_RAM },	
-	MEMORY_END
-	
-	
-	static PORT_READ_START( readport )
-		{0x00,0x00, input_port_0_r },
-		{0x01,0x01, controls_r},
-		{0x02,0x02, pix_data_r },
-		{0x03,0x03, input_port_1_r },
-		{0x04,0x04, input_port_4_r},
-		{0x05,0x05, input_port_5_r},
-	PORT_END
-	
-	static PORT_WRITE_START( writeport )
-		{ 0x00, 0x00, watchdog_reset_w },
-		{ 0x01, 0x01, pix_data_w },
-		{ 0x02, 0x02, pix_shift_w },
-		{ 0x03, 0x03, IOWP_NOP },
-		{ 0x04, 0x04, system_w },
-		{ 0x05, 0x05, graph_control_w },
-	PORT_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x2fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0xbfff, sbw_videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0xf800, 0xf800, AY8910_control_port_0_w ),
+		new Memory_WriteAddress( 0xf801, 0xf801, AY8910_write_port_0_w ),
+		new Memory_WriteAddress( 0xfc00, 0xffff, MWA_RAM ),	
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( sbowling )
-		PORT_START
-		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1   )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH,	IPT_TILT )	
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort(0x00,0x00, input_port_0_r ),
+		new IO_ReadPort(0x01,0x01, controls_r),
+		new IO_ReadPort(0x02,0x02, pix_data_r ),
+		new IO_ReadPort(0x03,0x03, input_port_1_r ),
+		new IO_ReadPort(0x04,0x04, input_port_4_r),
+		new IO_ReadPort(0x05,0x05, input_port_5_r),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START2 )
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, watchdog_reset_w ),
+		new IO_WritePort( 0x01, 0x01, pix_data_w ),
+		new IO_WritePort( 0x02, 0x02, pix_shift_w ),
+		new IO_WritePort( 0x03, 0x03, IOWP_NOP ),
+		new IO_WritePort( 0x04, 0x04, system_w ),
+		new IO_WritePort( 0x05, 0x05, graph_control_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
+	
+	
+	static InputPortPtr input_ports_sbowling = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_COIN1   );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH,	IPT_TILT );
+	
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START2 );
 			
-		PORT_START
-		PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y, 30, 30, 0, 0)
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_Y, 30, 30, 0, 0);
 	
-		PORT_START
-		PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X|IPF_REVERSE, 30, 30, 0, 0)
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0, IPT_TRACKBALL_X|IPF_REVERSE, 30, 30, 0, 0);
 			
-		PORT_START	/* coin slots: A 4 LSB, B 4 MSB */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* coin slots: A 4 LSB, B 4 MSB */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) ) 
-		PORT_DIPSETTING(    0x01, DEF_STR( Upright ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, "Year Display" )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x00, "Ball Controll Check" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x00, "Video Test" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Cabinet") ); 
+		PORT_DIPSETTING(    0x01, DEF_STR( "Upright") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, "Year Display" );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x00, "Ball Controll Check" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x00, "Video Test" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,
 		256,
 		3,
-		{ 0x800*0*8, 0x800*1*8, 0x800*2*8 },
-		{ 7, 6, 5, 4, 3, 2, 1, 0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { 0x800*0*8, 0x800*1*8, 0x800*2*8 },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
+	);
+	
+	static GfxDecodeInfo gfxdecodeinfo[] =
+	{
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,   0x18, 1 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
-	{
-		{ REGION_GFX1, 0, &charlayout,   0x18, 1 },
-		{ -1 }
-	};
 	
-	
-	static struct AY8910interface ay8910_interface =
-	{
+	static AY8910interface ay8910_interface = new AY8910interface
+	(
 		1, 
 		19968000 / 16,
-		{ 12 },
-		{ 0 },
-		{ 0 },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { 12 },
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
 	static PALETTE_INIT( sbowling )
 	{
@@ -336,20 +344,20 @@ public class sbowling
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* blue component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
 			b = combine_2_weights(weights_b, bit0, bit1);
 	
 			/* green component */
-			bit0 = (color_prom[i] >> 2) & 0x01;
-			bit1 = (color_prom[i] >> 3) & 0x01;
-			bit2 = (color_prom[i+0x400] >> 0) & 0x01;
+			bit0 = (color_prom.read(i)>> 2) & 0x01;
+			bit1 = (color_prom.read(i)>> 3) & 0x01;
+			bit2 = (color_prom.read(i+0x400)>> 0) & 0x01;
 			g = combine_3_weights(weights_g, bit0, bit1, bit2);
 	
 			/* red component */
-			bit0 = (color_prom[i+0x400] >> 1) & 0x01;
-			bit1 = (color_prom[i+0x400] >> 2) & 0x01;
-			bit2 = (color_prom[i+0x400] >> 3) & 0x01;
+			bit0 = (color_prom.read(i+0x400)>> 1) & 0x01;
+			bit1 = (color_prom.read(i+0x400)>> 2) & 0x01;
+			bit2 = (color_prom.read(i+0x400)>> 3) & 0x01;
 			r = combine_3_weights(weights_r, bit0, bit1, bit2);
 	
 			palette_set_color(i,r,g,b);
@@ -377,25 +385,25 @@ public class sbowling
 		MDRV_SOUND_ADD(AY8910, ay8910_interface)
 	MACHINE_DRIVER_END
 	
-	ROM_START( sbowling )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-		ROM_LOAD( "kb01.6h",        0x0000, 0x1000, CRC(dd5d411a) SHA1(ca15676d234353bc47f642be13d58f3d6d880126))
-		ROM_LOAD( "kb02.5h",        0x1000, 0x1000, CRC(75d3c45f) SHA1(af6e6237b7b28efaac258e6ddd85518c3406b24a))
-		ROM_LOAD( "kb03.3h",        0x2000, 0x1000, CRC(955fbfb8) SHA1(05d501f924adc5b816670f6f5e58a98a0c1bc962))
+	static RomLoadPtr rom_sbowling = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "kb01.6h",        0x0000, 0x1000, CRC(dd5d411a);SHA1(ca15676d234353bc47f642be13d58f3d6d880126))
+		ROM_LOAD( "kb02.5h",        0x1000, 0x1000, CRC(75d3c45f);SHA1(af6e6237b7b28efaac258e6ddd85518c3406b24a))
+		ROM_LOAD( "kb03.3h",        0x2000, 0x1000, CRC(955fbfb8);SHA1(05d501f924adc5b816670f6f5e58a98a0c1bc962))
 	
-		ROM_REGION( 0x1800, REGION_GFX1, 0 )
-		ROM_LOAD( "kb05.9k",        0x0000, 0x800,  CRC(4b4d9569) SHA1(d69e69add69ec11724090e34838ec8c61de81f4e))
-		ROM_LOAD( "kb06.7k",        0x0800, 0x800,  CRC(d89ba78b) SHA1(9e01be976e1e14feb8f7bd9f699a977a15a72e0d))
-		ROM_LOAD( "kb07.6k",        0x1000, 0x800,  CRC(9fb5db1a) SHA1(0b28ca5277ebe0d78d1a3f2d414efb5fd7c6e9ee))
+		ROM_REGION( 0x1800, REGION_GFX1, 0 );
+		ROM_LOAD( "kb05.9k",        0x0000, 0x800,  CRC(4b4d9569);SHA1(d69e69add69ec11724090e34838ec8c61de81f4e))
+		ROM_LOAD( "kb06.7k",        0x0800, 0x800,  CRC(d89ba78b);SHA1(9e01be976e1e14feb8f7bd9f699a977a15a72e0d))
+		ROM_LOAD( "kb07.6k",        0x1000, 0x800,  CRC(9fb5db1a);SHA1(0b28ca5277ebe0d78d1a3f2d414efb5fd7c6e9ee))
 		
-		ROM_REGION( 0x01000, REGION_USER1, 0 )
-		ROM_LOAD( "kb04.10k",       0x0000, 0x1000, CRC(1c27adc1) SHA1(a68748fbdbd8fb48f20b3675d793e5c156d1bd02))
+		ROM_REGION( 0x01000, REGION_USER1, 0 );
+		ROM_LOAD( "kb04.10k",       0x0000, 0x1000, CRC(1c27adc1);SHA1(a68748fbdbd8fb48f20b3675d793e5c156d1bd02))
 		
-		ROM_REGION( 0x0800, REGION_PROMS, 0 )
-		ROM_LOAD( "kb08.7m",        0x0000, 0x0400, CRC(e949e441) SHA1(8e0fe71ed6d4e6f94a703c27a8364da27b443730))
-		ROM_LOAD( "kb09.6m",        0x0400, 0x0400, CRC(e29191a6) SHA1(9a2c78a96ef6d118f4dacbea0b7d454b66a452ae))
-	ROM_END
+		ROM_REGION( 0x0800, REGION_PROMS, 0 );
+		ROM_LOAD( "kb08.7m",        0x0000, 0x0400, CRC(e949e441);SHA1(8e0fe71ed6d4e6f94a703c27a8364da27b443730))
+		ROM_LOAD( "kb09.6m",        0x0400, 0x0400, CRC(e29191a6);SHA1(9a2c78a96ef6d118f4dacbea0b7d454b66a452ae))
+	ROM_END(); }}; 
 	
-	GAMEX( 1982, sbowling, 0, sbowling, sbowling, 0, ROT90, "Taito Corporation", "Strike Bowling",GAME_IMPERFECT_SOUND|GAME_IMPERFECT_COLORS)
+	public static GameDriver driver_sbowling	   = new GameDriver("1982"	,"sbowling"	,"sbowling.java"	,rom_sbowling,null	,machine_driver_sbowling	,input_ports_sbowling	,null	,ROT90	,	"Taito Corporation", "Strike Bowling",GAME_IMPERFECT_SOUND|GAME_IMPERFECT_COLORS)
 	
 }

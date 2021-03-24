@@ -218,7 +218,6 @@ public class toaplan2
 	static int sprite_flip[2] = { 0, 0 };
 	static int tx_flip = 0;
 	
-	extern int toaplan2_sub_cpu;
 	
 	static UINT8 top_tile_priority[2][16];
 	static UINT8 fg_tile_priority[2][16];
@@ -1316,7 +1315,7 @@ public class toaplan2
 	
 			if ((priority == priority_to_display) && (attrib & 0x8000))
 			{
-				if (!bank_sel)	/* No Sprite select bank switching needed */
+				if (bank_sel == 0)	/* No Sprite select bank switching needed */
 				{
 					sprite = ((attrib & 3) << 16) | source[offs + 1];	/* 18 bit */
 				}

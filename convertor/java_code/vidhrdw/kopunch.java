@@ -44,37 +44,37 @@ public class kopunch
 		}
 	}
 	
-	WRITE_HANDLER( kopunch_videoram_w )
+	public static WriteHandlerPtr kopunch_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kopunch_videoram2_w )
+	public static WriteHandlerPtr kopunch_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (kopunch_videoram2[offset] != data)
 		{
 			kopunch_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kopunch_scroll_x_w )
+	public static WriteHandlerPtr kopunch_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll[0] = data; // REMOVE
 		tilemap_set_scrollx(fg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( kopunch_scroll_y_w )
+	public static WriteHandlerPtr kopunch_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scroll[1] = data; // REMOVE
 		tilemap_set_scrolly(fg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( kopunch_gfxbank_w )
+	public static WriteHandlerPtr kopunch_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfxbank != (data & 0x07))
 		{
@@ -85,11 +85,11 @@ public class kopunch
 		gfxflip = data & 0x08; // REMOVE
 	
 		tilemap_set_flip(fg_tilemap, (data & 0x08) ? TILEMAP_FLIPY : 0);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, 0, 0)
 	}
@@ -106,13 +106,13 @@ public class kopunch
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 16, 16);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);

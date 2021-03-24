@@ -81,23 +81,14 @@ public class adsp2100H
 	**	PUBLIC GLOBALS
 	**#################################################################################################*/
 	
-	extern int adsp2100_icount;
 	
 	
 	/*###################################################################################################
 	**	PUBLIC FUNCTIONS
 	**#################################################################################################*/
 	
-	extern void adsp2100_init(void);
-	extern void adsp2100_reset(void *param);
-	extern void adsp2100_exit(void);
-	extern int adsp2100_execute(int cycles);
 	extern unsigned adsp2100_get_context(void *dst);
-	extern void adsp2100_set_context(void *src);
 	extern unsigned adsp2100_get_reg(int regnum);
-	extern void adsp2100_set_reg(int regnum, unsigned val);
-	extern void adsp2100_set_irq_line(int irqline, int state);
-	extern void adsp2100_set_irq_callback(int (*callback)(int irqline));
 	extern const char *adsp2100_info(void *context, int regnum);
 	extern unsigned adsp2100_dasm(char *buffer, unsigned pc);
 	
@@ -143,20 +134,10 @@ public class adsp2100H
 	#define ADSP2101_SPORT0_RX	3		/* SPORT0 receive IRQ */
 	#define ADSP2101_SPORT0_TX	4		/* SPORT0 transmit IRQ */
 	
-	extern void adsp2101_init(void);
-	extern void adsp2101_reset(void *param);
-	extern void adsp2101_exit(void);
-	extern int adsp2101_execute(int cycles);
 	extern unsigned adsp2101_get_context(void *dst);
-	extern void adsp2101_set_context(void *src);
 	extern unsigned adsp2101_get_reg(int regnum);
-	extern void adsp2101_set_reg(int regnum, unsigned val);
-	extern void adsp2101_set_irq_line(int irqline, int state);
-	extern void adsp2101_set_irq_callback(int (*callback)(int irqline));
 	extern const char *adsp2101_info(void *context, int regnum);
 	extern unsigned adsp2101_dasm(char *buffer, unsigned pc);
-	extern void adsp2101_set_rx_callback( RX_CALLBACK cb );
-	extern void adsp2101_set_tx_callback( TX_CALLBACK cb );
 	#endif
 	
 	#if (HAS_ADSP2104)
@@ -178,22 +159,11 @@ public class adsp2100H
 	#define ADSP2104_SPORT0_RX	3		/* SPORT0 receive IRQ */
 	#define ADSP2104_SPORT0_TX	4		/* SPORT0 transmit IRQ */
 	
-	extern void adsp2104_init(void);
-	extern void adsp2104_reset(void *param);
-	extern void adsp2104_exit(void);
-	extern int adsp2104_execute(int cycles);
 	extern unsigned adsp2104_get_context(void *dst);
-	extern void adsp2104_set_context(void *src);
 	extern unsigned adsp2104_get_reg(int regnum);
-	extern void adsp2104_set_reg(int regnum, unsigned val);
-	extern void adsp2104_set_irq_line(int irqline, int state);
-	extern void adsp2104_set_irq_callback(int (*callback)(int irqline));
 	extern const char *adsp2104_info(void *context, int regnum);
 	extern unsigned adsp2104_dasm(char *buffer, unsigned pc);
-	extern void adsp2104_set_rx_callback( RX_CALLBACK cb );
-	extern void adsp2104_set_tx_callback( TX_CALLBACK cb );
 	
-	extern void adsp2104_load_boot_data(data8_t *srcdata, data32_t *dstdata);
 	#endif
 	
 	#if (HAS_ADSP2105)
@@ -213,22 +183,11 @@ public class adsp2100H
 	#define ADSP2105_SPORT1_TX	1		/* SPORT1 transmit IRQ */
 	#define ADSP2105_IRQ2		2		/* IRQ2 */
 	
-	extern void adsp2105_init(void);
-	extern void adsp2105_reset(void *param);
-	extern void adsp2105_exit(void);
-	extern int adsp2105_execute(int cycles);
 	extern unsigned adsp2105_get_context(void *dst);
-	extern void adsp2105_set_context(void *src);
 	extern unsigned adsp2105_get_reg(int regnum);
-	extern void adsp2105_set_reg(int regnum, unsigned val);
-	extern void adsp2105_set_irq_line(int irqline, int state);
-	extern void adsp2105_set_irq_callback(int (*callback)(int irqline));
 	extern const char *adsp2105_info(void *context, int regnum);
 	extern unsigned adsp2105_dasm(char *buffer, unsigned pc);
-	extern void adsp2105_set_rx_callback( RX_CALLBACK cb );
-	extern void adsp2105_set_tx_callback( TX_CALLBACK cb );
 	
-	extern void adsp2105_load_boot_data(data8_t *srcdata, data32_t *dstdata);
 	#endif
 	
 	#if (HAS_ADSP2115)
@@ -250,22 +209,11 @@ public class adsp2100H
 	#define ADSP2115_SPORT0_RX	3		/* SPORT0 receive IRQ */
 	#define ADSP2115_SPORT0_TX	4		/* SPORT0 transmit IRQ */
 	
-	extern void adsp2115_init(void);
-	extern void adsp2115_reset(void *param);
-	extern void adsp2115_exit(void);
-	extern int adsp2115_execute(int cycles);
 	extern unsigned adsp2115_get_context(void *dst);
-	extern void adsp2115_set_context(void *src);
 	extern unsigned adsp2115_get_reg(int regnum);
-	extern void adsp2115_set_reg(int regnum, unsigned val);
-	extern void adsp2115_set_irq_line(int irqline, int state);
-	extern void adsp2115_set_irq_callback(int (*callback)(int irqline));
 	extern const char *adsp2115_info(void *context, int regnum);
 	extern unsigned adsp2115_dasm(char *buffer, unsigned pc);
-	extern void adsp2115_set_rx_callback( RX_CALLBACK cb );
-	extern void adsp2115_set_tx_callback( TX_CALLBACK cb );
 	
-	extern void adsp2115_load_boot_data(data8_t *srcdata, data32_t *dstdata);
 	#endif
 	
 	#endif /* _ADSP2100_H */

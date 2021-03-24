@@ -26,13 +26,8 @@ package drivers;
 public class sprint2
 {
 	
-	extern READ_HANDLER( sprint2_collision1_r );
-	extern READ_HANDLER( sprint2_collision2_r );
-	
-	extern WRITE_HANDLER( sprint2_collision_reset1_w );
-	extern WRITE_HANDLER( sprint2_collision_reset2_w );
-	extern WRITE_HANDLER( sprint2_video_ram_w );
-	
+	extern extern 
+	extern extern extern 
 	extern VIDEO_UPDATE( sprint2 );
 	extern VIDEO_START( sprint2 );
 	extern VIDEO_EOF( sprint2 );
@@ -126,19 +121,19 @@ public class sprint2
 	}
 	
 	
-	static READ_HANDLER( sprint2_wram_r )
+	public static ReadHandlerPtr sprint2_wram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return sprint2_video_ram[0x380 + offset % 0x80];
-	}
+	} };
 	
 	
-	static READ_HANDLER( sprint2_dip_r )
+	public static ReadHandlerPtr sprint2_dip_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (readinputport(0) << (2 * ((offset & 3) ^ 3))) & 0xc0;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sprint2_input_A_r )
+	public static ReadHandlerPtr sprint2_input_A_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT8 val = readinputport(1);
 	
@@ -153,10 +148,10 @@ public class sprint2
 		}
 	
 		return (val << (offset ^ 7)) & 0x80;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sprint2_input_B_r )
+	public static ReadHandlerPtr sprint2_input_B_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT8 val = readinputport(2);
 	
@@ -168,10 +163,10 @@ public class sprint2
 		}
 	
 		return (val << (offset ^ 7)) & 0x80;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sprint2_sync_r )
+	public static ReadHandlerPtr sprint2_sync_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT8 val = 0;
 	
@@ -193,312 +188,316 @@ public class sprint2
 		}
 	
 		return val;
-	}
+	} };
 	
 	
-	static READ_HANDLER( sprint2_steering1_r )
+	public static ReadHandlerPtr sprint2_steering1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return steering[0];
-	}
-	static READ_HANDLER( sprint2_steering2_r )
+	} };
+	public static ReadHandlerPtr sprint2_steering2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return steering[1];
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_steering_reset1_w )
+	public static WriteHandlerPtr sprint2_steering_reset1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		steering[0] |= 0x80;
-	}
-	static WRITE_HANDLER( sprint2_steering_reset2_w )
+	} };
+	public static WriteHandlerPtr sprint2_steering_reset2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		steering[1] |= 0x80;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_wram_w )
+	public static WriteHandlerPtr sprint2_wram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sprint2_video_ram[0x380 + offset % 0x80] = data;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_attract_w )
+	public static WriteHandlerPtr sprint2_attract_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		attract = offset & 1;
 	
 		discrete_sound_w(5, !attract);
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_noise_reset_w )
+	public static WriteHandlerPtr sprint2_noise_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(6, 0);
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_skid1_w )
+	public static WriteHandlerPtr sprint2_skid1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(0, offset & 1);
-	}
-	static WRITE_HANDLER( sprint2_skid2_w )
+	} };
+	public static WriteHandlerPtr sprint2_skid2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		discrete_sound_w(1, offset & 1);
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( sprint2_lamp1_w )
+	public static WriteHandlerPtr sprint2_lamp1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(0, offset & 1);
-	}
-	static WRITE_HANDLER( sprint2_lamp2_w )
+	} };
+	public static WriteHandlerPtr sprint2_lamp2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_led_status(1, offset & 1);
-	}
+	} };
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x03ff, sprint2_wram_r },
-		{ 0x0400, 0x07ff, MRA_RAM },
-		{ 0x0818, 0x081f, sprint2_input_A_r },
-		{ 0x0828, 0x082f, sprint2_input_B_r },
-		{ 0x0830, 0x0837, sprint2_dip_r },
-		{ 0x0840, 0x087f, input_port_3_r },
-		{ 0x0880, 0x08bf, sprint2_steering1_r },
-		{ 0x08c0, 0x08ff, sprint2_steering2_r },
-		{ 0x0c00, 0x0fff, sprint2_sync_r },
-		{ 0x1000, 0x13ff, sprint2_collision1_r },
-		{ 0x1400, 0x17ff, sprint2_collision2_r },
-		{ 0x1800, 0x1800, MRA_NOP },  /* debugger ROM location? */
-		{ 0x2000, 0x3fff, MRA_ROM },
-		{ 0xe000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x03ff, sprint2_wram_r ),
+		new Memory_ReadAddress( 0x0400, 0x07ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x0818, 0x081f, sprint2_input_A_r ),
+		new Memory_ReadAddress( 0x0828, 0x082f, sprint2_input_B_r ),
+		new Memory_ReadAddress( 0x0830, 0x0837, sprint2_dip_r ),
+		new Memory_ReadAddress( 0x0840, 0x087f, input_port_3_r ),
+		new Memory_ReadAddress( 0x0880, 0x08bf, sprint2_steering1_r ),
+		new Memory_ReadAddress( 0x08c0, 0x08ff, sprint2_steering2_r ),
+		new Memory_ReadAddress( 0x0c00, 0x0fff, sprint2_sync_r ),
+		new Memory_ReadAddress( 0x1000, 0x13ff, sprint2_collision1_r ),
+		new Memory_ReadAddress( 0x1400, 0x17ff, sprint2_collision2_r ),
+		new Memory_ReadAddress( 0x1800, 0x1800, MRA_NOP ),  /* debugger ROM location? */
+		new Memory_ReadAddress( 0x2000, 0x3fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xe000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x03ff, sprint2_wram_w },
-		{ 0x0400, 0x07ff, sprint2_video_ram_w, &sprint2_video_ram },
-		{ 0x0c00, 0x0c0f, sprint2_attract_w },
-		{ 0x0c10, 0x0c1f, sprint2_skid1_w },
-		{ 0x0c20, 0x0c2f, sprint2_skid2_w },
-		{ 0x0c30, 0x0c3f, sprint2_lamp1_w },
-		{ 0x0c40, 0x0c4f, sprint2_lamp2_w },
-		{ 0x0c60, 0x0c6f, MWA_NOP }, /* SPARE */
-		{ 0x0c80, 0x0cff, MWA_NOP }, /* watchdog, disabled during service mode */
-		{ 0x0d00, 0x0d7f, sprint2_collision_reset1_w },
-		{ 0x0d80, 0x0dff, sprint2_collision_reset2_w },
-		{ 0x0e00, 0x0e7f, sprint2_steering_reset1_w },
-		{ 0x0e80, 0x0eff, sprint2_steering_reset2_w },
-		{ 0x0f00, 0x0f7f, sprint2_noise_reset_w },
-		{ 0x2000, 0x3fff, MWA_ROM },
-		{ 0xe000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x03ff, sprint2_wram_w ),
+		new Memory_WriteAddress( 0x0400, 0x07ff, sprint2_video_ram_w, sprint2_video_ram ),
+		new Memory_WriteAddress( 0x0c00, 0x0c0f, sprint2_attract_w ),
+		new Memory_WriteAddress( 0x0c10, 0x0c1f, sprint2_skid1_w ),
+		new Memory_WriteAddress( 0x0c20, 0x0c2f, sprint2_skid2_w ),
+		new Memory_WriteAddress( 0x0c30, 0x0c3f, sprint2_lamp1_w ),
+		new Memory_WriteAddress( 0x0c40, 0x0c4f, sprint2_lamp2_w ),
+		new Memory_WriteAddress( 0x0c60, 0x0c6f, MWA_NOP ), /* SPARE */
+		new Memory_WriteAddress( 0x0c80, 0x0cff, MWA_NOP ), /* watchdog, disabled during service mode */
+		new Memory_WriteAddress( 0x0d00, 0x0d7f, sprint2_collision_reset1_w ),
+		new Memory_WriteAddress( 0x0d80, 0x0dff, sprint2_collision_reset2_w ),
+		new Memory_WriteAddress( 0x0e00, 0x0e7f, sprint2_steering_reset1_w ),
+		new Memory_WriteAddress( 0x0e80, 0x0eff, sprint2_steering_reset2_w ),
+		new Memory_WriteAddress( 0x0f00, 0x0f7f, sprint2_noise_reset_w ),
+		new Memory_WriteAddress( 0x2000, 0x3fff, MWA_ROM ),
+		new Memory_WriteAddress( 0xe000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	INPUT_PORTS_START( sprint2 )
-		PORT_START
-		PORT_DIPNAME( 0x01, 0x00, "Tracks on Demo" )
-		PORT_DIPSETTING(    0x00, "Easy Track Only" )
-		PORT_DIPSETTING(    0x01, "Cycle 12 Tracks" )
-		PORT_DIPNAME( 0x02, 0x00, "Oil Slicks" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unused) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, "Extended Play" )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0xc0, 0x00, "Play Time" )
-		PORT_DIPSETTING(    0xc0, "60 seconds" )
-		PORT_DIPSETTING(    0x80, "90 seconds" )
-		PORT_DIPSETTING(    0x40, "120 seconds" )
-		PORT_DIPSETTING(    0x00, "150 seconds" )
+	static InputPortPtr input_ports_sprint2 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x01, 0x00, "Tracks on Demo" );
+		PORT_DIPSETTING(    0x00, "Easy Track Only" );
+		PORT_DIPSETTING(    0x01, "Cycle 12 Tracks" );
+		PORT_DIPNAME( 0x02, 0x00, "Oil Slicks" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Unused"));
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, "Extended Play" );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0xc0, 0x00, "Play Time" );
+		PORT_DIPSETTING(    0xc0, "60 seconds" );
+		PORT_DIPSETTING(    0x80, "90 seconds" );
+		PORT_DIPSETTING(    0x40, "120 seconds" );
+		PORT_DIPSETTING(    0x00, "150 seconds" );
 	
-		PORT_START /* input A */
-		PORT_BIT (0x01, IP_ACTIVE_LOW, IPT_UNUSED ) /* P1 1st gear */
-		PORT_BIT (0x02, IP_ACTIVE_LOW, IPT_UNUSED ) /* P2 1st gear */
-		PORT_BIT (0x04, IP_ACTIVE_LOW, IPT_UNUSED ) /* P1 2nd gear */
-		PORT_BIT (0x08, IP_ACTIVE_LOW, IPT_UNUSED ) /* P2 2nd gear */
-		PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_UNUSED ) /* P1 3rd gear */
-		PORT_BIT (0x20, IP_ACTIVE_LOW, IPT_UNUSED ) /* P2 3rd gear */
+		PORT_START();  /* input A */
+		PORT_BIT (0x01, IP_ACTIVE_LOW, IPT_UNUSED );/* P1 1st gear */
+		PORT_BIT (0x02, IP_ACTIVE_LOW, IPT_UNUSED );/* P2 1st gear */
+		PORT_BIT (0x04, IP_ACTIVE_LOW, IPT_UNUSED );/* P1 2nd gear */
+		PORT_BIT (0x08, IP_ACTIVE_LOW, IPT_UNUSED );/* P2 2nd gear */
+		PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_UNUSED );/* P1 3rd gear */
+		PORT_BIT (0x20, IP_ACTIVE_LOW, IPT_UNUSED );/* P2 3rd gear */
 	
-		PORT_START /* input B */
-		PORT_BITX(0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1, "Player 1 Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2, "Player 2 Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_SERVICE( 0x04, IP_ACTIVE_LOW )
-		PORT_BIT (0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT (0x20, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_BUTTON6, "Track Select", KEYCODE_SPACE, IP_JOY_DEFAULT )
+		PORT_START();  /* input B */
+		PORT_BITX(0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1, "Player 1 Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2, "Player 2 Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_SERVICE( 0x04, IP_ACTIVE_LOW );
+		PORT_BIT (0x08, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT (0x20, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_BUTTON6, "Track Select", KEYCODE_SPACE, IP_JOY_DEFAULT );
 	
-		PORT_START
-		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+		PORT_START(); 
+		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
 	
-		PORT_START
-		PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1, "Player 1 Gear 1", KEYCODE_Z, IP_JOY_DEFAULT )
-		PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER1, "Player 1 Gear 2", KEYCODE_X, IP_JOY_DEFAULT )
-		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, "Player 1 Gear 3", KEYCODE_C, IP_JOY_DEFAULT )
-		PORT_BITX(0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, "Player 1 Gear 4", KEYCODE_V, IP_JOY_DEFAULT )
+		PORT_START(); 
+		PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1, "Player 1 Gear 1", KEYCODE_Z, IP_JOY_DEFAULT );
+		PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER1, "Player 1 Gear 2", KEYCODE_X, IP_JOY_DEFAULT );
+		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, "Player 1 Gear 3", KEYCODE_C, IP_JOY_DEFAULT );
+		PORT_BITX(0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, "Player 1 Gear 4", KEYCODE_V, IP_JOY_DEFAULT );
 	
-		PORT_START
-		PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2, "Player 2 Gear 1", KEYCODE_Q, IP_JOY_DEFAULT )
-		PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER2, "Player 2 Gear 2", KEYCODE_W, IP_JOY_DEFAULT )
-		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, "Player 2 Gear 3", KEYCODE_E, IP_JOY_DEFAULT )
-		PORT_BITX(0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, "Player 2 Gear 4", KEYCODE_R, IP_JOY_DEFAULT )
+		PORT_START(); 
+		PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2, "Player 2 Gear 1", KEYCODE_Q, IP_JOY_DEFAULT );
+		PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER2, "Player 2 Gear 2", KEYCODE_W, IP_JOY_DEFAULT );
+		PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, "Player 2 Gear 3", KEYCODE_E, IP_JOY_DEFAULT );
+		PORT_BITX(0x08, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, "Player 2 Gear 4", KEYCODE_R, IP_JOY_DEFAULT );
 	
-		PORT_START
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER1, 100, 10, 0, 0 )
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER1, 100, 10, 0, 0 );
 	
-		PORT_START
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 100, 10, 0, 0 )
-	INPUT_PORTS_END
-	
-	
-	INPUT_PORTS_START( sprint1 )
-		PORT_START
-		PORT_DIPNAME( 0x01, 0x00, "Change Track" )
-		PORT_DIPSETTING(    0x01, "Every Lap" )
-		PORT_DIPSETTING(    0x00, "Every 2 Laps" )
-		PORT_DIPNAME( 0x02, 0x00, "Oil Slicks" )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x0c, DEF_STR( Free_Play ) )
-		PORT_DIPNAME( 0x10, 0x00, DEF_STR( Unused) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x00, "Extended Play" )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0xc0, 0x00, "Play Time" )
-		PORT_DIPSETTING(    0xc0, "60 seconds" )
-		PORT_DIPSETTING(    0x80, "90 seconds" )
-		PORT_DIPSETTING(    0x40, "120 seconds" )
-		PORT_DIPSETTING(    0x00, "150 seconds" )
-	
-		PORT_START /* input A */
-	
-		PORT_START /* input B */
-		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED ) /* 1st gear */
-		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED ) /* 2nd gear */
-		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED ) /* 3rd gear */
-		PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-		PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
-		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_START1 )
-	
-		PORT_START
-		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
-	
-		PORT_START
-		PORT_BITX( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2, "Gear 1", KEYCODE_Z, IP_JOY_DEFAULT )
-		PORT_BITX( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON3, "Gear 2", KEYCODE_X, IP_JOY_DEFAULT )
-		PORT_BITX( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON4, "Gear 3", KEYCODE_C, IP_JOY_DEFAULT )
-		PORT_BITX( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5, "Gear 4", KEYCODE_V, IP_JOY_DEFAULT )
-	
-		PORT_START
-	
-		PORT_START
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL, 100, 10, 0, 0 )
-	
-		PORT_START
-	
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 100, 10, 0, 0 );
+	INPUT_PORTS_END(); }}; 
 	
 	
-	INPUT_PORTS_START( dominos )
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x01, "Points to Win" )
-		PORT_DIPSETTING(	0x03, "6" )
-		PORT_DIPSETTING(	0x02, "5" )
-		PORT_DIPSETTING(	0x01, "4" )
-		PORT_DIPSETTING(	0x00, "3" )
-		PORT_DIPNAME( 0x0C, 0x08, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x04, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(	0x08, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(	0x0c, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	static InputPortPtr input_ports_sprint1 = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x01, 0x00, "Change Track" );
+		PORT_DIPSETTING(    0x01, "Every Lap" );
+		PORT_DIPSETTING(    0x00, "Every 2 Laps" );
+		PORT_DIPNAME( 0x02, 0x00, "Oil Slicks" );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x0c, DEF_STR( "Free_Play") );
+		PORT_DIPNAME( 0x10, 0x00, DEF_STR( "Unused"));
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x00, "Extended Play" );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0xc0, 0x00, "Play Time" );
+		PORT_DIPSETTING(    0xc0, "60 seconds" );
+		PORT_DIPSETTING(    0x80, "90 seconds" );
+		PORT_DIPSETTING(    0x40, "120 seconds" );
+		PORT_DIPSETTING(    0x00, "150 seconds" );
+	
+		PORT_START();  /* input A */
+	
+		PORT_START();  /* input B */
+		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );/* 1st gear */
+		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED );/* 2nd gear */
+		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED );/* 3rd gear */
+		PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1, "Gas", IP_KEY_DEFAULT, IP_JOY_DEFAULT );
+		PORT_SERVICE( 0x10, IP_ACTIVE_LOW );
+		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_START1 );
+	
+		PORT_START(); 
+		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
+	
+		PORT_START(); 
+		PORT_BITX( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2, "Gear 1", KEYCODE_Z, IP_JOY_DEFAULT );
+		PORT_BITX( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON3, "Gear 2", KEYCODE_X, IP_JOY_DEFAULT );
+		PORT_BITX( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON4, "Gear 3", KEYCODE_C, IP_JOY_DEFAULT );
+		PORT_BITX( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON5, "Gear 4", KEYCODE_V, IP_JOY_DEFAULT );
+	
+		PORT_START(); 
+	
+		PORT_START(); 
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL, 100, 10, 0, 0 );
+	
+		PORT_START(); 
+	
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static InputPortPtr input_ports_dominos = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x01, "Points to Win" );
+		PORT_DIPSETTING(	0x03, "6" );
+		PORT_DIPSETTING(	0x02, "5" );
+		PORT_DIPSETTING(	0x01, "4" );
+		PORT_DIPSETTING(	0x00, "3" );
+		PORT_DIPNAME( 0x0C, 0x08, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x04, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(	0x08, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(	0x0c, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 		
-		PORT_START /* input A */
-		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_4WAY | IPF_PLAYER2 )
-		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_4WAY | IPF_PLAYER2 )
+		PORT_START();  /* input A */
+		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_4WAY | IPF_PLAYER2 );
+		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_4WAY | IPF_PLAYER2 );
 	
-		PORT_START /* input B */
-		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_4WAY | IPF_PLAYER1 )
-		PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
+		PORT_START();  /* input B */
+		PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_4WAY | IPF_PLAYER1 );
+		PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_SERVICE( 0x40, IP_ACTIVE_LOW );
 	
-		PORT_START
-		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+		PORT_START(); 
+		PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 );
 	
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	
-	static struct GfxLayout tile_layout =
-	{
+	static GfxLayout tile_layout = new GfxLayout
+	(
 		16, 8,
 		64,
 		1,
-		{ 0 },
-		{
+		new int[] { 0 },
+		new int[] {
 			0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7
 		},
-		{
+		new int[] {
 			0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
 		},
 		0x40
-	};
+	);
 	
 	
-	static struct GfxLayout car_layout =
-	{
+	static GfxLayout car_layout = new GfxLayout
+	(
 		16, 8,
 		32,
 		1,
-		{ 0 },
-		{
+		new int[] { 0 },
+		new int[] {
 			0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0,
 			0xf, 0xe, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8
 		},
-		{
+		new int[] {
 			0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70
 		},
 		0x80
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tile_layout, 0, 2 },
-		{ REGION_GFX2, 0, &car_layout, 4, 4 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, tile_layout, 0, 2 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, car_layout, 4, 4 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -905,103 +904,103 @@ public class sprint2
 	MACHINE_DRIVER_END
 	
 	
-	ROM_START( sprint1 )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e) SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
-		ROM_RELOAD(             0xe000, 0x0800 )
-		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920) SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
-		ROM_RELOAD(             0xe800, 0x0800 )
-		ROM_LOAD( "6442-01.d1", 0x3000, 0x0800, CRC(e9ff0124) SHA1(42fe028e2e595573ccc0821de3bb6970364c585d) )
-		ROM_RELOAD(             0xf000, 0x0800 )
-		ROM_LOAD( "6443-01.e1", 0x3800, 0x0800, CRC(d6bb00d0) SHA1(cdcd4bb7b32be7a11480d3312fcd8d536e2d0caf) )
-		ROM_RELOAD(             0xf800, 0x0800 )
+	static RomLoadPtr rom_sprint1 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e);SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
+		ROM_RELOAD(             0xe000, 0x0800 );
+		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920);SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
+		ROM_RELOAD(             0xe800, 0x0800 );
+		ROM_LOAD( "6442-01.d1", 0x3000, 0x0800, CRC(e9ff0124);SHA1(42fe028e2e595573ccc0821de3bb6970364c585d) )
+		ROM_RELOAD(             0xf000, 0x0800 );
+		ROM_LOAD( "6443-01.e1", 0x3800, 0x0800, CRC(d6bb00d0);SHA1(cdcd4bb7b32be7a11480d3312fcd8d536e2d0caf) )
+		ROM_RELOAD(             0xf800, 0x0800 );
 	
-		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
-		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd) SHA1(1db58390d803f404253cbf36d562016441ca568d) )
-		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa) SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
+		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE );/* tiles */
+		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd);SHA1(1db58390d803f404253cbf36d562016441ca568d) )
+		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa);SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
 	
-		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE ) /* cars */
-		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2) SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
-		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e) SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
+		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE );/* cars */
+		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2);SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
+		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e);SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
 	
-		ROM_REGION( 0x0120, REGION_PROMS, 0 )
-		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
-		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db) SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
-	ROM_END
-	
-	
-	ROM_START( sprint2 )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e) SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
-		ROM_RELOAD(             0xe000, 0x0800 )
-		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920) SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
-		ROM_RELOAD(             0xe800, 0x0800 )
-		ROM_LOAD( "6404.d1",    0x3000, 0x0800, CRC(d2878ff6) SHA1(b742a8896c1bf1cfacf48d06908920d88a2c9ea8) )
-		ROM_RELOAD(             0xf000, 0x0800 )
-		ROM_LOAD( "6405.e1",    0x3800, 0x0800, CRC(6c991c80) SHA1(c30a5b340f05dd702c7a186eb62607a48fa19f72) )
-		ROM_RELOAD(             0xf800, 0x0800 )
-	
-		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
-		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd) SHA1(1db58390d803f404253cbf36d562016441ca568d) )
-		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa) SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
-	
-		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE ) /* cars */
-		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2) SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
-		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e) SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
-	
-		ROM_REGION( 0x0120, REGION_PROMS, 0 )
-		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
-		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db) SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
-	ROM_END
+		ROM_REGION( 0x0120, REGION_PROMS, 0 );
+		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c);SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
+		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db);SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
+	ROM_END(); }}; 
 	
 	
-	ROM_START( sprint2a )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e) SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
-		ROM_RELOAD(             0xe000, 0x0800 )
-		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920) SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
-		ROM_RELOAD(             0xe800, 0x0800 )
-		ROM_LOAD( "6404.d1",    0x3000, 0x0800, CRC(d2878ff6) SHA1(b742a8896c1bf1cfacf48d06908920d88a2c9ea8) )
-		ROM_RELOAD(             0xf000, 0x0800 )
-		ROM_LOAD( "6405-02.e1", 0x3800, 0x0800, CRC(e80fd249) SHA1(7bcf7dfd72ca83fdd80593eaf392570da1f71298) ) 
-		ROM_RELOAD(             0xf800, 0x0800 )
+	static RomLoadPtr rom_sprint2 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e);SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
+		ROM_RELOAD(             0xe000, 0x0800 );
+		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920);SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
+		ROM_RELOAD(             0xe800, 0x0800 );
+		ROM_LOAD( "6404.d1",    0x3000, 0x0800, CRC(d2878ff6);SHA1(b742a8896c1bf1cfacf48d06908920d88a2c9ea8) )
+		ROM_RELOAD(             0xf000, 0x0800 );
+		ROM_LOAD( "6405.e1",    0x3800, 0x0800, CRC(6c991c80);SHA1(c30a5b340f05dd702c7a186eb62607a48fa19f72) )
+		ROM_RELOAD(             0xf800, 0x0800 );
 	
-		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
-		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd) SHA1(1db58390d803f404253cbf36d562016441ca568d) )
-		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa) SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
+		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE );/* tiles */
+		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd);SHA1(1db58390d803f404253cbf36d562016441ca568d) )
+		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa);SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
 	
-		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE ) /* cars */
-		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2) SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
-		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e) SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
+		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE );/* cars */
+		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2);SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
+		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e);SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
 	
-		ROM_REGION( 0x0120, REGION_PROMS, 0 )
-		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
-		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db) SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
-	ROM_END
-	
-	
-	ROM_START( dominos )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "7352-02.d1",   0x3000, 0x0800, CRC(738b4413) SHA1(3a90ab25bb5f65504692f97da43f03e21392dcd8) )
-		ROM_RELOAD(               0xf000, 0x0800 )
-		ROM_LOAD( "7438-02.e1",   0x3800, 0x0800, CRC(c84e54e2) SHA1(383b388a1448a195f28352fc5e4ff1a2af80cc95) )
-		ROM_RELOAD(               0xf800, 0x0800 )
-	
-		ROM_REGION( 0x200, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
-		ROM_LOAD_NIB_HIGH( "7439-01.p4",   0x0000, 0x0200, CRC(4f42fdd6) SHA1(f8ea4b582e26cad37b746174cdc9f1c7ae0819c3) )
-		ROM_LOAD_NIB_LOW ( "7440-01.r4",   0x0000, 0x0200, CRC(957dd8df) SHA1(280457392f40cd66eae34d2fcdbd4d2142793402) )
-	
-		ROM_REGION( 0x200, REGION_GFX2, ROMREGION_DISPOSE ) /* sprites, not used */
-		ROM_FILL( 0x0000, 0x0200, 0 )
-	
-		ROM_REGION( 0x0120, REGION_PROMS, 0 )
-		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c) SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
-		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db) SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
-	ROM_END
+		ROM_REGION( 0x0120, REGION_PROMS, 0 );
+		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c);SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
+		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db);SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
+	ROM_END(); }}; 
 	
 	
-	GAME( 1978, sprint1,  0,       sprint1, sprint1, sprint1, ROT0, "Atari", "Sprint 1" )
-	GAME( 1976, sprint2,  sprint1, sprint2, sprint2, sprint2, ROT0, "Atari", "Sprint 2 (set 1)" )
-	GAME( 1976, sprint2a, sprint1, sprint2, sprint2, sprint2, ROT0, "Atari", "Sprint 2 (set 2)" )
-	GAME( 1977, dominos,  0,       dominos, dominos, dominos, ROT0, "Atari", "Dominos" )
+	static RomLoadPtr rom_sprint2a = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "6290-01.b1", 0x2000, 0x0800, CRC(41fc985e);SHA1(7178846480cbf8d15955ccd987d0b0e902ab9f90) )
+		ROM_RELOAD(             0xe000, 0x0800 );
+		ROM_LOAD( "6291-01.c1", 0x2800, 0x0800, CRC(07f7a920);SHA1(845f65d2bd290eb295ca6bae2575f27aaa08c0dd) )
+		ROM_RELOAD(             0xe800, 0x0800 );
+		ROM_LOAD( "6404.d1",    0x3000, 0x0800, CRC(d2878ff6);SHA1(b742a8896c1bf1cfacf48d06908920d88a2c9ea8) )
+		ROM_RELOAD(             0xf000, 0x0800 );
+		ROM_LOAD( "6405-02.e1", 0x3800, 0x0800, CRC(e80fd249);SHA1(7bcf7dfd72ca83fdd80593eaf392570da1f71298) ) 
+		ROM_RELOAD(             0xf800, 0x0800 );
+	
+		ROM_REGION( 0x0200, REGION_GFX1, ROMREGION_DISPOSE );/* tiles */
+		ROM_LOAD_NIB_HIGH( "6396-01.p4", 0x0000, 0x0200, CRC(801b42dd);SHA1(1db58390d803f404253cbf36d562016441ca568d) )
+		ROM_LOAD_NIB_LOW ( "6397-01.r4", 0x0000, 0x0200, CRC(135ba1aa);SHA1(0465259440f73e1a2c8d8101f29e99b4885420e4) )
+	
+		ROM_REGION( 0x0200, REGION_GFX2, ROMREGION_DISPOSE );/* cars */
+		ROM_LOAD_NIB_HIGH( "6399-01.j6", 0x0000, 0x0200, CRC(63d685b2);SHA1(608746163e25dbc14cde43c17aecbb9a14fac875) )
+		ROM_LOAD_NIB_LOW ( "6398-01.k6", 0x0000, 0x0200, CRC(c9e1017e);SHA1(e7279a13e4a812d2e0218be0bc5162f2e56c6b66) )
+	
+		ROM_REGION( 0x0120, REGION_PROMS, 0 );
+		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c);SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
+		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db);SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
+	ROM_END(); }}; 
+	
+	
+	static RomLoadPtr rom_dominos = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "7352-02.d1",   0x3000, 0x0800, CRC(738b4413);SHA1(3a90ab25bb5f65504692f97da43f03e21392dcd8) )
+		ROM_RELOAD(               0xf000, 0x0800 );
+		ROM_LOAD( "7438-02.e1",   0x3800, 0x0800, CRC(c84e54e2);SHA1(383b388a1448a195f28352fc5e4ff1a2af80cc95) )
+		ROM_RELOAD(               0xf800, 0x0800 );
+	
+		ROM_REGION( 0x200, REGION_GFX1, ROMREGION_DISPOSE );/* tiles */
+		ROM_LOAD_NIB_HIGH( "7439-01.p4",   0x0000, 0x0200, CRC(4f42fdd6);SHA1(f8ea4b582e26cad37b746174cdc9f1c7ae0819c3) )
+		ROM_LOAD_NIB_LOW ( "7440-01.r4",   0x0000, 0x0200, CRC(957dd8df);SHA1(280457392f40cd66eae34d2fcdbd4d2142793402) )
+	
+		ROM_REGION( 0x200, REGION_GFX2, ROMREGION_DISPOSE );/* sprites, not used */
+		ROM_FILL( 0x0000, 0x0200, 0 );
+	
+		ROM_REGION( 0x0120, REGION_PROMS, 0 );
+		ROM_LOAD( "6400-01.m2", 0x0000, 0x0100, CRC(b8094b4c);SHA1(82dc6799a19984f3b204ee3aeeb007e55afc8be3) )	/* SYNC */
+		ROM_LOAD( "6401-01.e2", 0x0100, 0x0020, CRC(857df8db);SHA1(06313d5bde03220b2bc313d18e50e4bb1d0cfbbb) )	/* address */
+	ROM_END(); }}; 
+	
+	
+	public static GameDriver driver_sprint1	   = new GameDriver("1978"	,"sprint1"	,"sprint2.java"	,rom_sprint1,null	,machine_driver_sprint1	,input_ports_sprint1	,init_sprint1	,ROT0	,	"Atari", "Sprint 1" )
+	public static GameDriver driver_sprint2	   = new GameDriver("1976"	,"sprint2"	,"sprint2.java"	,rom_sprint2,driver_sprint1	,machine_driver_sprint2	,input_ports_sprint2	,init_sprint2	,ROT0	,	"Atari", "Sprint 2 (set 1)" )
+	public static GameDriver driver_sprint2a	   = new GameDriver("1976"	,"sprint2a"	,"sprint2.java"	,rom_sprint2a,driver_sprint1	,machine_driver_sprint2	,input_ports_sprint2	,init_sprint2	,ROT0	,	"Atari", "Sprint 2 (set 2)" )
+	public static GameDriver driver_dominos	   = new GameDriver("1977"	,"dominos"	,"sprint2.java"	,rom_dominos,null	,machine_driver_dominos	,input_ports_dominos	,init_dominos	,ROT0	,	"Atari", "Dominos" )
 }

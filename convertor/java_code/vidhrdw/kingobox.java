@@ -11,7 +11,6 @@ public class kingobox
 	UINT8 *kingofb_colorram2;
 	UINT8 *kingofb_scroll_y;
 	
-	extern int kingofb_nmi_enable;
 	
 	static int palette_bank;
 	
@@ -49,22 +48,22 @@ public class kingobox
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 			/* green component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			g = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 			/* blue component */
-			bit0 = (color_prom[2*256] >> 0) & 0x01;
-			bit1 = (color_prom[2*256] >> 1) & 0x01;
-			bit2 = (color_prom[2*256] >> 2) & 0x01;
-			bit3 = (color_prom[2*256] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*256)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*256)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*256)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*256)>> 3) & 0x01;
 			b = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -106,22 +105,22 @@ public class kingobox
 	
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 4) & 0x01;
-			bit1 = (color_prom[0] >> 5) & 0x01;
-			bit2 = (color_prom[0] >> 6) & 0x01;
-			bit3 = (color_prom[0] >> 7) & 0x01;
+			bit0 = (color_prom.read(0)>> 4) & 0x01;
+			bit1 = (color_prom.read(0)>> 5) & 0x01;
+			bit2 = (color_prom.read(0)>> 6) & 0x01;
+			bit3 = (color_prom.read(0)>> 7) & 0x01;
 			r = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 			/* green component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			g = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 			/* blue component */
-			bit0 = (color_prom[256] >> 0) & 0x01;
-			bit1 = (color_prom[256] >> 1) & 0x01;
-			bit2 = (color_prom[256] >> 2) & 0x01;
-			bit3 = (color_prom[256] >> 3) & 0x01;
+			bit0 = (color_prom.read(256)>> 0) & 0x01;
+			bit1 = (color_prom.read(256)>> 1) & 0x01;
+			bit2 = (color_prom.read(256)>> 2) & 0x01;
+			bit3 = (color_prom.read(256)>> 3) & 0x01;
 			b = 0x10 * bit0 + 0x21 * bit1 + 0x45 * bit2 + 0x89 * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -148,43 +147,43 @@ public class kingobox
 		}
 	}
 	
-	WRITE_HANDLER( kingofb_videoram_w )
+	public static WriteHandlerPtr kingofb_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kingofb_colorram_w )
+	public static WriteHandlerPtr kingofb_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kingofb_videoram2_w )
+	public static WriteHandlerPtr kingofb_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (kingofb_videoram2[offset] != data)
 		{
 			kingofb_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kingofb_colorram2_w )
+	public static WriteHandlerPtr kingofb_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (kingofb_colorram2[offset] != data)
 		{
 			kingofb_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( kingofb_f800_w )
+	public static WriteHandlerPtr kingofb_f800_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		kingofb_nmi_enable = data & 0x20;
 	
@@ -199,13 +198,13 @@ public class kingobox
 			flip_screen_set(data & 0x80);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
+		int attr = colorram.read(tile_index);
 		int bank = ((attr & 0x04) >> 2) + 2;
-		int code = (tile_index / 16) ? videoram[tile_index] + ((attr & 0x03) << 8) : 0;
+		int code = (tile_index / 16) ? videoram.read(tile_index)+ ((attr & 0x03) << 8) : 0;
 		int color = ((attr & 0x70) >> 4) + 8 * palette_bank;
 	
 		SET_TILE_INFO(bank, code, color, 0)
@@ -226,13 +225,13 @@ public class kingobox
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols_flip_y, 
 			TILEMAP_OPAQUE, 16, 16, 16, 16);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_cols_flip_y, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -246,13 +245,13 @@ public class kingobox
 	
 		for (offs = spriteram_size - 4; offs >= 0; offs -= 4)
 		{
-			int bank = (spriteram[offs + 3] & 0x04) >> 2;
-			int code = spriteram[offs + 2] + ((spriteram[offs + 3] & 0x03) << 8);
-			int color = ((spriteram[offs + 3] & 0x70) >> 4) + 8 * palette_bank;
+			int bank = (spriteram.read(offs + 3)& 0x04) >> 2;
+			int code = spriteram.read(offs + 2)+ ((spriteram.read(offs + 3)& 0x03) << 8);
+			int color = ((spriteram.read(offs + 3)& 0x70) >> 4) + 8 * palette_bank;
 			int flipx = 0;		
-			int flipy = spriteram[offs + 3] & 0x80;
-			int sx = spriteram[offs+1];
-			int sy = spriteram[offs];
+			int flipy = spriteram.read(offs + 3)& 0x80;
+			int sx = spriteram.read(offs+1);
+			int sy = spriteram.read(offs);
 	
 			if (flip_screen)
 			{
@@ -282,8 +281,8 @@ public class kingobox
 	
 	static void ringking_get_bg_tile_info(int tile_index)
 	{
-		int code = (tile_index / 16) ? videoram[tile_index] : 0;
-		int color = ((colorram[tile_index] & 0x70) >> 4) + 8 * palette_bank;
+		int code = (tile_index / 16) ? videoram.read(tile_index): 0;
+		int color = ((colorram.read(tile_index)& 0x70) >> 4) + 8 * palette_bank;
 	
 		SET_TILE_INFO(4, code, color, 0)
 	}
@@ -293,13 +292,13 @@ public class kingobox
 		bg_tilemap = tilemap_create(ringking_get_bg_tile_info, tilemap_scan_cols_flip_y, 
 			TILEMAP_OPAQUE, 16, 16, 16, 16);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_cols_flip_y, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -313,13 +312,13 @@ public class kingobox
 	
 		for (offs = 0; offs < spriteram_size; offs += 4)
 		{
-			int bank = (spriteram[offs + 1] & 0x04) >> 2;
-			int code = spriteram[offs + 3] + ((spriteram[offs + 1] & 0x03) << 8);
-			int color = ((spriteram[offs + 1] & 0x70) >> 4) + 8 * palette_bank;
+			int bank = (spriteram.read(offs + 1)& 0x04) >> 2;
+			int code = spriteram.read(offs + 3)+ ((spriteram.read(offs + 1)& 0x03) << 8);
+			int color = ((spriteram.read(offs + 1)& 0x70) >> 4) + 8 * palette_bank;
 			int flipx = 0;
-			int flipy = ( spriteram[offs + 1] & 0x80 ) ? 0 : 1;
-			int sx = spriteram[offs+2];
-			int sy = spriteram[offs];
+			int flipy = ( spriteram.read(offs + 1)& 0x80 ) ? 0 : 1;
+			int sx = spriteram.read(offs+2);
+			int sy = spriteram.read(offs);
 	
 			if (flip_screen)
 			{

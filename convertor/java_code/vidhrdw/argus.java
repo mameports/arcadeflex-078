@@ -455,54 +455,54 @@ public class argus
 	  Memory handler
 	***************************************************************************/
 	
-	READ_HANDLER( argus_txram_r )
+	public static ReadHandlerPtr argus_txram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return argus_txram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( argus_txram_w )
+	public static WriteHandlerPtr argus_txram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_txram[ offset ] != data)
 		{
 			argus_txram[ offset ] = data;
 			tilemap_mark_tile_dirty(tx_tilemap, offset >> 1);
 		}
-	}
+	} };
 	
-	READ_HANDLER( butasan_txram_r )
+	public static ReadHandlerPtr butasan_txram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return butasan_txram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_txram_w )
+	public static WriteHandlerPtr butasan_txram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_txram[ offset ] != data)
 		{
 			butasan_txram[ offset ] = data;
 			tilemap_mark_tile_dirty(tx_tilemap, (offset ^ 0x7c0) >> 1);
 		}
-	}
+	} };
 	
-	READ_HANDLER( argus_bg1ram_r )
+	public static ReadHandlerPtr argus_bg1ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return argus_bg1ram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( argus_bg1ram_w )
+	public static WriteHandlerPtr argus_bg1ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg1ram[ offset ] != data)
 		{
 			argus_bg1ram[ offset ] = data;
 			tilemap_mark_tile_dirty(bg1_tilemap, offset >> 1);
 		}
-	}
+	} };
 	
-	READ_HANDLER( butasan_bg0ram_r )
+	public static ReadHandlerPtr butasan_bg0ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return butasan_bg0ram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg0ram_w )
+	public static WriteHandlerPtr butasan_bg0ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_bg0ram[ offset ] != data)
 		{
@@ -515,14 +515,14 @@ public class argus
 	
 			tilemap_mark_tile_dirty(bg0_tilemap, idx);
 		}
-	}
+	} };
 	
-	READ_HANDLER( butasan_bg1ram_r )
+	public static ReadHandlerPtr butasan_bg1ram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return butasan_bg1ram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg1ram_w )
+	public static WriteHandlerPtr butasan_bg1ram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_bg1ram[ offset ] != data)
 		{
@@ -535,7 +535,7 @@ public class argus
 	
 			tilemap_mark_tile_dirty(bg1_tilemap, idx);
 		}
-	}
+	} };
 	
 	WRITE_HANDLER ( argus_bg0_scrollx_w )
 	{
@@ -545,63 +545,63 @@ public class argus
 		}
 	}
 	
-	WRITE_HANDLER( argus_bg0_scrolly_w )
+	public static WriteHandlerPtr argus_bg0_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg0_scrolly[ offset ] != data)
 		{
 			int scrolly;
 			argus_bg0_scrolly[ offset ] = data;
 			scrolly = argus_bg0_scrolly[0] | ( (argus_bg0_scrolly[1] & 0x01) << 8);
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 				tilemap_set_scrolly( bg0_tilemap, 0, scrolly );
 			else
 				tilemap_set_scrolly( bg0_tilemap, 0, (scrolly + 256) & 0x1ff );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg0_scrollx_w )
+	public static WriteHandlerPtr butasan_bg0_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg0_scrollx[ offset ] != data)
 		{
 			int scrollx;
 			argus_bg0_scrollx[ offset ] = data;
 			scrollx = argus_bg0_scrollx[0] | ( (argus_bg0_scrollx[1] & 0x01) << 8);
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 				tilemap_set_scrollx( bg0_tilemap, 0, scrollx );
 			else
 				tilemap_set_scrollx( bg0_tilemap, 0, (scrollx + 256) & 0x1ff );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( argus_bg1_scrollx_w )
+	public static WriteHandlerPtr argus_bg1_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg1_scrollx[ offset ] != data)
 		{
 			int scrollx;
 			argus_bg1_scrollx[ offset ] = data;
 			scrollx = argus_bg1_scrollx[0] | ( (argus_bg1_scrollx[1] & 0x01) << 8);
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 				tilemap_set_scrollx( bg1_tilemap, 0, scrollx );
 			else
 				tilemap_set_scrollx( bg1_tilemap, 0, (scrollx + 256) & 0x1ff );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( argus_bg1_scrolly_w )
+	public static WriteHandlerPtr argus_bg1_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg1_scrolly[ offset ] != data)
 		{
 			int scrolly;
 			argus_bg1_scrolly[ offset ] = data;
 			scrolly = argus_bg1_scrolly[0] | ( (argus_bg1_scrolly[1] & 0x01) << 8);
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 				tilemap_set_scrolly( bg1_tilemap, 0, scrolly );
 			else
 				tilemap_set_scrolly( bg1_tilemap, 0, (scrolly + 256) & 0x1ff );
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( argus_bg_status_w )
+	public static WriteHandlerPtr argus_bg_status_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg_status != data)
 		{
@@ -622,9 +622,9 @@ public class argus
 				}
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( valtric_bg_status_w )
+	public static WriteHandlerPtr valtric_bg_status_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg_status != data)
 		{
@@ -645,9 +645,9 @@ public class argus
 				}
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg0_status_w )
+	public static WriteHandlerPtr butasan_bg0_status_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_bg_status != data)
 		{
@@ -656,15 +656,15 @@ public class argus
 			/* Backgound enable */
 			tilemap_set_enable(bg0_tilemap, argus_bg_status & 1);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( argus_flipscreen_w )
+	public static WriteHandlerPtr argus_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (argus_flipscreen != (data >> 7))
 		{
 			argus_flipscreen = data >> 7;
 			tilemap_set_flip( ALL_TILEMAPS, (argus_flipscreen) ? TILEMAP_FLIPY | TILEMAP_FLIPX : 0);
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 			{
 				int scrollx, scrolly;
 	
@@ -701,14 +701,14 @@ public class argus
 				tilemap_set_scrolly(bg1_tilemap, 0, (scrolly + 256) & 0x1ff);
 			}
 		}
-	}
+	} };
 	
-	READ_HANDLER( argus_paletteram_r )
+	public static ReadHandlerPtr argus_paletteram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return argus_paletteram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( argus_paletteram_w )
+	public static WriteHandlerPtr argus_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int offs;
 	
@@ -767,9 +767,9 @@ public class argus
 	
 			argus_bg_purple = argus_paletteram[0x0ff] & 0x0f;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( valtric_paletteram_w )
+	public static WriteHandlerPtr valtric_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int offs;
 	
@@ -805,9 +805,9 @@ public class argus
 	
 			argus_bg_purple = argus_paletteram[0x01ff] & 0x0f;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_paletteram_w )
+	public static WriteHandlerPtr butasan_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		argus_paletteram[ offset ] = data;
 	
@@ -839,35 +839,35 @@ public class argus
 			argus_change_palette( ((offset - 0x0600) >> 1) + 512,
 				argus_paletteram[offset | 1] | (argus_paletteram[offset & ~1] << 8));
 		}
-	}
+	} };
 	
-	READ_HANDLER( butasan_txbackram_r )
+	public static ReadHandlerPtr butasan_txbackram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return butasan_txbackram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_txbackram_w )
+	public static WriteHandlerPtr butasan_txbackram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_txbackram[ offset ] != data)
 		{
 			butasan_txbackram[ offset ] = data;
 		}
-	}
+	} };
 	
-	READ_HANDLER( butasan_bg0backram_r )
+	public static ReadHandlerPtr butasan_bg0backram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return butasan_bg0backram[ offset ];
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg0backram_w )
+	public static WriteHandlerPtr butasan_bg0backram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_bg0backram[ offset ] != data)
 		{
 			butasan_bg0backram[ offset ] = data;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( butasan_bg1_status_w )
+	public static WriteHandlerPtr butasan_bg1_status_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (butasan_bg1_status != data)
 		{
@@ -876,7 +876,7 @@ public class argus
 			tilemap_set_enable(bg1_tilemap, butasan_bg1_status & 0x01);	/* Set enable flag */
 			tilemap_mark_all_tiles_dirty( bg1_tilemap );				/* Bank changed */
 		}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -978,7 +978,7 @@ public class argus
 			}
 		}
 	
-		if (!argus_flipscreen)
+		if (argus_flipscreen == 0)
 			tilemap_set_scrollx(bg0_tilemap, 0, scrollx & 0x1ff);
 		else
 			tilemap_set_scrollx(bg0_tilemap, 0, (scrollx + 256) & 0x1ff);
@@ -996,8 +996,8 @@ public class argus
 			{
 				int sx, sy, tile, flipx, flipy, color, pri;
 	
-				sx = spriteram[offs + 1];
-				sy = spriteram[offs];
+				sx = spriteram.read(offs + 1);
+				sy = spriteram.read(offs);
 	
 				if (argus_flipscreen)
 				{
@@ -1005,22 +1005,22 @@ public class argus
 					sy = 240 - sy;
 				}
 	
-				if (!argus_flipscreen)
+				if (argus_flipscreen == 0)
 				{
-					if (  spriteram[offs+2] & 0x01)  sx -= 256;
-					if (!(spriteram[offs+2] & 0x02)) sy -= 256;
+					if (  spriteram.read(offs+2)& 0x01)  sx -= 256;
+					if (!(spriteram.read(offs+2)& 0x02)) sy -= 256;
 				}
 				else
 				{
-					if (  spriteram[offs+2] & 0x01)  sx += 256;
-					if (!(spriteram[offs+2] & 0x02)) sy += 256;
+					if (  spriteram.read(offs+2)& 0x01)  sx += 256;
+					if (!(spriteram.read(offs+2)& 0x02)) sy += 256;
 				}
 	
-				tile	 = spriteram[offs+3] + ((spriteram[offs+2] & 0xc0) << 2);
-				flipx	 = spriteram[offs+2] & 0x10;
-				flipy	 = spriteram[offs+2] & 0x20;
-				color	 = spriteram[offs+4] & 0x07;
-				pri      = (spriteram[offs+4] & 0x08) >> 3;
+				tile	 = spriteram.read(offs+3)+ ((spriteram.read(offs+2)& 0xc0) << 2);
+				flipx	 = spriteram.read(offs+2)& 0x10;
+				flipy	 = spriteram.read(offs+2)& 0x20;
+				color	 = spriteram.read(offs+4)& 0x07;
+				pri      = (spriteram.read(offs+4)& 0x08) >> 3;
 	
 				if (argus_flipscreen)
 				{
@@ -1052,8 +1052,8 @@ public class argus
 			{
 				int sx, sy, tile, flipx, flipy, color;
 	
-				sx = spriteram[offs + 1];
-				sy = spriteram[offs];
+				sx = spriteram.read(offs + 1);
+				sy = spriteram.read(offs);
 	
 				if (argus_flipscreen)
 				{
@@ -1061,21 +1061,21 @@ public class argus
 					sy = 240 - sy;
 				}
 	
-				if (!argus_flipscreen)
+				if (argus_flipscreen == 0)
 				{
-					if (  spriteram[offs+2] & 0x01)  sx -= 256;
-					if (!(spriteram[offs+2] & 0x02)) sy -= 256;
+					if (  spriteram.read(offs+2)& 0x01)  sx -= 256;
+					if (!(spriteram.read(offs+2)& 0x02)) sy -= 256;
 				}
 				else
 				{
-					if (  spriteram[offs+2] & 0x01)  sx += 256;
-					if (!(spriteram[offs+2] & 0x02)) sy += 256;
+					if (  spriteram.read(offs+2)& 0x01)  sx += 256;
+					if (!(spriteram.read(offs+2)& 0x02)) sy += 256;
 				}
 	
-				tile	 = spriteram[offs+3] + ((spriteram[offs+2] & 0xc0) << 2);
-				flipx	 = spriteram[offs+2] & 0x10;
-				flipy	 = spriteram[offs+2] & 0x20;
-				color	 = spriteram[offs+4] & 0x0f;
+				tile	 = spriteram.read(offs+3)+ ((spriteram.read(offs+2)& 0xc0) << 2);
+				flipx	 = spriteram.read(offs+2)& 0x10;
+				flipy	 = spriteram.read(offs+2)& 0x20;
+				color	 = spriteram.read(offs+4)& 0x0f;
 	
 				if (argus_flipscreen)
 				{
@@ -1103,18 +1103,18 @@ public class argus
 		{
 			int sx, sy, tile, flipx, flipy, color;
 	
-			sx = spriteram[offs + 2];
-			sy = 240 - spriteram[offs + 4];
+			sx = spriteram.read(offs + 2);
+			sy = 240 - spriteram.read(offs + 4);
 	
-			if (spriteram[offs + 3] & 0x01) sx -= 256;
-			if (spriteram[offs + 5] & 0x01) sy += 256;
+			if (spriteram.read(offs + 3)& 0x01) sx -= 256;
+			if (spriteram.read(offs + 5)& 0x01) sy += 256;
 	
-			tile	 = spriteram[offs + 6] + ((spriteram[offs + 7] & 0x0f) << 8);
-			flipx	 = spriteram[offs + 0] & 0x01;
-			flipy	 = spriteram[offs + 0] & 0x04;
-			color	 = spriteram[offs + 1] & 0x0f;
+			tile	 = spriteram.read(offs + 6)+ ((spriteram.read(offs + 7)& 0x0f) << 8);
+			flipx	 = spriteram.read(offs + 0)& 0x01;
+			flipy	 = spriteram.read(offs + 0)& 0x04;
+			color	 = spriteram.read(offs + 1)& 0x0f;
 	
-			if (!argus_flipscreen)
+			if (argus_flipscreen == 0)
 			{
 				if ( (offs >= 0x100 && offs < 0x300) || (offs >= 0x400 && offs < 0x580) )
 				{
@@ -1155,7 +1155,7 @@ public class argus
 						{
 							int td;
 	
-							if ( !flipy )
+							if (flipy == 0)
 								td = (flipx) ? (i * 2) + 1 - j : i * 2 + j;
 							else
 								td = (flipx) ? ( (1 - i) * 2 ) + 1 - j : (1 - i) * 2 + j;
@@ -1180,7 +1180,7 @@ public class argus
 						{
 							int td;
 	
-							if ( !flipy )
+							if (flipy == 0)
 								td = (flipx) ? (i * 4) + 3 - j : i * 4 + j;
 							else
 								td = (flipx) ? ( (3 - i) * 4 ) + 3 - j : (3 - i) * 4 + j;
@@ -1242,7 +1242,7 @@ public class argus
 						{
 							int td;
 	
-							if ( !flipy )
+							if (flipy == 0)
 								td = (flipx) ? (1 - i) * 2 + j : ( (1 - i) * 2 ) + 1 - j;
 							else
 								td = (flipx) ? i * 2 + j : (i * 2) + 1 - j;
@@ -1267,7 +1267,7 @@ public class argus
 						{
 							int td;
 	
-							if ( !flipy )
+							if (flipy == 0)
 								td = (flipx) ? (3 - i) * 4 + j : ( (3 - i) * 4 ) + 3 - j;
 							else
 								td = (flipx) ? i * 4 + j : (i * 4) + 3 - j;
@@ -1305,14 +1305,14 @@ public class argus
 					if (i == 0)
 					{
 						logerror("%04x : ", offs + 0xf000);
-						logerror("%02x ", spriteram[offs]);
+						logerror("%02x ", spriteram.read(offs));
 					}
 					else if (i == 7)
-						logerror("%02x  ", spriteram[offs + 7]);
+						logerror("%02x  ", spriteram.read(offs + 7));
 					else if (i == 15)
-						logerror("%02x\n", spriteram[offs + 15]);
+						logerror("%02x\n", spriteram.read(offs + 15));
 					else
-						logerror("%02x ", spriteram[offs + i]);
+						logerror("%02x ", spriteram.read(offs + i));
 				}
 			}
 			logerror("\nColor RAM\n");

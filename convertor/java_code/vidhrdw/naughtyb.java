@@ -16,7 +16,6 @@ public class naughtyb
 {
 	
 	/* from sndhrdw/pleiads.c */
-	WRITE_HANDLER( pleiads_sound_control_c_w );
 	
 	unsigned char *naughtyb_videoram2;
 	
@@ -32,23 +31,23 @@ public class naughtyb
 	static int bankreg;
 	
 	
-	static struct rectangle scrollvisiblearea =
-	{
+	static rectangle scrollvisiblearea = new rectangle
+	(
 		2*8, 34*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
-	static struct rectangle leftvisiblearea =
-	{
+	static rectangle leftvisiblearea = new rectangle
+	(
 		0*8, 2*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
-	static struct rectangle rightvisiblearea =
-	{
+	static rectangle rightvisiblearea = new rectangle
+	(
 		34*8, 36*8-1,
 		0*8, 28*8-1
-	};
+	);
 	
 	
 	
@@ -95,20 +94,20 @@ public class naughtyb
 			int bit0,bit1,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
 	
 			/*r = 0x55 * bit0 + 0xaa * bit1;*/
 			r = combine_2_weights(weights_r, bit0, bit1);
 	
-			bit0 = (color_prom[0] >> 2) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
+			bit0 = (color_prom.read(0)>> 2) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
 	
 			/*g = 0x55 * bit0 + 0xaa * bit1;*/
 			g = combine_2_weights(weights_g, bit0, bit1);
 	
-			bit0 = (color_prom[0] >> 1) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
+			bit0 = (color_prom.read(0)>> 1) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
 	
 			/*b = 0x55 * bit0 + 0xaa * bit1;*/
 			b = combine_2_weights(weights_b, bit0, bit1);
@@ -173,7 +172,7 @@ public class naughtyb
 	
 	
 	
-	WRITE_HANDLER( naughtyb_videoram2_w )
+	public static WriteHandlerPtr naughtyb_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (naughtyb_videoram2[offset] != data)
 		{
@@ -181,11 +180,11 @@ public class naughtyb
 	
 			naughtyb_videoram2[offset] = data;
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( naughtyb_videoreg_w )
+	public static WriteHandlerPtr naughtyb_videoreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 4+5 control the sound circuit */
 		pleiads_sound_control_c_w(offset,data);
@@ -197,11 +196,11 @@ public class naughtyb
 			palreg  = (data >> 1) & 0x03;	/* pallette sel is bit 1 & 2 */
 			bankreg = (data >> 2) & 0x01;	/* banksel is just bit 2 */
 	
-			memset (dirtybuffer, 1, videoram_size);
+			memset (dirtybuffer, 1, videoram_size[0]);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( popflame_videoreg_w )
+	public static WriteHandlerPtr popflame_videoreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 4+5 control the sound circuit */
 		pleiads_sound_control_c_w(offset,data);
@@ -213,9 +212,9 @@ public class naughtyb
 			palreg  = (data >> 1) & 0x03;	/* pallette sel is bit 1 & 2 */
 			bankreg = (data >> 3) & 0x01;	/* banksel is just bit 3 */
 	
-			memset (dirtybuffer, 1, videoram_size);
+			memset (dirtybuffer, 1, videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -302,8 +301,8 @@ public class naughtyb
 						0,TRANSPARENCY_NONE,0);
 	
 				drawgfx(tmpbitmap,Machine->gfx[1],
-						videoram[offs] + 256*bankreg,
-						(videoram[offs] >> 5) + 8 * palreg,
+						videoram.read(offs)+ 256*bankreg,
+						(videoram.read(offs)>> 5) + 8 * palreg,
 						0,0,
 						8*sx,8*sy,
 						0,TRANSPARENCY_PEN,0);

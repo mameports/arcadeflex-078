@@ -211,27 +211,27 @@ public class inptportH
 	#define IP_JOY_NONE CODE_NONE
 	
 	/* start of table */
-	#define INPUT_PORTS_START(name) \
+	#define static InputPortPtr input_ports_name = new InputPortPtr(){ public void handler() {  \
 		static const struct InputPortTiny input_ports_##name[] = {
 	
 	/* end of table */
-	#define INPUT_PORTS_END \
+	#define INPUT_PORTS_END(); }};  \
 		{ 0, 0, IPT_END, 0  } \
 		};
 	/* start of a new input port */
-	#define PORT_START \
+	#define PORT_START();  \
 		{ 0, 0, IPT_PORT, 0 },
 	
 	/* input bit definition */
 	#define PORT_BIT_NAME(mask,default,type,name) \
 		{ mask, default, type, name },
-	#define PORT_BIT(mask,default,type) \
+	#define PORT_BIT(mask,default,type);\
 		PORT_BIT_NAME(mask, default, type, IP_NAME_DEFAULT)
 	
 	/* impulse input bit definition */
 	#define PORT_BIT_IMPULSE_NAME(mask,default,type,duration,name) \
 		PORT_BIT_NAME(mask, default, type | IPF_IMPULSE | ((duration & 0xff) << 8), name)
-	#define PORT_BIT_IMPULSE(mask,default,type,duration) \
+	#define PORT_BIT_IMPULSE(mask,default,type,duration);\
 		PORT_BIT_IMPULSE_NAME(mask, default, type, duration, IP_NAME_DEFAULT)
 	
 	/* key/joy code specification */
@@ -239,36 +239,36 @@ public class inptportH
 		{ key, joy, IPT_EXTENSION, 0 },
 	
 	/* input bit definition with extended fields */
-	#define PORT_BITX(mask,default,type,name,key,joy) \
+	#define PORT_BITX(mask,default,type,name,key,joy);\
 		PORT_BIT_NAME(mask, default, type, name) \
 		PORT_CODE(key,joy)
 	
 	/* analog input */
-	#define PORT_ANALOG(mask,default,type,sensitivity,delta,min,max) \
-		PORT_BIT(mask, default, type) \
+	#define PORT_ANALOG(mask,default,type,sensitivity,delta,min,max);\
+		PORT_BIT(mask, default, type);\
 		{ min, max, IPT_EXTENSION | IPF_SENSITIVITY(sensitivity) | IPF_DELTA(delta), IP_NAME_DEFAULT },
 	
-	#define PORT_ANALOGX(mask,default,type,sensitivity,delta,min,max,keydec,keyinc,joydec,joyinc) \
-		PORT_BIT(mask, default, type) \
+	#define PORT_ANALOGX(mask,default,type,sensitivity,delta,min,max,keydec,keyinc,joydec,joyinc);\
+		PORT_BIT(mask, default, type);\
 		{ min, max, IPT_EXTENSION | IPF_SENSITIVITY(sensitivity) | IPF_DELTA(delta), IP_NAME_DEFAULT }, \
 		PORT_CODE(keydec,joydec) \
 		PORT_CODE(keyinc,joyinc)
 	
 	/* dip switch definition */
-	#define PORT_DIPNAME(mask,default,name) \
+	#define PORT_DIPNAME(mask,default,name);\
 		PORT_BIT_NAME(mask, default, IPT_DIPSWITCH_NAME, name)
 	
-	#define PORT_DIPSETTING(default,name) \
+	#define PORT_DIPSETTING(default,name);\
 		PORT_BIT_NAME(0, default, IPT_DIPSWITCH_SETTING, name)
 	
 	
-	#define PORT_SERVICE(mask,default)	\
-		PORT_BITX(    mask, mask & default, IPT_DIPSWITCH_NAME | IPF_TOGGLE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )	\
-		PORT_DIPSETTING(    mask & default, DEF_STR( Off ) )	\
-		PORT_DIPSETTING(    mask &~default, DEF_STR( On ) )
+	#define PORT_SERVICE(mask,default);\
+		PORT_BITX(    mask, mask & default, IPT_DIPSWITCH_NAME | IPF_TOGGLE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )	\
+		PORT_DIPSETTING(    mask & default, DEF_STR( "Off") );	\
+		PORT_DIPSETTING(    mask &~default, DEF_STR( "On") );
 	
 	#define PORT_SERVICE_NO_TOGGLE(mask,default)	\
-		PORT_BITX(    mask, mask & default, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+		PORT_BITX(    mask, mask & default, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
 	
 	#define MAX_DEFSTR_LEN 20
 	extern const char ipdn_defaultstrings[][MAX_DEFSTR_LEN];
@@ -380,15 +380,18 @@ public class inptportH
 		STR_TOTAL
 	};
 	
-	enum { IKT_STD, IKT_IPT, IKT_IPT_EXT, IKT_OSD_KEY, IKT_OSD_JOY };
+	public static final int IKT_STD = 0;
+	public static final int IKT_IPT = 1;
+	public static final int IKT_IPT_EXT = 2;
+	public static final int IKT_OSD_KEY = 3;
+	public static final int IKT_OSD_JOY = 4;
+	
 	
 	#define DEF_STR(str_num) (ipdn_defaultstrings[STR_##str_num])
 	
 	#define MAX_INPUT_PORTS 30
 	
 	
-	int load_input_port_settings(void);
-	void save_input_port_settings(void);
 	
 	const char *input_port_name(const struct InputPort *in);
 	InputSeq* input_port_type_seq(int type);
@@ -401,43 +404,10 @@ public class inptportH
 	void set_default_player_controls(int player);
 	#endif /* MAME_NET */
 	
-	void init_analog_seq(void);
 	
 	void update_analog_port(int port);
-	void update_input_ports(void);	/* called by cpuintrf.c - not for external use */
-	void inputport_vblank_end(void);	/* called by cpuintrf.c - not for external use */
 	
 	int readinputport(int port);
-	READ_HANDLER( input_port_0_r );
-	READ_HANDLER( input_port_1_r );
-	READ_HANDLER( input_port_2_r );
-	READ_HANDLER( input_port_3_r );
-	READ_HANDLER( input_port_4_r );
-	READ_HANDLER( input_port_5_r );
-	READ_HANDLER( input_port_6_r );
-	READ_HANDLER( input_port_7_r );
-	READ_HANDLER( input_port_8_r );
-	READ_HANDLER( input_port_9_r );
-	READ_HANDLER( input_port_10_r );
-	READ_HANDLER( input_port_11_r );
-	READ_HANDLER( input_port_12_r );
-	READ_HANDLER( input_port_13_r );
-	READ_HANDLER( input_port_14_r );
-	READ_HANDLER( input_port_15_r );
-	READ_HANDLER( input_port_16_r );
-	READ_HANDLER( input_port_17_r );
-	READ_HANDLER( input_port_18_r );
-	READ_HANDLER( input_port_19_r );
-	READ_HANDLER( input_port_20_r );
-	READ_HANDLER( input_port_21_r );
-	READ_HANDLER( input_port_22_r );
-	READ_HANDLER( input_port_23_r );
-	READ_HANDLER( input_port_24_r );
-	READ_HANDLER( input_port_25_r );
-	READ_HANDLER( input_port_26_r );
-	READ_HANDLER( input_port_27_r );
-	READ_HANDLER( input_port_28_r );
-	READ_HANDLER( input_port_29_r );
 	
 	READ16_HANDLER( input_port_0_word_r );
 	READ16_HANDLER( input_port_1_word_r );
@@ -485,7 +455,6 @@ public class inptportH
 	};
 	extern struct ik input_keywords[];
 	extern struct ik *osd_input_keywords;
-	extern int num_ik;
 	
 	void seq_set_string(InputSeq* a, const char *buf);
 	

@@ -24,10 +24,6 @@ public class amspdwy
 	
 	/* Variables & functions defined in vidhrdw: */
 	
-	WRITE_HANDLER( amspdwy_videoram_w );
-	WRITE_HANDLER( amspdwy_colorram_w );
-	WRITE_HANDLER( amspdwy_paletteram_w );
-	WRITE_HANDLER( amspdwy_flipscreen_w );
 	
 	VIDEO_START( amspdwy );
 	VIDEO_UPDATE( amspdwy );
@@ -49,7 +45,7 @@ public class amspdwy
 		Or last value when wheel delta = 0
 	*/
 	#define AMSPDWY_WHEEL_R( _n_ ) \
-	READ_HANDLER( amspdwy_wheel_##_n_##_r ) \
+	public static ReadHandlerPtr amspdwy_wheel_##_n_##_r  = new ReadHandlerPtr() { public int handler(int offset) \
 	{ \
 		static data8_t wheel_old, ret; \
 		data8_t wheel = readinputport(5 + _n_); \
@@ -61,63 +57,69 @@ public class amspdwy
 			wheel_old = wheel; \
 		} \
 		return ret | readinputport(2 + _n_); \
-	}
+	} };
 	AMSPDWY_WHEEL_R( 0 )
 	AMSPDWY_WHEEL_R( 1 )
 	
 	
-	READ_HANDLER( amspdwy_sound_r )
+	public static ReadHandlerPtr amspdwy_sound_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return (YM2151_status_port_0_r(0) & ~ 0x30) | readinputport(4);
-	}
+	} };
 	
-	WRITE_HANDLER( amspdwy_sound_w )
+	public static WriteHandlerPtr amspdwy_sound_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		soundlatch_w(0,data);
 		cpu_set_nmi_line(1,PULSE_LINE);
-	}
+	} };
 	
-	static MEMORY_READ_START( amspdwy_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM				},	// ROM
-	//	{ 0x8000, 0x801f, MRA_RAM				},	// Palette
-		{ 0x9000, 0x93ff, videoram_r			},	// Layer
-		{ 0x9400, 0x97ff, videoram_r			},	// Mirror?
-		{ 0x9800, 0x9bff, colorram_r			},	// Layer
-		{ 0x9c00, 0x9fff, MRA_RAM				},	// Unused?
-		{ 0xa000, 0xa000, input_port_0_r		},	// DSW 1
-		{ 0xa400, 0xa400, input_port_1_r		},	// DSW 2
-		{ 0xa800, 0xa800, amspdwy_wheel_0_r		},	// Player 1
-		{ 0xac00, 0xac00, amspdwy_wheel_1_r		},	// Player 2
-		{ 0xb400, 0xb400, amspdwy_sound_r		},	// YM2151 Status + Buttons
-		{ 0xc000, 0xc0ff, MRA_RAM				},	// Sprites
-		{ 0xe000, 0xe7ff, MRA_RAM				},	// Work RAM
-	MEMORY_END
+	public static Memory_ReadAddress amspdwy_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM				),	// ROM
+	//	new Memory_ReadAddress( 0x8000, 0x801f, MRA_RAM				),	// Palette
+		new Memory_ReadAddress( 0x9000, 0x93ff, videoram_r			),	// Layer
+		new Memory_ReadAddress( 0x9400, 0x97ff, videoram_r			),	// Mirror?
+		new Memory_ReadAddress( 0x9800, 0x9bff, colorram_r			),	// Layer
+		new Memory_ReadAddress( 0x9c00, 0x9fff, MRA_RAM				),	// Unused?
+		new Memory_ReadAddress( 0xa000, 0xa000, input_port_0_r		),	// DSW 1
+		new Memory_ReadAddress( 0xa400, 0xa400, input_port_1_r		),	// DSW 2
+		new Memory_ReadAddress( 0xa800, 0xa800, amspdwy_wheel_0_r		),	// Player 1
+		new Memory_ReadAddress( 0xac00, 0xac00, amspdwy_wheel_1_r		),	// Player 2
+		new Memory_ReadAddress( 0xb400, 0xb400, amspdwy_sound_r		),	// YM2151 Status + Buttons
+		new Memory_ReadAddress( 0xc000, 0xc0ff, MRA_RAM				),	// Sprites
+		new Memory_ReadAddress( 0xe000, 0xe7ff, MRA_RAM				),	// Work RAM
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( amspdwy_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM							},	// ROM
-		{ 0x8000, 0x801f, amspdwy_paletteram_w, &paletteram	},	// Palette
-		{ 0x9000, 0x93ff, amspdwy_videoram_w, &videoram		},	// Layer
-		{ 0x9400, 0x97ff, amspdwy_videoram_w				},	// Mirror?
-		{ 0x9800, 0x9bff, amspdwy_colorram_w, &colorram		},	// Layer
-		{ 0x9c00, 0x9fff, MWA_RAM							},	// Unused?
-	//	{ 0xa000, 0xa000, MWA_NOP							},	// ?
-		{ 0xa400, 0xa400, amspdwy_flipscreen_w				},	// Toggle Flip Screen?
-		{ 0xb000, 0xb000, MWA_NOP							},	// ? Exiting IRQ
-		{ 0xb400, 0xb400, amspdwy_sound_w					},	// To Sound CPU
-		{ 0xc000, 0xc0ff, MWA_RAM, &spriteram, &spriteram_size	},	// Sprites
-		{ 0xe000, 0xe7ff, MWA_RAM							},	// Work RAM
-	MEMORY_END
+	public static Memory_WriteAddress amspdwy_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM							),	// ROM
+		new Memory_WriteAddress( 0x8000, 0x801f, amspdwy_paletteram_w, paletteram	),	// Palette
+		new Memory_WriteAddress( 0x9000, 0x93ff, amspdwy_videoram_w, videoram		),	// Layer
+		new Memory_WriteAddress( 0x9400, 0x97ff, amspdwy_videoram_w				),	// Mirror?
+		new Memory_WriteAddress( 0x9800, 0x9bff, amspdwy_colorram_w, colorram		),	// Layer
+		new Memory_WriteAddress( 0x9c00, 0x9fff, MWA_RAM							),	// Unused?
+	//	new Memory_WriteAddress( 0xa000, 0xa000, MWA_NOP							),	// ?
+		new Memory_WriteAddress( 0xa400, 0xa400, amspdwy_flipscreen_w				),	// Toggle Flip Screen?
+		new Memory_WriteAddress( 0xb000, 0xb000, MWA_NOP							),	// ? Exiting IRQ
+		new Memory_WriteAddress( 0xb400, 0xb400, amspdwy_sound_w					),	// To Sound CPU
+		new Memory_WriteAddress( 0xc000, 0xc0ff, MWA_RAM, spriteram, spriteram_size	),	// Sprites
+		new Memory_WriteAddress( 0xe000, 0xe7ff, MWA_RAM							),	// Work RAM
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	READ_HANDLER( amspdwy_port_r )
+	public static ReadHandlerPtr amspdwy_port_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		data8_t *Tracks = memory_region(REGION_CPU1)+0x10000;
 		return Tracks[offset];
-	}
+	} };
 	
-	static PORT_READ_START( amspdwy_readport )
-		{ 0x0000, 0x7fff, amspdwy_port_r	},
-	PORT_END
+	public static IO_ReadPort amspdwy_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x0000, 0x7fff, amspdwy_port_r	),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -129,20 +131,24 @@ public class amspdwy
 	
 	***************************************************************************/
 	
-	static MEMORY_READ_START( amspdwy_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM					},	// ROM
-		{ 0x9000, 0x9000, soundlatch_r				},	// From Main CPU
-		{ 0xc000, 0xdfff, MRA_RAM					},	// Work RAM
-		{ 0xffff, 0xffff, MRA_NOP					},	// ??? IY = FFFF at the start ?
-	MEMORY_END
+	public static Memory_ReadAddress amspdwy_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM					),	// ROM
+		new Memory_ReadAddress( 0x9000, 0x9000, soundlatch_r				),	// From Main CPU
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM					),	// Work RAM
+		new Memory_ReadAddress( 0xffff, 0xffff, MRA_NOP					),	// ??? IY = FFFF at the start ?
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( amspdwy_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM					},	// ROM
-	//	{ 0x8000, 0x8000, MWA_NOP					},	// ? Written with 0 at the start
-		{ 0xa000, 0xa000, YM2151_register_port_0_w	},	// YM2151
-		{ 0xa001, 0xa001, YM2151_data_port_0_w		},	//
-		{ 0xc000, 0xdfff, MWA_RAM					},	// Work RAM
-	MEMORY_END
+	public static Memory_WriteAddress amspdwy_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM					),	// ROM
+	//	new Memory_WriteAddress( 0x8000, 0x8000, MWA_NOP					),	// ? Written with 0 at the start
+		new Memory_WriteAddress( 0xa000, 0xa000, YM2151_register_port_0_w	),	// YM2151
+		new Memory_WriteAddress( 0xa001, 0xa001, YM2151_data_port_0_w		),	//
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM					),	// Work RAM
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -155,61 +161,61 @@ public class amspdwy
 	
 	***************************************************************************/
 	
-	INPUT_PORTS_START( amspdwy )
+	static InputPortPtr input_ports_amspdwy = new InputPortPtr(){ public void handler() { 
 	
-		PORT_START	// IN0 - DSW 1
-		PORT_DIPNAME( 0x01, 0x00, "Character Test" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x00, "Show Arrows" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-		PORT_SERVICE( 0x08, IP_ACTIVE_HIGH )
-		PORT_DIPNAME( 0x10, 0x00, "Steering Test" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( On ) )
-		PORT_BIT(     0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 	// IN0 - DSW 1
+		PORT_DIPNAME( 0x01, 0x00, "Character Test" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x00, "Show Arrows" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "On") );
+		PORT_SERVICE( 0x08, IP_ACTIVE_HIGH );
+		PORT_DIPNAME( 0x10, 0x00, "Steering Test" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "On") );
+		PORT_BIT(     0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START	// IN1 - DSW 2
-		PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
-	//	PORT_DIPSETTING(    0x02, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
-		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x00, "Easy" )
-		PORT_DIPSETTING(    0x04, "Normal" )
-		PORT_DIPSETTING(    0x08, "Hard" )
-		PORT_DIPSETTING(    0x0c, "Hardest" )
-		PORT_DIPNAME( 0x10, 0x00, "Time" )
-		PORT_DIPSETTING(    0x10, "45 sec" )
-		PORT_DIPSETTING(    0x00, "60 sec" )
-		PORT_BIT(     0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 	// IN1 - DSW 2
+		PORT_DIPNAME( 0x03, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_1C") );
+	//	PORT_DIPSETTING(    0x02, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "1C_2C") );
+		PORT_DIPNAME( 0x0c, 0x00, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x00, "Easy" );
+		PORT_DIPSETTING(    0x04, "Normal" );
+		PORT_DIPSETTING(    0x08, "Hard" );
+		PORT_DIPSETTING(    0x0c, "Hardest" );
+		PORT_DIPNAME( 0x10, 0x00, "Time" );
+		PORT_DIPSETTING(    0x10, "45 sec" );
+		PORT_DIPSETTING(    0x00, "60 sec" );
+		PORT_BIT(     0xe0, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START	// IN2 - Player 1 Wheel + Coins
-		PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )	// wheel
-		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 2 )	// 2-3f
+		PORT_START(); 	// IN2 - Player 1 Wheel + Coins
+		PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL );// wheel
+		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 2 );// 2-3f
 	
-		PORT_START	// IN3 - Player 2 Wheel + Coins
-		PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
-		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN2, 2 )
+		PORT_START(); 	// IN3 - Player 2 Wheel + Coins
+		PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL );
+		PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN2, 2 );
 	
-		PORT_START	// IN4 - Player 1&2 Pedals + YM2151 Sound Status
-		PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0xc0, IP_ACTIVE_HIGH, IPT_SPECIAL )
+		PORT_START(); 	// IN4 - Player 1&2 Pedals + YM2151 Sound Status
+		PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0xc0, IP_ACTIVE_HIGH, IPT_SPECIAL );
 	
-		PORT_START	// IN5 - Player 1 Analog Fake Port
-		PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER1, 15, 20, 0, 0, KEYCODE_LEFT, KEYCODE_RIGHT, IP_JOY_NONE, IP_JOY_NONE )
+		PORT_START(); 	// IN5 - Player 1 Analog Fake Port
+		PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER1, 15, 20, 0, 0, KEYCODE_LEFT, KEYCODE_RIGHT, IP_JOY_NONE, IP_JOY_NONE );
 	
-		PORT_START	// IN6 - Player 2 Analog Fake Port
-		PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER2, 15, 20, 0, 0, KEYCODE_D, KEYCODE_G, IP_JOY_NONE, IP_JOY_NONE )
+		PORT_START(); 	// IN6 - Player 2 Analog Fake Port
+		PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER2, 15, 20, 0, 0, KEYCODE_D, KEYCODE_G, IP_JOY_NONE, IP_JOY_NONE );
 	
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -222,21 +228,21 @@ public class amspdwy
 	
 	***************************************************************************/
 	
-	static struct GfxLayout layout_8x8x2 =
-	{
+	static GfxLayout layout_8x8x2 = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,2),
 		2,
-		{ RGN_FRAC(0,2), RGN_FRAC(1,2) },
-		{ STEP8(0,1) },
-		{ STEP8(0,8) },
+		new int[] { RGN_FRAC(0,2), RGN_FRAC(1,2) },
+		new int[] { STEP8(0,1) },
+		new int[] { STEP8(0,8) },
 		8*8
-	};
+	);
 	
-	static struct GfxDecodeInfo amspdwy_gfxdecodeinfo[] =
+	static GfxDecodeInfo amspdwy_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &layout_8x8x2,   0, 8 }, // [0] Layer & Sprites
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout_8x8x2,   0, 8 ), // [0] Layer  Sprites
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -353,39 +359,39 @@ public class amspdwy
 	
 	***************************************************************************/
 	
-	ROM_START( amspdwy )
-		ROM_REGION( 0x18000, REGION_CPU1, 0 )		/* Main Z80 Code */
-		ROM_LOAD( "game5807.u33", 0x00000, 0x8000, CRC(88233b59) SHA1(bfdf10dde1731cde5c579a9a5173cafe9295a80c) )
-		ROM_LOAD( "trks6092.u34", 0x10000, 0x8000, CRC(74a4e7b7) SHA1(b4f6e3faaf048351c6671205f52378a64b81bcb1) )
+	static RomLoadPtr rom_amspdwy = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x18000, REGION_CPU1, 0 );	/* Main Z80 Code */
+		ROM_LOAD( "game5807.u33", 0x00000, 0x8000, CRC(88233b59);SHA1(bfdf10dde1731cde5c579a9a5173cafe9295a80c) )
+		ROM_LOAD( "trks6092.u34", 0x10000, 0x8000, CRC(74a4e7b7);SHA1(b4f6e3faaf048351c6671205f52378a64b81bcb1) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )		/* Sound Z80 Code */
-		ROM_LOAD( "audi9463.u2", 0x00000, 0x8000, CRC(61b0467e) SHA1(74509e7712838dd760919893aeda9241d308d0c3) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );	/* Sound Z80 Code */
+		ROM_LOAD( "audi9463.u2", 0x00000, 0x8000, CRC(61b0467e);SHA1(74509e7712838dd760919893aeda9241d308d0c3) )
 	
-		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )	/* Layer + Sprites */
-		ROM_LOAD( "hilo9b3c.5a", 0x0000, 0x1000, CRC(f50f864c) SHA1(5b2412c1558b30a04523fcdf1d5cf6fdae1ba88d) )
-		ROM_LOAD( "hihie12a.4a", 0x1000, 0x1000, CRC(3d7497f3) SHA1(34820ba42d9c9dab1d6fdda15795450ce08392c1) )
-		ROM_LOAD( "lolo1d51.1a", 0x2000, 0x1000, CRC(58701c1c) SHA1(67b476e697652a6b684bd76ae6c0078ed4b3e3a2) )
-		ROM_LOAD( "lohi4644.2a", 0x3000, 0x1000, CRC(a1d802b1) SHA1(1249ce406b1aa518885a02ab063fa14906ccec2e) )
-	ROM_END
+		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE );/* Layer + Sprites */
+		ROM_LOAD( "hilo9b3c.5a", 0x0000, 0x1000, CRC(f50f864c);SHA1(5b2412c1558b30a04523fcdf1d5cf6fdae1ba88d) )
+		ROM_LOAD( "hihie12a.4a", 0x1000, 0x1000, CRC(3d7497f3);SHA1(34820ba42d9c9dab1d6fdda15795450ce08392c1) )
+		ROM_LOAD( "lolo1d51.1a", 0x2000, 0x1000, CRC(58701c1c);SHA1(67b476e697652a6b684bd76ae6c0078ed4b3e3a2) )
+		ROM_LOAD( "lohi4644.2a", 0x3000, 0x1000, CRC(a1d802b1);SHA1(1249ce406b1aa518885a02ab063fa14906ccec2e) )
+	ROM_END(); }}; 
 	
-	ROM_START( amspdwya )
-		ROM_REGION( 0x18000, REGION_CPU1, 0 )		/* Main Z80 Code */
-		ROM_LOAD( "game.u33",     0x00000, 0x8000, CRC(facab102) SHA1(e232969eaaad8b89ac8e28ee0a7996107a7de9a2) )
-		ROM_LOAD( "trks6092.u34", 0x10000, 0x8000, CRC(74a4e7b7) SHA1(b4f6e3faaf048351c6671205f52378a64b81bcb1) )
+	static RomLoadPtr rom_amspdwya = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x18000, REGION_CPU1, 0 );	/* Main Z80 Code */
+		ROM_LOAD( "game.u33",     0x00000, 0x8000, CRC(facab102);SHA1(e232969eaaad8b89ac8e28ee0a7996107a7de9a2) )
+		ROM_LOAD( "trks6092.u34", 0x10000, 0x8000, CRC(74a4e7b7);SHA1(b4f6e3faaf048351c6671205f52378a64b81bcb1) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )		/* Sound Z80 Code */
-		ROM_LOAD( "audi9463.u2", 0x00000, 0x8000, CRC(61b0467e) SHA1(74509e7712838dd760919893aeda9241d308d0c3) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );	/* Sound Z80 Code */
+		ROM_LOAD( "audi9463.u2", 0x00000, 0x8000, CRC(61b0467e);SHA1(74509e7712838dd760919893aeda9241d308d0c3) )
 	
-		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )	/* Layer + Sprites */
-		ROM_LOAD( "hilo9b3c.5a", 0x0000, 0x1000, CRC(f50f864c) SHA1(5b2412c1558b30a04523fcdf1d5cf6fdae1ba88d) )
-		ROM_LOAD( "hihie12a.4a", 0x1000, 0x1000, CRC(3d7497f3) SHA1(34820ba42d9c9dab1d6fdda15795450ce08392c1) )
-		ROM_LOAD( "lolo1d51.1a", 0x2000, 0x1000, CRC(58701c1c) SHA1(67b476e697652a6b684bd76ae6c0078ed4b3e3a2) )
-		ROM_LOAD( "lohi4644.2a", 0x3000, 0x1000, CRC(a1d802b1) SHA1(1249ce406b1aa518885a02ab063fa14906ccec2e) )
-	ROM_END
+		ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE );/* Layer + Sprites */
+		ROM_LOAD( "hilo9b3c.5a", 0x0000, 0x1000, CRC(f50f864c);SHA1(5b2412c1558b30a04523fcdf1d5cf6fdae1ba88d) )
+		ROM_LOAD( "hihie12a.4a", 0x1000, 0x1000, CRC(3d7497f3);SHA1(34820ba42d9c9dab1d6fdda15795450ce08392c1) )
+		ROM_LOAD( "lolo1d51.1a", 0x2000, 0x1000, CRC(58701c1c);SHA1(67b476e697652a6b684bd76ae6c0078ed4b3e3a2) )
+		ROM_LOAD( "lohi4644.2a", 0x3000, 0x1000, CRC(a1d802b1);SHA1(1249ce406b1aa518885a02ab063fa14906ccec2e) )
+	ROM_END(); }}; 
 	
 	
 	/* (C) 1987 ETI 8402 MAGNOLIA ST. #C SANTEE, CA 92071 */
 	
-	GAME( 1987, amspdwy,  0,       amspdwy, amspdwy, 0, ROT0, "Enerdyne Technologies, Inc.", "American Speedway (set 1)" )
-	GAME( 1987, amspdwya, amspdwy, amspdwy, amspdwy, 0, ROT0, "Enerdyne Technologies, Inc.", "American Speedway (set 2)" )
+	public static GameDriver driver_amspdwy	   = new GameDriver("1987"	,"amspdwy"	,"amspdwy.java"	,rom_amspdwy,null	,machine_driver_amspdwy	,input_ports_amspdwy	,null	,ROT0	,	"Enerdyne Technologies, Inc.", "American Speedway (set 1)" )
+	public static GameDriver driver_amspdwya	   = new GameDriver("1987"	,"amspdwya"	,"amspdwy.java"	,rom_amspdwya,driver_amspdwy	,machine_driver_amspdwy	,input_ports_amspdwy	,null	,ROT0	,	"Enerdyne Technologies, Inc.", "American Speedway (set 2)" )
 }

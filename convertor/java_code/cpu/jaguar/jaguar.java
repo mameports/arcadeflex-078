@@ -134,77 +134,7 @@ public class jaguar
 	**	FUNCTION TABLES
 	**#################################################################################################*/
 	
-	static void abs_rn(void);
-	static void add_rn_rn(void);
-	static void addc_rn_rn(void);
-	static void addq_n_rn(void);
-	static void addqmod_n_rn(void);	/* DSP only */
-	static void addqt_n_rn(void);
-	static void and_rn_rn(void);
-	static void bclr_n_rn(void);
-	static void bset_n_rn(void);
-	static void btst_n_rn(void);
-	static void cmp_rn_rn(void);
-	static void cmpq_n_rn(void);
-	static void div_rn_rn(void);
-	static void illegal(void);
-	static void imacn_rn_rn(void);
-	static void imult_rn_rn(void);
-	static void imultn_rn_rn(void);
-	static void jr_cc_n(void);
-	static void jump_cc_rn(void);
-	static void load_rn_rn(void);
-	static void load_r14n_rn(void);
-	static void load_r15n_rn(void);
-	static void load_r14rn_rn(void);
-	static void load_r15rn_rn(void);
-	static void loadb_rn_rn(void);
-	static void loadw_rn_rn(void);
-	static void loadp_rn_rn(void);	/* GPU only */
-	static void mirror_rn(void);	/* DSP only */
-	static void mmult_rn_rn(void);
-	static void move_rn_rn(void);
-	static void move_pc_rn(void);
-	static void movefa_rn_rn(void);
-	static void movei_n_rn(void);
-	static void moveq_n_rn(void);
-	static void moveta_rn_rn(void);
-	static void mtoi_rn_rn(void);
-	static void mult_rn_rn(void);
-	static void neg_rn(void);
-	static void nop(void);
-	static void normi_rn_rn(void);
-	static void not_rn(void);
-	static void or_rn_rn(void);
-	static void pack_rn(void);		/* GPU only */
-	static void resmac_rn(void);
-	static void ror_rn_rn(void);
-	static void rorq_n_rn(void);
-	static void sat8_rn(void);		/* GPU only */
-	static void sat16_rn(void);		/* GPU only */
-	static void sat16s_rn(void);		/* DSP only */
-	static void sat24_rn(void);			/* GPU only */
-	static void sat32s_rn(void);		/* DSP only */
-	static void sh_rn_rn(void);
-	static void sha_rn_rn(void);
-	static void sharq_n_rn(void);
-	static void shlq_n_rn(void);
-	static void shrq_n_rn(void);
-	static void store_rn_rn(void);
-	static void store_rn_r14n(void);
-	static void store_rn_r15n(void);
-	static void store_rn_r14rn(void);
-	static void store_rn_r15rn(void);
-	static void storeb_rn_rn(void);
-	static void storew_rn_rn(void);
-	static void storep_rn_rn(void);	/* GPU only */
-	static void sub_rn_rn(void);
-	static void subc_rn_rn(void);
-	static void subq_n_rn(void);
-	static void subqmod_n_rn(void);	/* DSP only */
-	static void subqt_n_rn(void);
-	static void xor_rn_rn(void);
-	
+	static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static static 
 	static void (*gpu_op_table[64])(void) =
 	{
 		/* 00-03 */	add_rn_rn,		addc_rn_rn,		addq_n_rn,		addqt_n_rn,
@@ -283,7 +213,7 @@ public class jaguar
 				temp = jaguar.r[i], jaguar.r[i] = jaguar.a[i], jaguar.a[i] = temp;
 	
 			/* swap the bank pointers */
-			if (!bank)
+			if (bank == 0)
 			{
 				jaguar.b0 = jaguar.r;
 				jaguar.b1 = jaguar.a;
@@ -320,7 +250,7 @@ public class jaguar
 	
 		/* bail if nothing is available */
 		bits &= mask;
-		if (!bits)
+		if (bits == 0)
 			return;
 	
 		/* determine which interrupt */
@@ -436,7 +366,7 @@ public class jaguar
 		int i, j;
 	
 		/* allocate the mirror table */
-		if (!mirror_table)
+		if (mirror_table == 0)
 			mirror_table = malloc(65536 * sizeof(mirror_table[0]));
 	
 		/* fill in the mirror table */
@@ -452,7 +382,7 @@ public class jaguar
 				                  ((i << 13) & 0x4000) | ((i << 15) & 0x8000);
 	
 		/* allocate the condition table */
-		if (!condition_table)
+		if (condition_table == 0)
 			condition_table = malloc(32 * 8 * sizeof(condition_table[0]));
 	
 		/* fill in the condition table */
@@ -830,7 +760,7 @@ public class jaguar
 		which = (which+1) % 16;
 	    buffer[which][0] = '\0';
 	
-		if (!context)
+		if (context == 0)
 			r = &jaguar;
 	
 	    switch( regnum )

@@ -317,41 +317,45 @@ public class plygonet
 		cpu_setbank(2, memory_region(REGION_CPU2) + 0x10000 + cur_sound_region*0x4000);
 	}
 	
-	static WRITE_HANDLER( sound_bankswitch_w )
+	public static WriteHandlerPtr sound_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cur_sound_region = (data & 0x1f);
 	
 		reset_sound_region();
-	}
+	} };
 	
 	static INTERRUPT_GEN(audio_interrupt)
 	{
 		cpu_set_nmi_line(1, PULSE_LINE);
 	}
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xbfff, MRA_BANK2 },
-		{ 0xc000, 0xdfff, MRA_RAM },
-		{ 0xe000, 0xe22f, K054539_0_r },
-		{ 0xe230, 0xe3ff, MRA_RAM },
-		{ 0xe400, 0xe62f, K054539_1_r },
-		{ 0xe630, 0xe7ff, MRA_RAM },
-		{ 0xf002, 0xf002, soundlatch_r },
-		{ 0xf003, 0xf003, soundlatch2_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK2 ),
+		new Memory_ReadAddress( 0xc000, 0xdfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe000, 0xe22f, K054539_0_r ),
+		new Memory_ReadAddress( 0xe230, 0xe3ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xe400, 0xe62f, K054539_1_r ),
+		new Memory_ReadAddress( 0xe630, 0xe7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xf002, 0xf002, soundlatch_r ),
+		new Memory_ReadAddress( 0xf003, 0xf003, soundlatch2_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0xbfff, MWA_NOP },
-		{ 0xc000, 0xdfff, MWA_RAM },
-		{ 0xe000, 0xe22f, K054539_0_w },
-		{ 0xe230, 0xe3ff, MWA_RAM },
-		{ 0xe400, 0xe62f, K054539_1_w },
-		{ 0xe630, 0xe7ff, MWA_RAM },
-		{ 0xf000, 0xf000, soundlatch3_w },
-		{ 0xf800, 0xf800, sound_bankswitch_w },
-		{ 0xfff1, 0xfff3, MWA_NOP },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0xbfff, MWA_NOP ),
+		new Memory_WriteAddress( 0xc000, 0xdfff, MWA_RAM ),
+		new Memory_WriteAddress( 0xe000, 0xe22f, K054539_0_w ),
+		new Memory_WriteAddress( 0xe230, 0xe3ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xe400, 0xe62f, K054539_1_w ),
+		new Memory_WriteAddress( 0xe630, 0xe7ff, MWA_RAM ),
+		new Memory_WriteAddress( 0xf000, 0xf000, soundlatch3_w ),
+		new Memory_WriteAddress( 0xf800, 0xf800, sound_bankswitch_w ),
+		new Memory_WriteAddress( 0xfff1, 0xfff3, MWA_NOP ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	static struct K054539interface k054539_interface =
 	{
@@ -364,23 +368,23 @@ public class plygonet
 	
 	/**********************************************************************************/
 	
-	static struct GfxLayout bglayout =
-	{
+	static GfxLayout bglayout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		4,
-		{ 0, 1, 2, 3 },
-		{ 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4,
+		new int[] { 0, 1, 2, 3 },
+		new int[] { 0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4,
 		  9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4 },
-		{ 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		new int[] { 0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
 	 	  8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64 },
 		128*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX2, 0, &bglayout,     0x0000, 64 },
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX2, 0, bglayout,     0x0000, 64 ),
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	MACHINE_DRIVER_START( plygonet )
@@ -414,60 +418,60 @@ public class plygonet
 		MDRV_SOUND_ADD(K054539, k054539_interface)
 	MACHINE_DRIVER_END
 	
-	INPUT_PORTS_START( polygonet )
-		PORT_START
+	static InputPortPtr input_ports_polygonet = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
 	
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1)
-		PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2)
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3)
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1)
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2)
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START3)
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4)
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1);
+		PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2);
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3);
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1);
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2);
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START3);
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4);
 	
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* EEPROM data */
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )	/* EEPROM ready (always 1) */
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_DIPNAME(0x10, 0x00, "Monitors")
-		PORT_DIPSETTING(0x00, "1 Monitor")
-		PORT_DIPSETTING(0x10, "2 Monitors")
-	//	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL );/* EEPROM data */
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL );/* EEPROM ready (always 1) */
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_DIPNAME(0x10, 0x00, "Monitors");
+		PORT_DIPSETTING(0x00, "1 Monitor");
+		PORT_DIPSETTING(0x10, "2 Monitors");
+	//	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
+	INPUT_PORTS_END(); }}; 
 	
 	static DRIVER_INIT(polygonet)
 	{
@@ -476,32 +480,32 @@ public class plygonet
 		reset_sound_region();
 	}
 	
-	ROM_START( plygonet )
+	static RomLoadPtr rom_plygonet = new RomLoadPtr(){ public void handler(){ 
 		/* main program */
-		ROM_REGION( 0x200000, REGION_CPU1, 0)
-		ROM_LOAD32_BYTE( "305a01.bin", 0x000003, 512*1024, CRC(8bdb6c95) SHA1(e981833842f8fd89b9726901fbe2058444204792) )
-		ROM_LOAD32_BYTE( "305a02.bin", 0x000002, 512*1024, CRC(4d7e32b3) SHA1(25731526535036972577637d186f02ae467296bd) )
-		ROM_LOAD32_BYTE( "305a03.bin", 0x000001, 512*1024, CRC(36e4e3fe) SHA1(e8fcad4f196c9b225a0fbe70791493ff07c648a9) )
-		ROM_LOAD32_BYTE( "305a04.bin", 0x000000, 512*1024, CRC(d8394e72) SHA1(eb6bcf8aedb9ba5843204ab8aacb735cbaafb74d) )
+		ROM_REGION( 0x200000, REGION_CPU1, 0);
+		ROM_LOAD32_BYTE( "305a01.bin", 0x000003, 512*1024, CRC(8bdb6c95);SHA1(e981833842f8fd89b9726901fbe2058444204792) )
+		ROM_LOAD32_BYTE( "305a02.bin", 0x000002, 512*1024, CRC(4d7e32b3);SHA1(25731526535036972577637d186f02ae467296bd) )
+		ROM_LOAD32_BYTE( "305a03.bin", 0x000001, 512*1024, CRC(36e4e3fe);SHA1(e8fcad4f196c9b225a0fbe70791493ff07c648a9) )
+		ROM_LOAD32_BYTE( "305a04.bin", 0x000000, 512*1024, CRC(d8394e72);SHA1(eb6bcf8aedb9ba5843204ab8aacb735cbaafb74d) )
 	
 		/* Z80 sound program */
-		ROM_REGION( 0x30000, REGION_CPU2, 0 )
-		ROM_LOAD("305b05.bin", 0x000000, 0x20000, CRC(2d3d9654) SHA1(784a409df47cee877e507b8bbd3610d161d63753) )
-		ROM_RELOAD( 0x10000, 0x20000)
+		ROM_REGION( 0x30000, REGION_CPU2, 0 );
+		ROM_LOAD("305b05.bin", 0x000000, 0x20000, CRC(2d3d9654);SHA1(784a409df47cee877e507b8bbd3610d161d63753) )
+		ROM_RELOAD( 0x10000, 0x20000);
 	
 		/* TTL text plane tiles */
-		ROM_REGION( 0x20000, REGION_GFX1, 0 )
-		ROM_LOAD( "305b06.bin", 0x000000, 0x20000, CRC(decd6e42) SHA1(4c23dcb1d68132d3381007096e014ee4b6007086) )
+		ROM_REGION( 0x20000, REGION_GFX1, 0 );
+		ROM_LOAD( "305b06.bin", 0x000000, 0x20000, CRC(decd6e42);SHA1(4c23dcb1d68132d3381007096e014ee4b6007086) )
 	
 		/* '936 tiles */
-	 	ROM_REGION( 0x40000, REGION_GFX2, 0 )
-		ROM_LOAD( "305b07.bin", 0x000000, 0x40000, CRC(e4320bc3) SHA1(b0bb2dac40d42f97da94516d4ebe29b1c3d77c37) )
+	 	ROM_REGION( 0x40000, REGION_GFX2, 0 );
+		ROM_LOAD( "305b07.bin", 0x000000, 0x40000, CRC(e4320bc3);SHA1(b0bb2dac40d42f97da94516d4ebe29b1c3d77c37) )
 	
 		/* sound data */
-		ROM_REGION( 0x200000, REGION_SOUND1, 0 )
-		ROM_LOAD( "305b08.bin", 0x000000, 0x200000, CRC(874607df) SHA1(763b44a80abfbc355bcb9be8bf44373254976019) )
-	ROM_END
+		ROM_REGION( 0x200000, REGION_SOUND1, 0 );
+		ROM_LOAD( "305b08.bin", 0x000000, 0x200000, CRC(874607df);SHA1(763b44a80abfbc355bcb9be8bf44373254976019) )
+	ROM_END(); }}; 
 	
 	/*          ROM        parent   machine    inp        init */
-	GAMEX( 1993, plygonet, 0,       plygonet, polygonet, polygonet, ROT90, "Konami", "Polygonet Commanders (ver UAA)", GAME_NOT_WORKING )
+	public static GameDriver driver_plygonet	   = new GameDriver("1993"	,"plygonet"	,"plygonet.java"	,rom_plygonet,null	,machine_driver_plygonet	,input_ports_polygonet	,init_polygonet	,ROT90	,	"Konami", "Polygonet Commanders (ver UAA)", GAME_NOT_WORKING )
 }

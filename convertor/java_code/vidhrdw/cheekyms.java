@@ -36,13 +36,13 @@ public class cheekyms
 			for (j = 0;j < Machine->drv->total_colors/6;j++)
 			{
 				/* red component */
-				bit = (color_prom[0] >> 0) & 0x01;
+				bit = (color_prom.read(0)>> 0) & 0x01;
 				r = 0xff * bit;
 				/* green component */
-				bit = (color_prom[0] >> 1) & 0x01;
+				bit = (color_prom.read(0)>> 1) & 0x01;
 				g = 0xff * bit;
 				/* blue component */
-				bit = (color_prom[0] >> 2) & 0x01;
+				bit = (color_prom.read(0)>> 2) & 0x01;
 				b = 0xff * bit;
 	
 				palette_set_color(((i*2)*Machine->drv->total_colors/6)+j,r,g,b);
@@ -55,13 +55,13 @@ public class cheekyms
 			for (j = 0;j < Machine->drv->total_colors/6;j++)
 			{
 				/* red component */
-				bit = (color_prom[0] >> 4) & 0x01;
+				bit = (color_prom.read(0)>> 4) & 0x01;
 				r = 0xff * bit;
 				/* green component */
-				bit = (color_prom[0] >> 5) & 0x01;
+				bit = (color_prom.read(0)>> 5) & 0x01;
 				g = 0xff * bit;
 				/* blue component */
-				bit = (color_prom[0] >> 6) & 0x01;
+				bit = (color_prom.read(0)>> 6) & 0x01;
 				b = 0xff * bit;
 	
 				palette_set_color(((i*2+1)*Machine->drv->total_colors/6)+j,r,g,b);
@@ -71,13 +71,13 @@ public class cheekyms
 	}
 	
 	
-	WRITE_HANDLER( cheekyms_sprite_w )
+	public static WriteHandlerPtr cheekyms_sprite_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sprites[offset] = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( cheekyms_port_40_w )
+	public static WriteHandlerPtr cheekyms_port_40_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int last_dac = -1;
 	
@@ -89,10 +89,10 @@ public class cheekyms
 	
 			DAC_data_w(0, last_dac ? 0x80 : 0);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( cheekyms_port_80_w )
+	public static WriteHandlerPtr cheekyms_port_80_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int new_man_scroll;
 	
@@ -114,7 +114,7 @@ public class cheekyms
 	
 		/* Bit 7 is screen flip */
 		flip_screen_set(data & 0x80);
-	}
+	} };
 	
 	
 	
@@ -155,7 +155,7 @@ public class cheekyms
 	
 			if (v1 & 0x80)
 			{
-				if (!flip_screen)
+				if (flip_screen == 0)
 				{
 					code++;
 				}
@@ -214,7 +214,7 @@ public class cheekyms
 				}
 	
 				drawgfx(tmpbitmap,Machine->gfx[0],
-						videoram[offs],
+						videoram.read(offs),
 						0 + char_palette,
 						flip_screen,flip_screen,
 						8*sx, 8*sy - (man_area ? man_scroll : 0),

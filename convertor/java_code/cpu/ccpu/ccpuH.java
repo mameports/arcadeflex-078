@@ -46,15 +46,12 @@ public class ccpuH
 	#endif
 	
 	/* an ICount variable (mostly irrelevant) */
-	extern int ccpu_icount;
 	
 	#define CCPU_DATA_OFFSET    0x0000
 	#define CCPU_PGM_OFFSET     0x8000
 	
 	/* MAME interface functions */
-	void ccpu_init(void);
 	void ccpu_reset(void *param);
-	void ccpu_exit(void);
 	int ccpu_execute(int cycles);
 	unsigned ccpu_get_context(void *dst);
 	void ccpu_set_context(void *src);
@@ -137,17 +134,9 @@ public class ccpuH
 	typedef struct scCpuStruct CONTEXTCCPU;
 	
 	extern CINELONG cineExec(CINELONG);
-	extern void cineReset(void);
-	extern void cineSetJMI(int);
-	extern void cineSetMSize(int);
-	extern void cineSetMonitor(int);
-	extern void cSetContext(CONTEXTCCPU *);
-	extern void cGetContext(CONTEXTCCPU *);
 	extern CINELONG cineGetElapsedTicks(int);
-	extern void cineReleaseTimeslice(void);
 	extern CINELONG cGetContextSize(void);
 	
-	extern int bNewFrame;
 	
 	#endif
 }

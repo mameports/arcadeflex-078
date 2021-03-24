@@ -27,26 +27,26 @@ public class atarifb
 	
 	/***************************************************************************
 	***************************************************************************/
-	WRITE_HANDLER( atarifb_alphap1_vram_w )
+	public static WriteHandlerPtr atarifb_alphap1_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		atarifb_alphap1_vram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( atarifb_alphap2_vram_w )
+	public static WriteHandlerPtr atarifb_alphap2_vram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		atarifb_alphap2_vram[offset] = data;
-	}
+	} };
 	
 	/***************************************************************************
 	***************************************************************************/
-	WRITE_HANDLER( atarifb_scroll_w )
+	public static WriteHandlerPtr atarifb_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data - 8 != *atarifb_scroll_register)
 		{
 			*atarifb_scroll_register = data - 8;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	***************************************************************************/
@@ -99,7 +99,7 @@ public class atarifb
 			flipbit = (atarifb_alphap1_vram[offs] & 0x40) >> 6;
 			disable = (atarifb_alphap1_vram[offs] & 0x80) >> 7;
 	
-			if (!disable)
+			if (disable == 0)
 			{
 				drawgfx(bitmap,Machine->gfx[0],
 					charcode, 0,
@@ -124,7 +124,7 @@ public class atarifb
 			flipbit = (atarifb_alphap2_vram[offs] & 0x40) >> 6;
 			disable = (atarifb_alphap2_vram[offs] & 0x80) >> 7;
 	
-			if (!disable)
+			if (disable == 0)
 			{
 				drawgfx(bitmap,Machine->gfx[0],
 					charcode, 0,
@@ -145,9 +145,9 @@ public class atarifb
 	
 				dirtybuffer[offs]=0;
 	
-				charcode = videoram[offs] & 0x3f;
-				flipx = (videoram[offs] & 0x40) >> 6;
-				flipy = (videoram[offs] & 0x80) >> 7;
+				charcode = videoram.read(offs)& 0x3f;
+				flipx = (videoram.read(offs)& 0x40) >> 6;
+				flipy = (videoram.read(offs)& 0x80) >> 7;
 	
 				sx = (8 * (offs % 32) - *atarifb_scroll_register);
 				sy = 8 * (offs / 32) + 8;
@@ -182,13 +182,13 @@ public class atarifb
 			int sx,sy;
 			int shade = 0;
 	
-			sy = 255 - spriteram[obj*2 + 1];
+			sy = 255 - spriteram.read(obj*2 + 1);
 			if (sy == 255) continue;
 	
-			charcode = spriteram[obj*2] & 0x3f;
-			flipx = (spriteram[obj*2] & 0x40);
-			flipy = (spriteram[obj*2] & 0x80);
-			sx = spriteram[obj*2 + 0x20] + 8*3;
+			charcode = spriteram.read(obj*2)& 0x3f;
+			flipx = (spriteram.read(obj*2)& 0x40);
+			flipy = (spriteram.read(obj*2)& 0x80);
+			sx = spriteram.read(obj*2 + 0x20)+ 8*3;
 	
 			/* Note on Atari Soccer: */
 			/* There are 3 sets of 2 bits each, where the 2 bits represent */
@@ -196,14 +196,14 @@ public class atarifb
 			/* color of each bit in the sprite, but I haven't implemented it that way. */
 			if (atarifb_game == 4)
 			{
-				shade = ((spriteram[obj*2+1 + 0x20]) & 0x07);
+				shade = ((spriteram.read(obj*2+1 + 0x20)) & 0x07);
 	
 				drawgfx(bitmap,Machine->gfx[sprite_bank+1],
 					charcode, shade,
 					flipx,flipy,sx,sy,
 					&bigfield_area,TRANSPARENCY_PEN,0);
 	
-				shade = ((spriteram[obj*2+1 + 0x20]) & 0x08) >> 3;
+				shade = ((spriteram.read(obj*2+1 + 0x20)) & 0x08) >> 3;
 			}
 	
 			drawgfx(bitmap,Machine->gfx[sprite_bank],

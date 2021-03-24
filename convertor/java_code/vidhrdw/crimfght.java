@@ -61,7 +61,7 @@ public class crimfght
 	VIDEO_START( crimfght )
 	{
 		paletteram = auto_malloc(0x400);
-		if (!paletteram) return 1;
+		if (paletteram == 0) return 1;
 	
 		layer_colorbase[0] = 0;
 		layer_colorbase[1] = 4;

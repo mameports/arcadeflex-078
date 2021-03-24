@@ -34,72 +34,76 @@ public class truco
 	/***************************************************************************/
 	
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x17ff, MRA_RAM },		/* general purpose ram */
-		{ 0x1800, 0x7bff, MRA_RAM },		/* video ram */
-		{ 0x7c00, 0x7fff, MRA_RAM },		/* battery backed ram */
-		{ 0x8000, 0x8000, input_port_0_r },	/* controls (and irq ack?) */
-		{ 0x8001, 0x8001, MRA_NOP },		/* unknown */
-		{ 0x8002, 0x8002, input_port_1_r },	/* dipswitches */
-		{ 0x8003, 0x8007, MRA_NOP },		/* unknown */
-		{ 0x8008, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x17ff, MRA_RAM ),		/* general purpose ram */
+		new Memory_ReadAddress( 0x1800, 0x7bff, MRA_RAM ),		/* video ram */
+		new Memory_ReadAddress( 0x7c00, 0x7fff, MRA_RAM ),		/* battery backed ram */
+		new Memory_ReadAddress( 0x8000, 0x8000, input_port_0_r ),	/* controls (and irq ack?) */
+		new Memory_ReadAddress( 0x8001, 0x8001, MRA_NOP ),		/* unknown */
+		new Memory_ReadAddress( 0x8002, 0x8002, input_port_1_r ),	/* dipswitches */
+		new Memory_ReadAddress( 0x8003, 0x8007, MRA_NOP ),		/* unknown */
+		new Memory_ReadAddress( 0x8008, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x17ff, MWA_RAM },		/* general purpose ram */
-		{ 0x1800, 0x7bff, MWA_RAM },		/* video ram */
-		{ 0x7c00, 0x7fff, MWA_RAM },		/* battery backed ram */
-		{ 0x8000, 0x8007, MWA_NOP },		/* unknown (dac?) */
-		{ 0x8008, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x17ff, MWA_RAM ),		/* general purpose ram */
+		new Memory_WriteAddress( 0x1800, 0x7bff, MWA_RAM ),		/* video ram */
+		new Memory_WriteAddress( 0x7c00, 0x7fff, MWA_RAM ),		/* battery backed ram */
+		new Memory_WriteAddress( 0x8000, 0x8007, MWA_NOP ),		/* unknown (dac?) */
+		new Memory_WriteAddress( 0x8008, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	INPUT_PORTS_START( truco )
-		PORT_START	/* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )
+	static InputPortPtr input_ports_truco = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN );
 	
-		PORT_START /* DSW1 */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Alt. Graphics" )
-		PORT_DIPSETTING (	0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING (	0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING (	0x00, DEF_STR( On ) )
+		PORT_START();  /* DSW1 */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Alt. Graphics" );
+		PORT_DIPSETTING (	0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING (	0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING (	0x00, DEF_STR( "On") );
 	
-		PORT_START	/* IN1 - FAKE - Used for coinup */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	/* IN1 - FAKE - Used for coinup */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	static MACHINE_INIT( truco )
 	{
@@ -179,11 +183,11 @@ public class truco
 	
 	***************************************************************************/
 	
-	ROM_START( truco )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for main CPU */
-		ROM_LOAD( "truco.u3",   0x08000, 0x4000, CRC(4642fb96) SHA1(e821f6fd582b141a5ca2d5bd53f817697048fb81) )
-		ROM_LOAD( "truco.u2",   0x0c000, 0x4000, CRC(ff355750) SHA1(1538f20b1919928ffca439e4046a104ddfbc756c) )
-	ROM_END
+	static RomLoadPtr rom_truco = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );    /* 64k for main CPU */
+		ROM_LOAD( "truco.u3",   0x08000, 0x4000, CRC(4642fb96);SHA1(e821f6fd582b141a5ca2d5bd53f817697048fb81) )
+		ROM_LOAD( "truco.u2",   0x0c000, 0x4000, CRC(ff355750);SHA1(1538f20b1919928ffca439e4046a104ddfbc756c) )
+	ROM_END(); }}; 
 	
-	GAMEX( 198?, truco,  0, truco, truco, 0, ROT0, "Playtronic SRL", "Truco-Tron", GAME_NO_SOUND )
+	public static GameDriver driver_truco	   = new GameDriver("198?"	,"truco"	,"truco.java"	,rom_truco,null	,machine_driver_truco	,input_ports_truco	,null	,ROT0	,	"Playtronic SRL", "Truco-Tron", GAME_NO_SOUND )
 }

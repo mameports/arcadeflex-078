@@ -28,9 +28,9 @@ public class strnskil
 	
 		for (i = 0;i < Machine->drv->total_colors;i++)
 		{
-			int r = color_prom[0]*0x11;
-			int g = color_prom[Machine->drv->total_colors]*0x11;
-			int b = color_prom[2*Machine->drv->total_colors]*0x11;
+			int r = color_prom.read(0)*0x11;
+			int g = color_prom.read(Machine->drv->total_colors)*0x11;
+			int b = color_prom.read(2*Machine->drv->total_colors)*0x11;
 	
 			palette_set_color(i,r,g,b);
 			color_prom++;
@@ -50,21 +50,21 @@ public class strnskil
 	
 	}
 	
-	WRITE_HANDLER( strnskil_videoram_w )
+	public static WriteHandlerPtr strnskil_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( strnskil_scroll_x_w )
+	public static WriteHandlerPtr strnskil_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		strnskil_xscroll[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( strnskil_scrl_ctrl_w )
+	public static WriteHandlerPtr strnskil_scrl_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		strnskil_scrl_ctrl = data >> 5;
 	
@@ -73,12 +73,12 @@ public class strnskil
 			flip_screen_set(data & 0x08);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = videoram[tile_index * 2];
-		int code = videoram[(tile_index * 2) + 1] + ((attr & 0x60) << 3);
+		int attr = videoram.read(tile_index * 2);
+		int code = videoram.read((tile_index * 2) + 1)+ ((attr & 0x60) << 3);
 		int color = (attr & 0x1f) | ((attr & 0x80) >> 2);
 	
 		SET_TILE_INFO(0, code, color, 0)
@@ -89,7 +89,7 @@ public class strnskil
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_cols, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);
@@ -103,13 +103,13 @@ public class strnskil
 	
 		for (offs = 0x60; offs < 0x100; offs += 4)
 		{
-			int code = spriteram[offs + 1];
-			int color = spriteram[offs + 2] & 0x3f;
+			int code = spriteram.read(offs + 1);
+			int color = spriteram.read(offs + 2)& 0x3f;
 			int flipx = flip_screen_x;
 			int flipy = flip_screen_y;
 	
-			int sx = spriteram[offs + 3];
-			int sy = spriteram[offs];
+			int sx = spriteram.read(offs + 3);
+			int sy = spriteram.read(offs);
 			int px, py;
 	
 			if (flip_screen)

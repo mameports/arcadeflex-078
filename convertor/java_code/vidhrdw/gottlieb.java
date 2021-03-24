@@ -49,16 +49,16 @@ public class gottlieb
 	  bit 0 -- 2  kohm resistor  -- BLUE
 	
 	***************************************************************************/
-	WRITE_HANDLER( gottlieb_paletteram_w )
+	public static WriteHandlerPtr gottlieb_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bit0, bit1, bit2, bit3;
 		int r, g, b, val;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		/* red component */
 	
-		val = paletteram[offset | 1];
+		val = paletteram.read(offset | 1);
 	
 		bit0 = (val >> 0) & 0x01;
 		bit1 = (val >> 1) & 0x01;
@@ -69,7 +69,7 @@ public class gottlieb
 	
 		/* green component */
 	
-		val = paletteram[offset & ~1];
+		val = paletteram.read(offset & ~1);
 	
 		bit0 = (val >> 4) & 0x01;
 		bit1 = (val >> 5) & 0x01;
@@ -80,7 +80,7 @@ public class gottlieb
 	
 		/* blue component */
 	
-		val = paletteram[offset & ~1];
+		val = paletteram.read(offset & ~1);
 	
 		bit0 = (val >> 0) & 0x01;
 		bit1 = (val >> 1) & 0x01;
@@ -90,12 +90,11 @@ public class gottlieb
 		b = 0x10 * bit0 + 0x21 * bit1 + 0x46 * bit2 + 0x88 * bit3;
 	
 		palette_set_color(offset / 2, r, g, b);
-	}
+	} };
 	
-	WRITE_HANDLER( gottlieb_video_outputs_w )
+	public static WriteHandlerPtr gottlieb_video_outputs_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		extern void gottlieb_knocker(void);
-		int last = 0;
+			int last = 0;
 	
 		background_priority = data & 0x01;
 	
@@ -117,9 +116,9 @@ public class gottlieb
 		if ((last&0x20) && !(data&0x20)) gottlieb_knocker();
 	
 		last = data;
-	}
+	} };
 	
-	WRITE_HANDLER( usvsthem_video_outputs_w )
+	public static WriteHandlerPtr usvsthem_video_outputs_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		background_priority = data & 0x01;
 	
@@ -132,18 +131,18 @@ public class gottlieb
 		/* bit 2 video enable (0 = black screen) */
 	
 		/* bit 3 genlock control (1 = show laserdisc image) */
-	}
+	} };
 	
-	WRITE_HANDLER( gottlieb_videoram_w )
+	public static WriteHandlerPtr gottlieb_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gottlieb_charram_w )
+	public static WriteHandlerPtr gottlieb_charram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gottlieb_charram[offset] != data)
 		{
@@ -154,11 +153,11 @@ public class gottlieb
 			
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
+		int code = videoram.read(tile_index);
 	
 		SET_TILE_INFO(0, code, 0, 0)
 	}
@@ -168,7 +167,7 @@ public class gottlieb
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(bg_tilemap, 0);
@@ -184,14 +183,14 @@ public class gottlieb
 		{
 			/* coordinates hand tuned to make the position correct in Q*Bert Qubes start */
 			/* of level animation. */
-			int sx = (spriteram[offs + 1]) - 4;
-			int sy = (spriteram[offs]) - 13;
-			int code = (255 ^ spriteram[offs + 2]) + 256 * spritebank;
+			int sx = (spriteram.read(offs + 1)) - 4;
+			int sy = (spriteram.read(offs)) - 13;
+			int code = (255 ^ spriteram.read(offs + 2)) + 256 * spritebank;
 	
 			if (flip_screen_x) sx = 233 - sx;
 			if (flip_screen_y) sy = 244 - sy;
 	
-			if (spriteram[offs] || spriteram[offs + 1])	/* needed to avoid garbage on screen */
+			if (spriteram.read(offs)|| spriteram.read(offs + 1))	/* needed to avoid garbage on screen */
 				drawgfx(bitmap, Machine->gfx[1],
 					code, 0,
 					flip_screen_x, flip_screen_y,
@@ -203,7 +202,7 @@ public class gottlieb
 	
 	VIDEO_UPDATE( gottlieb )
 	{
-		if (!background_priority)
+		if (background_priority == 0)
 		{
 			tilemap_draw(bitmap, &Machine->visible_area, bg_tilemap, TILEMAP_IGNORE_TRANSPARENCY, 0);
 		}

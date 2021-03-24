@@ -84,44 +84,44 @@ public class rockola
 		}
 	}
 	
-	WRITE_HANDLER( rockola_videoram_w )
+	public static WriteHandlerPtr rockola_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_videoram2_w )
+	public static WriteHandlerPtr rockola_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rockola_videoram2[offset] != data)
 		{
 			rockola_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_colorram_w )
+	public static WriteHandlerPtr rockola_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_charram_w )
+	public static WriteHandlerPtr rockola_charram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (rockola_charram[offset] != data)
 		{
 			rockola_charram[offset] = data;
 			tilemap_mark_all_tiles_dirty(fg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_flipscreen_w )
+	public static WriteHandlerPtr rockola_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bank;
 	
@@ -156,17 +156,17 @@ public class rockola
 			flip_screen_set(data & 0x80);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_scrollx_w )
+	public static WriteHandlerPtr rockola_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( rockola_scrolly_w )
+	public static WriteHandlerPtr rockola_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
 	/***************************************************************************
 	
@@ -177,8 +177,8 @@ public class rockola
 	***************************************************************************/
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + 256 * charbank;
-		int color = (colorram[tile_index] & 0x38) >> 3;
+		int code = videoram.read(tile_index)+ 256 * charbank;
+		int color = (colorram.read(tile_index)& 0x38) >> 3;
 	
 		SET_TILE_INFO(1, code, color, 0)
 	}
@@ -186,7 +186,7 @@ public class rockola
 	static void get_fg_tile_info(int tile_index)
 	{
 		int code = rockola_videoram2[tile_index];
-		int color = colorram[tile_index] & 0x07;
+		int color = colorram.read(tile_index)& 0x07;
 	
 		decodechar(Machine->gfx[0], code, rockola_charram, 
 			Machine->drv->gfxdecodeinfo[0].gfxlayout);
@@ -199,13 +199,13 @@ public class rockola
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -275,7 +275,7 @@ public class rockola
 		}
 	}
 	
-	WRITE_HANDLER( satansat_b002_w )
+	public static WriteHandlerPtr satansat_b002_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 flips screen */
 	
@@ -292,9 +292,9 @@ public class rockola
 		interrupt_enable_w(0,data & 0x02);
 	
 		/* other bits unused */
-	}
+	} };
 	
-	WRITE_HANDLER( satansat_backcolor_w )
+	public static WriteHandlerPtr satansat_backcolor_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0-1 select background color. Other bits unused. */
 	
@@ -309,12 +309,12 @@ public class rockola
 	
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void satansat_get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = (colorram[tile_index] & 0x0c) >> 2;
+		int code = videoram.read(tile_index);
+		int color = (colorram.read(tile_index)& 0x0c) >> 2;
 	
 		SET_TILE_INFO(1, code, color, 0)
 	}
@@ -322,7 +322,7 @@ public class rockola
 	static void satansat_get_fg_tile_info(int tile_index)
 	{
 		int code = rockola_videoram2[tile_index];
-		int color = colorram[tile_index] & 0x03;
+		int color = colorram.read(tile_index)& 0x03;
 	
 		decodechar(Machine->gfx[0], code, rockola_charram, 
 			Machine->drv->gfxdecodeinfo[0].gfxlayout);
@@ -335,13 +335,13 @@ public class rockola
 		bg_tilemap = tilemap_create(satansat_get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(satansat_get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);

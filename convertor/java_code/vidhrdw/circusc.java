@@ -116,7 +116,7 @@ public class circusc
 	{
 		bg_tilemap = tilemap_create(get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32);
 	
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_cols(bg_tilemap,32);
@@ -132,28 +132,28 @@ public class circusc
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( circusc_videoram_w )
+	public static WriteHandlerPtr circusc_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (circusc_videoram[offset] != data)
 		{
 			circusc_videoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( circusc_colorram_w )
+	public static WriteHandlerPtr circusc_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (circusc_colorram[offset] != data)
 		{
 			circusc_colorram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( circusc_flipscreen_w )
+	public static WriteHandlerPtr circusc_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_set(data & 1);
-	}
+	} };
 	
 	
 	

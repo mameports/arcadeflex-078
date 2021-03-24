@@ -103,7 +103,7 @@ public class vaportra
 	
 	/******************************************************************************/
 	
-	static WRITE_HANDLER( YM2151_w )
+	public static WriteHandlerPtr YM2151_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset) {
 		case 0:
@@ -113,9 +113,9 @@ public class vaportra
 			YM2151_data_port_0_w(0,data);
 			break;
 		}
-	}
+	} };
 	
-	static WRITE_HANDLER( YM2203_w )
+	public static WriteHandlerPtr YM2203_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		switch (offset) {
 		case 0:
@@ -125,170 +125,174 @@ public class vaportra
 			YM2203_write_port_0_w(0,data);
 			break;
 		}
-	}
+	} };
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x000000, 0x00ffff, MRA_ROM },
-		{ 0x100000, 0x100001, YM2203_status_port_0_r },
-		{ 0x110000, 0x110001, YM2151_status_port_0_r },
-		{ 0x120000, 0x120001, OKIM6295_status_0_r },
-		{ 0x130000, 0x130001, OKIM6295_status_1_r },
-		{ 0x140000, 0x140001, soundlatch_r },
-		{ 0x1f0000, 0x1f1fff, MRA_BANK8 },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x000000, 0x00ffff, MRA_ROM ),
+		new Memory_ReadAddress( 0x100000, 0x100001, YM2203_status_port_0_r ),
+		new Memory_ReadAddress( 0x110000, 0x110001, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0x120000, 0x120001, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0x130000, 0x130001, OKIM6295_status_1_r ),
+		new Memory_ReadAddress( 0x140000, 0x140001, soundlatch_r ),
+		new Memory_ReadAddress( 0x1f0000, 0x1f1fff, MRA_BANK8 ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x000000, 0x00ffff, MWA_ROM },
-		{ 0x100000, 0x100001, YM2203_w },
-		{ 0x110000, 0x110001, YM2151_w },
-		{ 0x120000, 0x120001, OKIM6295_data_0_w },
-		{ 0x130000, 0x130001, OKIM6295_data_1_w },
-		{ 0x1f0000, 0x1f1fff, MWA_BANK8 },
-		{ 0x1fec00, 0x1fec01, H6280_timer_w },
-		{ 0x1ff402, 0x1ff403, H6280_irq_status_w },
-	MEMORY_END
-	
-	/******************************************************************************/
-	
-	INPUT_PORTS_START( vaportra )
-		PORT_START	/* Player 1 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
-	
-		PORT_START	/* Player 2 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
-	
-		PORT_START	/* Credits */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	
-		PORT_START	/* Dip switch bank 1 */
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x38, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x28, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 1C_6C ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
-	
-		PORT_START	/* Dip switch bank 2 */
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPSETTING(    0x03, "3" )
-		PORT_DIPSETTING(    0x02, "4" )
-		PORT_DIPSETTING(    0x01, "5" )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x08, "Easy" )
-		PORT_DIPSETTING(    0x0c, "Normal" )
-		PORT_DIPSETTING(    0x04, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x20, "150k, 300k and 600k" )
-		PORT_DIPSETTING(    0x30, "200k and 600k" )
-		PORT_DIPSETTING(    0x10, "300k only" )
-		PORT_DIPSETTING(    0x00, "None" )
-		PORT_DIPNAME( 0x40, 0x40, "Allow Continue" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Yes ) )
-	  	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x000000, 0x00ffff, MWA_ROM ),
+		new Memory_WriteAddress( 0x100000, 0x100001, YM2203_w ),
+		new Memory_WriteAddress( 0x110000, 0x110001, YM2151_w ),
+		new Memory_WriteAddress( 0x120000, 0x120001, OKIM6295_data_0_w ),
+		new Memory_WriteAddress( 0x130000, 0x130001, OKIM6295_data_1_w ),
+		new Memory_WriteAddress( 0x1f0000, 0x1f1fff, MWA_BANK8 ),
+		new Memory_WriteAddress( 0x1fec00, 0x1fec01, H6280_timer_w ),
+		new Memory_WriteAddress( 0x1ff402, 0x1ff403, H6280_irq_status_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	/******************************************************************************/
 	
-	static struct GfxLayout charlayout =
-	{
+	static InputPortPtr input_ports_vaportra = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* Player 1 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
+	
+		PORT_START(); 	/* Player 2 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
+	
+		PORT_START(); 	/* Credits */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );
+	
+		PORT_START(); 	/* Dip switch bank 1 */
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x38, 0x38, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x38, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x28, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "1C_6C") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
+	
+		PORT_START(); 	/* Dip switch bank 2 */
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPSETTING(    0x03, "3" );
+		PORT_DIPSETTING(    0x02, "4" );
+		PORT_DIPSETTING(    0x01, "5" );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x08, "Easy" );
+		PORT_DIPSETTING(    0x0c, "Normal" );
+		PORT_DIPSETTING(    0x04, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x20, "150k, 300k and 600k" );
+		PORT_DIPSETTING(    0x30, "200k and 600k" );
+		PORT_DIPSETTING(    0x10, "300k only" );
+		PORT_DIPSETTING(    0x00, "None" );
+		PORT_DIPNAME( 0x40, 0x40, "Allow Continue" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Yes") );
+	  	PORT_DIPNAME( 0x80, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
+	
+	/******************************************************************************/
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,	/* 8*8 chars */
 		4096,
 		4,		/* 4 bits per pixel  */
-		{ 8, 0,  0x40000*8+8, 0x40000*8 },
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
+		new int[] { 8, 0,  0x40000*8+8, 0x40000*8 },
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 },
 		16*8	/* every char takes 8 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout seallayout =
-	{
+	static GfxLayout seallayout = new GfxLayout
+	(
 		16,16,
 		4096,
 		4,
-		{ 0x80000*8+8, 0x80000*8, 8, 0 },
-		{ 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+		new int[] { 0x80000*8+8, 0x80000*8, 8, 0 },
+		new int[] { 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		64*8
-	};
+	);
 	
-	static struct GfxLayout seallayout3 =
-	{
+	static GfxLayout seallayout3 = new GfxLayout
+	(
 		16,16,
 		4096,
 		4,
-		{ 8, 0, 0x40000*8+8, 0x40000*8 },
-		{ 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+		new int[] { 8, 0, 0x40000*8+8, 0x40000*8 },
+		new int[] { 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		64*8
-	};
+	);
 	
-	static struct GfxLayout seallayout2 =
-	{
+	static GfxLayout seallayout2 = new GfxLayout
+	(
 		16,16,
 		4096*2,
 		4,
-		{ 8, 0, 0x80000*8+8, 0x80000*8 },
-		{ 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+		new int[] { 8, 0, 0x80000*8+8, 0x80000*8 },
+		new int[] { 32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 				8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 },
 		64*8
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0x000000, &charlayout,    0, 16 },	/* Characters 8x8 */
-		{ REGION_GFX2, 0x000000, &seallayout,  768, 16 },	/* Tiles 16x16 */
-		{ REGION_GFX1, 0x000000, &seallayout3, 512, 16 },	/* Tiles 16x16 */
-		{ REGION_GFX2, 0x040000, &seallayout, 1024, 16 },	/* Tiles 16x16 */
-		{ REGION_GFX3, 0x000000, &seallayout2, 256, 16 },	/* Sprites 16x16 */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0x000000, charlayout,    0, 16 ),	/* Characters 8x8 */
+		new GfxDecodeInfo( REGION_GFX2, 0x000000, seallayout,  768, 16 ),	/* Tiles 16x16 */
+		new GfxDecodeInfo( REGION_GFX1, 0x000000, seallayout3, 512, 16 ),	/* Tiles 16x16 */
+		new GfxDecodeInfo( REGION_GFX2, 0x040000, seallayout, 1024, 16 ),	/* Tiles 16x16 */
+		new GfxDecodeInfo( REGION_GFX3, 0x000000, seallayout2, 256, 16 ),	/* Sprites 16x16 */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	/******************************************************************************/
@@ -359,89 +363,89 @@ public class vaportra
 	
 	/******************************************************************************/
 	
-	ROM_START( vaportra )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 code */
-	  	ROM_LOAD16_BYTE( "fl_02-1.bin", 0x00000, 0x20000, CRC(9ae36095) SHA1(c8d11a6033a44277a267915b4ca471c43acd1143) )
-	  	ROM_LOAD16_BYTE( "fl_00-1.bin", 0x00001, 0x20000, CRC(c08cc048) SHA1(b28f95856817b8a8cb6cc588d48e95196cbf52fd) )
-		ROM_LOAD16_BYTE( "fl_03.bin",   0x40000, 0x20000, CRC(80bd2844) SHA1(3fcaa409c7134388fa9458df8e8aaecc93f085e6) )
-	 	ROM_LOAD16_BYTE( "fl_01.bin",   0x40001, 0x20000, CRC(9474b085) SHA1(5510309ddab5fbf1dbb0a7b1e424a5dff5ec263d) )
+	static RomLoadPtr rom_vaportra = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );/* 68000 code */
+	  	ROM_LOAD16_BYTE( "fl_02-1.bin", 0x00000, 0x20000, CRC(9ae36095);SHA1(c8d11a6033a44277a267915b4ca471c43acd1143) )
+	  	ROM_LOAD16_BYTE( "fl_00-1.bin", 0x00001, 0x20000, CRC(c08cc048);SHA1(b28f95856817b8a8cb6cc588d48e95196cbf52fd) )
+		ROM_LOAD16_BYTE( "fl_03.bin",   0x40000, 0x20000, CRC(80bd2844);SHA1(3fcaa409c7134388fa9458df8e8aaecc93f085e6) )
+	 	ROM_LOAD16_BYTE( "fl_01.bin",   0x40001, 0x20000, CRC(9474b085);SHA1(5510309ddab5fbf1dbb0a7b1e424a5dff5ec263d) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound CPU */
-		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b);SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 	
-		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b) SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
+		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b);SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b) SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
-		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e) SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b);SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
+		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e);SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
-	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81);SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
+	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc);SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235);SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND2, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
-	ROM_END
+		ROM_REGION( 0x20000, REGION_SOUND2, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5);SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
+	ROM_END(); }}; 
 	
-	ROM_START( vaportru )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 code */
-	  	ROM_LOAD16_BYTE( "fj02",   0x00000, 0x20000, CRC(a2affb73) SHA1(0d49397cc9891047a0b92e92e2e3d0e7fcaf8db9) )
-	  	ROM_LOAD16_BYTE( "fj00",   0x00001, 0x20000, CRC(ef05e07b) SHA1(0e505709fa251e6b30f019c0c28ee9ba2b29a50a) )
-		ROM_LOAD16_BYTE( "fj03",   0x40000, 0x20000, CRC(44893379) SHA1(da1340bc1821a552c317cb9a7c1ba69eb080b055) )
-	 	ROM_LOAD16_BYTE( "fj01",   0x40001, 0x20000, CRC(97fbc107) SHA1(b2899eb4347c0471397b83051e46c94dff3526f5) )
+	static RomLoadPtr rom_vaportru = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );/* 68000 code */
+	  	ROM_LOAD16_BYTE( "fj02",   0x00000, 0x20000, CRC(a2affb73);SHA1(0d49397cc9891047a0b92e92e2e3d0e7fcaf8db9) )
+	  	ROM_LOAD16_BYTE( "fj00",   0x00001, 0x20000, CRC(ef05e07b);SHA1(0e505709fa251e6b30f019c0c28ee9ba2b29a50a) )
+		ROM_LOAD16_BYTE( "fj03",   0x40000, 0x20000, CRC(44893379);SHA1(da1340bc1821a552c317cb9a7c1ba69eb080b055) )
+	 	ROM_LOAD16_BYTE( "fj01",   0x40001, 0x20000, CRC(97fbc107);SHA1(b2899eb4347c0471397b83051e46c94dff3526f5) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound CPU */
-		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b);SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 	
-		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b) SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
+		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b);SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b) SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
-		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e) SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b);SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
+		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e);SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
-	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81);SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
+	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc);SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235);SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND2, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
-	ROM_END
+		ROM_REGION( 0x20000, REGION_SOUND2, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5);SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
+	ROM_END(); }}; 
 	
-	ROM_START( kuhga )
-		ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 code */
-	  	ROM_LOAD16_BYTE( "fp02-3.bin", 0x00000, 0x20000, CRC(d0705ef4) SHA1(781efbf36d9dda543895e0a59cd4d72667439a93) )
-	  	ROM_LOAD16_BYTE( "fp00-3.bin", 0x00001, 0x20000, CRC(1da92e48) SHA1(6507bd9bbc31ee03e38b82cc135aebf090902761) )
-		ROM_LOAD16_BYTE( "fp03.bin",   0x40000, 0x20000, CRC(ea0da0f1) SHA1(ca40e694cb0aa0c13672c14fd4a389bc6d26cbc6) )
-	 	ROM_LOAD16_BYTE( "fp01.bin",   0x40001, 0x20000, CRC(e3ecbe86) SHA1(382e959111ec37ad94da8fd6dcefe2d2aab346b6) )
+	static RomLoadPtr rom_kuhga = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x80000, REGION_CPU1, 0 );/* 68000 code */
+	  	ROM_LOAD16_BYTE( "fp02-3.bin", 0x00000, 0x20000, CRC(d0705ef4);SHA1(781efbf36d9dda543895e0a59cd4d72667439a93) )
+	  	ROM_LOAD16_BYTE( "fp00-3.bin", 0x00001, 0x20000, CRC(1da92e48);SHA1(6507bd9bbc31ee03e38b82cc135aebf090902761) )
+		ROM_LOAD16_BYTE( "fp03.bin",   0x40000, 0x20000, CRC(ea0da0f1);SHA1(ca40e694cb0aa0c13672c14fd4a389bc6d26cbc6) )
+	 	ROM_LOAD16_BYTE( "fp01.bin",   0x40001, 0x20000, CRC(e3ecbe86);SHA1(382e959111ec37ad94da8fd6dcefe2d2aab346b6) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound CPU */
-		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b) SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* Sound CPU */
+		ROM_LOAD( "fj04",    0x00000, 0x10000, CRC(e9aedf9b);SHA1(f7bcf8f666015140aaad8ee5cf619636934b7066) )
 	
-		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b) SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
+		ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "vtmaa00.bin",   0x000000, 0x80000, CRC(0330e13b);SHA1(dce70667ea738295332556752d1305c5e941b383) ) /* chars & tiles */
 	
-		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b) SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
-		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e) SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
+		ROM_REGION( 0x100000, REGION_GFX2, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa01.bin",   0x000000, 0x80000, CRC(c217a31b);SHA1(e259d48190d6890781fb0338e17e14822876babb) ) /* tiles 2 */
+		ROM_LOAD( "vtmaa02.bin",   0x080000, 0x80000, CRC(091ff98e);SHA1(814dc08c055bad5368955a4b1fe6a706b58adc02) ) /* tiles 3 */
 	
-		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )
-	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81) SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
-	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc) SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
+		ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE );
+	  	ROM_LOAD( "vtmaa03.bin",   0x000000, 0x80000, CRC(1a30bf81);SHA1(00e6c713e12133a99d64ca80638c9cbc8e26b2c8) ) /* sprites */
+	  	ROM_LOAD( "vtmaa04.bin",   0x080000, 0x80000, CRC(b713e9cc);SHA1(af33943d75d2ee3a7385f624537008dca9e1d5d8) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235) SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj06",    0x00000, 0x20000, CRC(6e98a235);SHA1(374564b4e494d03cd1330c06e321b9452c22a075) )
 	
-		ROM_REGION( 0x20000, REGION_SOUND2, 0 )	/* ADPCM samples */
-		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5) SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
-	ROM_END
+		ROM_REGION( 0x20000, REGION_SOUND2, 0 );/* ADPCM samples */
+		ROM_LOAD( "fj05",    0x00000, 0x20000, CRC(39cda2b5);SHA1(f5c5a305025d451ab48f84cd63e36a3bbdefda96) )
+	ROM_END(); }}; 
 	
 	/******************************************************************************/
 	
@@ -456,7 +460,7 @@ public class vaportra
 	
 	/******************************************************************************/
 	
-	GAME( 1989, vaportra, 0,        vaportra, vaportra, vaportra, ROT270, "Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 1)" )
-	GAME( 1989, vaportru, vaportra, vaportra, vaportra, vaportra, ROT270, "Data East USA", "Vapor Trail - Hyper Offence Formation (US)" )
-	GAME( 1989, kuhga,    vaportra, vaportra, vaportra, vaportra, ROT270, "Data East Corporation", "Kuhga - Operation Code 'Vapor Trail' (Japan revision 3)" )
+	public static GameDriver driver_vaportra	   = new GameDriver("1989"	,"vaportra"	,"vaportra.java"	,rom_vaportra,null	,machine_driver_vaportra	,input_ports_vaportra	,init_vaportra	,ROT270	,	"Data East Corporation", "Vapor Trail - Hyper Offence Formation (World revision 1)" )
+	public static GameDriver driver_vaportru	   = new GameDriver("1989"	,"vaportru"	,"vaportra.java"	,rom_vaportru,driver_vaportra	,machine_driver_vaportra	,input_ports_vaportra	,init_vaportra	,ROT270	,	"Data East USA", "Vapor Trail - Hyper Offence Formation (US)" )
+	public static GameDriver driver_kuhga	   = new GameDriver("1989"	,"kuhga"	,"vaportra.java"	,rom_kuhga,driver_vaportra	,machine_driver_vaportra	,input_ports_vaportra	,init_vaportra	,ROT270	,	"Data East Corporation", "Kuhga - Operation Code 'Vapor Trail' (Japan revision 3)" )
 }

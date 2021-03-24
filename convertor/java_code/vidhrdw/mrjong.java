@@ -67,38 +67,38 @@ public class mrjong
 	  Display control parameter.
 	
 	***************************************************************************/
-	WRITE_HANDLER( mrjong_videoram_w )
+	public static WriteHandlerPtr mrjong_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mrjong_colorram_w )
+	public static WriteHandlerPtr mrjong_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( mrjong_flipscreen_w )
+	public static WriteHandlerPtr mrjong_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (data & 0x01))
 		{
 			flip_screen_set(data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] | ((colorram[tile_index] & 0x20) << 3);
-		int color = colorram[tile_index] & 0x1f;
-		int flags = ((colorram[tile_index] & 0x40) ? TILE_FLIPX : 0) | ((colorram[tile_index] & 0x80) ? TILE_FLIPY : 0);
+		int code = videoram.read(tile_index)| ((colorram.read(tile_index)& 0x20) << 3);
+		int color = colorram.read(tile_index)& 0x1f;
+		int flags = ((colorram.read(tile_index)& 0x40) ? TILE_FLIPX : 0) | ((colorram.read(tile_index)& 0x80) ? TILE_FLIPY : 0);
 	
 		SET_TILE_INFO(0, code, color, flags)
 	}
@@ -108,7 +108,7 @@ public class mrjong
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows_flip_xy,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -125,13 +125,13 @@ public class mrjong
 			int sx, sy;
 			int flipx, flipy;
 	
-			sprt = (((spriteram[offs + 1] >> 2) & 0x3f) | ((spriteram[offs + 3] & 0x20) << 1));
-			flipx = (spriteram[offs + 1] & 0x01) >> 0;
-			flipy = (spriteram[offs + 1] & 0x02) >> 1;
-			color = (spriteram[offs + 3] & 0x1f);
+			sprt = (((spriteram.read(offs + 1)>> 2) & 0x3f) | ((spriteram.read(offs + 3)& 0x20) << 1));
+			flipx = (spriteram.read(offs + 1)& 0x01) >> 0;
+			flipy = (spriteram.read(offs + 1)& 0x02) >> 1;
+			color = (spriteram.read(offs + 3)& 0x1f);
 	
-			sx = 224 - spriteram[offs + 2];
-			sy = spriteram[offs + 0];
+			sx = 224 - spriteram.read(offs + 2);
+			sy = spriteram.read(offs + 0);
 			if (flip_screen)
 			{
 				sx = 208 - sx;

@@ -24,28 +24,28 @@ public class mermaid
 	unsigned char* mermaid_foreground_scrollram;
 	
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		0*8, 26*8-1,
 		2*8, 30*8-1
-	};
+	);
 	
-	static struct rectangle flip_spritevisiblearea =
-	{
+	static rectangle flip_spritevisiblearea = new rectangle
+	(
 		6*8, 31*8-1,
 		2*8, 30*8-1
-	};
+	);
 	
 	
-	WRITE_HANDLER( mermaid_flip_screen_x_w )
+	public static WriteHandlerPtr mermaid_flip_screen_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_x_set(data & 0x01);
-	}
+	} };
 	
-	WRITE_HANDLER( mermaid_flip_screen_y_w )
+	public static WriteHandlerPtr mermaid_flip_screen_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_y_set(data & 0x01);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -198,18 +198,17 @@ public class mermaid
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
 	#ifdef MAME_DEBUG
-			extern int debug_key_pressed;
-	#endif
+			#endif
 			UINT8 flipx,flipy,sx,sy,code,bank = 0;
 	
 	
-			sx = spriteram[offs + 3] + 1;
-			sy = 240 - spriteram[offs + 1];
-			flipx = spriteram[offs + 0] & 0x40;
-			flipy = spriteram[offs + 0] & 0x80;
+			sx = spriteram.read(offs + 3)+ 1;
+			sy = 240 - spriteram.read(offs + 1);
+			flipx = spriteram.read(offs + 0)& 0x40;
+			flipy = spriteram.read(offs + 0)& 0x80;
 	
 			/* this doesn't look correct. Oh really? Maybe there is a PROM. */
-			switch (spriteram[offs + 2] & 0xf0)
+			switch (spriteram.read(offs + 2)& 0xf0)
 			{
 			case 0x00:  bank = 2; break;
 			case 0x10:  bank = 1; break;
@@ -226,7 +225,7 @@ public class mermaid
 	#endif
 			}
 	
-			code = (spriteram[offs + 0] & 0x3f) | (bank << 6);
+			code = (spriteram.read(offs + 0)& 0x3f) | (bank << 6);
 	
 			if (flip_screen_x) {
 				flipx = !flipx;
@@ -235,12 +234,12 @@ public class mermaid
 	
 			if (flip_screen_y) {
 				flipy = !flipy;
-				sy = spriteram[offs + 1];
+				sy = spriteram.read(offs + 1);
 			}
 	
 			drawgfx(bitmap,Machine->gfx[1],
 					code,
-					spriteram[offs + 2] & 0x0f,
+					spriteram.read(offs + 2)& 0x0f,
 					flipx, flipy,
 					sx, sy,
 					(flip_screen_x ? &flip_spritevisiblearea :

@@ -37,13 +37,13 @@ public class mcr12
 	
 	static void mcr1_get_bg_tile_info(int tile_index)
 	{
-		SET_TILE_INFO(0, videoram[tile_index], 0, 0);
+		SET_TILE_INFO(0, videoram.read(tile_index), 0, 0);
 	}
 	
 	
 	static void mcr2_get_bg_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index * 2] | (videoram[tile_index * 2 + 1] << 8);
+		int data = videoram.read(tile_index * 2)| (videoram.read(tile_index * 2 + 1)<< 8);
 		int code = data & 0x1ff;
 		int color = (data >> 11) & 3;
 		SET_TILE_INFO(0, code, color, TILE_FLIPYX((data >> 9) & 3));
@@ -52,7 +52,7 @@ public class mcr12
 	
 	static void twotigra_get_bg_tile_info(int tile_index)
 	{
-		int data = videoram[tile_index] | (videoram[tile_index + 0x400] << 8);
+		int data = videoram.read(tile_index)| (videoram.read(tile_index + 0x400)<< 8);
 		int code = data & 0x1ff;
 		int color = (data >> 11) & 3;
 		SET_TILE_INFO(0, code, color, TILE_FLIPYX((data >> 9) & 3));
@@ -72,14 +72,14 @@ public class mcr12
 	
 		/* allocate a dirty buffer */
 		dirtybuffer = auto_malloc(videoram_size);
-		if (!dirtybuffer)
+		if (dirtybuffer == 0)
 			return 1;
 	
 		/* allocate a temporary bitmap for the sprite rendering */
 		spritebitmap_width = Machine->drv->screen_width + 2 * 32;
 		spritebitmap_height = Machine->drv->screen_height + 2 * 32;
 		spritebitmap = auto_malloc(spritebitmap_width * spritebitmap_height);
-		if (!spritebitmap)
+		if (spritebitmap == 0)
 			return 1;
 		memset(spritebitmap, 0, spritebitmap_width * spritebitmap_height);
 	
@@ -113,7 +113,7 @@ public class mcr12
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(mcr1_get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		
 		/* handle the rest */
@@ -125,7 +125,7 @@ public class mcr12
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(mcr2_get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		
 		/* handle the rest */
@@ -137,7 +137,7 @@ public class mcr12
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(twotigra_get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		
 		/* handle the rest */
@@ -149,7 +149,7 @@ public class mcr12
 	{
 		/* initialize the background tilemap */
 		bg_tilemap = tilemap_create(mcr2_get_bg_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE, 16,16, 32,30);
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 		return 0;
 	}
@@ -162,16 +162,16 @@ public class mcr12
 	 *
 	 *************************************/
 	
-	WRITE_HANDLER( mcr1_videoram_w )
+	public static WriteHandlerPtr mcr1_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(bg_tilemap, offset);
-	}
+	} };
 	
 	
-	WRITE_HANDLER( mcr2_videoram_w )
+	public static WriteHandlerPtr mcr2_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 	
 		/* palette RAM is mapped into the upper 0x80 bytes here */
@@ -190,12 +190,12 @@ public class mcr12
 	
 			palette_set_color(idx, r, g, b);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( twotigra_videoram_w )
+	public static WriteHandlerPtr twotigra_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(bg_tilemap, offset & 0x3ff);
 	
 		/* palette RAM is mapped into the upper 0x40 bytes of each bank */
@@ -214,7 +214,7 @@ public class mcr12
 	
 			palette_set_color(idx, r, g, b);
 		}
-	}
+	} };
 	
 	
 	
@@ -244,7 +244,7 @@ public class mcr12
 			UINT8 *dst = spritebitmap + spritebitmap_width * sy + sx;
 	
 			/* redraw the line */
-			if (!hflip)
+			if (hflip == 0)
 			{
 				for (x = 0; x < 32; x++)
 					*dst++ |= *src++;
@@ -285,11 +285,11 @@ public class mcr12
 				continue;
 	
 			/* extract the bits of information */
-			code = spriteram[offs + 1] & 0x3f;
-			hflip = spriteram[offs + 1] & 0x40;
-			vflip = spriteram[offs + 1] & 0x80;
-			x = (spriteram[offs + 2] - 4) * 2;
-			y = (240 - spriteram[offs]) * 2;
+			code = spriteram.read(offs + 1)& 0x3f;
+			hflip = spriteram.read(offs + 1)& 0x40;
+			vflip = spriteram.read(offs + 1)& 0x80;
+			x = (spriteram.read(offs + 2)- 4) * 2;
+			y = (240 - spriteram.read(offs)) * 2;
 	
 			/* apply cocktail mode */
 			if (mcr_cocktail_flip)
@@ -415,7 +415,7 @@ public class mcr12
 				}
 	
 				/* lookup the attributes for the tile underneath to get the color */
-				attr = videoram[(ty * 32 + tx) * 2 + 1];
+				attr = videoram.read((ty * 32 + tx) * 2 + 1);
 				render_sprite_tile(bitmap, &Machine->pens[(attr & 0xc0) >> 2], offs);
 				dirtybuffer[offs] = 0;
 			}

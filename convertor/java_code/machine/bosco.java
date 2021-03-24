@@ -101,11 +101,9 @@ public class bosco
 	static int credits;
 	
 	void bosco_sample_play(int, int);
-	void bosco_vh_interrupt(void);
 	
 	static void *nmi_timer_1, *nmi_timer_2;
 	
-	WRITE_HANDLER( bosco_halt_w );
 	static void bosco_nmi_generate_1(int);
 	static void bosco_nmi_generate_2(int);
 	
@@ -122,21 +120,21 @@ public class bosco
 	}
 	
 	
-	READ_HANDLER( bosco_sharedram_r )
+	public static ReadHandlerPtr bosco_sharedram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return bosco_sharedram[offset];
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( bosco_sharedram_w )
+	public static WriteHandlerPtr bosco_sharedram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		bosco_sharedram[offset] = data;
-	}
+	} };
 	
 	
 	
-	READ_HANDLER( bosco_dsw_r )
+	public static ReadHandlerPtr bosco_dsw_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int bit0,bit1;
 	
@@ -145,7 +143,7 @@ public class bosco
 		bit1 = (input_port_1_r(0) >> offset) & 1;
 	
 		return bit0 | (bit1 << 1);
-	}
+	} };
 	
 	
 	
@@ -159,7 +157,7 @@ public class bosco
 	static int mode;
 	
 	
-	WRITE_HANDLER( bosco_customio_data_1_w )
+	public static WriteHandlerPtr bosco_customio_data_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		customio_1[offset] = data;
 	
@@ -297,10 +295,10 @@ public class bosco
 				}
 				break;
 		}
-	}
+	} };
 	
 	
-	READ_HANDLER( bosco_customio_data_1_r )
+	public static ReadHandlerPtr bosco_customio_data_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (customio_command_1)
 		{
@@ -431,20 +429,20 @@ public class bosco
 		}
 	
 		return -1;
-	}
+	} };
 	
 	
-	READ_HANDLER( bosco_customio_1_r )
+	public static ReadHandlerPtr bosco_customio_1_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return customio_command_1;
-	}
+	} };
 	
 	void bosco_nmi_generate_1 (int param)
 	{
 		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
 	}
 	
-	WRITE_HANDLER( bosco_customio_1_w )
+	public static WriteHandlerPtr bosco_customio_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data != 0x10)
 			logerror("%04x: custom IO 1 command %02x\n",activecpu_get_pc(),data);
@@ -486,7 +484,7 @@ public class bosco
 		}
 	
 		timer_adjust(nmi_timer_1, TIME_IN_USEC(50), 0, TIME_IN_USEC(50));
-	}
+	} };
 	
 	
 	
@@ -498,7 +496,7 @@ public class bosco
 	static int customio_command_2;
 	static unsigned char customio_2[16];
 	
-	WRITE_HANDLER( bosco_customio_data_2_w )
+	public static WriteHandlerPtr bosco_customio_data_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		customio_2[offset] = data;
 	
@@ -529,10 +527,10 @@ public class bosco
 				}
 				break;
 		}
-	}
+	} };
 	
 	
-	READ_HANDLER( bosco_customio_data_2_r )
+	public static ReadHandlerPtr bosco_customio_data_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		switch (customio_command_2)
 		{
@@ -545,20 +543,20 @@ public class bosco
 		}
 	
 		return -1;
-	}
+	} };
 	
 	
-	READ_HANDLER( bosco_customio_2_r )
+	public static ReadHandlerPtr bosco_customio_2_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return customio_command_2;
-	}
+	} };
 	
 	void bosco_nmi_generate_2 (int param)
 	{
 		cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
 	}
 	
-	WRITE_HANDLER( bosco_customio_2_w )
+	public static WriteHandlerPtr bosco_customio_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data != 0x10)
 			logerror("%04x: custom IO 2 command %02x\n",activecpu_get_pc(),data);
@@ -573,14 +571,14 @@ public class bosco
 		}
 	
 		timer_adjust(nmi_timer_2, TIME_IN_USEC(50), 0, TIME_IN_USEC(50));
-	}
+	} };
 	
 	
 	
 	
 	
 	
-	WRITE_HANDLER( bosco_halt_w )
+	public static WriteHandlerPtr bosco_halt_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data & 1)
 		{
@@ -592,14 +590,14 @@ public class bosco
 			cpu_set_reset_line(1,ASSERT_LINE);
 			cpu_set_reset_line(2,ASSERT_LINE);
 		}
-	}
+	} };
 	
 	
 	
-	WRITE_HANDLER( bosco_interrupt_enable_1_w )
+	public static WriteHandlerPtr bosco_interrupt_enable_1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		interrupt_enable_1 = (data&1);
-	}
+	} };
 	
 	
 	
@@ -613,10 +611,10 @@ public class bosco
 	
 	
 	
-	WRITE_HANDLER( bosco_interrupt_enable_2_w )
+	public static WriteHandlerPtr bosco_interrupt_enable_2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		interrupt_enable_2 = data & 1;
-	}
+	} };
 	
 	
 	
@@ -628,10 +626,10 @@ public class bosco
 	
 	
 	
-	WRITE_HANDLER( bosco_interrupt_enable_3_w )
+	public static WriteHandlerPtr bosco_interrupt_enable_3_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		interrupt_enable_3 = !(data & 1);
-	}
+	} };
 	
 	
 	

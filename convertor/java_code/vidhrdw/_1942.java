@@ -51,22 +51,22 @@ public class _1942
 	
 	
 			/* red component */
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
-			bit3 = (color_prom[i] >> 3) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
+			bit3 = (color_prom.read(i)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* green component */
-			bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 			/* blue component */
-			bit0 = (color_prom[i + 2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[i + 2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[i + 2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[i + 2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(i + 2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -156,38 +156,38 @@ public class _1942
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( c1942_fgvideoram_w )
+	public static WriteHandlerPtr c1942_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		c1942_fgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(fg_tilemap,offset & 0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( c1942_bgvideoram_w )
+	public static WriteHandlerPtr c1942_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		c1942_bgvideoram[offset] = data;
 		tilemap_mark_tile_dirty(bg_tilemap,(offset & 0x0f) | ((offset >> 1) & 0x01f0));
-	}
+	} };
 	
 	
-	WRITE_HANDLER( c1942_palette_bank_w )
+	public static WriteHandlerPtr c1942_palette_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (c1942_palette_bank != data)
 		{
 			c1942_palette_bank = data;
 			tilemap_mark_all_tiles_dirty(bg_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( c1942_scroll_w )
+	public static WriteHandlerPtr c1942_scroll_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned char scroll[2];
 	
 		scroll[offset] = data;
 		tilemap_set_scrollx(bg_tilemap,0,scroll[0] | (scroll[1] << 8));
-	}
+	} };
 	
 	
-	WRITE_HANDLER( c1942_c804_w )
+	public static WriteHandlerPtr c1942_c804_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 7: flip screen
 	       bit 4: cpu B reset
@@ -198,7 +198,7 @@ public class _1942
 		cpu_set_reset_line(1,(data & 0x10) ? ASSERT_LINE : CLEAR_LINE);
 	
 		flip_screen_set(data & 0x80);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -217,11 +217,11 @@ public class _1942
 			int i,code,col,sx,sy,dir;
 	
 	
-			code = (spriteram[offs] & 0x7f) + 4*(spriteram[offs + 1] & 0x20)
-					+ 2*(spriteram[offs] & 0x80);
-			col = spriteram[offs + 1] & 0x0f;
-			sx = spriteram[offs + 3] - 0x10 * (spriteram[offs + 1] & 0x10);
-			sy = spriteram[offs + 2];
+			code = (spriteram.read(offs)& 0x7f) + 4*(spriteram.read(offs + 1)& 0x20)
+					+ 2*(spriteram.read(offs)& 0x80);
+			col = spriteram.read(offs + 1)& 0x0f;
+			sx = spriteram.read(offs + 3)- 0x10 * (spriteram.read(offs + 1)& 0x10);
+			sy = spriteram.read(offs + 2);
 			dir = 1;
 			if (flip_screen)
 			{
@@ -231,7 +231,7 @@ public class _1942
 			}
 	
 			/* handle double / quadruple height */
-			i = (spriteram[offs + 1] & 0xc0) >> 6;
+			i = (spriteram.read(offs + 1)& 0xc0) >> 6;
 			if (i == 2) i = 3;
 	
 			do

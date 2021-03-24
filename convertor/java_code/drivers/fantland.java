@@ -48,77 +48,85 @@ public class fantland
 	
 	static data8_t fantland_nmi_enable;
 	
-	static WRITE_HANDLER( fantland_nmi_enable_w )
+	public static WriteHandlerPtr fantland_nmi_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		fantland_nmi_enable = data;
 	//	if ((fantland_nmi_enable != 0) && (fantland_nmi_enable != 8))
 	//		logerror("CPU #0 : nmi_enable = %02x - PC = %04X\n", data, activecpu_get_pc());
-	}
+	} };
 	
-	static WRITE_HANDLER( fantland_soundlatch_w )
+	public static WriteHandlerPtr fantland_soundlatch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		soundlatch_w(0,data);
 		cpu_set_nmi_line(1,PULSE_LINE);
-	}
+	} };
 	
 	/***************************************************************************
 									Fantasy Land
 	***************************************************************************/
 	
-	static MEMORY_READ_START( fantland_readmem )
-		{ 0x00000, 0x07fff, MRA_RAM			},
-		{ 0x08000, 0x7ffff, MRA_ROM			},
-		{ 0xa2000, 0xa21ff, MRA_RAM			},	// not actually read
-		{ 0xa3000, 0xa3000, input_port_0_r	},
-		{ 0xa3001, 0xa3001, input_port_1_r	},
-		{ 0xa3002, 0xa3002, input_port_2_r	},
-		{ 0xa3003, 0xa3003, input_port_3_r	},
-		{ 0xa4000, 0xa67ff, MRA_RAM			},	// not actually read
-		{ 0xc0000, 0xc03ff, MRA_RAM			},	// ""
-		{ 0xe0000, 0xfffff, MRA_ROM			},
-	MEMORY_END
+	public static Memory_ReadAddress fantland_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x00000, 0x07fff, MRA_RAM			),
+		new Memory_ReadAddress( 0x08000, 0x7ffff, MRA_ROM			),
+		new Memory_ReadAddress( 0xa2000, 0xa21ff, MRA_RAM			),	// not actually read
+		new Memory_ReadAddress( 0xa3000, 0xa3000, input_port_0_r	),
+		new Memory_ReadAddress( 0xa3001, 0xa3001, input_port_1_r	),
+		new Memory_ReadAddress( 0xa3002, 0xa3002, input_port_2_r	),
+		new Memory_ReadAddress( 0xa3003, 0xa3003, input_port_3_r	),
+		new Memory_ReadAddress( 0xa4000, 0xa67ff, MRA_RAM			),	// not actually read
+		new Memory_ReadAddress( 0xc0000, 0xc03ff, MRA_RAM			),	// ""
+		new Memory_ReadAddress( 0xe0000, 0xfffff, MRA_ROM			),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( fantland_writemem )
-		{ 0x00000, 0x07fff, MWA_RAM					},
-		{ 0x08000, 0x7ffff, MWA_ROM					},
-		{ 0xa2000, 0xa21ff, paletteram_xRRRRRGGGGGBBBBB_w, &paletteram	},
-		{ 0xa3000, 0xa3000, fantland_nmi_enable_w	},
-		{ 0xa3002, 0xa3002, fantland_soundlatch_w	},
-		{ 0xa4000, 0xa67ff, MWA_RAM, &spriteram		},
-		{ 0xc0000, 0xc03ff, MWA_RAM, &spriteram_2	},
-		{ 0xe0000, 0xfffff, MWA_ROM					},
-	MEMORY_END
+	public static Memory_WriteAddress fantland_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x00000, 0x07fff, MWA_RAM					),
+		new Memory_WriteAddress( 0x08000, 0x7ffff, MWA_ROM					),
+		new Memory_WriteAddress( 0xa2000, 0xa21ff, paletteram_xRRRRRGGGGGBBBBB_w, paletteram	),
+		new Memory_WriteAddress( 0xa3000, 0xa3000, fantland_nmi_enable_w	),
+		new Memory_WriteAddress( 0xa3002, 0xa3002, fantland_soundlatch_w	),
+		new Memory_WriteAddress( 0xa4000, 0xa67ff, MWA_RAM, spriteram		),
+		new Memory_WriteAddress( 0xc0000, 0xc03ff, MWA_RAM, spriteram_2	),
+		new Memory_WriteAddress( 0xe0000, 0xfffff, MWA_ROM					),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
 									Galaxy Gunners
 	***************************************************************************/
 	
-	static MEMORY_READ_START( galaxygn_readmem )
-		{ 0x00000, 0x07fff, MRA_RAM			},
-		{ 0x10000, 0x2ffff, MRA_ROM			},
-		{ 0x52000, 0x521ff, MRA_RAM			},	// not actually read
-		{ 0x53000, 0x53000, input_port_0_r	},
-		{ 0x53001, 0x53001, input_port_1_r	},
-		{ 0x53002, 0x53002, input_port_2_r	},
-		{ 0x53003, 0x53003, input_port_3_r	},
-		{ 0x54000, 0x567ff, MRA_RAM			},	// not actually read
-		{ 0x60000, 0x603ff, MRA_RAM			},	// ""
-		{ 0x60000, 0x7ffff, MRA_ROM			},
-		{ 0xf0000, 0xfffff, MRA_ROM			},
-	MEMORY_END
+	public static Memory_ReadAddress galaxygn_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x00000, 0x07fff, MRA_RAM			),
+		new Memory_ReadAddress( 0x10000, 0x2ffff, MRA_ROM			),
+		new Memory_ReadAddress( 0x52000, 0x521ff, MRA_RAM			),	// not actually read
+		new Memory_ReadAddress( 0x53000, 0x53000, input_port_0_r	),
+		new Memory_ReadAddress( 0x53001, 0x53001, input_port_1_r	),
+		new Memory_ReadAddress( 0x53002, 0x53002, input_port_2_r	),
+		new Memory_ReadAddress( 0x53003, 0x53003, input_port_3_r	),
+		new Memory_ReadAddress( 0x54000, 0x567ff, MRA_RAM			),	// not actually read
+		new Memory_ReadAddress( 0x60000, 0x603ff, MRA_RAM			),	// ""
+		new Memory_ReadAddress( 0x60000, 0x7ffff, MRA_ROM			),
+		new Memory_ReadAddress( 0xf0000, 0xfffff, MRA_ROM			),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( galaxygn_writemem )
-		{ 0x00000, 0x07fff, MWA_RAM					},
-		{ 0x10000, 0x2ffff, MWA_ROM					},
-		{ 0x52000, 0x521ff, paletteram_xRRRRRGGGGGBBBBB_w, &paletteram	},
-		{ 0x53000, 0x53000, fantland_nmi_enable_w	},
-		{ 0x53002, 0x53002, fantland_soundlatch_w	},
-		{ 0x54000, 0x567ff, MWA_RAM, &spriteram		},
-		{ 0x60000, 0x603ff, MWA_RAM, &spriteram_2	},
-		{ 0x60000, 0x7ffff, MWA_ROM					},
-		{ 0xf0000, 0xfffff, MWA_ROM					},
-	MEMORY_END
+	public static Memory_WriteAddress galaxygn_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x00000, 0x07fff, MWA_RAM					),
+		new Memory_WriteAddress( 0x10000, 0x2ffff, MWA_ROM					),
+		new Memory_WriteAddress( 0x52000, 0x521ff, paletteram_xRRRRRGGGGGBBBBB_w, paletteram	),
+		new Memory_WriteAddress( 0x53000, 0x53000, fantland_nmi_enable_w	),
+		new Memory_WriteAddress( 0x53002, 0x53002, fantland_soundlatch_w	),
+		new Memory_WriteAddress( 0x54000, 0x567ff, MWA_RAM, spriteram		),
+		new Memory_WriteAddress( 0x60000, 0x603ff, MWA_RAM, spriteram_2	),
+		new Memory_WriteAddress( 0x60000, 0x7ffff, MWA_ROM					),
+		new Memory_WriteAddress( 0xf0000, 0xfffff, MWA_ROM					),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
@@ -127,28 +135,36 @@ public class fantland
 	
 	***************************************************************************/
 	
-	static MEMORY_READ_START( fantland_sound_readmem )
-		{ 0x00000, 0x01fff, MRA_RAM },
-		{ 0x80000, 0x9ffff, MRA_ROM	},
-		{ 0xc0000, 0xfffff, MRA_ROM	},
-	MEMORY_END
+	public static Memory_ReadAddress fantland_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x00000, 0x01fff, MRA_RAM ),
+		new Memory_ReadAddress( 0x80000, 0x9ffff, MRA_ROM	),
+		new Memory_ReadAddress( 0xc0000, 0xfffff, MRA_ROM	),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( fantland_sound_writemem )
-		{ 0x00000, 0x01fff, MWA_RAM	},
-		{ 0x80000, 0x9ffff, MWA_ROM	},
-		{ 0xc0000, 0xfffff, MWA_ROM	},
-	MEMORY_END
+	public static Memory_WriteAddress fantland_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x00000, 0x01fff, MWA_RAM	),
+		new Memory_WriteAddress( 0x80000, 0x9ffff, MWA_ROM	),
+		new Memory_WriteAddress( 0xc0000, 0xfffff, MWA_ROM	),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( fantland_sound_readport )
-		{ 0x0080, 0x0080, soundlatch_r				},
-		{ 0x0101, 0x0101, YM2151_status_port_0_r	},
-	PORT_END
+	public static IO_ReadPort fantland_sound_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x0080, 0x0080, soundlatch_r				),
+		new IO_ReadPort( 0x0101, 0x0101, YM2151_status_port_0_r	),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( fantland_sound_writeport )
-		{ 0x0100, 0x0100, YM2151_register_port_0_w	},
-		{ 0x0101, 0x0101, YM2151_data_port_0_w		},
-		{ 0x0180, 0x0180, DAC_0_data_w				},
-	PORT_END
+	public static IO_WritePort fantland_sound_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x0100, 0x0100, YM2151_register_port_0_w	),
+		new IO_WritePort( 0x0101, 0x0101, YM2151_data_port_0_w		),
+		new IO_WritePort( 0x0180, 0x0180, DAC_0_data_w				),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	/***************************************************************************
@@ -161,149 +177,149 @@ public class fantland
 									Fantasy Land
 	***************************************************************************/
 	
-	INPUT_PORTS_START( fantland )
-		PORT_START	/* IN0 - a3000 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1			)
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1			)
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		)
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	)
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	)
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	)
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			)
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			)
+	static InputPortPtr input_ports_fantland = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 - a3000 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1			);
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1			);
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		);
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	);
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	);
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	);
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			);
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			);
 	
-		PORT_START	/* IN1 - a3001 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2			)
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2			)
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		| IPF_PLAYER2 )	// used in test mode only
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	| IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			| IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			| IPF_PLAYER2 )
+		PORT_START(); 	/* IN1 - a3001 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2			);
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2			);
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		| IPF_PLAYER2 );// used in test mode only
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	| IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			| IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			| IPF_PLAYER2 );
 	
-		PORT_START	/* IN2 - a3002 */
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x00, "Invulnerability" )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, "Allow Continue" )
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x60, "Normal" )
-		PORT_DIPSETTING(    0x40, "Hard" )
-		PORT_DIPSETTING(    0x20, "Harder" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+		PORT_START(); 	/* IN2 - a3002 */
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x00, "Invulnerability" );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, "Allow Continue" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x60, 0x60, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x60, "Normal" );
+		PORT_DIPSETTING(    0x40, "Hard" );
+		PORT_DIPSETTING(    0x20, "Harder" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
 	
-		PORT_START      /* IN3 - a3003 */
-		PORT_DIPNAME( 0x01, 0x01, "Test Sound" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0e, 0x0c, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x0e, "1" )
-		PORT_DIPSETTING(    0x0c, "2" )
-		PORT_DIPSETTING(    0x0a, "3" )
-		PORT_DIPSETTING(    0x08, "4" )
-		PORT_DIPSETTING(    0x06, "5" )
-		PORT_DIPSETTING(    0x04, "6" )
-		PORT_DIPSETTING(    0x02, "7" )
-		PORT_DIPSETTING(    0x00, "8" )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x30, "800k" )
-		PORT_DIPSETTING(    0x20, "1600k" )
-		PORT_DIPSETTING(    0x10, "2400k" )
-		PORT_DIPSETTING(    0x00, "3200k" )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//unused?
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//unused?
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START();       /* IN3 - a3003 */
+		PORT_DIPNAME( 0x01, 0x01, "Test Sound" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0e, 0x0c, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x0e, "1" );
+		PORT_DIPSETTING(    0x0c, "2" );
+		PORT_DIPSETTING(    0x0a, "3" );
+		PORT_DIPSETTING(    0x08, "4" );
+		PORT_DIPSETTING(    0x06, "5" );
+		PORT_DIPSETTING(    0x04, "6" );
+		PORT_DIPSETTING(    0x02, "7" );
+		PORT_DIPSETTING(    0x00, "8" );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x30, "800k" );
+		PORT_DIPSETTING(    0x20, "1600k" );
+		PORT_DIPSETTING(    0x10, "2400k" );
+		PORT_DIPSETTING(    0x00, "3200k" );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );	//unused?
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );	//unused?
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
 	/***************************************************************************
 									Galaxy Gunners
 	***************************************************************************/
 	
-	INPUT_PORTS_START( galaxygn )
-		PORT_START	/* IN0 - 53000 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1			)
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1			)
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		)
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	)
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	)
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	)
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			)
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			)
+	static InputPortPtr input_ports_galaxygn = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* IN0 - 53000 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1			);
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1			);
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		);
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	);
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	);
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	);
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			);
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			);
 	
-		PORT_START	/* IN1 - 53001 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2			)
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2			)
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		| IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	| IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			| IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			| IPF_PLAYER2 )
+		PORT_START(); 	/* IN1 - 53001 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2			);
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2			);
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP		| IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	| IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	| IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1			| IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2			| IPF_PLAYER2 );
 	
-		PORT_START	/* IN2 - 53002 */
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x00, "Invulnerability" )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) ) 	// Demo Sounds? doesn't work
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )	// Allow Continue? doesn't work
-		PORT_DIPSETTING(    0x00, DEF_STR( No ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Yes ) )
-		PORT_DIPNAME( 0x60, 0x60, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x60, "Normal" )
-		PORT_DIPSETTING(    0x40, "Hard" )
-		PORT_DIPSETTING(    0x20, "Harder" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+		PORT_START(); 	/* IN2 - 53002 */
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x00, "Invulnerability" );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") ); 	// Demo Sounds? doesn't work
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );	// Allow Continue? doesn't work
+		PORT_DIPSETTING(    0x00, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0x60, 0x60, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x60, "Normal" );
+		PORT_DIPSETTING(    0x40, "Hard" );
+		PORT_DIPSETTING(    0x20, "Harder" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_SERVICE( 0x80, IP_ACTIVE_LOW );
 	
-		PORT_START      /* IN3 - 53003 */
-		PORT_DIPNAME( 0x01, 0x01, "Test Sound" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0e, 0x08, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x0e, "1" )
-		PORT_DIPSETTING(    0x0c, "2" )
-		PORT_DIPSETTING(    0x0a, "3" )
-		PORT_DIPSETTING(    0x08, "4" )
-		PORT_DIPSETTING(    0x06, "5" )
-		PORT_DIPSETTING(    0x04, "6" )
-		PORT_DIPSETTING(    0x02, "7" )
-		PORT_DIPSETTING(    0x00, "8" )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x30, "10k" )
-		PORT_DIPSETTING(    0x20, "20k" )
-		PORT_DIPSETTING(    0x10, "30k" )
-		PORT_DIPSETTING(    0x00, "40k" )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//unused?
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//unused?
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+		PORT_START();       /* IN3 - 53003 */
+		PORT_DIPNAME( 0x01, 0x01, "Test Sound" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0e, 0x08, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x0e, "1" );
+		PORT_DIPSETTING(    0x0c, "2" );
+		PORT_DIPSETTING(    0x0a, "3" );
+		PORT_DIPSETTING(    0x08, "4" );
+		PORT_DIPSETTING(    0x06, "5" );
+		PORT_DIPSETTING(    0x04, "6" );
+		PORT_DIPSETTING(    0x02, "7" );
+		PORT_DIPSETTING(    0x00, "8" );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x30, "10k" );
+		PORT_DIPSETTING(    0x20, "20k" );
+		PORT_DIPSETTING(    0x10, "30k" );
+		PORT_DIPSETTING(    0x00, "40k" );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );	//unused?
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );	//unused?
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	/***************************************************************************
@@ -312,21 +328,21 @@ public class fantland
 	
 	***************************************************************************/
 	
-	static struct GfxLayout layout16x16x6 =
-	{
+	static GfxLayout layout16x16x6 = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,1),
 		6,
-		{ 0,1,2,3,4,5 },
-		{ STEP4(3*6,-6),STEP4(7*6,-6),STEP4(11*6,-6),STEP4(15*6,-6) },
-		{ STEP16(0,16*6) },
+		new int[] { 0,1,2,3,4,5 },
+		new int[] { STEP4(3*6,-6),STEP4(7*6,-6),STEP4(11*6,-6),STEP4(15*6,-6) },
+		new int[] { STEP16(0,16*6) },
 		16*16*6
-	};
+	);
 	
-	static struct GfxDecodeInfo fantland_gfxdecodeinfo[] =
+	static GfxDecodeInfo fantland_gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &layout16x16x6, 0, 4 }, // [0] Sprites
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, layout16x16x6, 0, 4 ), // [0] Sprites
+		new GfxDecodeInfo( -1 )
 	};
 	
 	/***************************************************************************
@@ -359,11 +375,11 @@ public class fantland
 		{ 0 }
 	};
 	
-	static struct DACinterface fantland_dac_interface =
-	{
+	static DACinterface fantland_dac_interface = new DACinterface
+	(
 		1,
-		{ 80 }
-	};
+		new int[] { 80 }
+	);
 	
 	static MACHINE_DRIVER_START( fantland )
 		/* basic machine hardware */
@@ -472,20 +488,20 @@ public class fantland
 	
 	***************************************************************************/
 	
-	ROM_START( fantland )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )					// Main CPU
+	static RomLoadPtr rom_fantland = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );				// Main CPU
 		ROMX_LOAD( "fantasyl.ev2", 0x00000, 0x20000, CRC(f5bdca0e) SHA1(d05cf6f68d4d1a3dcc0171f7cf220c4920bd47bb) , ROM_SKIP(1) )
 		ROMX_LOAD( "fantasyl.od2", 0x00001, 0x20000, CRC(9db35023) SHA1(81e2accd67dcf8563a68b2c4e35526f23a40150c) , ROM_SKIP(1) )
-		ROM_COPY( REGION_CPU1,     0x00000, 0x40000, 0x40000 )
+		ROM_COPY( REGION_CPU1,     0x00000, 0x40000, 0x40000 );
 		ROMX_LOAD( "fantasyl.ev1", 0xe0000, 0x10000, CRC(70e0ee30) SHA1(5253213da56b3f97e2811f2b10927d0e542447f0) , ROM_SKIP(1) )
 		ROMX_LOAD( "fantasyl.od1", 0xe0001, 0x10000, CRC(577b4bd7) SHA1(1f08202d99c3e39e0dd1ed4947b928b695a5b411) , ROM_SKIP(1) )
 	
-		ROM_REGION( 0x100000, REGION_CPU2, 0 )					// Sound CPU
-		ROM_LOAD16_WORD( "fantasyl.s2", 0x80000, 0x20000, CRC(f23837d8) SHA1(4048784f759781e50ae445ea61f1ca908e8e6ac1) )	// samples (8 bit unsigned)
-		ROM_LOAD16_WORD( "fantasyl.s1", 0xc0000, 0x20000, CRC(1a324a69) SHA1(06f6877af6cd19bfaac8a4ea8057ef8faee276f5) )
-		ROM_COPY( REGION_CPU2,          0xc0000, 0xe0000, 0x20000 )
+		ROM_REGION( 0x100000, REGION_CPU2, 0 );				// Sound CPU
+		ROM_LOAD16_WORD( "fantasyl.s2", 0x80000, 0x20000, CRC(f23837d8);SHA1(4048784f759781e50ae445ea61f1ca908e8e6ac1) )	// samples (8 bit unsigned)
+		ROM_LOAD16_WORD( "fantasyl.s1", 0xc0000, 0x20000, CRC(1a324a69);SHA1(06f6877af6cd19bfaac8a4ea8057ef8faee276f5) )
+		ROM_COPY( REGION_CPU2,          0xc0000, 0xe0000, 0x20000 );
 	
-		ROM_REGION( 0x480000, REGION_GFX1, ROMREGION_DISPOSE )	// Sprites
+		ROM_REGION( 0x480000, REGION_GFX1, ROMREGION_DISPOSE );// Sprites
 		ROMX_LOAD( "fantasyl.m00", 0x000000, 0x80000, CRC(82d819ff) SHA1(2b5b0759de8260eaa84ddded9dc2d12a6e0f5ec9) , ROM_GROUPWORD | ROM_SKIP(1) )
 		ROMX_LOAD( "fantasyl.m01", 0x0c0000, 0x80000, CRC(70a94139) SHA1(689fbfa267d60821cde13d5dc2dfe1dea67b434a) , ROM_GROUPWORD | ROM_SKIP(1) )
 		ROMX_LOAD( "fantasyl.05",  0x000002, 0x80000, CRC(62b9a00b) SHA1(ecd18e5e7a5e3535956fb693d2f7e35d2bb7ede9) , ROM_SKIP(2) )
@@ -498,27 +514,27 @@ public class fantland
 		ROMX_LOAD( "fantasyl.d0",  0x3c0001, 0x20000, CRC(0f907f19) SHA1(eea90e7d7e2e29db809e867d9b1205f4fbb7ada8) , ROM_SKIP(2) )
 		ROMX_LOAD( "fantasyl.d1",  0x3c0000, 0x20000, CRC(10d10389) SHA1(3a5639050c769eedc62924dfde57c1bf020970c8) , ROM_SKIP(2) )
 		ROMX_LOAD( "fantasyl.07",  0x300002, 0x80000, CRC(162ad422) SHA1(0d3609e630481018d1326a908d1d4c204dfcdf13) , ROM_SKIP(2) )
-	ROM_END
+	ROM_END(); }}; 
 	
 	/***************************************************************************
 									Galaxy Gunners
 	***************************************************************************/
 	
-	ROM_START( galaxygn )
-		ROM_REGION( 0x100000, REGION_CPU1, 0 )					// Main CPU
-		ROM_LOAD( "gg03.bin", 0x10000, 0x10000, CRC(9e469189) SHA1(07e5d36ca9665bdd13e3bb4241d34b9042371b79) )
-		ROM_LOAD( "gg02.bin", 0x20000, 0x10000, CRC(b87a438f) SHA1(96c39cc4d51a2fc0779f148971220117967173c0) )
-		ROM_LOAD( "gg01.bin", 0x60000, 0x10000, CRC(ad0e5b29) SHA1(f9a7ebce9f47a009af213e4e10811bb1c26f891a) )
-		ROM_COPY( REGION_CPU1, 0x60000, 0x70000, 0x10000 )
-		ROM_COPY( REGION_CPU1, 0x60000, 0xf0000, 0x10000 )
+	static RomLoadPtr rom_galaxygn = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x100000, REGION_CPU1, 0 );				// Main CPU
+		ROM_LOAD( "gg03.bin", 0x10000, 0x10000, CRC(9e469189);SHA1(07e5d36ca9665bdd13e3bb4241d34b9042371b79) )
+		ROM_LOAD( "gg02.bin", 0x20000, 0x10000, CRC(b87a438f);SHA1(96c39cc4d51a2fc0779f148971220117967173c0) )
+		ROM_LOAD( "gg01.bin", 0x60000, 0x10000, CRC(ad0e5b29);SHA1(f9a7ebce9f47a009af213e4e10811bb1c26f891a) )
+		ROM_COPY( REGION_CPU1, 0x60000, 0x70000, 0x10000 );
+		ROM_COPY( REGION_CPU1, 0x60000, 0xf0000, 0x10000 );
 	
-		ROM_REGION( 0x100000, REGION_CPU2, 0 )					// Sound CPU
-		ROM_LOAD( "gg20.bin", 0xc0000, 0x10000, CRC(f5c65a85) SHA1(a094fa9531ea4e68ec0a448568e7d4b2307c8185) )
-		ROM_COPY( REGION_CPU2, 0xc0000, 0xd0000, 0x10000 )
-		ROM_COPY( REGION_CPU2, 0xc0000, 0xe0000, 0x10000 )
-		ROM_COPY( REGION_CPU2, 0xc0000, 0xf0000, 0x10000 )
+		ROM_REGION( 0x100000, REGION_CPU2, 0 );				// Sound CPU
+		ROM_LOAD( "gg20.bin", 0xc0000, 0x10000, CRC(f5c65a85);SHA1(a094fa9531ea4e68ec0a448568e7d4b2307c8185) )
+		ROM_COPY( REGION_CPU2, 0xc0000, 0xd0000, 0x10000 );
+		ROM_COPY( REGION_CPU2, 0xc0000, 0xe0000, 0x10000 );
+		ROM_COPY( REGION_CPU2, 0xc0000, 0xf0000, 0x10000 );
 	
-		ROM_REGION( 0x1b0000, REGION_GFX1, ROMREGION_DISPOSE )	// Sprites
+		ROM_REGION( 0x1b0000, REGION_GFX1, ROMREGION_DISPOSE );// Sprites
 		ROMX_LOAD( "gg54.bin", 0x000000, 0x10000, CRC(b3621119) SHA1(66ade772077e57f872ef1c8f45e244f4006023f0) , ROM_SKIP(2) )
 		ROMX_LOAD( "gg38.bin", 0x000001, 0x10000, CRC(52b70f3e) SHA1(65f11d5700337d6d9b6325ff70c86d076e1bdc26) , ROM_SKIP(2) )
 		ROMX_LOAD( "gg22.bin", 0x000002, 0x10000, CRC(ea49fee4) SHA1(29ae3e5dfade421a5e97efe5be1cb17862fdcea1) , ROM_SKIP(2) )
@@ -546,9 +562,9 @@ public class fantland
 		ROMX_LOAD( "gg62.bin", 0x180000, 0x10000, CRC(0fb2d41a) SHA1(41b179e4e9ae142b3057e7cdad6eee8efcd952c4) , ROM_SKIP(2) )
 		ROMX_LOAD( "gg46.bin", 0x180001, 0x10000, CRC(5f1bf8ad) SHA1(b831ea433ff008377b522a3be4666d6d1b86cbb4) , ROM_SKIP(2) )
 		ROMX_LOAD( "gg30.bin", 0x180002, 0x10000, CRC(ded7cacf) SHA1(adbfaa8f46e5ce8df264d5b5a201d75ca2b3dbeb) , ROM_SKIP(2) )
-	ROM_END
+	ROM_END(); }}; 
 	
-	GAME( 19??, fantland, 0, fantland, fantland, 0, ROT0,  "Electronic Devices Italy", "Fantasy Land"   )
-	GAME( 1989, galaxygn, 0, galaxygn, galaxygn, 0, ROT90, "Electronic Devices Italy", "Galaxy Gunners" )
+	public static GameDriver driver_fantland	   = new GameDriver("19??"	,"fantland"	,"fantland.java"	,rom_fantland,null	,machine_driver_fantland	,input_ports_fantland	,null	,ROT0	,	"Electronic Devices Italy", "Fantasy Land"   )
+	public static GameDriver driver_galaxygn	   = new GameDriver("1989"	,"galaxygn"	,"fantland.java"	,rom_galaxygn,null	,machine_driver_galaxygn	,input_ports_galaxygn	,null	,ROT90	,	"Electronic Devices Italy", "Galaxy Gunners" )
 	
 }

@@ -27,7 +27,6 @@ public class ojankohs
 	static int ojankoc_screen_refresh;
 	static struct mame_bitmap *ojankoc_tmpbitmap;
 	
-	WRITE_HANDLER( ojankoc_videoram_w );
 	
 	
 	/******************************************************************************
@@ -42,23 +41,23 @@ public class ojankohs
 		int bit0, bit1, bit2, bit3, bit4, r, g, b;
 	
 		for (i = 0; i < Machine->drv->total_colors; i++) {
-			bit0 = (color_prom[0] >> 2) & 0x01;
-			bit1 = (color_prom[0] >> 3) & 0x01;
-			bit2 = (color_prom[0] >> 4) & 0x01;
-			bit3 = (color_prom[0] >> 5) & 0x01;
-			bit4 = (color_prom[0] >> 6) & 0x01;
+			bit0 = (color_prom.read(0)>> 2) & 0x01;
+			bit1 = (color_prom.read(0)>> 3) & 0x01;
+			bit2 = (color_prom.read(0)>> 4) & 0x01;
+			bit3 = (color_prom.read(0)>> 5) & 0x01;
+			bit4 = (color_prom.read(0)>> 6) & 0x01;
 			r = 0x08 * bit0 + 0x11 * bit1 + 0x21 * bit2 + 0x43 * bit3 + 0x82 * bit4;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 5) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 6) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 7) & 0x01;
-			bit3 = (color_prom[0] >> 0) & 0x01;
-			bit4 = (color_prom[0] >> 1) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 5) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 6) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 7) & 0x01;
+			bit3 = (color_prom.read(0)>> 0) & 0x01;
+			bit4 = (color_prom.read(0)>> 1) & 0x01;
 			g = 0x08 * bit0 + 0x11 * bit1 + 0x21 * bit2 + 0x43 * bit3 + 0x82 * bit4;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
-			bit4 = (color_prom[Machine->drv->total_colors] >> 4) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
+			bit4 = (color_prom.read(Machine->drv->total_colors)>> 4) & 0x01;
 			b = 0x08 * bit0 + 0x11 * bit1 + 0x21 * bit2 + 0x43 * bit3 + 0x82 * bit4;
 	
 			palette_set_color(i, r, g, b);
@@ -66,12 +65,12 @@ public class ojankohs
 		}
 	}
 	
-	READ_HANDLER( ojankohs_palette_r )
+	public static ReadHandlerPtr ojankohs_palette_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ojankohs_paletteram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( ojankohs_palette_w )
+	public static WriteHandlerPtr ojankohs_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
@@ -89,9 +88,9 @@ public class ojankohs
 		b = (b << 3) | (b >> 2);
 	
 		palette_set_color(offset >> 1, r, g, b);
-	}
+	} };
 	
-	WRITE_HANDLER( ccasino_palette_w )
+	public static WriteHandlerPtr ccasino_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
@@ -112,9 +111,9 @@ public class ojankohs
 		b = (b << 3) | (b >> 2);
 	
 		palette_set_color(offset >> 1, r, g, b);
-	}
+	} };
 	
-	WRITE_HANDLER( ojankoc_palette_w )
+	public static WriteHandlerPtr ojankoc_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b, color;
 	
@@ -134,7 +133,7 @@ public class ojankohs
 		b = (b << 3) | (b >> 2);
 	
 		palette_set_color(offset >> 1, r, g, b);
-	}
+	} };
 	
 	
 	/******************************************************************************
@@ -143,39 +142,39 @@ public class ojankohs
 	
 	******************************************************************************/
 	
-	READ_HANDLER( ojankohs_videoram_r )
+	public static ReadHandlerPtr ojankohs_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ojankohs_videoram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( ojankohs_videoram_w )
+	public static WriteHandlerPtr ojankohs_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (ojankohs_videoram[offset] != data) {
 			ojankohs_videoram[offset] = data;
 			tilemap_mark_tile_dirty(ojankohs_tilemap, offset);
 		}
-	}
+	} };
 	
-	READ_HANDLER( ojankohs_colorram_r )
+	public static ReadHandlerPtr ojankohs_colorram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return ojankohs_colorram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( ojankohs_colorram_w )
+	public static WriteHandlerPtr ojankohs_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		ojankohs_colorram[offset] = data;
 		tilemap_mark_tile_dirty(ojankohs_tilemap, offset);
-	}
+	} };
 	
-	WRITE_HANDLER( ojankohs_gfxreg_w )
+	public static WriteHandlerPtr ojankohs_gfxreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (ojankohs_gfxreg != data) {
 			ojankohs_gfxreg = data;
 			tilemap_mark_all_tiles_dirty(ojankohs_tilemap);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ojankohs_flipscreen_w )
+	public static WriteHandlerPtr ojankohs_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (ojankohs_flipscreen != (data & 0x01)) {
 	
@@ -192,7 +191,7 @@ public class ojankohs
 				ojankohs_scrolly = 0;
 			}
 		}
-	}
+	} };
 	
 	INLINE void ojankohs_get_tile_info(int tile_index)
 	{
@@ -255,7 +254,7 @@ public class ojankohs
 		ojankoc_flipscreen_old = ojankohs_flipscreen;
 	}
 	
-	WRITE_HANDLER( ojankoc_videoram_w )
+	public static WriteHandlerPtr ojankoc_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 		UINT8 x, y, xx, px, py ;
@@ -287,7 +286,7 @@ public class ojankohs
 			color1 >>= 1;
 			color2 >>= 1;
 		}
-	}
+	} };
 	
 	
 	/******************************************************************************

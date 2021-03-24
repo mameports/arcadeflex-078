@@ -16,11 +16,11 @@
 
 ***************************************************************************/
 
-#define DRIVER_INIT(name)		void init_##name(void)
+#define DRIVER_INIT(name)		public static InitDriverPtr init_##name = new InitDriverPtr() { public void handler() 
 
 #define INTERRUPT_GEN(func)		void func(void)
 
-#define MACHINE_INIT(name)		void machine_init_##name(void)
+#define MACHINE_INIT(name)		public static InitMachinePtr machine_init_##name = new InitMachinePtr() { public void handler() 
 #define MACHINE_STOP(name)		void machine_stop_##name(void)
 
 #define NVRAM_HANDLER(name)		void nvram_handler_##name(mame_file *file, int read_or_write)
@@ -88,7 +88,7 @@ public class driverH
 			(void)cpu;														\
 	
 	#define MACHINE_DRIVER_END 												\
-		}																	\
+		} };																	\
 	
 	
 	/* importing data from other machine drivers */
@@ -444,7 +444,7 @@ public class driverH
 	
 	***************************************************************************/
 	
-	#define GAME(YEAR,NAME,PARENT,MACHINE,INPUT,INIT,MONITOR,COMPANY,FULLNAME)	\
+	#define public static GameDriver driver_NAME	   = new GameDriver("YEAR"	,"NAME"	,"driverH.java"	,rom_NAME,driver_PARENT	,machine_driver_MACHINE	,input_ports_INPUT	,init_INIT	,MONITOR	,	COMPANY,FULLNAME)	\
 	extern const struct GameDriver driver_##PARENT;	\
 	const struct GameDriver driver_##NAME =		\
 	{											\
@@ -462,7 +462,7 @@ public class driverH
 		MONITOR									\
 	};
 	
-	#define GAMEX(YEAR,NAME,PARENT,MACHINE,INPUT,INIT,MONITOR,COMPANY,FULLNAME,FLAGS)	\
+	#define public static GameDriver driver_NAME	   = new GameDriver("YEAR"	,"NAME"	,"driverH.java"	,rom_NAME,driver_PARENT	,machine_driver_MACHINE	,input_ports_INPUT	,init_INIT	,MONITOR	,	COMPANY,FULLNAME,FLAGS)	\
 	extern const struct GameDriver driver_##PARENT;	\
 	const struct GameDriver driver_##NAME =		\
 	{											\

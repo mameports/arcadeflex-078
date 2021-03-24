@@ -66,7 +66,7 @@ public class stfight
 		/* fg uses colors 64-127 */
 		for (i = 0;i < TOTAL_COLORS(1);i++)
 		{
-			COLOR(1,i) = (color_prom[256] & 0x0f) + 16 * (color_prom[0] & 0x03) + 0x40;
+			COLOR(1,i) = (color_prom.read(256)& 0x0f) + 16 * (color_prom.read(0)& 0x03) + 0x40;
 			color_prom++;
 		}
 		color_prom += 256;
@@ -74,7 +74,7 @@ public class stfight
 		/* bg uses colors 0-63 */
 		for (i = 0;i < TOTAL_COLORS(2);i++)
 		{
-			COLOR(2,i) = (color_prom[256] & 0x0f) + 16 * (color_prom[0] & 0x03) + 0x00;
+			COLOR(2,i) = (color_prom.read(256)& 0x0f) + 16 * (color_prom.read(0)& 0x03) + 0x00;
 			color_prom++;
 		}
 		color_prom += 256;
@@ -82,7 +82,7 @@ public class stfight
 		/* sprites use colors 128-191 */
 		for (i = 0;i < TOTAL_COLORS(4);i++)
 		{
-			COLOR(4,i) = (color_prom[256] & 0x0f) + 16 * (color_prom[0] & 0x03) + 0x80;
+			COLOR(4,i) = (color_prom.read(256)& 0x0f) + 16 * (color_prom.read(0)& 0x03) + 0x80;
 			color_prom++;
 		}
 		color_prom += 256;
@@ -181,31 +181,31 @@ public class stfight
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( stfight_text_char_w )
+	public static WriteHandlerPtr stfight_text_char_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (stfight_text_char_ram[offset] != data)
 		{
 			stfight_text_char_ram[offset] = data;
 			tilemap_mark_tile_dirty(tx_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( stfight_text_attr_w )
+	public static WriteHandlerPtr stfight_text_attr_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (stfight_text_attr_ram[offset] != data)
 		{
 			stfight_text_attr_ram[offset] = data;
 			tilemap_mark_tile_dirty(tx_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( stfight_sprite_bank_w )
+	public static WriteHandlerPtr stfight_sprite_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		stfight_sprite_base = ( ( data & 0x04 ) << 7 ) |
 					          ( ( data & 0x01 ) << 8 );
-	}
+	} };
 	
-	WRITE_HANDLER( stfight_vh_latch_w )
+	public static WriteHandlerPtr stfight_vh_latch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int scroll;
 	
@@ -246,7 +246,7 @@ public class stfight
 				flip_screen_set(data & 0x01);
 				break;
 		}
-	}
+	} };
 	
 	/***************************************************************************
 	

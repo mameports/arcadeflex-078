@@ -15,39 +15,39 @@ public class raiden
 	
 	/******************************************************************************/
 	
-	READ_HANDLER( raiden_background_r )
+	public static ReadHandlerPtr raiden_background_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return raiden_back_data[offset];
-	}
+	} };
 	
-	READ_HANDLER( raiden_foreground_r )
+	public static ReadHandlerPtr raiden_foreground_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return raiden_fore_data[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( raiden_background_w )
+	public static WriteHandlerPtr raiden_background_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		raiden_back_data[offset]=data;
 		tilemap_mark_tile_dirty( bg_layer,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( raiden_foreground_w )
+	public static WriteHandlerPtr raiden_foreground_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		raiden_fore_data[offset]=data;
 		tilemap_mark_tile_dirty( fg_layer,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( raiden_text_w )
+	public static WriteHandlerPtr raiden_text_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty( tx_layer,offset/2);
-	}
+	} };
 	
-	WRITE_HANDLER( raidena_text_w )
+	public static WriteHandlerPtr raidena_text_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset]=data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty( tx_layer,offset/2);
-	}
+	} };
 	
 	static void get_back_tile_info(int tile_index)
 	{
@@ -79,8 +79,8 @@ public class raiden
 	
 	static void get_text_tile_info(int tile_index)
 	{
-		int tile=videoram[2*tile_index]+((videoram[2*tile_index+1]&0xc0)<<2);
-		int color=videoram[2*tile_index+1]&0xf;
+		int tile=videoram.read(2*tile_index)+((videoram.read(2*tile_index+1)&0xc0)<<2);
+		int color=videoram.read(2*tile_index+1)&0xf;
 	
 		SET_TILE_INFO(
 				0,
@@ -121,7 +121,7 @@ public class raiden
 		return 0;
 	}
 	
-	WRITE_HANDLER( raiden_control_w )
+	public static WriteHandlerPtr raiden_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* All other bits unknown - could be playfield enables */
 	
@@ -130,7 +130,7 @@ public class raiden
 			flipscreen=data&0x2;
 			tilemap_set_flip(ALL_TILEMAPS,flipscreen ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
 		}
-	}
+	} };
 	
 	static void draw_sprites(struct mame_bitmap *bitmap,const struct rectangle *cliprect,int pri_mask)
 	{
@@ -171,7 +171,7 @@ public class raiden
 	VIDEO_UPDATE( raiden )
 	{
 		/* Setup the tilemaps, alternate version has different scroll positions */
-		if (!ALTERNATE) {
+		if (ALTERNATE == 0) {
 			tilemap_set_scrollx( bg_layer,0, ((raiden_scroll_ram[1]<<8)+raiden_scroll_ram[0]) );
 			tilemap_set_scrolly( bg_layer,0, ((raiden_scroll_ram[3]<<8)+raiden_scroll_ram[2]) );
 			tilemap_set_scrollx( fg_layer,0, ((raiden_scroll_ram[5]<<8)+raiden_scroll_ram[4]) );

@@ -46,8 +46,8 @@ public class nycaptor
 	static void get_tile_info(int tile_index)
 	{
 		int flags,pal;
-		tile_info.priority = (videoram[tile_index*2 + 1] & 0x30)>>4;
-		pal=videoram[tile_index*2+1]&0x0f;
+		tile_info.priority = (videoram.read(tile_index*2 + 1)& 0x30)>>4;
+		pal=videoram.read(tile_index*2+1)&0x0f;
 	  flags=TILE_SPLIT(0);
 	  if((!nycaptor_spot)&&(pal==6))flags=TILE_SPLIT(1);
 		if(((nycaptor_spot==3)&&(pal==8))||((nycaptor_spot==1)&&(pal==0xc)))flags=TILE_SPLIT(2);
@@ -61,7 +61,7 @@ public class nycaptor
 	
 		SET_TILE_INFO(
 				0,
-				videoram[tile_index*2] + ((videoram[tile_index*2+1] & 0xc0) << 2) +0x400 * char_bank,
+				videoram.read(tile_index*2)+ ((videoram.read(tile_index*2+1)& 0xc0) << 2) +0x400 * char_bank,
 				pal,flags;
 				)
 	}
@@ -83,34 +83,34 @@ public class nycaptor
 		return video_start_generic();
 	}
 	
-	WRITE_HANDLER( nycaptor_videoram_w )
+	public static WriteHandlerPtr nycaptor_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		videoram[offset] = data;
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(tilemap,offset>>1);
-	}
+	} };
 	
-	READ_HANDLER( nycaptor_videoram_r )
+	public static ReadHandlerPtr nycaptor_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
-		return videoram[offset];
-	}
+		return videoram.read(offset);
+	} };
 	
-	WRITE_HANDLER( nycaptor_palette_w )
+	public static WriteHandlerPtr nycaptor_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (offset & 0x100)
 			paletteram_xxxxBBBBGGGGRRRR_split2_w((offset & 0xff) + (palette_bank << 8),data);
 		else
 			paletteram_xxxxBBBBGGGGRRRR_split1_w((offset & 0xff) + (palette_bank << 8),data);
-	}
+	} };
 	
-	READ_HANDLER( nycaptor_palette_r )
+	public static ReadHandlerPtr nycaptor_palette_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (offset & 0x100)
 			return paletteram_2[ (offset & 0xff) + (palette_bank << 8) ];
 		else
 			return paletteram  [ (offset & 0xff) + (palette_bank << 8) ];
-	}
+	} };
 	
-	WRITE_HANDLER( nycaptor_gfxctrl_w )
+	public static WriteHandlerPtr nycaptor_gfxctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfxctrl == data)
 			return;
@@ -123,23 +123,23 @@ public class nycaptor
 		}
 		palette_bank = (data & 0x20) >> 5;
 	
-	}
+	} };
 	
-	READ_HANDLER( nycaptor_gfxctrl_r )
+	public static ReadHandlerPtr nycaptor_gfxctrl_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 			return 	gfxctrl;
-	}
+	} };
 	
-	READ_HANDLER( nycaptor_scrlram_r )
+	public static ReadHandlerPtr nycaptor_scrlram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return nycaptor_scrlram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( nycaptor_scrlram_w )
+	public static WriteHandlerPtr nycaptor_scrlram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		nycaptor_scrlram[offset] = data;
 		tilemap_set_scrolly(tilemap, offset, data );
-	}
+	} };
 	
 	void nycaptor_draw_sprites(struct mame_bitmap *bitmap, const struct rectangle *cliprect,int pri)
 	{

@@ -278,31 +278,31 @@ public class lazercmd
 	 *************************************************************/
 	
 	/* triggered by WRTC,r opcode */
-	static WRITE_HANDLER( lazercmd_ctrl_port_w )
+	public static WriteHandlerPtr lazercmd_ctrl_port_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-	}
+	} };
 	
 	/* triggered by REDC,r opcode */
-	static READ_HANDLER( lazercmd_ctrl_port_r )
+	public static ReadHandlerPtr lazercmd_ctrl_port_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int data = 0;
 		return data;
-	}
+	} };
 	
 	/* triggered by WRTD,r opcode */
-	static WRITE_HANDLER( lazercmd_data_port_w )
+	public static WriteHandlerPtr lazercmd_data_port_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-	}
+	} };
 	
 	/* triggered by REDD,r opcode */
-	static READ_HANDLER( lazercmd_data_port_r )
+	public static ReadHandlerPtr lazercmd_data_port_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int data;
 		data = input_port_2_r(0) & 0x0f;
 		return data;
-	}
+	} };
 	
-	static WRITE_HANDLER( lazercmd_hardware_w )
+	public static WriteHandlerPtr lazercmd_hardware_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int DAC_data = 0;
 	
@@ -330,9 +330,9 @@ public class lazercmd
 			case 3: /* D4 clears coin detected and D0 toggles on attract mode */
 				break;
 		}
-	}
+	} };
 	
-	static WRITE_HANDLER( medlanes_hardware_w )
+	public static WriteHandlerPtr medlanes_hardware_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int DAC_data = 0;
 	
@@ -363,9 +363,9 @@ public class lazercmd
 			case 3: /* D4 clears coin detected and D0 toggles on attract mode */
 				break;
 		}
-	}
+	} };
 	
-	static WRITE_HANDLER( bbonk_hardware_w )
+	public static WriteHandlerPtr bbonk_hardware_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int DAC_data = 0;
 	
@@ -388,9 +388,9 @@ public class lazercmd
 			case 3: /* D4 clears coin detected and D0 toggles on attract mode */
 				break;
 		}
-	}
+	} };
 	
-	static READ_HANDLER( lazercmd_hardware_r )
+	public static ReadHandlerPtr lazercmd_hardware_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int data = 0;
 	
@@ -422,7 +422,7 @@ public class lazercmd
 				break;
 		}
 		return data;
-	}
+	} };
 	
 	
 	/*************************************************************
@@ -445,211 +445,227 @@ public class lazercmd
 	
 	
 	
-	static MEMORY_WRITE_START( lazercmd_writemem )
-		{ 0x0000, 0x0bff, MWA_ROM },
-		{ 0x1c00, 0x1c1f, MWA_RAM },
-		{ 0x1c20, 0x1eff, videoram_w, &videoram, &videoram_size },
-		{ 0x1f00, 0x1f03, lazercmd_hardware_w },
-	MEMORY_END
+	public static Memory_WriteAddress lazercmd_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x0bff, MWA_ROM ),
+		new Memory_WriteAddress( 0x1c00, 0x1c1f, MWA_RAM ),
+		new Memory_WriteAddress( 0x1c20, 0x1eff, videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0x1f00, 0x1f03, lazercmd_hardware_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( lazercmd_readmem )
-		{ 0x0000, 0x0bff, MRA_ROM },
-		{ 0x1c00, 0x1c1f, MRA_RAM },
-		{ 0x1c20, 0x1eff, MRA_RAM },
-		{ 0x1f00, 0x1f07, lazercmd_hardware_r },
-	MEMORY_END
+	public static Memory_ReadAddress lazercmd_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x0bff, MRA_ROM ),
+		new Memory_ReadAddress( 0x1c00, 0x1c1f, MRA_RAM ),
+		new Memory_ReadAddress( 0x1c20, 0x1eff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1f00, 0x1f07, lazercmd_hardware_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( medlanes_writemem )
-		{ 0x0000, 0x0bff, MWA_ROM },
-		{ 0x1000, 0x1800, MWA_ROM },
-		{ 0x1c00, 0x1c1f, MWA_RAM },
-		{ 0x1c20, 0x1eff, videoram_w, &videoram, &videoram_size },
-		{ 0x1f00, 0x1f03, medlanes_hardware_w },
-	MEMORY_END
+	public static Memory_WriteAddress medlanes_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x0bff, MWA_ROM ),
+		new Memory_WriteAddress( 0x1000, 0x1800, MWA_ROM ),
+		new Memory_WriteAddress( 0x1c00, 0x1c1f, MWA_RAM ),
+		new Memory_WriteAddress( 0x1c20, 0x1eff, videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0x1f00, 0x1f03, medlanes_hardware_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( medlanes_readmem )
-		{ 0x0000, 0x0bff, MRA_ROM },
-		{ 0x1000, 0x1800, MRA_ROM },
-		{ 0x1c00, 0x1c1f, MRA_RAM },
-		{ 0x1c20, 0x1eff, MRA_RAM },
-		{ 0x1f00, 0x1f07, lazercmd_hardware_r },
-	MEMORY_END
+	public static Memory_ReadAddress medlanes_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x0bff, MRA_ROM ),
+		new Memory_ReadAddress( 0x1000, 0x1800, MRA_ROM ),
+		new Memory_ReadAddress( 0x1c00, 0x1c1f, MRA_RAM ),
+		new Memory_ReadAddress( 0x1c20, 0x1eff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1f00, 0x1f07, lazercmd_hardware_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( bbonk_writemem )
-		{ 0x0000, 0x0bff, MWA_ROM },
-		{ 0x1c00, 0x1c1f, MWA_RAM },
-		{ 0x1c20, 0x1eff, videoram_w, &videoram, &videoram_size },
-		{ 0x1f00, 0x1f03, bbonk_hardware_w },
-	MEMORY_END
+	public static Memory_WriteAddress bbonk_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x0bff, MWA_ROM ),
+		new Memory_WriteAddress( 0x1c00, 0x1c1f, MWA_RAM ),
+		new Memory_WriteAddress( 0x1c20, 0x1eff, videoram_w, videoram, videoram_size ),
+		new Memory_WriteAddress( 0x1f00, 0x1f03, bbonk_hardware_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( bbonk_readmem )
-		{ 0x0000, 0x0bff, MRA_ROM },
-		{ 0x1c00, 0x1c1f, MRA_RAM },
-		{ 0x1c20, 0x1eff, MRA_RAM },
-		{ 0x1f00, 0x1f07, lazercmd_hardware_r },
-	MEMORY_END
+	public static Memory_ReadAddress bbonk_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x0bff, MRA_ROM ),
+		new Memory_ReadAddress( 0x1c00, 0x1c1f, MRA_RAM ),
+		new Memory_ReadAddress( 0x1c20, 0x1eff, MRA_RAM ),
+		new Memory_ReadAddress( 0x1f00, 0x1f07, lazercmd_hardware_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( lazercmd_writeport )
-		{ S2650_CTRL_PORT, S2650_CTRL_PORT, lazercmd_ctrl_port_w },
-		{ S2650_DATA_PORT, S2650_DATA_PORT, lazercmd_data_port_w },
-	PORT_END
+	public static IO_WritePort lazercmd_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( S2650_CTRL_PORT, S2650_CTRL_PORT, lazercmd_ctrl_port_w ),
+		new IO_WritePort( S2650_DATA_PORT, S2650_DATA_PORT, lazercmd_data_port_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( lazercmd_readport )
-		{ S2650_CTRL_PORT, S2650_CTRL_PORT, lazercmd_ctrl_port_r },
-		{ S2650_DATA_PORT, S2650_DATA_PORT, lazercmd_data_port_r },
-	PORT_END
-	
-	
-	INPUT_PORTS_START( lazercmd )
-		PORT_START					   /* IN0 player 1 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	
-		PORT_START					   /* IN1 player 2 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	
-		PORT_START					   /* IN2 dip switch */
-		PORT_DIPNAME( 0x03, 0x03, "Game Time" )
-		PORT_DIPSETTING(	0x00, "60 seconds" )
-		PORT_DIPSETTING(	0x01, "90 seconds" )
-		PORT_DIPSETTING(	0x02, "120 seconds" )
-		PORT_DIPSETTING(	0x03, "180 seconds" )
-		PORT_BIT( 0x18, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_DIPNAME( 0x20, 0x20, "Video Invert" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, "Marker Size" )
-		PORT_DIPSETTING(	0x00, "Small" )
-		PORT_DIPSETTING(	0x40, "Large" )
-		PORT_DIPNAME( 0x80, 0x80, "Color Overlay" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x80, DEF_STR( On ) )
-	
-		PORT_START					   /* IN3 coinage & start */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(	0x01, DEF_STR( 1C_1C ) )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
-	
-		PORT_START					   /* IN4 player 1 + 2 buttons */
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
-	
-	INPUT_PORTS_START( medlanes )
-		PORT_START					   /* IN0 player 1 controls */
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	
-		PORT_START					   /* IN1 player 1 controls */
-		PORT_BITX(0x01, IP_ACTIVE_LOW, 0,"Hook Left", KEYCODE_Z, 0 )
-		PORT_BITX(0x02, IP_ACTIVE_LOW, 0,"Hook Right", KEYCODE_X, 0 )
-		PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED)
-	
-		PORT_START					   /* IN2 dip switch */
-		PORT_DIPNAME( 0x01, 0x01, "Game Timer" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, "Time" )
-		PORT_DIPSETTING(	0x00, "3 seconds" )
-		PORT_DIPSETTING(	0x02, "5 seconds" )
-		PORT_BIT( 0x1C, IP_ACTIVE_LOW, IPT_UNUSED)
-		PORT_DIPNAME( 0x20, 0x00, "Video Invert" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x00, "Marker Size" )
-		PORT_DIPSETTING(	0x00, "Small" )
-		PORT_DIPSETTING(	0x40, "Large" )
-		PORT_DIPNAME( 0x80, 0x00, "Color Overlay" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x80, DEF_STR( On ) )
-	
-		PORT_START					   /* IN3 coinage & start */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(	0x01, DEF_STR( 1C_1C ) )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0xf4, IP_ACTIVE_HIGH, IPT_UNUSED )
-	
-		PORT_START					   /* IN4 not used */
-		PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
-	
-	INPUT_PORTS_START( bbonk )
-		PORT_START					   /* IN0 player 1 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	
-		PORT_START					   /* IN1 player 2 controls */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
-	
-		PORT_START					   /* IN2 dip switch */
-		PORT_DIPNAME( 0x03, 0x02, "Games to win" )
-		PORT_DIPSETTING(	0x02, "2" )
-		PORT_DIPSETTING(	0x03, "3" )
-		PORT_DIPSETTING(	0x00, "4" )
-		PORT_DIPSETTING(	0x01, "5" )
-		PORT_BIT( 0x1C, IP_ACTIVE_LOW, IPT_UNUSED)
-		PORT_DIPNAME( 0x20, 0x00, "Video Invert" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED)
-		PORT_DIPNAME( 0x80, 0x00, "Color Overlay" )
-		PORT_DIPSETTING(	0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(	0x80, DEF_STR( On ) )
-	
-		PORT_START					   /* IN3 coinage & start */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Coinage ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(	0x01, DEF_STR( 1C_1C ) )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0xf4, IP_ACTIVE_HIGH, IPT_UNUSED )
-	
-		PORT_START					   /* IN4 not used */
-		PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
-	INPUT_PORTS_END
+	public static IO_ReadPort lazercmd_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( S2650_CTRL_PORT, S2650_CTRL_PORT, lazercmd_ctrl_port_r ),
+		new IO_ReadPort( S2650_DATA_PORT, S2650_DATA_PORT, lazercmd_data_port_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static struct GfxLayout charlayout =
-	{
+	static InputPortPtr input_ports_lazercmd = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 					   /* IN0 player 1 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN1 player 2 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN2 dip switch */
+		PORT_DIPNAME( 0x03, 0x03, "Game Time" );
+		PORT_DIPSETTING(	0x00, "60 seconds" );
+		PORT_DIPSETTING(	0x01, "90 seconds" );
+		PORT_DIPSETTING(	0x02, "120 seconds" );
+		PORT_DIPSETTING(	0x03, "180 seconds" );
+		PORT_BIT( 0x18, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_DIPNAME( 0x20, 0x20, "Video Invert" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, "Marker Size" );
+		PORT_DIPSETTING(	0x00, "Small" );
+		PORT_DIPSETTING(	0x40, "Large" );
+		PORT_DIPNAME( 0x80, 0x80, "Color Overlay" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x80, DEF_STR( "On") );
+	
+		PORT_START(); 					   /* IN3 coinage & start */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(	0x01, DEF_STR( "1C_1C") );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN4 player 1 + 2 buttons */
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
+	
+	static InputPortPtr input_ports_medlanes = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 					   /* IN0 player 1 controls */
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN1 player 1 controls */
+		PORT_BITX(0x01, IP_ACTIVE_LOW, 0,"Hook Left", KEYCODE_Z, 0 );
+		PORT_BITX(0x02, IP_ACTIVE_LOW, 0,"Hook Right", KEYCODE_X, 0 );
+		PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNUSED);
+	
+		PORT_START(); 					   /* IN2 dip switch */
+		PORT_DIPNAME( 0x01, 0x01, "Game Timer" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, "Time" );
+		PORT_DIPSETTING(	0x00, "3 seconds" );
+		PORT_DIPSETTING(	0x02, "5 seconds" );
+		PORT_BIT( 0x1C, IP_ACTIVE_LOW, IPT_UNUSED);
+		PORT_DIPNAME( 0x20, 0x00, "Video Invert" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x20, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x00, "Marker Size" );
+		PORT_DIPSETTING(	0x00, "Small" );
+		PORT_DIPSETTING(	0x40, "Large" );
+		PORT_DIPNAME( 0x80, 0x00, "Color Overlay" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x80, DEF_STR( "On") );
+	
+		PORT_START(); 					   /* IN3 coinage & start */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(	0x01, DEF_STR( "1C_1C") );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0xf4, IP_ACTIVE_HIGH, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN4 not used */
+		PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
+	
+	static InputPortPtr input_ports_bbonk = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 					   /* IN0 player 1 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN1 player 2 controls */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 );
+		PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN2 dip switch */
+		PORT_DIPNAME( 0x03, 0x02, "Games to win" );
+		PORT_DIPSETTING(	0x02, "2" );
+		PORT_DIPSETTING(	0x03, "3" );
+		PORT_DIPSETTING(	0x00, "4" );
+		PORT_DIPSETTING(	0x01, "5" );
+		PORT_BIT( 0x1C, IP_ACTIVE_LOW, IPT_UNUSED);
+		PORT_DIPNAME( 0x20, 0x00, "Video Invert" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x20, DEF_STR( "On") );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED);
+		PORT_DIPNAME( 0x80, 0x00, "Color Overlay" );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(	0x80, DEF_STR( "On") );
+	
+		PORT_START(); 					   /* IN3 coinage & start */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(	0x01, DEF_STR( "1C_1C") );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0xf4, IP_ACTIVE_HIGH, IPT_UNUSED );
+	
+		PORT_START(); 					   /* IN4 not used */
+		PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8, 10,					/* 8*10 characters */
 		4*64,					/* 4 * 64 characters */
 		1,						/* 1 bit per pixel */
-		{ 0 },					/* no bitplanes */
-		{ 0, 1, 2, 3, 4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8 },
+		new int[] { 0 },					/* no bitplanes */
+		new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8 },
 		10*8					/* every char takes 10 bytes */
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout, 0, 2 },
-		{ -1 }					 /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout, 0, 2 ),
+		new GfxDecodeInfo( -1 )					 /* end of array */
 	};
 	
 	static unsigned short colortable_source[] =
@@ -665,11 +681,11 @@ public class lazercmd
 		memcpy(colortable,colortable_source,sizeof(colortable_source));
 	}
 	
-	static struct DACinterface lazercmd_DAC_interface =
-	{
+	static DACinterface lazercmd_DAC_interface = new DACinterface
+	(
 		1,
-		{ 100 }
-	};
+		new int[] { 100 }
+	);
 	
 	static MACHINE_DRIVER_START( lazercmd )
 	
@@ -774,47 +790,47 @@ public class lazercmd
 	
 	***************************************************************************/
 	
-	ROM_START( lazercmd )
-		ROM_REGION( 0x8000, REGION_CPU1, 0 )			   /* 32K cpu, 4K for ROM/RAM */
-		ROM_LOAD( "lc.e5",        0x0000, 0x0400, CRC(56dc7a40) SHA1(1324d5d6a44d7314723a0b5745d89f8e27f49d25) )
-		ROM_LOAD( "lc.e6",        0x0400, 0x0400, CRC(b1ef0aa2) SHA1(3edeaa4d4f4e18536066898284d430a1ac00512e) )
-		ROM_LOAD( "lc.e7",        0x0800, 0x0400, CRC(8e6ffc97) SHA1(d5243ce88585db91573b6586d3d47d13b5b473c8) )
-		ROM_LOAD( "lc.f5",        0x1000, 0x0400, CRC(fc5b38a4) SHA1(bff670d7b78c6b9324d2bf4b2d8a4f9dbfe82158) )
-		ROM_LOAD( "lc.f6",        0x1400, 0x0400, CRC(26eaee21) SHA1(9c0a4a22abb0b0466378f067ef52a45f86cc4369) )
-		ROM_LOAD( "lc.f7",        0x1800, 0x0400, CRC(9ec3534d) SHA1(98f15c5828ad2743bf205f71b8e69abd4db78a58) )
+	static RomLoadPtr rom_lazercmd = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x8000, REGION_CPU1, 0 );		   /* 32K cpu, 4K for ROM/RAM */
+		ROM_LOAD( "lc.e5",        0x0000, 0x0400, CRC(56dc7a40);SHA1(1324d5d6a44d7314723a0b5745d89f8e27f49d25) )
+		ROM_LOAD( "lc.e6",        0x0400, 0x0400, CRC(b1ef0aa2);SHA1(3edeaa4d4f4e18536066898284d430a1ac00512e) )
+		ROM_LOAD( "lc.e7",        0x0800, 0x0400, CRC(8e6ffc97);SHA1(d5243ce88585db91573b6586d3d47d13b5b473c8) )
+		ROM_LOAD( "lc.f5",        0x1000, 0x0400, CRC(fc5b38a4);SHA1(bff670d7b78c6b9324d2bf4b2d8a4f9dbfe82158) )
+		ROM_LOAD( "lc.f6",        0x1400, 0x0400, CRC(26eaee21);SHA1(9c0a4a22abb0b0466378f067ef52a45f86cc4369) )
+		ROM_LOAD( "lc.f7",        0x1800, 0x0400, CRC(9ec3534d);SHA1(98f15c5828ad2743bf205f71b8e69abd4db78a58) )
 	
-		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "lc.b8",        0x0a00, 0x0200, CRC(6d708edd) SHA1(85a45a292eb7bca288b06a118658bf754f828a92) )
-	ROM_END
+		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "lc.b8",        0x0a00, 0x0200, CRC(6d708edd);SHA1(85a45a292eb7bca288b06a118658bf754f828a92) )
+	ROM_END(); }}; 
 	
-	ROM_START( medlanes )
-		ROM_REGION( 0x8000, REGION_CPU1, 0 )			   /* 32K cpu, 4K for ROM/RAM */
-		ROM_LOAD( "medlanes.2a", 0x0000, 0x0400, CRC(9c77566a) SHA1(60e1820012b47da8b86d54f00b6f60d2d0123745) )
-		ROM_LOAD( "medlanes.2b", 0x0400, 0x0400, CRC(7841b1a9) SHA1(80621d30995dad42ae44c62494922ca8b75415cf) )
-		ROM_LOAD( "medlanes.2c", 0x0800, 0x0400, CRC(a359b5b8) SHA1(dbc3c286951c50e3465132fc0d6054f06026425d) )
-		ROM_LOAD( "medlanes.1a", 0x1000, 0x0400, CRC(0d57c596) SHA1(f3ce4802fc777c57f75fe691c93b7062903bdf06) )
-		ROM_LOAD( "medlanes.1b", 0x1400, 0x0400, CRC(1d451630) SHA1(bf9de3096e98685355c906ab7e1dc2628dce79d6) )
-		ROM_LOAD( "medlanes.3a", 0x4000, 0x0400, CRC(22bc56a6) SHA1(7444170c19274d9d889df61796e6f61af2361f3e) )
-		ROM_LOAD( "medlanes.3b", 0x4400, 0x0400, CRC(6616dbef) SHA1(9506177315883b7d87a9bfada712ddeea12fd446) )
-		ROM_LOAD( "medlanes.3c", 0x4800, 0x0400, CRC(b3db0f3d) SHA1(57c28a54f7a1f17df3a24b61dd0cf37f9f6bc7d8) )
-		ROM_LOAD( "medlanes.4a", 0x5000, 0x0400, CRC(30d495e9) SHA1(4f2414bf60ef91093bedf5e9ae16833e9e135aa7) )
-		ROM_LOAD( "medlanes.4b", 0x5400, 0x0400, CRC(a4abb5db) SHA1(a20da872b0f7d6b16b9551233af4269db9d1b55f) )
+	static RomLoadPtr rom_medlanes = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x8000, REGION_CPU1, 0 );		   /* 32K cpu, 4K for ROM/RAM */
+		ROM_LOAD( "medlanes.2a", 0x0000, 0x0400, CRC(9c77566a);SHA1(60e1820012b47da8b86d54f00b6f60d2d0123745) )
+		ROM_LOAD( "medlanes.2b", 0x0400, 0x0400, CRC(7841b1a9);SHA1(80621d30995dad42ae44c62494922ca8b75415cf) )
+		ROM_LOAD( "medlanes.2c", 0x0800, 0x0400, CRC(a359b5b8);SHA1(dbc3c286951c50e3465132fc0d6054f06026425d) )
+		ROM_LOAD( "medlanes.1a", 0x1000, 0x0400, CRC(0d57c596);SHA1(f3ce4802fc777c57f75fe691c93b7062903bdf06) )
+		ROM_LOAD( "medlanes.1b", 0x1400, 0x0400, CRC(1d451630);SHA1(bf9de3096e98685355c906ab7e1dc2628dce79d6) )
+		ROM_LOAD( "medlanes.3a", 0x4000, 0x0400, CRC(22bc56a6);SHA1(7444170c19274d9d889df61796e6f61af2361f3e) )
+		ROM_LOAD( "medlanes.3b", 0x4400, 0x0400, CRC(6616dbef);SHA1(9506177315883b7d87a9bfada712ddeea12fd446) )
+		ROM_LOAD( "medlanes.3c", 0x4800, 0x0400, CRC(b3db0f3d);SHA1(57c28a54f7a1f17df3a24b61dd0cf37f9f6bc7d8) )
+		ROM_LOAD( "medlanes.4a", 0x5000, 0x0400, CRC(30d495e9);SHA1(4f2414bf60ef91093bedf5e9ae16833e9e135aa7) )
+		ROM_LOAD( "medlanes.4b", 0x5400, 0x0400, CRC(a4abb5db);SHA1(a20da872b0f7d6b16b9551233af4269db9d1b55f) )
 	
-		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "medlanes.8b", 0x0a00, 0x0200, CRC(44e5de8f) SHA1(fc797fa137f0c11a15caf9c0013aac668fd69a3c) )
-	ROM_END
+		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "medlanes.8b", 0x0a00, 0x0200, CRC(44e5de8f);SHA1(fc797fa137f0c11a15caf9c0013aac668fd69a3c) )
+	ROM_END(); }}; 
 	
 	
-	ROM_START( bbonk )
-		ROM_REGION( 0x8000, REGION_CPU1, 0 )			   /* 32K cpu, 4K for ROM/RAM */
-		ROM_LOAD( "bbonk.e5",     0x0000, 0x0400, CRC(d032baa0) SHA1(09cba16f6a2b7d8a8c501db639bd5eeefb63dc0f) )
-		ROM_LOAD( "bbonk.e6",     0x0400, 0x0400, CRC(71df0e25) SHA1(c2f78490816add1296923861a89df15be9822fed) )
-		ROM_LOAD( "bbonk.f5",     0x1000, 0x0400, CRC(748e8c7f) SHA1(99e4e182ee41c246e31f656411a9f09d7b617f92) )
-		ROM_LOAD( "bbonk.f6",     0x1400, 0x0400, CRC(5ce183ed) SHA1(7c78dfa463a37605e8423104426af2f5906fae24) )
+	static RomLoadPtr rom_bbonk = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x8000, REGION_CPU1, 0 );		   /* 32K cpu, 4K for ROM/RAM */
+		ROM_LOAD( "bbonk.e5",     0x0000, 0x0400, CRC(d032baa0);SHA1(09cba16f6a2b7d8a8c501db639bd5eeefb63dc0f) )
+		ROM_LOAD( "bbonk.e6",     0x0400, 0x0400, CRC(71df0e25);SHA1(c2f78490816add1296923861a89df15be9822fed) )
+		ROM_LOAD( "bbonk.f5",     0x1000, 0x0400, CRC(748e8c7f);SHA1(99e4e182ee41c246e31f656411a9f09d7b617f92) )
+		ROM_LOAD( "bbonk.f6",     0x1400, 0x0400, CRC(5ce183ed);SHA1(7c78dfa463a37605e8423104426af2f5906fae24) )
 	
-		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE )
-		ROM_LOAD( "bbonk.b8",     0x0a00, 0x0200, CRC(5ac34260) SHA1(7c2b1e378d2b9fed27117f9adab1381507f5d554) )
-	ROM_END
+		ROM_REGION( 0x0c00, REGION_GFX1, ROMREGION_DISPOSE );
+		ROM_LOAD( "bbonk.b8",     0x0a00, 0x0200, CRC(5ac34260);SHA1(7c2b1e378d2b9fed27117f9adab1381507f5d554) )
+	ROM_END(); }}; 
 	
 	
 	DRIVER_INIT( lazercmd )
@@ -935,7 +951,7 @@ public class lazercmd
 	
 	
 	
-	GAME( 1976, lazercmd, 0, lazercmd, lazercmd, lazercmd, ROT0, "Meadows Games, Inc.", "Lazer Command" )
-	GAMEX(1977, medlanes, 0, medlanes, medlanes, medlanes, ROT0, "Meadows Games, Inc.", "Meadows Lanes", GAME_IMPERFECT_SOUND )
-	GAME( 1976, bbonk,	  0, bbonk,    bbonk,	 bbonk,    ROT0, "Meadows Games, Inc.", "Bigfoot Bonkers" )
+	public static GameDriver driver_lazercmd	   = new GameDriver("1976"	,"lazercmd"	,"lazercmd.java"	,rom_lazercmd,null	,machine_driver_lazercmd	,input_ports_lazercmd	,init_lazercmd	,ROT0	,	"Meadows Games, Inc.", "Lazer Command" )
+	public static GameDriver driver_medlanes	   = new GameDriver("1977"	,"medlanes"	,"lazercmd.java"	,rom_medlanes,null	,machine_driver_medlanes	,input_ports_medlanes	,init_medlanes	,ROT0	,	"Meadows Games, Inc.", "Meadows Lanes", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_bbonk	   = new GameDriver("1976"	,"bbonk"	,"lazercmd.java"	,rom_bbonk,null	,machine_driver_bbonk	,input_ports_bbonk	,init_bbonk	,ROT0	,	"Meadows Games, Inc.", "Bigfoot Bonkers" )
 }

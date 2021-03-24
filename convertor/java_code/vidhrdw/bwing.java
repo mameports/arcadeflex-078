@@ -55,34 +55,34 @@ public class bwing
 	//****************************************************************************
 	// Exports
 	
-	struct GfxLayout bwing_tilelayout =
-	{
+	static GfxLayout bwing_tilelayout = new GfxLayout
+	(
 		16, 16,
 		BW_NTILES,
 		3,
-		{ 0x4000*8, 0x2000*8, 0 },
-		{ 7, 6, 5, 4, 3, 2, 1, 0, 128+7, 128+6, 128+5, 128+4, 128+3, 128+2, 128+1, 128+0 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		new int[] { 0x4000*8, 0x2000*8, 0 },
+		new int[] { 7, 6, 5, 4, 3, 2, 1, 0, 128+7, 128+6, 128+5, 128+4, 128+3, 128+2, 128+1, 128+0 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 		  8*8, 9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
 		32*8
-	};
+	);
 	
 	
-	WRITE_HANDLER( bwing_spriteram_w ) { buffered_spriteram[offset] = data; }
-	WRITE_HANDLER( bwing_videoram_w )  { videoram[offset] = data; tilemap_mark_tile_dirty(charmap, offset); }
+	public static WriteHandlerPtr bwing_spriteram_w = new WriteHandlerPtr() {public void handler(int offset, int data) { buffered_spriteram[offset] = data; } };
+	public static WriteHandlerPtr bwing_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)  { videoram.write(offset,data); tilemap_mark_tile_dirty(charmap, offset); } };
 	
 	
 	READ_HANDLER ( bwing_scrollram_r )
 	{
-		if (!srbank) offset = srxlat[offset];
+		if (srbank == 0) offset = srxlat[offset];
 	
 		return((srbase[srbank])[offset]);
 	}
 	
 	
-	WRITE_HANDLER( bwing_scrollram_w )
+	public static WriteHandlerPtr bwing_scrollram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (!srbank)
+		if (srbank == 0)
 		{
 			offset = srxlat[offset];
 	
@@ -90,10 +90,10 @@ public class bwing
 		}
 	
 		(srbase[srbank])[offset] = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( bwing_scrollreg_w )
+	public static WriteHandlerPtr bwing_scrollreg_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static unsigned bp_ready=0;
 		unsigned i;
@@ -132,15 +132,15 @@ public class bwing
 		#if BW_DEBUG
 			(memory_region(REGION_CPU1))[0x1b10 + offset] = data;
 		#endif
-	}
+	} };
 	
 	
-	WRITE_HANDLER( bwing_paletteram_w )
+	public static WriteHandlerPtr bwing_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		const float rgb[4][3]={{0.85,0.95,1.00},{0.90,1.00,1.00},{0.80,1.00,1.00},{0.75,0.90,1.10}};
 		int r, g, b, i;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		r = ~data & 7;
 		g = ~data>>4 & 7;
@@ -163,9 +163,9 @@ public class bwing
 		palette_set_color(offset, r, g, b);
 	
 		#if BW_DEBUG
-			paletteram[offset+0x40] = palatch;
+			paletteram.write(offset+0x40,palatch);
 		#endif
-	}
+	} };
 	
 	//****************************************************************************
 	// Initializations
@@ -190,7 +190,7 @@ public class bwing
 	
 	INLINE void get_charinfo(int i)
 	{
-		SET_TILE_INFO(0, videoram[i], 0, 0)
+		SET_TILE_INFO(0, videoram.read(i), 0, 0)
 	}
 	
 	INLINE UINT32 bwing_scan_cols(UINT32 col, UINT32 row, UINT32 nc, UINT32 nr)

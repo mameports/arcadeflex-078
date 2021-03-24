@@ -20,7 +20,6 @@ public class mameH
 	
 	
 	extern char build_version[];
-	extern int gbPriorityBitmapIsDirty;
 	
 	
 	
@@ -341,30 +340,24 @@ public class mameH
 	void set_visible_area(int min_x, int max_x, int min_y, int max_y);
 	
 	/* force an erase and a complete redraw of the video next frame */
-	void schedule_full_refresh(void);
 	
 	/* called by cpuexec.c to reset updates at the end of VBLANK */
-	void reset_partial_updates(void);
 	
 	/* force a partial update of the screen up to and including the requested scanline */
 	void force_partial_update(int scanline);
 	
 	/* finish updating the screen for this frame */
-	void draw_screen(void);
 	
 	/* update the video by calling down to the OSD layer */
-	void update_video_and_audio(void);
 	
 	/* update the screen, handling frame skipping and rendering */
 	/* (this calls draw_screen and update_video_and_audio) */
-	int updatescreen(void);
 	
 	
 	
 	/* ----- miscellaneous bits & pieces ----- */
 	
 	/* mame_fopen() must use this to know if high score files can be used */
-	int mame_highscore_enabled(void);
 	
 	/* set the state of a given LED */
 	void set_led_status(int num, int on);

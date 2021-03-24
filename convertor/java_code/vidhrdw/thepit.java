@@ -20,16 +20,16 @@ public class thepit
 	
 	static int graphics_bank = 0;
 	
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		2*8+1, 32*8-1,
 		2*8, 30*8-1
-	};
-	static struct rectangle spritevisibleareaflipx =
-	{
+	);
+	static rectangle spritevisibleareaflipx = new rectangle
+	(
 		0*8, 30*8-2,
 		2*8, 30*8-1
-	};
+	);
 	
 	
 	/***************************************************************************
@@ -68,17 +68,17 @@ public class thepit
 			int bit0,bit1,bit2,r,g,b;
 	
 	
-			bit0 = (color_prom[i] >> 0) & 0x01;
-			bit1 = (color_prom[i] >> 1) & 0x01;
-			bit2 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i)>> 0) & 0x01;
+			bit1 = (color_prom.read(i)>> 1) & 0x01;
+			bit2 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			bit0 = 0;
-			bit1 = (color_prom[i] >> 6) & 0x01;
-			bit2 = (color_prom[i] >> 7) & 0x01;
+			bit1 = (color_prom.read(i)>> 6) & 0x01;
+			bit2 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 			palette_set_color(i+8,r,g,b);
 		}
@@ -117,23 +117,23 @@ public class thepit
 			int bit0,bit1,bit2,bit3,bit4,r,g,b;
 	
 	
-			bit0 = (color_prom[i+0x20] >> 6) & 0x01;
-			bit1 = (color_prom[i+0x20] >> 7) & 0x01;
-			bit2 = (color_prom[i] >> 0) & 0x01;
-			bit3 = (color_prom[i] >> 1) & 0x01;
-			bit4 = (color_prom[i] >> 2) & 0x01;
+			bit0 = (color_prom.read(i+0x20)>> 6) & 0x01;
+			bit1 = (color_prom.read(i+0x20)>> 7) & 0x01;
+			bit2 = (color_prom.read(i)>> 0) & 0x01;
+			bit3 = (color_prom.read(i)>> 1) & 0x01;
+			bit4 = (color_prom.read(i)>> 2) & 0x01;
 			r = 0x10 * bit0 + 0x20 * bit1 + 0x30 * bit2 + 0x40 * bit3 + 0x50 * bit4;
-			bit0 = (color_prom[i+0x20] >> 1) & 0x01;
-			bit1 = (color_prom[i+0x20] >> 2) & 0x01;
-			bit2 = (color_prom[i+0x20] >> 3) & 0x01;
-			bit3 = (color_prom[i+0x20] >> 4) & 0x01;
-			bit4 = (color_prom[i+0x20] >> 5) & 0x01;
+			bit0 = (color_prom.read(i+0x20)>> 1) & 0x01;
+			bit1 = (color_prom.read(i+0x20)>> 2) & 0x01;
+			bit2 = (color_prom.read(i+0x20)>> 3) & 0x01;
+			bit3 = (color_prom.read(i+0x20)>> 4) & 0x01;
+			bit4 = (color_prom.read(i+0x20)>> 5) & 0x01;
 			g = 0x50 * bit0 + 0x40 * bit1 + 0x30 * bit2 + 0x20 * bit3 + 0x10 * bit4;
-			bit0 = (color_prom[i] >> 3) & 0x01;
-			bit1 = (color_prom[i] >> 4) & 0x01;
-			bit2 = (color_prom[i] >> 5) & 0x01;
-			bit3 = (color_prom[i] >> 6) & 0x01;
-			bit4 = (color_prom[i] >> 7) & 0x01;
+			bit0 = (color_prom.read(i)>> 3) & 0x01;
+			bit1 = (color_prom.read(i)>> 4) & 0x01;
+			bit2 = (color_prom.read(i)>> 5) & 0x01;
+			bit3 = (color_prom.read(i)>> 6) & 0x01;
+			bit4 = (color_prom.read(i)>> 7) & 0x01;
 			b = 0x50 * bit0 + 0x40 * bit1 + 0x30 * bit2 + 0x20 * bit3 + 0x10 * bit4;
 			palette_set_color(i+8,r,g,b);
 		}
@@ -145,28 +145,28 @@ public class thepit
 	}
 	
 	
-	WRITE_HANDLER( thepit_attributes_w )
+	public static WriteHandlerPtr thepit_attributes_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if ((offset & 1) && thepit_attributesram[offset] != data)
 		{
 			int i;
 	
 	
-			for (i = offset / 2;i < videoram_size;i += 32)
+			for (i = offset / 2;i < videoram_size[0];i += 32)
 				dirtybuffer[i] = 1;
 		}
 	
 		thepit_attributesram[offset] = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( intrepid_graphics_bank_select_w )
+	public static WriteHandlerPtr intrepid_graphics_bank_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		set_vh_global_attribute(&graphics_bank, data << 1);
-	}
+	} };
 	
 	
-	READ_HANDLER( thepit_input_port_0_r )
+	public static ReadHandlerPtr thepit_input_port_0_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* Read either the real or the fake input ports depending on the
 		   horizontal flip switch. (This is how the real PCB does it) */
@@ -178,13 +178,13 @@ public class thepit
 		{
 			return input_port_0_r(offset);
 		}
-	}
+	} };
 	
 	
-	WRITE_HANDLER( thepit_sound_enable_w )
+	public static WriteHandlerPtr thepit_sound_enable_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		mixer_sound_enable_global_w(data);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -213,10 +213,10 @@ public class thepit
 			int bgcolor;
 	
 	
-			bgcolor = (colorram[offs] & 0x70) >> 4;
+			bgcolor = (colorram.read(offs)& 0x70) >> 4;
 	
 			if ((priority == 0 && dirtybuffer[offs]) ||
-					(priority == 1 && bgcolor != 0 && (colorram[offs] & 0x80) == 0))
+					(priority == 1 && bgcolor != 0 && (colorram.read(offs)& 0x80) == 0))
 			{
 				int sx,sy,code,bank,color;
 	
@@ -228,7 +228,7 @@ public class thepit
 	
 				if (priority == 0)
 				{
-					code = videoram[offs];
+					code = videoram.read(offs);
 					bank = graphics_bank;
 				}
 				else
@@ -242,7 +242,7 @@ public class thepit
 				if (flip_screen_x) sx = 31 - sx;
 				if (flip_screen_y) sy = 248 - sy;
 	
-				color = colorram[offs] & (Machine->drv->gfxdecodeinfo[bank].total_color_codes - 1);
+				color = colorram.read(offs)& (Machine->drv->gfxdecodeinfo[bank].total_color_codes - 1);
 	
 				/* set up the background color */
 				Machine->gfx[bank]->
@@ -293,7 +293,7 @@ public class thepit
 		/* draw low priority sprites */
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			if (((spriteram[offs + 2] & 0x08) >> 3) == priority)
+			if (((spriteram.read(offs + 2)& 0x08) >> 3) == priority)
 			{
 				int sx,sy,flipx,flipy;
 	
@@ -304,11 +304,11 @@ public class thepit
 					continue;
 				}
 	
-				sx = (spriteram[offs+3] + 1) & 0xff;
-				sy = 240 - spriteram[offs];
+				sx = (spriteram.read(offs+3)+ 1) & 0xff;
+				sy = 240 - spriteram.read(offs);
 	
-				flipx = spriteram[offs + 1] & 0x40;
-				flipy = spriteram[offs + 1] & 0x80;
+				flipx = spriteram.read(offs + 1)& 0x40;
+				flipy = spriteram.read(offs + 1)& 0x80;
 	
 				if (flip_screen_x)
 				{
@@ -326,8 +326,8 @@ public class thepit
 				if (offs <= 3*4) sy++;
 	
 				drawgfx(bitmap,Machine->gfx[graphics_bank | 1],
-						spriteram[offs + 1] & 0x3f,
-						spriteram[offs + 2] & 0x07,
+						spriteram.read(offs + 1)& 0x3f,
+						spriteram.read(offs + 2)& 0x07,
 						flipx,flipy,
 						sx,sy,
 						flip_screen_x & 1 ? &spritevisibleareaflipx : &spritevisiblearea,TRANSPARENCY_PEN,0);

@@ -21,27 +21,27 @@ public class marineb
 	static int palbank;
 	
 	
-	WRITE_HANDLER( marineb_palbank0_w )
+	public static WriteHandlerPtr marineb_palbank0_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int new_palbank = (palbank & ~1) | (data & 1);
 		set_vh_global_attribute(&palbank, new_palbank);
-	}
+	} };
 	
-	WRITE_HANDLER( marineb_palbank1_w )
+	public static WriteHandlerPtr marineb_palbank1_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int new_palbank = (palbank & ~2) | ((data << 1) & 2);
 		set_vh_global_attribute(&palbank, new_palbank);
-	}
+	} };
 	
-	WRITE_HANDLER( marineb_flipscreen_x_w )
+	public static WriteHandlerPtr marineb_flipscreen_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_x_set(data ^ marineb_active_low_flipscreen);
-	}
+	} };
 	
-	WRITE_HANDLER( marineb_flipscreen_y_w )
+	public static WriteHandlerPtr marineb_flipscreen_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		flip_screen_y_set(data ^ marineb_active_low_flipscreen);
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -77,8 +77,8 @@ public class marineb
 				sx = offs % 32;
 				sy = offs / 32;
 	
-				flipx = colorram[offs] & 0x20;
-				flipy = colorram[offs] & 0x10;
+				flipx = colorram.read(offs)& 0x20;
+				flipy = colorram.read(offs)& 0x10;
 	
 				if (flip_screen_y)
 				{
@@ -93,8 +93,8 @@ public class marineb
 				}
 	
 				drawgfx(_tmpbitmap,Machine->gfx[0],
-						videoram[offs] | ((colorram[offs] & 0xc0) << 2),
-						(colorram[offs] & 0x0f) + 16 * palbank,
+						videoram.read(offs)| ((colorram.read(offs)& 0xc0) << 2),
+						(colorram.read(offs)& 0x0f) + 16 * palbank,
 						flipx,flipy,
 						8*sx,8*sy,
 						0,TRANSPARENCY_NONE,0);
@@ -155,10 +155,10 @@ public class marineb
 			}
 	
 	
-			code  = videoram[offs2];
-			sx    = videoram[offs2 + 0x20];
-			sy    = colorram[offs2];
-			col   = (colorram[offs2 + 0x20] & 0x0f) + 16 * palbank;
+			code  = videoram.read(offs2);
+			sx    = videoram.read(offs2 + 0x20);
+			sy    = colorram.read(offs2);
+			col   = (colorram.read(offs2 + 0x20)& 0x0f) + 16 * palbank;
 			flipx =   code & 0x02;
 			flipy = !(code & 0x01);
 	
@@ -175,7 +175,7 @@ public class marineb
 				code >>= 2;
 			}
 	
-			if (!flip_screen_y)
+			if (flip_screen_y == 0)
 			{
 				sy = 256 - Machine->gfx[gfx]->width - sy;
 				flipy = !flipy;
@@ -212,14 +212,14 @@ public class marineb
 	
 			offs2 = 0x001a + offs;
 	
-			code  = videoram[offs2];
-			sx    = videoram[offs2 + 0x20];
-			sy    = colorram[offs2];
-			col   = (colorram[offs2 + 0x20] & 0x0f) + 16 * palbank;
+			code  = videoram.read(offs2);
+			sx    = videoram.read(offs2 + 0x20);
+			sy    = colorram.read(offs2);
+			col   = (colorram.read(offs2 + 0x20)& 0x0f) + 16 * palbank;
 			flipx =   code & 0x02;
 			flipy = !(code & 0x01);
 	
-			if (!flip_screen_y)
+			if (flip_screen_y == 0)
 			{
 				sy = 256 - Machine->gfx[1]->width - sy;
 				flipy = !flipy;
@@ -240,14 +240,14 @@ public class marineb
 	
 		/* draw the big sprite */
 	
-		code  = videoram[0x3df];
-		sx    = videoram[0x3ff];
-		sy    = colorram[0x3df];
-		col   = colorram[0x3ff];
+		code  = videoram.read(0x3df);
+		sx    = videoram.read(0x3ff);
+		sy    = colorram.read(0x3df);
+		col   = colorram.read(0x3ff);
 		flipx =   code & 0x02;
 		flipy = !(code & 0x01);
 	
-		if (!flip_screen_y)
+		if (flip_screen_y == 0)
 		{
 			sy = 256 - Machine->gfx[2]->width - sy;
 			flipy = !flipy;
@@ -298,10 +298,10 @@ public class marineb
 			offs2 = 0x0010 + offs;
 	
 	
-			code  = videoram[offs2];
-			sx    = 240 - videoram[offs2 + 0x20];
-			sy    = colorram[offs2];
-			col   = (colorram[offs2 + 0x20] & 0x0f) + 16 * palbank;
+			code  = videoram.read(offs2);
+			sx    = 240 - videoram.read(offs2 + 0x20);
+			sy    = colorram.read(offs2);
+			col   = (colorram.read(offs2 + 0x20)& 0x0f) + 16 * palbank;
 			flipx = !(code & 0x02);
 			flipy = !(code & 0x01);
 	
@@ -319,13 +319,13 @@ public class marineb
 				code >>= 2;
 			}
 	
-			if (!flip_screen_y)
+			if (flip_screen_y == 0)
 			{
 				sy = 256 - Machine->gfx[gfx]->width - sy;
 				flipy = !flipy;
 			}
 	
-			if (!flip_screen_x)
+			if (flip_screen_x == 0)
 			{
 				sx--;
 			}
@@ -357,14 +357,14 @@ public class marineb
 			offs2 = 0x0018 + offs;
 	
 	
-			code  = spriteram[offs2];
-			sx    = spriteram[offs2 + 0x20];
-			sy    = colorram[offs2];
-			col   = colorram[offs2 + 0x20];
+			code  = spriteram.read(offs2);
+			sx    = spriteram.read(offs2 + 0x20);
+			sy    = colorram.read(offs2);
+			col   = colorram.read(offs2 + 0x20);
 			flipx =   code & 0x02;
 			flipy = !(code & 0x01);
 	
-			if (!flip_screen_y)
+			if (flip_screen_y == 0)
 			{
 				sy = 256 - Machine->gfx[1]->width - sy;
 				flipy = !flipy;
@@ -406,10 +406,10 @@ public class marineb
 			offs2 = 0x0010 + offs;
 	
 	
-			code  = videoram[offs2];
-			sx    = videoram[offs2 + 0x20];
-			sy    = colorram[offs2];
-			col   = (colorram[offs2 + 0x20] & 0x0f) + 16 * palbank;
+			code  = videoram.read(offs2);
+			sx    = videoram.read(offs2 + 0x20);
+			sy    = colorram.read(offs2);
+			col   = (colorram.read(offs2 + 0x20)& 0x0f) + 16 * palbank;
 			flipx =   code & 0x02;
 			flipy = !(code & 0x01);
 	
@@ -426,13 +426,13 @@ public class marineb
 				code >>= 2;
 			}
 	
-			if (!flip_screen_y)
+			if (flip_screen_y == 0)
 			{
 				sy = 256 - Machine->gfx[gfx]->width - sy;
 				flipy = !flipy;
 			}
 	
-			if (!flip_screen_x)
+			if (flip_screen_x == 0)
 			{
 				sx--;
 			}

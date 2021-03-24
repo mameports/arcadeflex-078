@@ -128,7 +128,6 @@ public class tms32025H
 		TMS32025_IMR,  TMS32025_GREG
 	};
 	
-	extern int tms32025_icount;					/* T-state count */
 	
 	
 	
@@ -136,9 +135,7 @@ public class tms32025H
 	 *	Public Functions
 	 */
 	
-	void tms32025_init(void);
 	void tms32025_reset(void *param);			/* Reset processor & registers	*/
-	void tms32025_exit(void);					/* Shutdown CPU core			*/
 	int tms32025_execute(int cycles);			/* Execute cycles T-States -	*/
 												/* returns number of cycles actually run */
 	unsigned tms32025_get_context(void *dst);	/* Get registers				*/

@@ -19,7 +19,6 @@ public class battlane
 	static struct tilemap *bg_tilemap;
 	
 	static int battlane_video_ctrl;
-	extern int battlane_cpu_control;
 	
 	static struct mame_bitmap *screen_bitmap;
 	
@@ -31,7 +30,7 @@ public class battlane
 	        0x01    = Scroll MSB
 	*/
 	
-	WRITE_HANDLER( battlane_palette_w )
+	public static WriteHandlerPtr battlane_palette_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 		int bit0, bit1, bit2;
@@ -58,39 +57,39 @@ public class battlane
 		b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 		palette_set_color(offset, r, g, b);
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_scrollx_w )
+	public static WriteHandlerPtr battlane_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, ((battlane_video_ctrl & 0x01) << 8) + data);
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_scrolly_w )
+	public static WriteHandlerPtr battlane_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, ((battlane_cpu_control & 0x01) << 8) + data);
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_tileram_w )
+	public static WriteHandlerPtr battlane_tileram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (battlane_tileram[offset] != data)
 		{
 		    battlane_tileram[offset] = data;
 			//tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_spriteram_w )
+	public static WriteHandlerPtr battlane_spriteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 	    battlane_spriteram[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_bitmap_w )
+	public static WriteHandlerPtr battlane_bitmap_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i, orval;
 	
 	    orval = (~battlane_video_ctrl >> 1) & 0x07;
 	
-		if (!orval)
+		if (orval == 0)
 			orval = 7;
 	
 		for (i = 0; i < 8; i++)
@@ -104,12 +103,12 @@ public class battlane
 				((UINT8 *)screen_bitmap->line[offset % 0x100])[(offset / 0x100) * 8 + i] &= ~orval;
 			}
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( battlane_video_ctrl_w )
+	public static WriteHandlerPtr battlane_video_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		battlane_video_ctrl = data;
-	}
+	} };
 	
 	static void get_tile_info_bg(int tile_index)
 	{
@@ -156,12 +155,12 @@ public class battlane
 		bg_tilemap = tilemap_create(get_tile_info_bg, battlane_tilemap_scan_rows_2x2,
 			TILEMAP_OPAQUE, 16, 16, 32, 32);
 		
-		if (!bg_tilemap)
+		if (bg_tilemap == 0)
 			return 1;
 	
 		screen_bitmap = auto_bitmap_alloc(32 * 8, 32 * 8);
 	
-		if (!screen_bitmap)
+		if (screen_bitmap == 0)
 			return 1;
 	
 		return 0;
@@ -200,7 +199,7 @@ public class battlane
 				flipx = attr & 0x04;
 				flipy = attr & 0x02;
 	
-				if (!flip_screen)
+				if (flip_screen == 0)
 	            {
 					sx = 240 - sx;
 					sy = 240 - sy;

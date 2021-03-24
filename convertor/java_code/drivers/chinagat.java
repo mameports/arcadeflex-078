@@ -79,14 +79,10 @@ public class chinagat
 	
 	/**************** Video stuff ******************/
 	
-	WRITE_HANDLER( ddragon_bgvideoram_w );
-	WRITE_HANDLER( ddragon_fgvideoram_w );
 	
 	VIDEO_START( chinagat );
 	VIDEO_UPDATE( ddragon );
 	
-	extern int technos_video_hw;
-	extern int ddragon_scrollx_hi, ddragon_scrolly_hi;
 	extern data8_t *ddragon_scrollx_lo;
 	extern data8_t *ddragon_scrolly_lo;
 	extern data8_t *ddragon_bgvideoram,*ddragon_fgvideoram;
@@ -112,7 +108,7 @@ public class chinagat
 		sound_irq = IRQ_LINE_NMI;
 	}
 	
-	WRITE_HANDLER( chinagat_video_ctrl_w )
+	public static WriteHandlerPtr chinagat_video_ctrl_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/***************************
 		---- ---x   X Scroll MSB
@@ -125,32 +121,32 @@ public class chinagat
 		ddragon_scrollx_hi = ( ( data & 0x01 ) << 8 );
 	
 		flip_screen_set(~data & 0x04);
-	}
+	} };
 	
-	static WRITE_HANDLER( chinagat_bankswitch_w )
+	public static WriteHandlerPtr chinagat_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data8_t *RAM = memory_region(REGION_CPU1);
 		cpu_setbank( 1,&RAM[ 0x10000 + (0x4000 * (data & 7)) ] );
-	}
+	} };
 	
-	static WRITE_HANDLER( chinagat_sub_bankswitch_w )
+	public static WriteHandlerPtr chinagat_sub_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		data8_t *RAM = memory_region( REGION_CPU2 );
 		cpu_setbank( 4,&RAM[ 0x10000 + (0x4000 * (data & 7)) ] );
-	}
+	} };
 	
-	static WRITE_HANDLER( chinagat_sub_IRQ_w )
+	public static WriteHandlerPtr chinagat_sub_IRQ_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		cpu_set_irq_line( 1, sprite_irq, (sprite_irq == IRQ_LINE_NMI) ? PULSE_LINE : HOLD_LINE );
-	}
+	} };
 	
-	static WRITE_HANDLER( chinagat_cpu_sound_cmd_w )
+	public static WriteHandlerPtr chinagat_cpu_sound_cmd_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		soundlatch_w( offset, data );
 		cpu_set_irq_line( 2, sound_irq, (sound_irq == IRQ_LINE_NMI) ? PULSE_LINE : HOLD_LINE );
-	}
+	} };
 	
-	static READ_HANDLER( saiyugb1_mcu_command_r )
+	public static ReadHandlerPtr saiyugb1_mcu_command_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 	#if 0
 		if (saiyugb1_mcu_command == 0x78)
@@ -159,9 +155,9 @@ public class chinagat
 		}
 	#endif
 		return saiyugb1_mcu_command;
-	}
+	} };
 	
-	static WRITE_HANDLER( saiyugb1_mcu_command_w )
+	public static WriteHandlerPtr saiyugb1_mcu_command_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		saiyugb1_mcu_command = data;
 	#if 0
@@ -170,15 +166,15 @@ public class chinagat
 			timer_suspendcpu(3, 0, SUSPEND_REASON_HALT);	/* Wake up */
 		}
 	#endif
-	}
+	} };
 	
-	static WRITE_HANDLER( saiyugb1_adpcm_rom_addr_w )
+	public static WriteHandlerPtr saiyugb1_adpcm_rom_addr_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* i8748 Port 1 write */
 		saiyugb1_i8748_P1 = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( saiyugb1_adpcm_control_w )
+	public static WriteHandlerPtr saiyugb1_adpcm_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* i8748 Port 2 write */
 	
@@ -223,9 +219,9 @@ public class chinagat
 			logerror("$ROM=%08x  P1=%02x  P2=%02x  Prev_P2=%02x  Nibble=%1x  PCM_data=%02x\n",saiyugb1_adpcm_addr,saiyugb1_i8748_P1,data,saiyugb1_i8748_P2,saiyugb1_pcm_shift,saiyugb1_pcm_nibble);
 		}
 		saiyugb1_i8748_P2 = data;
-	}
+	} };
 	
-	static WRITE_HANDLER( saiyugb1_m5205_clk_w )
+	public static WriteHandlerPtr saiyugb1_m5205_clk_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* i8748 T0 output clk mode */
 		/* This signal goes through a divide by 8 counter */
@@ -236,7 +232,7 @@ public class chinagat
 	#if 0
 		saiyugb1_m5205_clk++;
 		if (saiyugb1_m5205_clk == 8)
-		}
+		} };
 			MSM5205_vclk_w (0, 1);		/* ??? */
 			saiyugb1_m5205_clk = 0;
 		}
@@ -247,7 +243,7 @@ public class chinagat
 	#endif
 	}
 	
-	static READ_HANDLER( saiyugb1_m5205_irq_r )
+	public static ReadHandlerPtr saiyugb1_m5205_irq_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		if (adpcm_sound_irq)
 		{
@@ -255,248 +251,276 @@ public class chinagat
 			return 1;
 		}
 		return 0;
-	}
+	} };
 	static void saiyugb1_m5205_irq_w(int num)
 	{
 		adpcm_sound_irq = 1;
 	}
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x1fff, MRA_BANK2 },
-		{ 0x3f00, 0x3f00, input_port_0_r },
-		{ 0x3f01, 0x3f01, input_port_1_r },
-		{ 0x3f02, 0x3f02, input_port_2_r },
-		{ 0x3f03, 0x3f03, input_port_3_r },
-		{ 0x3f04, 0x3f04, input_port_4_r },
-		{ 0x4000, 0x7fff, MRA_BANK1 },
-		{ 0x8000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_BANK2 ),
+		new Memory_ReadAddress( 0x3f00, 0x3f00, input_port_0_r ),
+		new Memory_ReadAddress( 0x3f01, 0x3f01, input_port_1_r ),
+		new Memory_ReadAddress( 0x3f02, 0x3f02, input_port_2_r ),
+		new Memory_ReadAddress( 0x3f03, 0x3f03, input_port_3_r ),
+		new Memory_ReadAddress( 0x3f04, 0x3f04, input_port_4_r ),
+		new Memory_ReadAddress( 0x4000, 0x7fff, MRA_BANK1 ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x1fff, MWA_BANK2 },
-		{ 0x2000, 0x27ff, ddragon_fgvideoram_w, &ddragon_fgvideoram },
-		{ 0x2800, 0x2fff, ddragon_bgvideoram_w, &ddragon_bgvideoram },
-		{ 0x3000, 0x317f, paletteram_xxxxBBBBGGGGRRRR_split1_w, &paletteram },
-		{ 0x3400, 0x357f, paletteram_xxxxBBBBGGGGRRRR_split2_w, &paletteram_2 },
-		{ 0x3800, 0x397f, MWA_BANK3, &spriteram, &spriteram_size },
-		{ 0x3e00, 0x3e00, chinagat_cpu_sound_cmd_w },
-	//	{ 0x3e01, 0x3e01, MWA_NOP },
-	//	{ 0x3e02, 0x3e02, MWA_NOP },
-	//	{ 0x3e03, 0x3e03, MWA_NOP },
-		{ 0x3e04, 0x3e04, chinagat_sub_IRQ_w },
-		{ 0x3e06, 0x3e06, MWA_RAM, &ddragon_scrolly_lo },
-		{ 0x3e07, 0x3e07, MWA_RAM, &ddragon_scrollx_lo },
-		{ 0x3f00, 0x3f00, chinagat_video_ctrl_w },
-		{ 0x3f01, 0x3f01, chinagat_bankswitch_w },
-		{ 0x4000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_BANK2 ),
+		new Memory_WriteAddress( 0x2000, 0x27ff, ddragon_fgvideoram_w, ddragon_fgvideoram ),
+		new Memory_WriteAddress( 0x2800, 0x2fff, ddragon_bgvideoram_w, ddragon_bgvideoram ),
+		new Memory_WriteAddress( 0x3000, 0x317f, paletteram_xxxxBBBBGGGGRRRR_split1_w, paletteram ),
+		new Memory_WriteAddress( 0x3400, 0x357f, paletteram_xxxxBBBBGGGGRRRR_split2_w, paletteram_2 ),
+		new Memory_WriteAddress( 0x3800, 0x397f, MWA_BANK3, spriteram, spriteram_size ),
+		new Memory_WriteAddress( 0x3e00, 0x3e00, chinagat_cpu_sound_cmd_w ),
+	//	new Memory_WriteAddress( 0x3e01, 0x3e01, MWA_NOP ),
+	//	new Memory_WriteAddress( 0x3e02, 0x3e02, MWA_NOP ),
+	//	new Memory_WriteAddress( 0x3e03, 0x3e03, MWA_NOP ),
+		new Memory_WriteAddress( 0x3e04, 0x3e04, chinagat_sub_IRQ_w ),
+		new Memory_WriteAddress( 0x3e06, 0x3e06, MWA_RAM, ddragon_scrolly_lo ),
+		new Memory_WriteAddress( 0x3e07, 0x3e07, MWA_RAM, ddragon_scrollx_lo ),
+		new Memory_WriteAddress( 0x3f00, 0x3f00, chinagat_video_ctrl_w ),
+		new Memory_WriteAddress( 0x3f01, 0x3f01, chinagat_bankswitch_w ),
+		new Memory_WriteAddress( 0x4000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( sub_readmem )
-		{ 0x0000, 0x1fff, MRA_BANK2 },
-	//	{ 0x2a2b, 0x2a2b, MRA_NOP }, /* What lives here? */
-	//	{ 0x2a30, 0x2a30, MRA_NOP }, /* What lives here? */
-		{ 0x4000, 0x7fff, MRA_BANK4 },
-		{ 0x8000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress sub_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x1fff, MRA_BANK2 ),
+	//	new Memory_ReadAddress( 0x2a2b, 0x2a2b, MRA_NOP ), /* What lives here? */
+	//	new Memory_ReadAddress( 0x2a30, 0x2a30, MRA_NOP ), /* What lives here? */
+		new Memory_ReadAddress( 0x4000, 0x7fff, MRA_BANK4 ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sub_writemem )
-		{ 0x0000, 0x1fff, MWA_BANK2 },
-		{ 0x2000, 0x2000, chinagat_sub_bankswitch_w },
-		{ 0x2800, 0x2800, MWA_RAM }, /* Called on CPU start and after return from jump table */
-		{ 0x4000, 0xffff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress sub_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x1fff, MWA_BANK2 ),
+		new Memory_WriteAddress( 0x2000, 0x2000, chinagat_sub_bankswitch_w ),
+		new Memory_WriteAddress( 0x2800, 0x2800, MWA_RAM ), /* Called on CPU start and after return from jump table */
+		new Memory_WriteAddress( 0x4000, 0xffff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0x8801, 0x8801, YM2151_status_port_0_r },
-		{ 0x9800, 0x9800, OKIM6295_status_0_r },
-		{ 0xA000, 0xA000, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8801, 0x8801, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0x9800, 0x9800, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0xA000, 0xA000, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM },
-		{ 0x8800, 0x8800, YM2151_register_port_0_w },
-		{ 0x8801, 0x8801, YM2151_data_port_0_w },
-		{ 0x9800, 0x9800, OKIM6295_data_0_w },
-	MEMORY_END
+	public static Memory_WriteAddress sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8800, 0x8800, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0x8801, 0x8801, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0x9800, 0x9800, OKIM6295_data_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( ym2203c_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0x8800, 0x8800, YM2203_status_port_0_r },
-	//	{ 0x8802, 0x8802, OKIM6295_status_0_r },
-		{ 0x8804, 0x8804, YM2203_status_port_1_r },
-	//	{ 0x8801, 0x8801, YM2151_status_port_0_r },
-	//	{ 0x9800, 0x9800, OKIM6295_status_0_r },
-		{ 0xA000, 0xA000, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress ym2203c_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8800, 0x8800, YM2203_status_port_0_r ),
+	//	new Memory_ReadAddress( 0x8802, 0x8802, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0x8804, 0x8804, YM2203_status_port_1_r ),
+	//	new Memory_ReadAddress( 0x8801, 0x8801, YM2151_status_port_0_r ),
+	//	new Memory_ReadAddress( 0x9800, 0x9800, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0xA000, 0xA000, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( ym2203c_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM },
+	public static Memory_WriteAddress ym2203c_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ),
 	// 8804 and/or 8805 make a gong sound when the coin goes in
 	// but only on the title screen....
 	
-		{ 0x8800, 0x8800, YM2203_control_port_0_w },
-		{ 0x8801, 0x8801, YM2203_write_port_0_w },
-	//	{ 0x8802, 0x8802, OKIM6295_data_0_w },
-	//	{ 0x8803, 0x8803, OKIM6295_data_0_w },
-		{ 0x8804, 0x8804, YM2203_control_port_1_w },
-		{ 0x8805, 0x8805, YM2203_write_port_1_w },
-	//	{ 0x8804, 0x8804, MWA_RAM },
-	//	{ 0x8805, 0x8805, MWA_RAM },
+		new Memory_WriteAddress( 0x8800, 0x8800, YM2203_control_port_0_w ),
+		new Memory_WriteAddress( 0x8801, 0x8801, YM2203_write_port_0_w ),
+	//	new Memory_WriteAddress( 0x8802, 0x8802, OKIM6295_data_0_w ),
+	//	new Memory_WriteAddress( 0x8803, 0x8803, OKIM6295_data_0_w ),
+		new Memory_WriteAddress( 0x8804, 0x8804, YM2203_control_port_1_w ),
+		new Memory_WriteAddress( 0x8805, 0x8805, YM2203_write_port_1_w ),
+	//	new Memory_WriteAddress( 0x8804, 0x8804, MWA_RAM ),
+	//	new Memory_WriteAddress( 0x8805, 0x8805, MWA_RAM ),
 	
-	//	{ 0x8800, 0x8800, YM2151_register_port_0_w },
-	//	{ 0x8801, 0x8801, YM2151_data_port_0_w },
-	//	{ 0x9800, 0x9800, OKIM6295_data_0_w },
-	MEMORY_END
+	//	new Memory_WriteAddress( 0x8800, 0x8800, YM2151_register_port_0_w ),
+	//	new Memory_WriteAddress( 0x8801, 0x8801, YM2151_data_port_0_w ),
+	//	new Memory_WriteAddress( 0x9800, 0x9800, OKIM6295_data_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( saiyugb1_sound_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM },
-		{ 0x8801, 0x8801, YM2151_status_port_0_r },
-		{ 0xA000, 0xA000, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress saiyugb1_sound_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x8801, 0x8801, YM2151_status_port_0_r ),
+		new Memory_ReadAddress( 0xA000, 0xA000, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( saiyugb1_sound_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM },
-		{ 0x8800, 0x8800, YM2151_register_port_0_w },
-		{ 0x8801, 0x8801, YM2151_data_port_0_w },
-		{ 0x9800, 0x9800, saiyugb1_mcu_command_w },
-	MEMORY_END
+	public static Memory_WriteAddress saiyugb1_sound_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8800, 0x8800, YM2151_register_port_0_w ),
+		new Memory_WriteAddress( 0x8801, 0x8801, YM2151_data_port_0_w ),
+		new Memory_WriteAddress( 0x9800, 0x9800, saiyugb1_mcu_command_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_READ_START( i8748_readmem )
-		{ 0x0000, 0x03ff, MRA_ROM },
-		{ 0x0400, 0x07ff, MRA_ROM },	/* i8749 version */
-	MEMORY_END
+	public static Memory_ReadAddress i8748_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x03ff, MRA_ROM ),
+		new Memory_ReadAddress( 0x0400, 0x07ff, MRA_ROM ),	/* i8749 version */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( i8748_writemem )
-		{ 0x0000, 0x03ff, MWA_ROM },
-		{ 0x0400, 0x07ff, MWA_ROM },
-	MEMORY_END
+	public static Memory_WriteAddress i8748_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x03ff, MWA_ROM ),
+		new Memory_WriteAddress( 0x0400, 0x07ff, MWA_ROM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( i8748_readport )
-		{ I8039_bus, I8039_bus, saiyugb1_mcu_command_r },
-		{ I8039_t1,  I8039_t1,  saiyugb1_m5205_irq_r },
-	PORT_END
+	public static IO_ReadPort i8748_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( I8039_bus, I8039_bus, saiyugb1_mcu_command_r ),
+		new IO_ReadPort( I8039_t1,  I8039_t1,  saiyugb1_m5205_irq_r ),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( i8748_writeport )
-		{ I8039_t0,  I8039_t0,  saiyugb1_m5205_clk_w }, 		/* Drives the clock on the m5205 at 1/8 of this frequency */
-		{ I8039_p1,  I8039_p1,  saiyugb1_adpcm_rom_addr_w },
-		{ I8039_p2,  I8039_p2,  saiyugb1_adpcm_control_w },
-	PORT_END
+	public static IO_WritePort i8748_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( I8039_t0,  I8039_t0,  saiyugb1_m5205_clk_w ), 		/* Drives the clock on the m5205 at 1/8 of this frequency */
+		new IO_WritePort( I8039_p1,  I8039_p1,  saiyugb1_adpcm_rom_addr_w ),
+		new IO_WritePort( I8039_p2,  I8039_p2,  saiyugb1_adpcm_control_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	INPUT_PORTS_START( chinagat )
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3 )
-		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	static InputPortPtr input_ports_chinagat = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_VBLANK );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN3 );
+		PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x06, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x03, DEF_STR( 1C_5C ) )
-		PORT_DIPNAME( 0x38, 0x38, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( 4C_1C ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
-		PORT_DIPSETTING(    0x38, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(    0x30, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(    0x28, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(    0x18, DEF_STR( 1C_5C ) )
-		/*PORT_DIPNAME( 0x40, 0x00, DEF_STR( Cabinet ) )
-		PORT_DIPSETTING(	0x00, DEF_STR( Upright ) )
-		PORT_DIPSETTING(	0x40, DEF_STR( Cocktail ) )*/
-		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 
+		PORT_DIPNAME( 0x07, 0x07, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x07, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x06, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x05, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x03, DEF_STR( "1C_5C") );
+		PORT_DIPNAME( 0x38, 0x38, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "4C_1C") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_1C") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "2C_1C") );
+		PORT_DIPSETTING(    0x38, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(    0x30, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(    0x28, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(    0x18, DEF_STR( "1C_5C") );
+		/*PORT_DIPNAME( 0x40, 0x00, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(	0x00, DEF_STR( "Upright") );
+		PORT_DIPSETTING(	0x40, DEF_STR( "Cocktail") );*/
+		PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START
-		PORT_DIPNAME( 0x03, 0x03, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(	0x01, "Easy" )
-		PORT_DIPSETTING(	0x03, "Normal" )
-		PORT_DIPSETTING(	0x02, "Hard" )
-		PORT_DIPSETTING(	0x00, "Hardest" )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( On ))
-		PORT_DIPNAME( 0x30, 0x30, "Timer" )
-		PORT_DIPSETTING(    0x00, "50" )
-		PORT_DIPSETTING(    0x20, "55" )
-		PORT_DIPSETTING(    0x30, "60" )
-		PORT_DIPSETTING(    0x10, "70" )
-		PORT_DIPNAME( 0xc0, 0x80, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x00, "1" )
-		PORT_DIPSETTING(    0xc0, "2" )
-		PORT_DIPSETTING(    0x80, "3" )
-		PORT_DIPSETTING(    0x40, "4" )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+		PORT_START(); 
+		PORT_DIPNAME( 0x03, 0x03, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(	0x01, "Easy" );
+		PORT_DIPSETTING(	0x03, "Normal" );
+		PORT_DIPSETTING(	0x02, "Hard" );
+		PORT_DIPSETTING(	0x00, "Hardest" );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "On") );
+		PORT_DIPNAME( 0x30, 0x30, "Timer" );
+		PORT_DIPSETTING(    0x00, "50" );
+		PORT_DIPSETTING(    0x20, "55" );
+		PORT_DIPSETTING(    0x30, "60" );
+		PORT_DIPSETTING(    0x10, "70" );
+		PORT_DIPNAME( 0xc0, 0x80, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "1" );
+		PORT_DIPSETTING(    0xc0, "2" );
+		PORT_DIPSETTING(    0x80, "3" );
+		PORT_DIPSETTING(    0x40, "4" );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 );
 	
-		PORT_START
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
-	INPUT_PORTS_END
+		PORT_START(); 
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 );
+	INPUT_PORTS_END(); }}; 
 	
-	static struct GfxLayout charlayout =
-	{
+	static GfxLayout charlayout = new GfxLayout
+	(
 		8,8,			/* 8*8 chars */
 		RGN_FRAC(1,1),	/* num of characters */
 		4,				/* 4 bits per pixel */
-		{ 0, 2, 4, 6 },		/* plane offset */
-		{ 1, 0, 65, 64, 129, 128, 193, 192 },
-		{ STEP8(0,8) },			/* { 0*8, 1*8 ... 6*8, 7*8 }, */
+		new int[] { 0, 2, 4, 6 },		/* plane offset */
+		new int[] { 1, 0, 65, 64, 129, 128, 193, 192 },
+		new int[] { STEP8(0,8) },			/* { 0*8, 1*8 ... 6*8, 7*8 }, */
 		32*8 /* every char takes 32 consecutive bytes */
-	};
+	);
 	
-	static struct GfxLayout tilelayout =
-	{
+	static GfxLayout tilelayout = new GfxLayout
+	(
 		16,16,			/* 16x16 chars */
 		RGN_FRAC(1,2),	/* num of Tiles/Sprites */
 		4,				/* 4 bits per pixel */
-		{ RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4, 0,4 }, /* plane offset */
-		{ 3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
+		new int[] { RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+4, 0,4 }, /* plane offset */
+		new int[] { 3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
 			32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0 },
-		{ STEP16(0,8) },		/* { 0*8, 1*8 ... 14*8, 15*8 }, */
+		new int[] { STEP16(0,8) },		/* { 0*8, 1*8 ... 14*8, 15*8 }, */
 		64*8 /* every char takes 64 consecutive bytes */
-	};
+	);
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &charlayout,   0,16 },	/*  8x8  chars */
-		{ REGION_GFX2, 0, &tilelayout, 128, 8 },	/* 16x16 sprites */
-		{ REGION_GFX3, 0, &tilelayout, 256, 8 },	/* 16x16 background tiles */
-		{ -1 } /* end of array */
+		new GfxDecodeInfo( REGION_GFX1, 0, charlayout,   0,16 ),	/*  8x8  chars */
+		new GfxDecodeInfo( REGION_GFX2, 0, tilelayout, 128, 8 ),	/* 16x16 sprites */
+		new GfxDecodeInfo( REGION_GFX3, 0, tilelayout, 256, 8 ),	/* 16x16 background tiles */
+		new GfxDecodeInfo( -1 ) /* end of array */
 	};
 	
 	static void chinagat_irq_handler(int irq) {
@@ -661,214 +685,214 @@ public class chinagat
 	
 	***************************************************************************/
 	
-	ROM_START( chinagat )
-		ROM_REGION( 0x28000, REGION_CPU1, 0 )	/* Main CPU: 128KB for code (bankswitched using $3F01) */
-		ROM_LOAD( "cgate51.bin", 0x10000, 0x18000, CRC(439a3b19) SHA1(01393b4302ac7a66390270b01e2757582240f6b8) )	/* Banks 0x4000 long @ 0x4000 */
-		ROM_CONTINUE(            0x08000, 0x08000 )				/* Static code */
+	static RomLoadPtr rom_chinagat = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x28000, REGION_CPU1, 0 );/* Main CPU: 128KB for code (bankswitched using $3F01) */
+		ROM_LOAD( "cgate51.bin", 0x10000, 0x18000, CRC(439a3b19);SHA1(01393b4302ac7a66390270b01e2757582240f6b8) )	/* Banks 0x4000 long @ 0x4000 */
+		ROM_CONTINUE(            0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x28000, REGION_CPU2, 0 )	/* Slave CPU: 128KB for code (bankswitched using $2000) */
-		ROM_LOAD( "23j4-0.48",   0x10000, 0x18000, CRC(2914af38) SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) ) /* Banks 0x4000 long @ 0x4000 */
-		ROM_CONTINUE(            0x08000, 0x08000 )				/* Static code */
+		ROM_REGION( 0x28000, REGION_CPU2, 0 );/* Slave CPU: 128KB for code (bankswitched using $2000) */
+		ROM_LOAD( "23j4-0.48",   0x10000, 0x18000, CRC(2914af38);SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) ) /* Banks 0x4000 long @ 0x4000 */
+		ROM_CONTINUE(            0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Music CPU, 64KB */
-		ROM_LOAD( "23j0-0.40",   0x00000, 0x08000, CRC(9ffcadb6) SHA1(606dbdd73aee3cabb2142200ac6f8c96169e4b19) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );/* Music CPU, 64KB */
+		ROM_LOAD( "23j0-0.40",   0x00000, 0x08000, CRC(9ffcadb6);SHA1(606dbdd73aee3cabb2142200ac6f8c96169e4b19) )
 	
-		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE )	/* Text */
-		ROM_LOAD( "cgate18.bin", 0x00000, 0x20000, CRC(8d88d64d) SHA1(57265138ebb0c6419542cce5953aee7335bfa2bd) )	/* 0,1,2,3 */
+		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE );/* Text */
+		ROM_LOAD( "cgate18.bin", 0x00000, 0x20000, CRC(8d88d64d);SHA1(57265138ebb0c6419542cce5953aee7335bfa2bd) )	/* 0,1,2,3 */
 	
-		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "23j7-0.103",  0x00000, 0x20000, CRC(2f445030) SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
-		ROM_LOAD( "23j8-0.102",  0x20000, 0x20000, CRC(237f725a) SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
-		ROM_LOAD( "23j9-0.101",  0x40000, 0x20000, CRC(8caf6097) SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
-		ROM_LOAD( "23ja-0.100",  0x60000, 0x20000, CRC(f678594f) SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
+		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "23j7-0.103",  0x00000, 0x20000, CRC(2f445030);SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
+		ROM_LOAD( "23j8-0.102",  0x20000, 0x20000, CRC(237f725a);SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
+		ROM_LOAD( "23j9-0.101",  0x40000, 0x20000, CRC(8caf6097);SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
+		ROM_LOAD( "23ja-0.100",  0x60000, 0x20000, CRC(f678594f);SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
 	
-		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE )	/* Background */
-		ROM_LOAD( "a-13", 0x00000, 0x10000, NO_DUMP )		/* Where are    */
-		ROM_LOAD( "a-12", 0x10000, 0x10000, NO_DUMP )		/* these on the */
-		ROM_LOAD( "a-15", 0x20000, 0x10000, NO_DUMP )		/* real board ? */
-		ROM_LOAD( "a-14", 0x30000, 0x10000, NO_DUMP )
+		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE );/* Background */
+		ROM_LOAD( "a-13", 0x00000, 0x10000, NO_DUMP );	/* Where are    */
+		ROM_LOAD( "a-12", 0x10000, 0x10000, NO_DUMP );	/* these on the */
+		ROM_LOAD( "a-15", 0x20000, 0x10000, NO_DUMP );	/* real board ? */
+		ROM_LOAD( "a-14", 0x30000, 0x10000, NO_DUMP );
 	
-		ROM_REGION(0x40000, REGION_SOUND1, 0 )	/* ADPCM */
-		ROM_LOAD( "23j1-0.53", 0x00000, 0x20000, CRC(f91f1001) SHA1(378402a3c966cabd61e9662ae5decd66672a228b) )
-		ROM_LOAD( "23j2-0.52", 0x20000, 0x20000, CRC(8b6f26e9) SHA1(7da26ae846814b3957b19c38b6bf7e83617dc6cc) )
+		ROM_REGION(0x40000, REGION_SOUND1, 0 );/* ADPCM */
+		ROM_LOAD( "23j1-0.53", 0x00000, 0x20000, CRC(f91f1001);SHA1(378402a3c966cabd61e9662ae5decd66672a228b) )
+		ROM_LOAD( "23j2-0.52", 0x20000, 0x20000, CRC(8b6f26e9);SHA1(7da26ae846814b3957b19c38b6bf7e83617dc6cc) )
 	
-		ROM_REGION(0x300, REGION_USER1, 0 )	/* Unknown Bipolar PROMs */
-		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529) SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
-		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9) SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
-	ROM_END
+		ROM_REGION(0x300, REGION_USER1, 0 );/* Unknown Bipolar PROMs */
+		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529);SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
+		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9);SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
+	ROM_END(); }}; 
 	
 	
-	ROM_START( saiyugou )
-		ROM_REGION( 0x28000, REGION_CPU1, 0 )	/* Main CPU: 128KB for code (bankswitched using $3F01) */
-		ROM_LOAD( "23j3-0.51",  0x10000, 0x18000, CRC(aa8132a2) SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
-		ROM_CONTINUE(           0x08000, 0x08000)				/* Static code */
+	static RomLoadPtr rom_saiyugou = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x28000, REGION_CPU1, 0 );/* Main CPU: 128KB for code (bankswitched using $3F01) */
+		ROM_LOAD( "23j3-0.51",  0x10000, 0x18000, CRC(aa8132a2);SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
+		ROM_CONTINUE(           0x08000, 0x08000);			/* Static code */
 	
-		ROM_REGION( 0x28000, REGION_CPU2, 0 )	/* Slave CPU: 128KB for code (bankswitched using $2000) */
-		ROM_LOAD( "23j4-0.48",  0x10000, 0x18000, CRC(2914af38) SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
-		ROM_CONTINUE(           0x08000, 0x08000)				/* Static code */
+		ROM_REGION( 0x28000, REGION_CPU2, 0 );/* Slave CPU: 128KB for code (bankswitched using $2000) */
+		ROM_LOAD( "23j4-0.48",  0x10000, 0x18000, CRC(2914af38);SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
+		ROM_CONTINUE(           0x08000, 0x08000);			/* Static code */
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Music CPU, 64KB */
-		ROM_LOAD( "23j0-0.40",  0x00000, 0x8000, CRC(9ffcadb6) SHA1(606dbdd73aee3cabb2142200ac6f8c96169e4b19) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );/* Music CPU, 64KB */
+		ROM_LOAD( "23j0-0.40",  0x00000, 0x8000, CRC(9ffcadb6);SHA1(606dbdd73aee3cabb2142200ac6f8c96169e4b19) )
 	
-		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE )	/* Text */
-		ROM_LOAD( "23j6-0.18",  0x00000, 0x20000, CRC(86d33df0) SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
+		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE );/* Text */
+		ROM_LOAD( "23j6-0.18",  0x00000, 0x20000, CRC(86d33df0);SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
 	
-		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "23j7-0.103", 0x00000, 0x20000, CRC(2f445030) SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
-		ROM_LOAD( "23j8-0.102", 0x20000, 0x20000, CRC(237f725a) SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
-		ROM_LOAD( "23j9-0.101", 0x40000, 0x20000, CRC(8caf6097) SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
-		ROM_LOAD( "23ja-0.100", 0x60000, 0x20000, CRC(f678594f) SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
+		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "23j7-0.103", 0x00000, 0x20000, CRC(2f445030);SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
+		ROM_LOAD( "23j8-0.102", 0x20000, 0x20000, CRC(237f725a);SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
+		ROM_LOAD( "23j9-0.101", 0x40000, 0x20000, CRC(8caf6097);SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
+		ROM_LOAD( "23ja-0.100", 0x60000, 0x20000, CRC(f678594f);SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
 	
-		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE )	/* Background */
-		ROM_LOAD( "a-13", 0x00000, 0x10000, NO_DUMP )
-		ROM_LOAD( "a-12", 0x10000, 0x10000, NO_DUMP )
-		ROM_LOAD( "a-15", 0x20000, 0x10000, NO_DUMP )
-		ROM_LOAD( "a-14", 0x30000, 0x10000, NO_DUMP )
+		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE );/* Background */
+		ROM_LOAD( "a-13", 0x00000, 0x10000, NO_DUMP );
+		ROM_LOAD( "a-12", 0x10000, 0x10000, NO_DUMP );
+		ROM_LOAD( "a-15", 0x20000, 0x10000, NO_DUMP );
+		ROM_LOAD( "a-14", 0x30000, 0x10000, NO_DUMP );
 	
-		ROM_REGION(0x40000, REGION_SOUND1, 0 )	/* ADPCM */
-		ROM_LOAD( "23j1-0.53", 0x00000, 0x20000, CRC(f91f1001) SHA1(378402a3c966cabd61e9662ae5decd66672a228b) )
-		ROM_LOAD( "23j2-0.52", 0x20000, 0x20000, CRC(8b6f26e9) SHA1(7da26ae846814b3957b19c38b6bf7e83617dc6cc) )
+		ROM_REGION(0x40000, REGION_SOUND1, 0 );/* ADPCM */
+		ROM_LOAD( "23j1-0.53", 0x00000, 0x20000, CRC(f91f1001);SHA1(378402a3c966cabd61e9662ae5decd66672a228b) )
+		ROM_LOAD( "23j2-0.52", 0x20000, 0x20000, CRC(8b6f26e9);SHA1(7da26ae846814b3957b19c38b6bf7e83617dc6cc) )
 	
-		ROM_REGION(0x300, REGION_USER1, 0 )	/* Unknown Bipolar PROMs */
-		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529) SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
-		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9) SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
-	ROM_END
+		ROM_REGION(0x300, REGION_USER1, 0 );/* Unknown Bipolar PROMs */
+		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529);SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
+		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9);SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
+	ROM_END(); }}; 
 	
-	ROM_START( saiyugb1 )
-		ROM_REGION( 0x28000, REGION_CPU1, 0 )	/* Main CPU: 128KB for code (bankswitched using $3F01) */
-		ROM_LOAD( "23j3-0.51",  0x10000, 0x18000, CRC(aa8132a2) SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
+	static RomLoadPtr rom_saiyugb1 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x28000, REGION_CPU1, 0 );/* Main CPU: 128KB for code (bankswitched using $3F01) */
+		ROM_LOAD( "23j3-0.51",  0x10000, 0x18000, CRC(aa8132a2);SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "a-5.bin", 0x10000, 0x10000, CRC(39795aa5) )	   Banks 0x4000 long @ 0x4000
-		   ROM_LOAD( "a-9.bin", 0x20000, 0x08000, CRC(051ebe92) )	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "a-5.bin", 0x10000, 0x10000, CRC(39795aa5));	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "a-9.bin", 0x20000, 0x08000, CRC(051ebe92));	   Banks 0x4000 long @ 0x4000
 		*/
-		ROM_CONTINUE(           0x08000, 0x08000 )				/* Static code */
+		ROM_CONTINUE(           0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x28000, REGION_CPU2, 0 )	/* Slave CPU: 128KB for code (bankswitched using $2000) */
-		ROM_LOAD( "23j4-0.48",  0x10000, 0x18000, CRC(2914af38) SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
+		ROM_REGION( 0x28000, REGION_CPU2, 0 );/* Slave CPU: 128KB for code (bankswitched using $2000) */
+		ROM_LOAD( "23j4-0.48",  0x10000, 0x18000, CRC(2914af38);SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "a-4.bin", 0x10000, 0x10000, CRC(9effddc1) )	   Banks 0x4000 long @ 0x4000
-		   ROM_LOAD( "a-8.bin", 0x20000, 0x08000, CRC(a436edb8) )	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "a-4.bin", 0x10000, 0x10000, CRC(9effddc1));	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "a-8.bin", 0x20000, 0x08000, CRC(a436edb8));	   Banks 0x4000 long @ 0x4000
 		*/
-		ROM_CONTINUE(           0x08000, 0x08000 )				/* Static code */
+		ROM_CONTINUE(           0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Music CPU, 64KB */
-		ROM_LOAD( "a-1.bin",  0x00000, 0x8000,  CRC(46e5a6d4) SHA1(965ed7bdb727ab32ce3322ca49f1a4e3786e8051) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );/* Music CPU, 64KB */
+		ROM_LOAD( "a-1.bin",  0x00000, 0x8000,  CRC(46e5a6d4);SHA1(965ed7bdb727ab32ce3322ca49f1a4e3786e8051) )
 	
-		ROM_REGION( 0x800, REGION_CPU4, 0 )		/* ADPCM CPU, 1KB */
-		ROM_LOAD( "mcu8748.bin", 0x000, 0x400, CRC(6d28d6c5) SHA1(20582c62a72545e68c2e155b063ee7e95e1228ce) )
+		ROM_REGION( 0x800, REGION_CPU4, 0 );	/* ADPCM CPU, 1KB */
+		ROM_LOAD( "mcu8748.bin", 0x000, 0x400, CRC(6d28d6c5);SHA1(20582c62a72545e68c2e155b063ee7e95e1228ce) )
 	
-		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE )	/* Text */
-		ROM_LOAD( "23j6-0.18",  0x00000, 0x20000, CRC(86d33df0) SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
+		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE );/* Text */
+		ROM_LOAD( "23j6-0.18",  0x00000, 0x20000, CRC(86d33df0);SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "a-2.bin", 0x00000, 0x10000, CRC(baa5a3b9) )	   0,1
-		   ROM_LOAD( "a-3.bin", 0x10000, 0x10000, CRC(532d59be) )	   2,3
+		   ROM_LOAD( "a-2.bin", 0x00000, 0x10000, CRC(baa5a3b9));	   0,1
+		   ROM_LOAD( "a-3.bin", 0x10000, 0x10000, CRC(532d59be));	   2,3
 		*/
 	
-		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "23j7-0.103",  0x00000, 0x20000, CRC(2f445030) SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
-		ROM_LOAD( "23j8-0.102",  0x20000, 0x20000, CRC(237f725a) SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
-		ROM_LOAD( "23j9-0.101",  0x40000, 0x20000, CRC(8caf6097) SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
-		ROM_LOAD( "23ja-0.100",  0x60000, 0x20000, CRC(f678594f) SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
+		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "23j7-0.103",  0x00000, 0x20000, CRC(2f445030);SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
+		ROM_LOAD( "23j8-0.102",  0x20000, 0x20000, CRC(237f725a);SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
+		ROM_LOAD( "23j9-0.101",  0x40000, 0x20000, CRC(8caf6097);SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
+		ROM_LOAD( "23ja-0.100",  0x60000, 0x20000, CRC(f678594f);SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same
-		   ROM_LOAD( "a-23.bin", 0x00000, 0x10000, CRC(12b56225) )	   2,3
-		   ROM_LOAD( "a-22.bin", 0x10000, 0x10000, CRC(b592aa9b) )	   2,3
-		   ROM_LOAD( "a-21.bin", 0x20000, 0x10000, CRC(a331ba3d) )	   2,3
-		   ROM_LOAD( "a-20.bin", 0x30000, 0x10000, CRC(2515d742) )	   2,3
-		   ROM_LOAD( "a-19.bin", 0x40000, 0x10000, CRC(d796f2e4) )	   0,1
-		   ROM_LOAD( "a-18.bin", 0x50000, 0x10000, CRC(c9e1c2f9) )	   0,1
-		   ROM_LOAD( "a-17.bin", 0x60000, 0x10000, CRC(00b6db0a) )	   0,1
-		   ROM_LOAD( "a-16.bin", 0x70000, 0x10000, CRC(f196818b) )	   0,1
+		   ROM_LOAD( "a-23.bin", 0x00000, 0x10000, CRC(12b56225));	   2,3
+		   ROM_LOAD( "a-22.bin", 0x10000, 0x10000, CRC(b592aa9b));	   2,3
+		   ROM_LOAD( "a-21.bin", 0x20000, 0x10000, CRC(a331ba3d));	   2,3
+		   ROM_LOAD( "a-20.bin", 0x30000, 0x10000, CRC(2515d742));	   2,3
+		   ROM_LOAD( "a-19.bin", 0x40000, 0x10000, CRC(d796f2e4));	   0,1
+		   ROM_LOAD( "a-18.bin", 0x50000, 0x10000, CRC(c9e1c2f9));	   0,1
+		   ROM_LOAD( "a-17.bin", 0x60000, 0x10000, CRC(00b6db0a));	   0,1
+		   ROM_LOAD( "a-16.bin", 0x70000, 0x10000, CRC(f196818b));	   0,1
 		*/
 	
-		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE )	/* Background */
-		ROM_LOAD( "a-13", 0x00000, 0x10000, CRC(b745cac4) SHA1(759767ca7c5123b03b9e1a42bb105d194cb76400) )
-		ROM_LOAD( "a-12", 0x10000, 0x10000, CRC(3c864299) SHA1(cb12616e4d6c53a82beb4cd51510a632894b359c) )
-		ROM_LOAD( "a-15", 0x20000, 0x10000, CRC(2f268f37) SHA1(f82cfe3b2001d5ed2a709ca9c51febcf624bb627) )
-		ROM_LOAD( "a-14", 0x30000, 0x10000, CRC(aef814c8) SHA1(f6b9229ca7beb9a0e47d1f6a1083c6102fdd20c8) )
+		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE );/* Background */
+		ROM_LOAD( "a-13", 0x00000, 0x10000, CRC(b745cac4);SHA1(759767ca7c5123b03b9e1a42bb105d194cb76400) )
+		ROM_LOAD( "a-12", 0x10000, 0x10000, CRC(3c864299);SHA1(cb12616e4d6c53a82beb4cd51510a632894b359c) )
+		ROM_LOAD( "a-15", 0x20000, 0x10000, CRC(2f268f37);SHA1(f82cfe3b2001d5ed2a709ca9c51febcf624bb627) )
+		ROM_LOAD( "a-14", 0x30000, 0x10000, CRC(aef814c8);SHA1(f6b9229ca7beb9a0e47d1f6a1083c6102fdd20c8) )
 	
 		/* Some bootlegs have incorrectly halved the ADPCM data ! */
 		/* These are same as the 128k sample except nibble-swapped */
-		ROM_REGION(0x40000, REGION_SOUND1, 0 )	/* ADPCM */		/* Bootleggers wrong data */
-		ROM_LOAD ( "a-6.bin",   0x00000, 0x10000, CRC(4da4e935) SHA1(235a1589165a23cfad29e07cf66d7c3a777fc904) )	/* 0x8000, 0x7cd47f01 */
-		ROM_LOAD ( "a-7.bin",   0x10000, 0x10000, CRC(6284c254) SHA1(e01be1bd4768ae0ccb1cec65b3a6bc80ed7a4b00) )	/* 0x8000, 0x7091959c */
-		ROM_LOAD ( "a-10.bin",  0x20000, 0x10000, CRC(b728ec6e) SHA1(433b5f907e4918e89b79bd927e2993ad3030017b) )	/* 0x8000, 0x78349cb6 */
-		ROM_LOAD ( "a-11.bin",  0x30000, 0x10000, CRC(a50d1895) SHA1(0c2c1f8a2e945d6c53ce43413f0e63ced45bae17) )	/* 0x8000, 0xaa5b6834 */
+		ROM_REGION(0x40000, REGION_SOUND1, 0 );/* ADPCM */		/* Bootleggers wrong data */
+		ROM_LOAD ( "a-6.bin",   0x00000, 0x10000, CRC(4da4e935);SHA1(235a1589165a23cfad29e07cf66d7c3a777fc904) )	/* 0x8000, 0x7cd47f01 */
+		ROM_LOAD ( "a-7.bin",   0x10000, 0x10000, CRC(6284c254);SHA1(e01be1bd4768ae0ccb1cec65b3a6bc80ed7a4b00) )	/* 0x8000, 0x7091959c */
+		ROM_LOAD ( "a-10.bin",  0x20000, 0x10000, CRC(b728ec6e);SHA1(433b5f907e4918e89b79bd927e2993ad3030017b) )	/* 0x8000, 0x78349cb6 */
+		ROM_LOAD ( "a-11.bin",  0x30000, 0x10000, CRC(a50d1895);SHA1(0c2c1f8a2e945d6c53ce43413f0e63ced45bae17) )	/* 0x8000, 0xaa5b6834 */
 	
-		ROM_REGION(0x300, REGION_USER1, 0 )	/* Unknown Bipolar PROMs */
-		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529) SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
-		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9) SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
-	ROM_END
+		ROM_REGION(0x300, REGION_USER1, 0 );/* Unknown Bipolar PROMs */
+		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529);SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
+		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9);SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
+	ROM_END(); }}; 
 	
-	ROM_START( saiyugb2 )
-		ROM_REGION( 0x28000, REGION_CPU1, 0 )	/* Main CPU: 128KB for code (bankswitched using $3F01) */
-		ROM_LOAD( "23j3-0.51",   0x10000, 0x18000, CRC(aa8132a2) SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
+	static RomLoadPtr rom_saiyugb2 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x28000, REGION_CPU1, 0 );/* Main CPU: 128KB for code (bankswitched using $3F01) */
+		ROM_LOAD( "23j3-0.51",   0x10000, 0x18000, CRC(aa8132a2);SHA1(87c3bd447767f263113c4865afc905a0e484a625) )	/* Banks 0x4000 long @ 0x4000 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "sai5.bin", 0x10000, 0x10000, CRC(39795aa5) )	   Banks 0x4000 long @ 0x4000
-		   ROM_LOAD( "sai9.bin", 0x20000, 0x08000, CRC(051ebe92) )	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "sai5.bin", 0x10000, 0x10000, CRC(39795aa5));	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "sai9.bin", 0x20000, 0x08000, CRC(051ebe92));	   Banks 0x4000 long @ 0x4000
 		*/
-		ROM_CONTINUE(            0x08000, 0x08000 )				/* Static code */
+		ROM_CONTINUE(            0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x28000, REGION_CPU2, 0 )	/* Slave CPU: 128KB for code (bankswitched using $2000) */
-		ROM_LOAD( "23j4-0.48", 0x10000, 0x18000, CRC(2914af38) SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
+		ROM_REGION( 0x28000, REGION_CPU2, 0 );/* Slave CPU: 128KB for code (bankswitched using $2000) */
+		ROM_LOAD( "23j4-0.48", 0x10000, 0x18000, CRC(2914af38);SHA1(3d690fa50b7d36a22de82c026d59a16126a7b73c) )	/* Banks 0x4000 long @ 0x4000 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "sai4.bin", 0x10000, 0x10000, CRC(9effddc1) )	   Banks 0x4000 long @ 0x4000
-		   ROM_LOAD( "sai8.bin", 0x20000, 0x08000, CRC(a436edb8) )	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "sai4.bin", 0x10000, 0x10000, CRC(9effddc1));	   Banks 0x4000 long @ 0x4000
+		   ROM_LOAD( "sai8.bin", 0x20000, 0x08000, CRC(a436edb8));	   Banks 0x4000 long @ 0x4000
 		*/
-		ROM_CONTINUE(         0x08000, 0x08000 )				/* Static code */
+		ROM_CONTINUE(         0x08000, 0x08000 );			/* Static code */
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Music CPU, 64KB */
-		ROM_LOAD( "sai-alt1.bin", 0x00000, 0x8000, CRC(8d397a8d) SHA1(52599521c3dbcecc1ae56bb80dc855e76d700134) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );/* Music CPU, 64KB */
+		ROM_LOAD( "sai-alt1.bin", 0x00000, 0x8000, CRC(8d397a8d);SHA1(52599521c3dbcecc1ae56bb80dc855e76d700134) )
 	
-	//	ROM_REGION( 0x800, REGION_CPU4, 0 )		/* ADPCM CPU, 1KB */
-	//	ROM_LOAD( "sgr-8749.bin", 0x000, 0x800, CRC(9237e8c5) ) /* same as above but padded with 00 for different mcu */
+	//	ROM_REGION( 0x800, REGION_CPU4, 0 );	/* ADPCM CPU, 1KB */
+	//	ROM_LOAD( "sgr-8749.bin", 0x000, 0x800, CRC(9237e8c5)); /* same as above but padded with 00 for different mcu */
 	
-		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE )	/* Text */
-		ROM_LOAD( "23j6-0.18", 0x00000, 0x20000, CRC(86d33df0) SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
+		ROM_REGION(0x20000, REGION_GFX1, ROMREGION_DISPOSE );/* Text */
+		ROM_LOAD( "23j6-0.18", 0x00000, 0x20000, CRC(86d33df0);SHA1(3419959c28703c5177de9c11b61e1dba9e76aca5) )	/* 0,1,2,3 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same.
-		   ROM_LOAD( "sai2.bin", 0x00000, 0x10000, CRC(baa5a3b9) )	   0,1
-		   ROM_LOAD( "sai3.bin", 0x10000, 0x10000, CRC(532d59be) )	   2,3
+		   ROM_LOAD( "sai2.bin", 0x00000, 0x10000, CRC(baa5a3b9));	   0,1
+		   ROM_LOAD( "sai3.bin", 0x10000, 0x10000, CRC(532d59be));	   2,3
 		*/
 	
-		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE )	/* Sprites */
-		ROM_LOAD( "23j7-0.103",   0x00000, 0x20000, CRC(2f445030) SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
-		ROM_LOAD( "23j8-0.102",   0x20000, 0x20000, CRC(237f725a) SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
-		ROM_LOAD( "23j9-0.101",   0x40000, 0x20000, CRC(8caf6097) SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
-		ROM_LOAD( "23ja-0.100",   0x60000, 0x20000, CRC(f678594f) SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
+		ROM_REGION(0x80000, REGION_GFX2, ROMREGION_DISPOSE );/* Sprites */
+		ROM_LOAD( "23j7-0.103",   0x00000, 0x20000, CRC(2f445030);SHA1(3fcf32097e655e963d952d01a30396dc195269ca) )	/* 2,3 */
+		ROM_LOAD( "23j8-0.102",   0x20000, 0x20000, CRC(237f725a);SHA1(47bebe5b9878ca10fe6efd4f353717e53a372416) )	/* 2,3 */
+		ROM_LOAD( "23j9-0.101",   0x40000, 0x20000, CRC(8caf6097);SHA1(50ad192f831b055586a4a9974f8c6c2f2063ede5) )	/* 0,1 */
+		ROM_LOAD( "23ja-0.100",   0x60000, 0x20000, CRC(f678594f);SHA1(4bdcf9407543925f4630a8c7f1f48b85f76343a9) )	/* 0,1 */
 		/* Orientation of bootleg ROMs which are split, but otherwise the same
-		   ROM_LOAD( "sai23.bin", 0x00000, 0x10000, CRC(12b56225) )	   2,3
-		   ROM_LOAD( "sai22.bin", 0x10000, 0x10000, CRC(b592aa9b) )	   2,3
-		   ROM_LOAD( "sai21.bin", 0x20000, 0x10000, CRC(a331ba3d) )	   2,3
-		   ROM_LOAD( "sai20.bin", 0x30000, 0x10000, CRC(2515d742) )	   2,3
-		   ROM_LOAD( "sai19.bin", 0x40000, 0x10000, CRC(d796f2e4) )	   0,1
-		   ROM_LOAD( "sai18.bin", 0x50000, 0x10000, CRC(c9e1c2f9) )	   0,1
-		   ROM_LOAD( "roku17.bin",0x60000, 0x10000, CRC(00b6db0a) )	   0,1
-		   ROM_LOAD( "sai16.bin", 0x70000, 0x10000, CRC(f196818b) )	   0,1
+		   ROM_LOAD( "sai23.bin", 0x00000, 0x10000, CRC(12b56225));	   2,3
+		   ROM_LOAD( "sai22.bin", 0x10000, 0x10000, CRC(b592aa9b));	   2,3
+		   ROM_LOAD( "sai21.bin", 0x20000, 0x10000, CRC(a331ba3d));	   2,3
+		   ROM_LOAD( "sai20.bin", 0x30000, 0x10000, CRC(2515d742));	   2,3
+		   ROM_LOAD( "sai19.bin", 0x40000, 0x10000, CRC(d796f2e4));	   0,1
+		   ROM_LOAD( "sai18.bin", 0x50000, 0x10000, CRC(c9e1c2f9));	   0,1
+		   ROM_LOAD( "roku17.bin",0x60000, 0x10000, CRC(00b6db0a));	   0,1
+		   ROM_LOAD( "sai16.bin", 0x70000, 0x10000, CRC(f196818b));	   0,1
 		*/
 	
-		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE )	/* Background */
-		ROM_LOAD( "a-13", 0x00000, 0x10000, CRC(b745cac4) SHA1(759767ca7c5123b03b9e1a42bb105d194cb76400) )
-		ROM_LOAD( "a-12", 0x10000, 0x10000, CRC(3c864299) SHA1(cb12616e4d6c53a82beb4cd51510a632894b359c) )
-		ROM_LOAD( "a-15", 0x20000, 0x10000, CRC(2f268f37) SHA1(f82cfe3b2001d5ed2a709ca9c51febcf624bb627) )
-		ROM_LOAD( "a-14", 0x30000, 0x10000, CRC(aef814c8) SHA1(f6b9229ca7beb9a0e47d1f6a1083c6102fdd20c8) )
+		ROM_REGION(0x40000, REGION_GFX3, ROMREGION_DISPOSE );/* Background */
+		ROM_LOAD( "a-13", 0x00000, 0x10000, CRC(b745cac4);SHA1(759767ca7c5123b03b9e1a42bb105d194cb76400) )
+		ROM_LOAD( "a-12", 0x10000, 0x10000, CRC(3c864299);SHA1(cb12616e4d6c53a82beb4cd51510a632894b359c) )
+		ROM_LOAD( "a-15", 0x20000, 0x10000, CRC(2f268f37);SHA1(f82cfe3b2001d5ed2a709ca9c51febcf624bb627) )
+		ROM_LOAD( "a-14", 0x30000, 0x10000, CRC(aef814c8);SHA1(f6b9229ca7beb9a0e47d1f6a1083c6102fdd20c8) )
 	
-		ROM_REGION(0x40000, REGION_SOUND1, 0 )	/* ADPCM */
+		ROM_REGION(0x40000, REGION_SOUND1, 0 );/* ADPCM */
 		/* These are same as the 128k sample except nibble-swapped */
 		/* Some bootlegs have incorrectly halved the ADPCM data !  Bootleggers wrong data */
-		ROM_LOAD ( "a-6.bin",   0x00000, 0x10000, CRC(4da4e935) SHA1(235a1589165a23cfad29e07cf66d7c3a777fc904) )	/* 0x8000, 0x7cd47f01 */
-		ROM_LOAD ( "a-7.bin",   0x10000, 0x10000, CRC(6284c254) SHA1(e01be1bd4768ae0ccb1cec65b3a6bc80ed7a4b00) )	/* 0x8000, 0x7091959c */
-		ROM_LOAD ( "a-10.bin",  0x20000, 0x10000, CRC(b728ec6e) SHA1(433b5f907e4918e89b79bd927e2993ad3030017b) )	/* 0x8000, 0x78349cb6 */
-		ROM_LOAD ( "a-11.bin",  0x30000, 0x10000, CRC(a50d1895) SHA1(0c2c1f8a2e945d6c53ce43413f0e63ced45bae17) )	/* 0x8000, 0xaa5b6834 */
+		ROM_LOAD ( "a-6.bin",   0x00000, 0x10000, CRC(4da4e935);SHA1(235a1589165a23cfad29e07cf66d7c3a777fc904) )	/* 0x8000, 0x7cd47f01 */
+		ROM_LOAD ( "a-7.bin",   0x10000, 0x10000, CRC(6284c254);SHA1(e01be1bd4768ae0ccb1cec65b3a6bc80ed7a4b00) )	/* 0x8000, 0x7091959c */
+		ROM_LOAD ( "a-10.bin",  0x20000, 0x10000, CRC(b728ec6e);SHA1(433b5f907e4918e89b79bd927e2993ad3030017b) )	/* 0x8000, 0x78349cb6 */
+		ROM_LOAD ( "a-11.bin",  0x30000, 0x10000, CRC(a50d1895);SHA1(0c2c1f8a2e945d6c53ce43413f0e63ced45bae17) )	/* 0x8000, 0xaa5b6834 */
 	
-		ROM_REGION(0x300, REGION_USER1, 0 )	/* Unknown Bipolar PROMs */
-		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529) SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
-		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9) SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
-	ROM_END
+		ROM_REGION(0x300, REGION_USER1, 0 );/* Unknown Bipolar PROMs */
+		ROM_LOAD( "23jb-0.16", 0x000, 0x200, CRC(46339529);SHA1(64f4c42a826d67b7cbaa8a23a45ebc4eb6248891) )	/* 82S131 on video board */
+		ROM_LOAD( "23j5-0.45", 0x200, 0x100, CRC(fdb130a9);SHA1(4c4f214229b9fab2b5d69c745ec5428787b89e1f) )	/* 82S129 on main board */
+	ROM_END(); }}; 
 	
 	
 	
 	/*   ( YEAR  NAME      PARENT    MACHINE   INPUT     INIT    MONITOR COMPANY    FULLNAME     FLAGS ) */
-	GAME ( 1988, chinagat, 0,        chinagat, chinagat, 0     , ROT0, "[Technos] (Taito Romstar license)", "China Gate (US)" )
-	GAME ( 1988, saiyugou, chinagat, chinagat, chinagat, 0     , ROT0, "Technos", "Sai Yu Gou Ma Roku (Japan)" )
-	GAMEX( 1988, saiyugb1, chinagat, saiyugb1, chinagat, 0     , ROT0, "bootleg", "Sai Yu Gou Ma Roku (Japan bootleg 1)", GAME_IMPERFECT_SOUND )
-	GAME ( 1988, saiyugb2, chinagat, saiyugb2, chinagat, 0     , ROT0, "bootleg", "Sai Yu Gou Ma Roku (Japan bootleg 2)" )
+	public static GameDriver driver_chinagat	   = new GameDriver("1988"	,"chinagat"	,"chinagat.java"	,rom_chinagat,null	,machine_driver_chinagat	,input_ports_chinagat	,null	,	,	ROT0, "[Technos] (Taito Romstar license)", "China Gate (US)" )
+	public static GameDriver driver_saiyugou	   = new GameDriver("1988"	,"saiyugou"	,"chinagat.java"	,rom_saiyugou,driver_chinagat	,machine_driver_chinagat	,input_ports_chinagat	,null	,	,	ROT0, "Technos", "Sai Yu Gou Ma Roku (Japan)" )
+	public static GameDriver driver_saiyugb1	   = new GameDriver("1988"	,"saiyugb1"	,"chinagat.java"	,rom_saiyugb1,driver_chinagat	,machine_driver_saiyugb1	,input_ports_chinagat	,null	,	,	ROT0, "bootleg", "Sai Yu Gou Ma Roku (Japan bootleg 1)", GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_saiyugb2	   = new GameDriver("1988"	,"saiyugb2"	,"chinagat.java"	,rom_saiyugb2,driver_chinagat	,machine_driver_saiyugb2	,input_ports_chinagat	,null	,	,	ROT0, "bootleg", "Sai Yu Gou Ma Roku (Japan bootleg 2)" )
 }

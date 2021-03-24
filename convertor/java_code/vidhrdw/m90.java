@@ -122,17 +122,17 @@ public class m90
 	
 			if (/*spriteram[offs+0]==0x78 &&*/ spriteram[offs+1]==0x7f) continue;
 	
-			y=(spriteram[offs+0] | (spriteram[offs+1]<<8))&0x1ff;
-			x=(spriteram[offs+6] | (spriteram[offs+7]<<8))&0x1ff;
+			y=(spriteram.read(offs+0)| (spriteram.read(offs+1)<<8))&0x1ff;
+			x=(spriteram.read(offs+6)| (spriteram.read(offs+7)<<8))&0x1ff;
 	
 			x = x - /*64 -*/ 16;
 			y = 256 - /*32 -*/ y;
 	
-		    sprite=(spriteram[offs+2] | (spriteram[offs+3]<<8));
-			colour=(spriteram[offs+5]>>1)&0xf;
+		    sprite=(spriteram.read(offs+2)| (spriteram.read(offs+3)<<8));
+			colour=(spriteram.read(offs+5)>>1)&0xf;
 	
-			fx=spriteram[offs+5]&1;
-			fy=0;//spriteram[offs+5]&2;
+			fx=spriteram.read(offs+5)&1;
+			fy=0;//spriteram.read(offs+5)&2;
 	
 			drawgfx(bitmap,Machine->gfx[1],
 					sprite&0x1fff,
@@ -144,10 +144,10 @@ public class m90
 	}
 	#endif
 	
-	WRITE_HANDLER( m90_video_control_w )
+	public static WriteHandlerPtr m90_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m90_video_control_data[offset]=data;
-	}
+	} };
 	
 	
 	static void markdirty(struct tilemap *tilemap,int page,offs_t offset)
@@ -159,7 +159,7 @@ public class m90
 	}
 	
 	
-	WRITE_HANDLER( m90_video_w )
+	public static WriteHandlerPtr m90_video_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		m90_video_data[offset] = data;
 	
@@ -167,7 +167,7 @@ public class m90
 		markdirty(pf1_wide_layer,m90_video_control_data[0xa] & 0x2,offset);
 		markdirty(pf2_layer,     m90_video_control_data[0xc] & 0x3,offset);
 		markdirty(pf2_wide_layer,m90_video_control_data[0xc] & 0x2,offset);
-	}
+	} };
 	
 	VIDEO_UPDATE( m90 )
 	{
@@ -239,7 +239,7 @@ public class m90
 	
 		fillbitmap(priority_bitmap,0,cliprect);
 	
-		if (!pf2_enable)
+		if (pf2_enable == 0)
 			fillbitmap(bitmap,Machine->pens[0],cliprect);
 	
 		if (pf2_enable)

@@ -21,11 +21,11 @@ public class pingpong
 	/* This is strange; it's unlikely that the sprites actually have a hardware */
 	/* clipping region, but I haven't found another way to have them masked by */
 	/* the characters at the top and bottom of the screen. */
-	static struct rectangle spritevisiblearea =
-	{
+	static rectangle spritevisiblearea = new rectangle
+	(
 		0*8, 32*8-1,
 		4*8, 29*8-1
-	};
+	);
 	
 	
 	
@@ -101,28 +101,28 @@ public class pingpong
 			COLOR(0,i) = (*(color_prom++) & 0x0f) + 0x10;
 	}
 	
-	WRITE_HANDLER( pingpong_videoram_w )
+	public static WriteHandlerPtr pingpong_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( pingpong_colorram_w )
+	public static WriteHandlerPtr pingpong_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] + ((attr & 0x20) << 3);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)+ ((attr & 0x20) << 3);
 		int color = attr & 0x1f; 
 		int flags = ((attr & 0x40) ? TILE_FLIPX : 0) | ((attr & 0x80) ? TILE_FLIPY : 0);
 	
@@ -134,7 +134,7 @@ public class pingpong
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -149,13 +149,13 @@ public class pingpong
 			int sx,sy,flipx,flipy,color,schar;
 	
 	
-			sx = spriteram[offs + 3];
-			sy = 241 - spriteram[offs + 1];
+			sx = spriteram.read(offs + 3);
+			sy = 241 - spriteram.read(offs + 1);
 	
-			flipx = spriteram[offs] & 0x40;
-			flipy = spriteram[offs] & 0x80;
-			color = spriteram[offs] & 0x1F;
-			schar = spriteram[offs + 2] & 0x7F;
+			flipx = spriteram.read(offs)& 0x40;
+			flipy = spriteram.read(offs)& 0x80;
+			color = spriteram.read(offs)& 0x1F;
+			schar = spriteram.read(offs + 2)& 0x7F;
 	
 			drawgfx(bitmap,Machine->gfx[1],
 					schar,

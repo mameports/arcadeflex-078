@@ -11,16 +11,16 @@ public class shisen
 	
 	static struct tilemap *bg_tilemap;
 	
-	WRITE_HANDLER( sichuan2_videoram_w )
+	public static WriteHandlerPtr sichuan2_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( sichuan2_bankswitch_w )
+	public static WriteHandlerPtr sichuan2_bankswitch_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int bankaddress;
 		int bank;
@@ -42,31 +42,31 @@ public class shisen
 		}
 	
 		/* bits 6-7 unknown */
-	}
+	} };
 	
-	WRITE_HANDLER( sichuan2_paletteram_w )
+	public static WriteHandlerPtr sichuan2_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int r, g, b;
 	
-		paletteram[offset] = data;
+		paletteram.write(offset,data);
 	
 		offset &= 0xff;
 	
-		r = paletteram[offset + 0x000] & 0x1f;
-		g = paletteram[offset + 0x100] & 0x1f;
-		b = paletteram[offset + 0x200] & 0x1f;
+		r = paletteram.read(offset + 0x000)& 0x1f;
+		g = paletteram.read(offset + 0x100)& 0x1f;
+		b = paletteram.read(offset + 0x200)& 0x1f;
 		r = (r << 3) | (r >> 2);
 		g = (g << 3) | (g >> 2);
 		b = (b << 3) | (b >> 2);
 	
 		palette_set_color(offset, r, g, b);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		int offs = tile_index * 2;
-		int code = videoram[offs] + ((videoram[offs + 1] & 0x0f) << 8) + (gfxbank << 12);
-		int color = (videoram[offs + 1] & 0xf0) >> 4;
+		int code = videoram.read(offs)+ ((videoram.read(offs + 1)& 0x0f) << 8) + (gfxbank << 12);
+		int color = (videoram.read(offs + 1)& 0xf0) >> 4;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -76,7 +76,7 @@ public class shisen
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 64, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;

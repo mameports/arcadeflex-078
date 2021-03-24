@@ -86,16 +86,12 @@ public class cpuexecH
 	 *************************************/
 	
 	/* Prepare CPUs for execution */
-	int cpu_init(void);
 	
 	/* Run CPUs until the user quits */
-	void cpu_run(void);
 	
 	/* Clean up after quitting */
-	void cpu_exit(void);
 	
 	/* Force a reset after the current timeslice */
-	void machine_reset(void);
 	
 	
 	
@@ -114,7 +110,6 @@ public class cpuexecH
 	};
 	void cpu_loadsave_schedule(int type, char id);
 	void cpu_loadsave_schedule_file(int type, const char *name);
-	void cpu_loadsave_reset(void);
 	
 	
 	
@@ -125,8 +120,6 @@ public class cpuexecH
 	 *************************************/
 	
 	/* 8-bit watchdog read/write handlers */
-	WRITE_HANDLER( watchdog_reset_w );
-	READ_HANDLER( watchdog_reset_r );
 	
 	/* 16-bit watchdog read/write handlers */
 	WRITE16_HANDLER( watchdog_reset16_w );
@@ -183,7 +176,6 @@ public class cpuexecH
 	int cpunum_is_suspended(int cpunum, int reason);
 	
 	/* Aborts the timeslice for the active CPU */
-	void activecpu_abort_timeslice(void);
 	
 	/* Returns the current local time for a CPU, relative to the current timeslice */
 	double cpunum_get_localtime(int cpunum);
@@ -213,10 +205,8 @@ public class cpuexecH
 	 *************************************/
 	
 	/* Returns the number of cycles run so far this timeslice */
-	int cycles_currently_ran(void);
 	
 	/* Returns the number of cycles left to run in this timeslice */
-	int cycles_left_to_run(void);
 	
 	/* Returns the total number of CPU cycles */
 	UINT32 activecpu_gettotalcycles(void);
@@ -227,7 +217,6 @@ public class cpuexecH
 	UINT64 cpunum_gettotalcycles64(int cpunum);
 	
 	/* Returns the number of CPU cycles before the next interrupt handler call */
-	int activecpu_geticount(void);
 	
 	/* Safely eats cycles so we don't cross a timeslice boundary */
 	void activecpu_eat_cycles(int cycles);
@@ -249,16 +238,12 @@ public class cpuexecH
 	 *************************************/
 	
 	/* Initialize the refresh timer */
-	void cpu_init_refresh_timer(void);
 	
 	/* Recomputes the scanling timing after, e.g., a visible area change */
-	void cpu_compute_scanline_timing(void);
 	
 	/* Returns the number of the video frame we are currently playing */
-	int cpu_getcurrentframe(void);
 	
 	/* Returns the current scanline number */
-	int cpu_getscanline(void);
 	
 	/* Returns the amount of time until a given scanline */
 	double cpu_getscanlinetime(int scanline);
@@ -267,13 +252,10 @@ public class cpuexecH
 	double cpu_getscanlineperiod(void);
 	
 	/* Returns the current horizontal beam position in pixels */
-	int cpu_gethorzbeampos(void);
 	
 	/* Returns the current VBLANK state */
-	int cpu_getvblank(void);
 	
 	/* Returns the number of the video frame we are currently playing */
-	int cpu_getcurrentframe(void);
 	
 	
 	
@@ -299,16 +281,12 @@ public class cpuexecH
 	void cpu_yielduntil_trigger(int trigger);
 	
 	/* burn CPU cycles until the next interrupt */
-	void cpu_spinuntil_int(void);
 	
 	/* yield our timeslice until the next interrupt */
-	void cpu_yielduntil_int(void);
 	
 	/* burn CPU cycles until our timeslice is up */
-	void cpu_spin(void);
 	
 	/* yield our current timeslice */
-	void cpu_yield(void);
 	
 	/* burn CPU cycles for a specific period of time */
 	void cpu_spinuntil_time(double duration);
@@ -329,7 +307,6 @@ public class cpuexecH
 	   handlers to synchronize their operation. If you call this from outside
 	   an interrupt handler, add 1 to the result, i.e. if it returns 0, it means
 	   that the interrupt handler will be called once. */
-	int cpu_getiloops(void);
 	
 	
 	

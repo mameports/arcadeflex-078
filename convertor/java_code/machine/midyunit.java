@@ -418,7 +418,7 @@ public class midyunit
 	
 				b1 = 0;			 									/* CLR    B1 */
 				b2 = (INT32)(READ_INT16(0x100F640));				/* MOVE   @100F640h,B2,0 */
-				if (!b2)											/* JREQ   FFC029F0h */
+				if (b2 == 0)											/* JREQ   FFC029F0h */
 				{
 					cpu_spinuntil_int();
 					return value1;
@@ -684,17 +684,17 @@ public class midyunit
 	 *************************************/
 	
 	static UINT8 *cvsd_protection_base;
-	static WRITE_HANDLER( cvsd_protection_w )
+	public static WriteHandlerPtr cvsd_protection_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* because the entire CVSD ROM is banked, we have to make sure that writes */
 		/* go to the proper location (i.e., bank 0); currently bank 0 always lives */
 		/* in the 0x10000-0x17fff space, so we just need to add 0x8000 to get the  */
 		/* proper offset */
 		cvsd_protection_base[0x8000 + offset] = data;
-	}
+	} };
 	
 	
-	static void init_generic(int bpp, int sound, int prot_start, int prot_end)
+	public static InitDriverPtr init_generic = new InitDriverPtr() { public void handler() (int bpp, int sound, int prot_start, int prot_end)
 	{
 		offs_t gfx_chunk = midyunit_gfx_rom_size / 4;
 		UINT8 d1, d2, d3, d4, d5, d6;
@@ -772,7 +772,7 @@ public class midyunit
 				install_mem_write_handler(1, prot_start, prot_end, MWA_RAM);
 				break;
 		}
-	}
+	} };
 	
 	
 	
@@ -823,7 +823,7 @@ public class midyunit
 	
 	/********************** Trog **************************/
 	
-	static void init_trog_common(void)
+	public static InitDriverPtr init_trog_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data trog_protection_data =
@@ -838,7 +838,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(4, SOUND_CVSD_SMALL, 0x9eaf, 0x9ed9);
-	}
+	} };
 	
 	DRIVER_INIT( trog )
 	{
@@ -866,11 +866,11 @@ public class midyunit
 	
 	/********************** Smash TV **********************/
 	
-	static void init_smashtv_common(void)
+	public static InitDriverPtr init_smashtv_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* common init */
 		init_generic(6, SOUND_CVSD_SMALL, 0x9cf6, 0x9d21);
-	}
+	} };
 	
 	DRIVER_INIT( smashtv )
 	{
@@ -887,7 +887,7 @@ public class midyunit
 	
 	/********************** High Impact Football **********************/
 	
-	static void init_hiimpact_common(void)
+	public static InitDriverPtr init_hiimpact_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data hiimpact_protection_data =
@@ -900,7 +900,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(6, SOUND_CVSD, 0x9b79, 0x9ba3);
-	}
+	} };
 	
 	DRIVER_INIT( hiimpact )
 	{
@@ -911,7 +911,7 @@ public class midyunit
 	
 	/********************** Super High Impact Football **********************/
 	
-	static void init_shimpact_common(void)
+	public static InitDriverPtr init_shimpact_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data shimpact_protection_data =
@@ -924,7 +924,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(6, SOUND_CVSD, 0x9c06, 0x9c15);
-	}
+	} };
 	
 	DRIVER_INIT( shimpact )
 	{
@@ -941,7 +941,7 @@ public class midyunit
 	
 	/********************** Strike Force **********************/
 	
-	static void init_strkforc_common(void)
+	public static InitDriverPtr init_strkforc_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data strkforc_protection_data =
@@ -952,7 +952,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(4, SOUND_CVSD_SMALL, 0x9f7d, 0x9fa7);
-	}
+	} };
 	
 	DRIVER_INIT( strkforc )
 	{
@@ -973,7 +973,7 @@ public class midyunit
 	
 	/********************** Mortal Kombat **********************/
 	
-	static void init_mk_common(void)
+	public static InitDriverPtr init_mk_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data mk_protection_data =
@@ -987,7 +987,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(6, SOUND_ADPCM, 0xfb9c, 0xfbc6);
-	}
+	} };
 	
 	DRIVER_INIT( mkprot9 )
 	{
@@ -1022,7 +1022,7 @@ public class midyunit
 	
 	/********************** Terminator 2 **********************/
 	
-	static void init_term2_common(void)
+	public static InitDriverPtr init_term2_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data term2_protection_data =
@@ -1038,7 +1038,7 @@ public class midyunit
 		/* special inputs */
 		install_mem_read16_handler(0, TOBYTE(0x01c00000), TOBYTE(0x01c0005f), term2_input_r);
 		install_mem_write16_handler(0, TOBYTE(0x01e00000), TOBYTE(0x01e0001f), term2_sound_w);
-	}
+	} };
 	
 	DRIVER_INIT( term2 )
 	{
@@ -1073,7 +1073,7 @@ public class midyunit
 	
 	/********************** Total Carnage **********************/
 	
-	static void init_totcarn_common(void)
+	public static InitDriverPtr init_totcarn_common = new InitDriverPtr() { public void handler() (void)
 	{
 		/* protection */
 		static const struct protection_data totcarn_protection_data =
@@ -1086,7 +1086,7 @@ public class midyunit
 	
 		/* common init */
 		init_generic(6, SOUND_ADPCM, 0xfc04, 0xfc2e);
-	}
+	} };
 	
 	DRIVER_INIT( totcarn )
 	{

@@ -26,10 +26,10 @@ public class clayshoo
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( input_port_select_w )
+	public static WriteHandlerPtr input_port_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		input_port_select = data;
-	}
+	} };
 	
 	
 	static data8_t difficulty_input_port_r(int bit)
@@ -50,7 +50,7 @@ public class clayshoo
 	}
 	
 	
-	static READ_HANDLER( input_port_r )
+	public static ReadHandlerPtr input_port_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		data8_t ret = 0;
 	
@@ -69,7 +69,7 @@ public class clayshoo
 		}
 	
 		return ret;
-	}
+	} };
 	
 	
 	static ppi8255_interface ppi8255_intf =
@@ -111,7 +111,7 @@ public class clayshoo
 	}
 	
 	
-	WRITE_HANDLER( clayshoo_analog_reset_w )
+	public static WriteHandlerPtr clayshoo_analog_reset_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* reset the analog value, and start two times that will fire
 		   off in a short period proportional to the position of the
@@ -121,11 +121,11 @@ public class clayshoo
 	
 		timer_set(compute_duration(readinputport(4)), 0x02, reset_analog_bit);
 		timer_set(compute_duration(readinputport(5)), 0x01, reset_analog_bit);
-	}
+	} };
 	
 	
-	READ_HANDLER( clayshoo_analog_r )
+	public static ReadHandlerPtr clayshoo_analog_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return analog_port_val;
-	}
+	} };
 }

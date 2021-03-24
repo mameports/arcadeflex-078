@@ -28,9 +28,7 @@ public class suprnova
 	extern data32_t *skns_pal_regs, *skns_v3_regs, *skns_spc_regs;
 	extern data32_t skns_v3t_dirty[0x4000]; // allocate this elsewhere?
 	extern data32_t skns_v3t_4bppdirty[0x8000]; // allocate this elsewhere?
-	extern int skns_v3t_somedirty,skns_v3t_4bpp_somedirty;
 	
-	void skns_palette_update(void);
 	
 	static data8_t decodebuffer[64*128];
 	static int old_depthA=0, depthA=0;
@@ -329,7 +327,7 @@ public class suprnova
 		sprite_x_scroll += sprite_kludge_x;
 		sprite_y_scroll += sprite_kludge_y;
 	
-		if (!disabled){
+		if (disabled == 0){
 			while( source<finish )
 			{
 				xflip = (source[0] & 0x00000200) >> 9;
@@ -780,8 +778,8 @@ public class suprnova
 			}
 	
 	
-			if (!supernova_pri_a) { supernova_draw_a(bitmap,cliprect,tran); tran = 1;}
-			if (!supernova_pri_b) { supernova_draw_b(bitmap,cliprect,tran); tran = 1;}
+			if (supernova_pri_a == 0) { supernova_draw_a(bitmap,cliprect,tran); tran = 1;}
+			if (supernova_pri_b == 0) { supernova_draw_b(bitmap,cliprect,tran); tran = 1;}
 			if (supernova_pri_a) { supernova_draw_a(bitmap,cliprect,tran); tran = 1;}
 			if (supernova_pri_b) { supernova_draw_b(bitmap,cliprect,tran); tran = 1;}
 	

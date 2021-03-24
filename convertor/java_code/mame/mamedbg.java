@@ -262,14 +262,8 @@ public class mamedbg
 	static const char *get_register_name( int id );
 	static unsigned get_register_or_value( char **parg, int *size );
 	static void trace_init( const char *filename, UINT8 *regs );
-	static void trace_done( void );
-	static void trace_select( void );
-	static void trace_output( void );
-	
-	static int hit_brk_exec( void );
-	static int hit_brk_data( void );
-	static int hit_brk_regs( void );
-	
+	static static static 
+	static static static 
 	static const char *name_rom( const char *type, int region, unsigned *base, unsigned start );
 	static const char *name_rdmem( unsigned base );
 	static const char *name_wrmem( unsigned base );
@@ -278,75 +272,22 @@ public class mamedbg
 	static int win_create(int n, UINT8 prio, int x, int y, int w, int h,
 		UINT8 co_text, UINT8 co_frame, UINT8 chr, UINT32 attributes);
 	static int DECL_SPEC win_msgbox( UINT8 color, const char *title, const char *fmt, ... );
-	static void dbg_open_windows( void );
-	static void dbg_close_windows( void );
-	
+	static static 
 	static unsigned dasm_line( unsigned pc, int times );
 	
-	static void dump_regs( void );
-	static unsigned dump_dasm( unsigned pc );
+	static static unsigned dump_dasm( unsigned pc );
 	static void dump_mem_hex( int which, unsigned len_addr, unsigned len_data );
 	static void dump_mem( int which, int set_title );
 	
-	static int edit_cmds_info( void );
-	static int edit_cmds_parse( char *cmdline );
+	static static int edit_cmds_parse( char *cmdline );
 	static void edit_cmds_append( const char *src );
 	
-	static void edit_regs( void );
-	static void edit_dasm( void );
-	static void edit_mem( int which );
-	static void edit_cmds(void);
+	static static static void edit_mem( int which );
+	static 
+	static static void cmd_default( int code );
 	
-	static void cmd_help( void );
-	static void cmd_default( int code );
-	
-	static void cmd_display_memory( void );
-	static void cmd_edit_memory( void );
-	static void cmd_set_memory_mode( void );
-	static void cmd_fast( void );
-	static void cmd_go_break( void );
-	static void cmd_jump( void );
-	static void cmd_replace_register( void );
-	static void cmd_brk_exec_set( void );
-	static void cmd_brk_exec_clear( void );
-	static void cmd_brk_regs_set( void );
-	static void cmd_brk_regs_clear( void );
-	static void cmd_brk_data_set( void );
-	static void cmd_brk_data_clear( void );
-	static void cmd_here( void );
-	static void cmd_dasm_to_file( void );
-	static void cmd_dump_to_file( void );
-	static void cmd_trace_to_file( void );
-	static void cmd_save_to_file( void );
-	static void cmd_set_ignore( void );
-	static void cmd_set_observe( void );
-	static void cmd_set_key_repeat( void );
-	static void cmd_set_dasm_case( void );
-	static void cmd_set_dasm_opcodes( void );
-	static void cmd_set_dasm_relative_jumps( void );
-	static void cmd_set_mem_squeezed( void );
-	static void cmd_set_element_color( void );
-	static void cmd_brk_exec_toggle( void );
-	static void cmd_brk_data_toggle( void );
-	static void cmd_toggle_scanlines( void );
-	
-	static void cmd_switch_window( void );
-	static void cmd_dasm_up( void );
-	static void cmd_dasm_down( void );
-	static void cmd_dasm_page_up( void );
-	static void cmd_dasm_page_down( void );
-	static void cmd_dasm_home( void );
-	static void cmd_dasm_end( void );
-	static void cmd_dasm_hist_follow( void );
-	static void cmd_dasm_hist_back( void );
-	static void cmd_run_to_cursor( void );
-	static void cmd_focus_next_cpu( void );
-	static void cmd_step( void );
-	static void cmd_animate( void );
-	static void cmd_step_over( void );
-	static void cmd_go( void );
-	static void cmd_search_memory( void );
-	
+	static static static static static static static static static static static static static static static static static static static static static static static static static static static static static 
+	static static static static static static static static static static static static static static static static 
 	/****************************************************************************
 	 * Generic structure for saving points in the 'follow history'
 	 ****************************************************************************/
@@ -1600,7 +1541,7 @@ public class mamedbg
 	 **************************************************************************/
 	void trace_done(void)
 	{
-		if( !trace_on )
+		if (trace_on == 0)
 			return;
 	
 		for( tracecpu = 0; tracecpu < total_cpu; tracecpu++ )
@@ -3435,7 +3376,7 @@ public class mamedbg
 		int cmd = INVALID;
 		int i, k, l, top, lines;
 	
-		if( !help )
+		if (help == 0)
 		{
 			win_msgbox( cur_col[E_ERROR],
 				"Memory problem!", "Couldn't allocate help text buffer" );
@@ -3646,7 +3587,7 @@ public class mamedbg
 			if( length )
 			{
 				bg = get_option_or_value( &cmd, &length, COLOR_NAMES );
-				if( !length ) bg = 0;	/* BLACK is default background */
+				if (length == 0) bg = 0;	/* BLACK is default background */
 			}
 			else
 			{
@@ -3882,7 +3823,7 @@ public class mamedbg
 		unsigned i, pc, size, start, end, width, opcodes;
 	
 		filename = get_file_name( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DASM arguments",
 				"Filename missing");
@@ -3890,7 +3831,7 @@ public class mamedbg
 			return;
 		}
 		start = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DASM arguments",
 				"Start address missing");
@@ -3898,7 +3839,7 @@ public class mamedbg
 			return;
 		}
 		end = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DASM arguments",
 				"End address missing");
@@ -3909,7 +3850,7 @@ public class mamedbg
 		if( length == 4 ) opcodes = 1; 	/* default to display opcodes */
 	
 		file = fopen(filename, "w");
-		if( !file )
+		if (file == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DASM to file",
 				"Could not create %s", filename);
@@ -3991,7 +3932,7 @@ public class mamedbg
 		unsigned datasize, asciimode, pgm_memory_base;
 	
 		filename = get_file_name( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DUMP arguments",
 				"<filename> missing");
@@ -3999,7 +3940,7 @@ public class mamedbg
 			return;
 		}
 		start = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DUMP arguments",
 				"<start> address missing");
@@ -4008,7 +3949,7 @@ public class mamedbg
 		}
 		start = rshift(start);
 		end = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DUMP arguments",
 				"<end> address missing");
@@ -4062,7 +4003,7 @@ public class mamedbg
 			pgm_memory_base = PGM_MEMORY;
 	
 		file = fopen(filename, "w");
-		if( !file )
+		if (file == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "DUMP to file",
 				"Could not create %s", filename);
@@ -4135,7 +4076,7 @@ public class mamedbg
 		unsigned save_what;
 	
 		filename = get_file_name( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "SAVE arguments",
 				"<filename> missing");
@@ -4143,7 +4084,7 @@ public class mamedbg
 			return;
 		}
 		start = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "SAVE arguments",
 				"<start> address missing");
@@ -4151,7 +4092,7 @@ public class mamedbg
 			return;
 		}
 		end = get_register_or_value( &cmd, &length );
-		if( !length )
+		if (length == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "SAVE arguments",
 				"<end> address missing");
@@ -4160,10 +4101,10 @@ public class mamedbg
 		}
 	
 		save_what = get_option_or_value( &cmd, &length, "OPCODES\0DATA\0");
-		if( !length ) save_what = 0;	/* default to OP_ROM */
+		if (length == 0) save_what = 0;	/* default to OP_ROM */
 	
 		file = fopen(filename, "wb");
-		if( !file )
+		if (file == 0)
 		{
 			win_msgbox( cur_col[E_ERROR], "SAVE to file",
 				"Could not create %s", filename);
@@ -4587,7 +4528,7 @@ public class mamedbg
 		{
 			which = (which - 1) % 2;
 			mode = get_option_or_value( &cmd, &length, "BYTE\0WORD\0DWORD\0" );
-			if( !length ) mode = 0; /* default to BYTE */
+			if (length == 0) mode = 0; /* default to BYTE */
 			DBGMEM[which].mode = mode;
 		}
 		else
@@ -5312,13 +5253,13 @@ public class mamedbg
 		if( ++debug_key_delay == 0x7fff )
 		{
 			debug_key_delay = 0;
-			if (!debug_key_pressed)
+			if (debug_key_pressed == 0)
 				debug_key_pressed = seq_pressed(input_port_type_seq(IPT_UI_ON_SCREEN_DISPLAY));
 		}
 	
 		if( dbg_fast )
 		{
-			if( !debug_key_pressed ) return;
+			if (debug_key_pressed == 0) return;
 			dbg_fast = 0;
 		}
 	
@@ -5358,7 +5299,7 @@ public class mamedbg
 		{
 			debug_key_pressed = 0;
 	
-			if( !first_time )
+			if (first_time == 0)
 			{
 				osd_sound_enable(0);
 			}
@@ -5443,7 +5384,7 @@ public class mamedbg
 				dbg_update = 0;
 			}
 	
-			if( !dbg_trace )
+			if (dbg_trace == 0)
 			{
 				switch( DBG.window )
 				{

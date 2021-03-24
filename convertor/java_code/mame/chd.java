@@ -166,7 +166,7 @@ public class chd
 	static int read_header(struct chd_interface_file *file, struct chd_header *header);
 	static int write_header(struct chd_interface_file *file, const struct chd_header *header);
 	static int read_hunk_map(struct chd_file *chd);
-	static void init_crcmap(struct chd_file *chd, int prepopulate);
+	public static InitDriverPtr init_crcmap = new InitDriverPtr() { public void handler() (struct chd_file *chd, int prepopulate);
 	static void add_to_crcmap(struct chd_file *chd, UINT32 hunknum);
 	static UINT32 find_matching_hunk(struct chd_file *chd, UINT32 hunknum, UINT32 crc, const UINT8 *rawdata);
 	static int find_metadata_entry(struct chd_file *chd, UINT32 metatag, UINT32 metaindex, struct metadata_entry *metaentry);
@@ -192,7 +192,7 @@ public class chd
 	{
 		return ((UINT64)base[0] << 56) | ((UINT64)base[1] << 48) | ((UINT64)base[2] << 40) | ((UINT64)base[3] << 32) |
 				((UINT64)base[4] << 24) | ((UINT64)base[5] << 16) | ((UINT64)base[6] << 8) | (UINT64)base[7];
-	}
+	} };
 	
 	INLINE void put_bigendian_uint64(UINT8 *base, UINT64 value)
 	{
@@ -315,7 +315,7 @@ public class chd
 			SET_ERROR_AND_CLEANUP(CHDERR_NO_INTERFACE);
 	
 		/* verify parameters */
-		if (!filename)
+		if (filename == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_FILE_NOT_FOUND);
 		if (compression >= CHDCOMPRESSION_MAX)
 			SET_ERROR_AND_CLEANUP(CHDERR_INVALID_PARAMETER);
@@ -366,7 +366,7 @@ public class chd
 		
 		/* attempt to create the file */
 		file = multi_open(filename, "wb");
-		if (!file)
+		if (file == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_CANT_CREATE_FILE);
 	
 		/* write the resulting header */
@@ -492,7 +492,7 @@ public class chd
 			SET_ERROR_AND_CLEANUP(CHDERR_NO_INTERFACE);
 	
 		/* verify parameters */
-		if (!filename)
+		if (filename == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_FILE_NOT_FOUND);
 	
 		/* punt if invalid parent */
@@ -568,7 +568,7 @@ public class chd
 	
 		/* okay, now allocate our entry and copy it */
 		finalchd = malloc(sizeof(chd));
-		if (!finalchd)
+		if (finalchd == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_OUT_OF_MEMORY);
 		*finalchd = chd;
 	
@@ -984,7 +984,7 @@ public class chd
 	
 		/* attempt to open the file */
 		file = multi_open(filename, "rb+");
-		if (!file)
+		if (file == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_FILE_NOT_FOUND);
 	
 		/* read the old header */
@@ -1050,7 +1050,7 @@ public class chd
 		
 		/* open the raw file */
 		sourcefile = multi_open(rawfile, "rb");
-		if (!sourcefile)
+		if (sourcefile == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_FILE_NOT_FOUND);
 	
 		/* mark the CHD writeable and write the updated header */
@@ -1169,7 +1169,7 @@ public class chd
 			SET_ERROR_AND_CLEANUP(CHDERR_NO_INTERFACE);
 	
 		/* verify parameters */
-		if (!chd)
+		if (chd == 0)
 			SET_ERROR_AND_CLEANUP(CHDERR_INVALID_PARAMETER);
 	
 		/* if this is a writeable file image, we can't verify */
@@ -1532,11 +1532,11 @@ public class chd
 		UINT32 count;
 	
 		/* punt if NULL */
-		if (!header)
+		if (header == 0)
 			return CHDERR_INVALID_PARAMETER;
 	
 		/* punt if invalid file */
-		if (!file)
+		if (file == 0)
 			return CHDERR_INVALID_FILE;
 	
 		/* punt if no interface */
@@ -1616,11 +1616,11 @@ public class chd
 		UINT32 count;
 	
 		/* punt if NULL */
-		if (!header)
+		if (header == 0)
 			return CHDERR_INVALID_PARAMETER;
 	
 		/* punt if invalid file */
-		if (!file)
+		if (file == 0)
 			return CHDERR_INVALID_FILE;
 	
 		/* punt if no interface */
@@ -1733,7 +1733,7 @@ public class chd
 	 *
 	 *************************************/
 	
-	static void init_crcmap(struct chd_file *chd, int prepopulate)
+	public static InitDriverPtr init_crcmap = new InitDriverPtr() { public void handler() (struct chd_file *chd, int prepopulate)
 	{
 		int i;
 	
@@ -1774,7 +1774,7 @@ public class chd
 		if (prepopulate)
 			for (i = 0; i < chd->header.totalhunks; i++)
 				add_to_crcmap(chd, i);
-	}
+	} };
 	
 	
 	
@@ -1939,7 +1939,7 @@ public class chd
 	
 		/* alloc a new one */
 		ptr = malloc(size + sizeof(UINT32));
-		if (!ptr)
+		if (ptr == 0)
 			return NULL;
 	
 		/* put it into the list */

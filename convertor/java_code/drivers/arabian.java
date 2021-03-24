@@ -93,7 +93,7 @@ public class arabian
 	 *
 	 *************************************/
 	
-	static WRITE_HANDLER( ay8910_porta_w )
+	public static WriteHandlerPtr ay8910_porta_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*
 			bit 7 = ENA
@@ -103,10 +103,10 @@ public class arabian
 			bit 3 = /ARHF
 		*/
 		arabian_video_control = data;
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( ay8910_portb_w )
+	public static WriteHandlerPtr ay8910_portb_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/*
 			bit 5 = /IREQ to custom CPU
@@ -121,7 +121,7 @@ public class arabian
 		/* clock the coin counters */
 		coin_counter_w(1, ~data & 0x02);
 		coin_counter_w(0, ~data & 0x01);
-	}
+	} };
 	
 	
 	
@@ -131,7 +131,7 @@ public class arabian
 	 *
 	 *************************************/
 	
-	static READ_HANDLER( custom_cpu_r )
+	public static ReadHandlerPtr custom_cpu_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* since we don't have a simulator for the Fujitsu 8841 4-bit microprocessor */
 		/* we have to simulate its behavior; it looks like Arabian reads out of the  */
@@ -173,7 +173,7 @@ public class arabian
 				return 0;
 		}
 		return 0;
-	}
+	} };
 	
 	
 	static void update_flip_state(void)
@@ -194,18 +194,18 @@ public class arabian
 	}
 	
 	
-	static WRITE_HANDLER( custom_flip_w )
+	public static WriteHandlerPtr custom_flip_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		custom_cpu_ram[0x34b + offset] = data;
 		update_flip_state();
-	}
+	} };
 	
 	
-	static WRITE_HANDLER( custom_cocktail_w )
+	public static WriteHandlerPtr custom_cocktail_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		custom_cpu_ram[0x400 + offset] = data;
 		update_flip_state();
-	}
+	} };
 	
 	
 	
@@ -215,21 +215,25 @@ public class arabian
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0xc000, 0xc000, input_port_0_r },
-		{ 0xc200, 0xc200, input_port_1_r },
-		{ 0xd000, 0xd7ef, MRA_RAM },
-		{ 0xd7f0, 0xd7ff, custom_cpu_r },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0xc000, 0xc000, input_port_0_r ),
+		new Memory_ReadAddress( 0xc200, 0xc200, input_port_1_r ),
+		new Memory_ReadAddress( 0xd000, 0xd7ef, MRA_RAM ),
+		new Memory_ReadAddress( 0xd7f0, 0xd7ff, custom_cpu_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0xbfff, arabian_videoram_w, &videoram },
-		{ 0xd000, 0xd7ff, MWA_RAM, &custom_cpu_ram },
-		{ 0xe000, 0xe07f, arabian_blitter_w, &spriteram },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0xbfff, arabian_videoram_w, videoram ),
+		new Memory_WriteAddress( 0xd000, 0xd7ff, MWA_RAM, custom_cpu_ram ),
+		new Memory_WriteAddress( 0xe000, 0xe07f, arabian_blitter_w, spriteram ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -239,10 +243,12 @@ public class arabian
 	 *
 	 *************************************/
 	
-	static PORT_WRITE_START( writeport )
-		{ 0xc800, 0xc800, AY8910_control_port_0_w },
-		{ 0xca00, 0xca00, AY8910_write_port_0_w },
-	PORT_END
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0xc800, 0xc800, AY8910_control_port_0_w ),
+		new IO_WritePort( 0xca00, 0xca00, AY8910_write_port_0_w ),
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -252,87 +258,87 @@ public class arabian
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( arabian )
-		PORT_START      /* IN0 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
-		PORT_SERVICE( 0x04, IP_ACTIVE_HIGH )
-		PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	static InputPortPtr input_ports_arabian = new InputPortPtr(){ public void handler() { 
+		PORT_START();       /* IN0 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 );
+		PORT_SERVICE( 0x04, IP_ACTIVE_HIGH );
+		PORT_BIT( 0xf8, IP_ACTIVE_HIGH, IPT_UNKNOWN );
 	
-		PORT_START      /* DSW1 */
-		PORT_DIPNAME( 0x01, 0x00, DEF_STR( Lives ))
-		PORT_DIPSETTING(    0x00, "3" )
-		PORT_DIPSETTING(    0x01, "5" )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Cabinet ))
-		PORT_DIPSETTING(    0x02, DEF_STR( Upright ))
-		PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ))
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Flip_Screen ))
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ))
-		PORT_DIPSETTING(    0x00, DEF_STR( On ))
-		PORT_DIPNAME( 0x08, 0x00, "Carry Bowls to Next Life" )
-		PORT_DIPSETTING(    0x08, DEF_STR( No ))
-		PORT_DIPSETTING(    0x00, DEF_STR( Yes ))
-		PORT_DIPNAME( 0xf0, 0x00, DEF_STR( Coinage ))
-		PORT_DIPSETTING(    0x10, "A 2/1 B 2/1" )
-		PORT_DIPSETTING(    0x20, "A 2/1 B 1/3" )
-		PORT_DIPSETTING(    0x00, "A 1/1 B 1/1" )
-		PORT_DIPSETTING(    0x30, "A 1/1 B 1/2" )
-		PORT_DIPSETTING(    0x40, "A 1/1 B 1/3" )
-		PORT_DIPSETTING(    0x50, "A 1/1 B 1/4" )
-		PORT_DIPSETTING(    0x60, "A 1/1 B 1/5" )
-		PORT_DIPSETTING(    0x70, "A 1/1 B 1/6" )
-		PORT_DIPSETTING(    0x80, "A 1/2 B 1/2" )
-		PORT_DIPSETTING(    0x90, "A 1/2 B 1/4" )
-		PORT_DIPSETTING(    0xa0, "A 1/2 B 1/6" )
-		PORT_DIPSETTING(    0xb0, "A 1/2 B 1/10" )
-		PORT_DIPSETTING(    0xc0, "A 1/2 B 1/11" )
-		PORT_DIPSETTING(    0xd0, "A 1/2 B 1/12" )
-		PORT_DIPSETTING(    0xf0, DEF_STR( Free_Play ))
+		PORT_START();       /* DSW1 */
+		PORT_DIPNAME( 0x01, 0x00, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x00, "3" );
+		PORT_DIPSETTING(    0x01, "5" );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Cabinet") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Upright") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Cocktail") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Flip_Screen") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x00, "Carry Bowls to Next Life" );
+		PORT_DIPSETTING(    0x08, DEF_STR( "No") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Yes") );
+		PORT_DIPNAME( 0xf0, 0x00, DEF_STR( "Coinage") );
+		PORT_DIPSETTING(    0x10, "A 2/1 B 2/1" );
+		PORT_DIPSETTING(    0x20, "A 2/1 B 1/3" );
+		PORT_DIPSETTING(    0x00, "A 1/1 B 1/1" );
+		PORT_DIPSETTING(    0x30, "A 1/1 B 1/2" );
+		PORT_DIPSETTING(    0x40, "A 1/1 B 1/3" );
+		PORT_DIPSETTING(    0x50, "A 1/1 B 1/4" );
+		PORT_DIPSETTING(    0x60, "A 1/1 B 1/5" );
+		PORT_DIPSETTING(    0x70, "A 1/1 B 1/6" );
+		PORT_DIPSETTING(    0x80, "A 1/2 B 1/2" );
+		PORT_DIPSETTING(    0x90, "A 1/2 B 1/4" );
+		PORT_DIPSETTING(    0xa0, "A 1/2 B 1/6" );
+		PORT_DIPSETTING(    0xb0, "A 1/2 B 1/10" );
+		PORT_DIPSETTING(    0xc0, "A 1/2 B 1/11" );
+		PORT_DIPSETTING(    0xd0, "A 1/2 B 1/12" );
+		PORT_DIPSETTING(    0xf0, DEF_STR( "Free_Play") );
 		/* 0xe0 gives A 1/2 B 1/6 */
 	
-		PORT_START      /* COM0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START1 )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START2 )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN3 )		/* IN3 */
+		PORT_START();       /* COM0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START1 );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START2 );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN3 );	/* IN3 */
 	
-		PORT_START      /* COM1 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+		PORT_START();       /* COM1 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY );
 	
-		PORT_START      /* COM2 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN9 */
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN10 */
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN11 */
+		PORT_START();       /* COM2 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN9 */
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN10 */
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN11 */
 	
-		PORT_START      /* COM3 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
+		PORT_START();       /* COM3 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL );
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL );
 	
-		PORT_START      /* COM4 */
-		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN17 */
-		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN18 */
-		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN19 */
+		PORT_START();       /* COM4 */
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN17 */
+		PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN18 */
+		PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN );/* IN19 */
 	
-		PORT_START      /* COM5 */
-		PORT_DIPNAME( 0x01, 0x00, "Coin Chutes" )
-		PORT_DIPSETTING(    0x01, "1" )
-		PORT_DIPSETTING(    0x00, "2" )
-		PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ))
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ))
-		PORT_DIPSETTING(    0x00, DEF_STR( On ))
-		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( Bonus_Life ))
-		PORT_DIPSETTING(    0x04, "20000" )
-		PORT_DIPSETTING(    0x08, "40000" )
-		PORT_DIPSETTING(    0x0c, "20000 50000 +100K" )
-		PORT_DIPSETTING(    0x00, "None" )
-	INPUT_PORTS_END
+		PORT_START();       /* COM5 */
+		PORT_DIPNAME( 0x01, 0x00, "Coin Chutes" );
+		PORT_DIPSETTING(    0x01, "1" );
+		PORT_DIPSETTING(    0x00, "2" );
+		PORT_DIPNAME( 0x02, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0c, 0x04, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x04, "20000" );
+		PORT_DIPSETTING(    0x08, "40000" );
+		PORT_DIPSETTING(    0x0c, "20000 50000 +100K" );
+		PORT_DIPSETTING(    0x00, "None" );
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -342,16 +348,16 @@ public class arabian
 	 *
 	 *************************************/
 	
-	static struct AY8910interface ay8910_interface =
-	{
+	static AY8910interface ay8910_interface = new AY8910interface
+	(
 		1,
 		MAIN_OSC/4/2,	/* 1.5 MHz */
-		{ 50 },
-		{ 0 },
-		{ 0 },
-		{ ay8910_porta_w },
-		{ ay8910_portb_w }
-	};
+		new int[] { 50 },
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { ay8910_porta_w },
+		new WriteHandlerPtr[] { ay8910_portb_w }
+	);
 	
 	
 	
@@ -396,34 +402,34 @@ public class arabian
 	 *
 	 *************************************/
 	
-	ROM_START( arabian )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "ic1rev2.87", 0x0000, 0x2000, CRC(5e1c98b8) SHA1(1775b7b125dde3502aefcf6221662e82f55b3f2a) )
-		ROM_LOAD( "ic2rev2.88", 0x2000, 0x2000, CRC(092f587e) SHA1(a722a61d35629ff4087c7a5e4c98b3ab51d6322b) )
-		ROM_LOAD( "ic3rev2.89", 0x4000, 0x2000, CRC(15145f23) SHA1(ae250116b57455ed84948cd9a6bdda86b2ac3e16) )
-		ROM_LOAD( "ic4rev2.90", 0x6000, 0x2000, CRC(32b77b44) SHA1(9d7951e723bc65e3d607f89836f1436b99f2585b) )
+	static RomLoadPtr rom_arabian = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "ic1rev2.87", 0x0000, 0x2000, CRC(5e1c98b8);SHA1(1775b7b125dde3502aefcf6221662e82f55b3f2a) )
+		ROM_LOAD( "ic2rev2.88", 0x2000, 0x2000, CRC(092f587e);SHA1(a722a61d35629ff4087c7a5e4c98b3ab51d6322b) )
+		ROM_LOAD( "ic3rev2.89", 0x4000, 0x2000, CRC(15145f23);SHA1(ae250116b57455ed84948cd9a6bdda86b2ac3e16) )
+		ROM_LOAD( "ic4rev2.90", 0x6000, 0x2000, CRC(32b77b44);SHA1(9d7951e723bc65e3d607f89836f1436b99f2585b) )
 	
-		ROM_REGION( 0x10000, REGION_GFX1, 0 )
-		ROM_LOAD( "ic84.91",    0x0000, 0x2000, CRC(c4637822) SHA1(0c73d9a4db925421a535784780ad93bb0f091051) )
-		ROM_LOAD( "ic85.92",    0x2000, 0x2000, CRC(f7c6866d) SHA1(34f545c5f7c152cd59f7be0a72105f739852cd6a) )
-		ROM_LOAD( "ic86.93",    0x4000, 0x2000, CRC(71acd48d) SHA1(cd0bffed351b14c9aebbfc1d3d4d232a5b91a68f) )
-		ROM_LOAD( "ic87.94",    0x6000, 0x2000, CRC(82160b9a) SHA1(03511f6ebcf22ba709a80a565e71acf5bdecbabb) )
-	ROM_END
+		ROM_REGION( 0x10000, REGION_GFX1, 0 );
+		ROM_LOAD( "ic84.91",    0x0000, 0x2000, CRC(c4637822);SHA1(0c73d9a4db925421a535784780ad93bb0f091051) )
+		ROM_LOAD( "ic85.92",    0x2000, 0x2000, CRC(f7c6866d);SHA1(34f545c5f7c152cd59f7be0a72105f739852cd6a) )
+		ROM_LOAD( "ic86.93",    0x4000, 0x2000, CRC(71acd48d);SHA1(cd0bffed351b14c9aebbfc1d3d4d232a5b91a68f) )
+		ROM_LOAD( "ic87.94",    0x6000, 0x2000, CRC(82160b9a);SHA1(03511f6ebcf22ba709a80a565e71acf5bdecbabb) )
+	ROM_END(); }}; 
 	
 	
-	ROM_START( arabiana )
-		ROM_REGION( 0x10000, REGION_CPU1, 0 )
-		ROM_LOAD( "ic1.87",     0x0000, 0x2000, CRC(51e9a6b1) SHA1(a2e6beab5380eed56972f5625be21b01c7e2082a) )
-		ROM_LOAD( "ic2.88",     0x2000, 0x2000, CRC(1cdcc1ab) SHA1(46886d53cc8a1c1d540fd0e1ddf1811fb256c1f3) )
-		ROM_LOAD( "ic3.89",     0x4000, 0x2000, CRC(b7b7faa0) SHA1(719418b7b7c057acb6d3060cf7061ffacf00798c) )
-		ROM_LOAD( "ic4.90",     0x6000, 0x2000, CRC(dbded961) SHA1(ecc09fa95f6dd58c4ac0e095a89ffd3aae681da4) )
+	static RomLoadPtr rom_arabiana = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x10000, REGION_CPU1, 0 );
+		ROM_LOAD( "ic1.87",     0x0000, 0x2000, CRC(51e9a6b1);SHA1(a2e6beab5380eed56972f5625be21b01c7e2082a) )
+		ROM_LOAD( "ic2.88",     0x2000, 0x2000, CRC(1cdcc1ab);SHA1(46886d53cc8a1c1d540fd0e1ddf1811fb256c1f3) )
+		ROM_LOAD( "ic3.89",     0x4000, 0x2000, CRC(b7b7faa0);SHA1(719418b7b7c057acb6d3060cf7061ffacf00798c) )
+		ROM_LOAD( "ic4.90",     0x6000, 0x2000, CRC(dbded961);SHA1(ecc09fa95f6dd58c4ac0e095a89ffd3aae681da4) )
 	
-		ROM_REGION( 0x10000, REGION_GFX1, 0 )
-		ROM_LOAD( "ic84.91",    0x0000, 0x2000, CRC(c4637822) SHA1(0c73d9a4db925421a535784780ad93bb0f091051) )
-		ROM_LOAD( "ic85.92",    0x2000, 0x2000, CRC(f7c6866d) SHA1(34f545c5f7c152cd59f7be0a72105f739852cd6a) )
-		ROM_LOAD( "ic86.93",    0x4000, 0x2000, CRC(71acd48d) SHA1(cd0bffed351b14c9aebbfc1d3d4d232a5b91a68f) )
-		ROM_LOAD( "ic87.94",    0x6000, 0x2000, CRC(82160b9a) SHA1(03511f6ebcf22ba709a80a565e71acf5bdecbabb) )
-	ROM_END
+		ROM_REGION( 0x10000, REGION_GFX1, 0 );
+		ROM_LOAD( "ic84.91",    0x0000, 0x2000, CRC(c4637822);SHA1(0c73d9a4db925421a535784780ad93bb0f091051) )
+		ROM_LOAD( "ic85.92",    0x2000, 0x2000, CRC(f7c6866d);SHA1(34f545c5f7c152cd59f7be0a72105f739852cd6a) )
+		ROM_LOAD( "ic86.93",    0x4000, 0x2000, CRC(71acd48d);SHA1(cd0bffed351b14c9aebbfc1d3d4d232a5b91a68f) )
+		ROM_LOAD( "ic87.94",    0x6000, 0x2000, CRC(82160b9a);SHA1(03511f6ebcf22ba709a80a565e71acf5bdecbabb) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -447,6 +453,6 @@ public class arabian
 	 *
 	 *************************************/
 	
-	GAME( 1983, arabian,  0,       arabian, arabian, arabian, ROT270, "Sun Electronics", "Arabian" )
-	GAME( 1983, arabiana, arabian, arabian, arabian, arabian, ROT270, "[Sun Electronics] (Atari license)", "Arabian (Atari)" )
+	public static GameDriver driver_arabian	   = new GameDriver("1983"	,"arabian"	,"arabian.java"	,rom_arabian,null	,machine_driver_arabian	,input_ports_arabian	,init_arabian	,ROT270	,	"Sun Electronics", "Arabian" )
+	public static GameDriver driver_arabiana	   = new GameDriver("1983"	,"arabiana"	,"arabian.java"	,rom_arabiana,driver_arabian	,machine_driver_arabian	,input_ports_arabian	,init_arabian	,ROT270	,	"[Sun Electronics] (Atari license)", "Arabian (Atari)" )
 }

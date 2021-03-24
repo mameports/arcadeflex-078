@@ -19,8 +19,8 @@ public class ninjakid
 	*******************************************************************************/
 	
 	static void get_fg_tile_info(int tile_index){
-		unsigned int tile_number = videoram[tile_index] & 0xFF;
-		unsigned char attr  = videoram[tile_index+0x400];
+		unsigned int tile_number = videoram.read(tile_index)& 0xFF;
+		unsigned char attr  = videoram.read(tile_index+0x400);
 		tile_number += (attr & 0x20) << 3; /* bank */
 		SET_TILE_INFO(
 				0,
@@ -30,8 +30,8 @@ public class ninjakid
 	}
 	
 	static void get_bg_tile_info(int tile_index){
-		unsigned int tile_number = videoram[tile_index+0x800] & 0xFF;
-		unsigned char attr  = videoram[tile_index+0xc00];
+		unsigned int tile_number = videoram.read(tile_index+0x800)& 0xFF;
+		unsigned char attr  = videoram.read(tile_index+0xc00);
 		tile_number += (attr & 0xC0) << 2; /* bank */
 		SET_TILE_INFO(
 				1,
@@ -40,38 +40,38 @@ public class ninjakid
 				0)
 	}
 	
-	WRITE_HANDLER( ninjakid_fg_videoram_w ){
-		videoram[offset] = data;
+	public static WriteHandlerPtr ninjakid_fg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data){
+		videoram.write(offset,data);
 		tilemap_mark_tile_dirty(fg_tilemap,offset&0x3ff);
-	}
+	} };
 	
-	WRITE_HANDLER( ninjakid_bg_videoram_w ){
+	public static WriteHandlerPtr ninjakid_bg_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data){
 	
 		int y = (offset + ((ninjakun_yscroll & 0xf8) << 2) ) & 0x3e0;
 		int x = (offset + (ninjakun_xscroll >> 3) ) & 0x1f;
 		int offs = x+y+(offset & 0x400);
 	
-		videoram[0x800+offs] = data;
+		videoram.write(0x800+offs,data);
 		tilemap_mark_tile_dirty(bg_tilemap,x+y);
-	}
+	} };
 	
-	READ_HANDLER( ninjakid_bg_videoram_r )
+	public static ReadHandlerPtr ninjakid_bg_videoram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		int y = (offset + ((ninjakun_yscroll & 0xf8) << 2) ) & 0x3e0;
 		int x = (offset + (ninjakun_xscroll >> 3) ) & 0x1f;
 		int offs = x+y+(offset & 0x400);
 	
-		return videoram[0x800+offs];
-	}
+		return videoram.read(0x800+offs);
+	} };
 	
 	/******************************************************************************/
 	
-	WRITE_HANDLER( ninjakun_flipscreen_w ){
+	public static WriteHandlerPtr ninjakun_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data){
 		flipscreen = data?(TILEMAP_FLIPX|TILEMAP_FLIPY):0;
 		tilemap_set_flip( ALL_TILEMAPS,flipscreen );
-	}
+	} };
 	
-	READ_HANDLER( ninjakun_io_8000_r ){
+	public static ReadHandlerPtr ninjakun_io_8000_r  = new ReadHandlerPtr() { public int handler(int offset){
 		switch( offset ){
 		case 0: /* control */
 			return AY8910_read_port_0_r( 0 );
@@ -96,7 +96,7 @@ public class ninjakid
 	
 	//	logerror("PC=%04x; RAM[0x800%d]\n",activecpu_get_pc(),offset);
 		return 0xFF;
-	}
+	} };
 	
 	/* static void handle_scrolly( UINT8 new_scroll ){ */
 	
@@ -119,13 +119,13 @@ public class ninjakid
 			if ((new_row == ((old_row - 1) & 0xff)) || ((!old_row) && (new_row == 0x1f)))
 			{
 				for( i=0x400-0x21; i>=0; i-- ){
-					ninjakid_bg_videoram_w( i+0x20, videoram[0x800+i] );
+					ninjakid_bg_videoram_w( i+0x20, videoram.read(0x800+i));
 				}
 			}
 			else if ((new_row == ((old_row + 1) & 0xff)) || ((old_row == 0x1f) && (!new_row)))
 			{
 				for( i=0x20; i<0x400; i++ ){
-					ninjakid_bg_videoram_w( i-0x20, videoram[0x800+i] );
+					ninjakid_bg_videoram_w( i-0x20, videoram.read(0x800+i));
 				}
 			}
 	
@@ -135,7 +135,7 @@ public class ninjakid
 	*/
 	
 	
-	WRITE_HANDLER( ninjakun_io_8000_w ){
+	public static WriteHandlerPtr ninjakun_io_8000_w = new WriteHandlerPtr() {public void handler(int offset, int data){
 		switch( offset ){
 		case 0x0: /* control#1 */
 			ninjakun_io_8000_ctrl[0] = data;
@@ -175,9 +175,9 @@ public class ninjakid
 			}
 			break;
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ninjakun_paletteram_w )
+	public static WriteHandlerPtr ninjakun_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		int i;
 	
@@ -194,7 +194,7 @@ public class ninjakid
 			}
 		}
 		paletteram_BBGGRRII_w(0x200+offset*16+1,data);
-	}
+	} };
 	
 	/*******************************************************************************
 	 Video Hardware Functions
@@ -277,8 +277,8 @@ public class ninjakid
 			for (x=0; x<32; x++)
 			{
 				offs = y*32+x;
-				chr = videoram[offs];
-				col = videoram[offs + 0x400];
+				chr = videoram.read(offs);
+				col = videoram.read(offs + 0x400);
 				chr +=  (col & 0x20) << 3;
 	
 				if ((col & 0x10) == 0)

@@ -71,20 +71,20 @@ public class galivan
 		{
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -156,8 +156,8 @@ public class galivan
 	
 	static void get_tx_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] | ((attr & 0x01) << 8);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)| ((attr & 0x01) << 8);
 		SET_TILE_INFO(
 				0,
 				code,
@@ -180,8 +180,8 @@ public class galivan
 	
 	static void ninjemak_get_tx_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int code = videoram[tile_index] | ((attr & 0x03) << 8);
+		int attr = colorram.read(tile_index);
+		int code = videoram.read(tile_index)| ((attr & 0x03) << 8);
 		SET_TILE_INFO(
 				0,
 				code,
@@ -231,26 +231,26 @@ public class galivan
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( galivan_videoram_w )
+	public static WriteHandlerPtr galivan_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(tx_tilemap,offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( galivan_colorram_w )
+	public static WriteHandlerPtr galivan_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(tx_tilemap,offset);
 		}
-	}
+	} };
 	
 	/* Written through port 40 */
-	WRITE_HANDLER( galivan_gfxbank_w )
+	public static WriteHandlerPtr galivan_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0 and 1 coin counters */
 		coin_counter_w(0,data & 1);
@@ -270,9 +270,9 @@ public class galivan
 		}
 	
 	/*	logerror("Address: %04X - port 40 = %02x\n",activecpu_get_pc(),data); */
-	}
+	} };
 	
-	WRITE_HANDLER( ninjemak_gfxbank_w )
+	public static WriteHandlerPtr ninjemak_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bits 0 and 1 coin counters */
 		coin_counter_w(0,data & 1);
@@ -292,11 +292,11 @@ public class galivan
 	
 	logerror("%04x: write %02x to port 80\n",activecpu_get_pc(),data);
 	
-			for (offs = 0; offs < videoram_size; offs++)
+			for (offs = 0; offs < videoram_size[0]; offs++)
 			{
 				galivan_videoram_w(offs, 0x20);
 			}
-			for (offs = 0; offs < videoram_size; offs++)
+			for (offs = 0; offs < videoram_size[0]; offs++)
 			{
 				galivan_colorram_w(offs, 0x03);
 			}
@@ -327,12 +327,12 @@ public class galivan
 			usrintf_showmessage(mess);
 		}
 	#endif
-	}
+	} };
 	
 	
 	
 	/* Written through port 41-42 */
-	WRITE_HANDLER( galivan_scrollx_w )
+	public static WriteHandlerPtr galivan_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		static int up = 0;
 		if (offset == 1) {
@@ -344,24 +344,24 @@ public class galivan
 			}
 		}
 		scrollx[offset] = data;
-	}
+	} };
 	
 	/* Written through port 43-44 */
-	WRITE_HANDLER( galivan_scrolly_w )
+	public static WriteHandlerPtr galivan_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrolly[offset] = data;
-	}
+	} };
 	
 	
-	WRITE_HANDLER( ninjemak_scrollx_w )
+	public static WriteHandlerPtr ninjemak_scrollx_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrollx[offset] = data;
-	}
+	} };
 	
-	WRITE_HANDLER( ninjemak_scrolly_w )
+	public static WriteHandlerPtr ninjemak_scrolly_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		scrolly[offset] = data;
-	}
+	} };
 	
 	
 	
@@ -379,14 +379,14 @@ public class galivan
 		for (offs = 0;offs < spriteram_size;offs += 4)
 		{
 			int code;
-			int attr = spriteram[offs+2];
+			int attr = spriteram.read(offs+2);
 			int color = (attr & 0x3c) >> 2;
 			int flipx = attr & 0x40;
 			int flipy = attr & 0x80;
 			int sx,sy;
 	
-			sx = (spriteram[offs+3] - 0x80) + 256 * (attr & 0x01);
-			sy = 240 - spriteram[offs];
+			sx = (spriteram.read(offs+3)- 0x80) + 256 * (attr & 0x01);
+			sy = 240 - spriteram.read(offs);
 			if (flipscreen)
 			{
 				sx = 240 - sx;
@@ -395,8 +395,8 @@ public class galivan
 				flipy = !flipy;
 			}
 	
-	//		code = spriteram[offs+1] + ((attr & 0x02) << 7);
-			code = spriteram[offs+1] + ((attr & 0x06) << 7);	// for ninjemak, not sure ?
+	//		code = spriteram.read(offs+1)+ ((attr & 0x02) << 7);
+			code = spriteram.read(offs+1)+ ((attr & 0x06) << 7);	// for ninjemak, not sure ?
 	
 			drawgfx(bitmap,Machine->gfx[2],
 					code,

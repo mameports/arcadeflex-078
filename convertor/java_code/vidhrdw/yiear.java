@@ -68,16 +68,16 @@ public class yiear
 		}
 	}
 	
-	WRITE_HANDLER( yiear_videoram_w )
+	public static WriteHandlerPtr yiear_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset / 2);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( yiear_control_w )
+	public static WriteHandlerPtr yiear_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 flips screen */
 	
@@ -99,13 +99,13 @@ public class yiear
 	
 		coin_counter_w(0, data & 0x08);
 		coin_counter_w(1, data & 0x10);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
 		int offs = tile_index * 2;
-		int attr = videoram[offs];
-		int code = videoram[offs + 1] | ((attr & 0x10) << 4);
+		int attr = videoram.read(offs);
+		int code = videoram.read(offs + 1)| ((attr & 0x10) << 4);
 	//	int color = (attr & 0xf0) >> 4;
 		int flags = ((attr & 0x80) ? TILE_FLIPX : 0) | ((attr & 0x40) ? TILE_FLIPY : 0);
 	
@@ -117,7 +117,7 @@ public class yiear
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -129,13 +129,13 @@ public class yiear
 	
 		for (offs = spriteram_size - 2;offs >= 0;offs -= 2)
 		{
-			int attr = spriteram[offs];
-			int code = spriteram_2[offs + 1] + 256 * (attr & 0x01);
+			int attr = spriteram.read(offs);
+			int code = spriteram_2.read(offs + 1)+ 256 * (attr & 0x01);
 			int color = 0;
 			int flipx = ~attr & 0x40;
 			int flipy = attr & 0x80;
-			int sy = 240 - spriteram[offs + 1];
-			int sx = spriteram_2[offs];
+			int sy = 240 - spriteram.read(offs + 1);
+			int sx = spriteram_2.read(offs);
 	
 			if (flip_screen)
 			{

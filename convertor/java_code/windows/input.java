@@ -26,10 +26,6 @@ public class input
 	//	IMPORTS
 	//============================================================
 	
-	extern int verbose;
-	extern int win_physical_width;
-	extern int win_physical_height;
-	extern int win_window_mode;
 	
 	
 	//============================================================
@@ -184,9 +180,8 @@ public class input
 	//	PROTOTYPES
 	//============================================================
 	
-	static void updatekeyboard(void);
-	static void init_keylist(void);
-	static void init_joylist(void);
+	static public static InitDriverPtr init_keylist = new InitDriverPtr() { public void handler() (void);
+	public static InitDriverPtr init_joylist = new InitDriverPtr() { public void handler() (void);
 	
 	
 	
@@ -319,7 +314,7 @@ public class input
 		{ KEYCODE_LWIN, 		DIK_LWIN,			VK_LWIN, 		0 },
 		{ KEYCODE_RWIN, 		DIK_RWIN,			VK_RWIN, 		0 },
 		{ KEYCODE_MENU, 		DIK_APPS,			VK_APPS, 		0 }
-	};
+	} };;
 	
 	
 	
@@ -813,7 +808,7 @@ public class input
 		win_process_events_periodic();
 	
 		// if we don't have focus, turn off all keys
-		if (!focus)
+		if (focus == 0)
 		{
 			memset(&keyboard_state[0][0], 0, sizeof(keyboard_state[i]));
 			updatekeyboard();
@@ -951,7 +946,7 @@ public class input
 			}
 	
 		// if keyboard state is stable, copy it over
-		if (!changed)
+		if (changed == 0)
 			memcpy(currkey, &keyboard_state[0][0], sizeof(currkey));
 	
 		// remember the previous state
@@ -1022,7 +1017,7 @@ public class input
 	//	init_joylist
 	//============================================================
 	
-	static void init_keylist(void)
+	public static InitDriverPtr init_keylist = new InitDriverPtr() { public void handler() (void)
 	{
 		int keycount = 0, key;
 		struct ik *temp;
@@ -1121,7 +1116,7 @@ public class input
 	
 		// terminate the list
 		memset(&keylist[keycount], 0, sizeof(keylist[keycount]));
-	}
+	} };
 	
 	
 	
@@ -1207,7 +1202,7 @@ public class input
 	//	init_joylist
 	//============================================================
 	
-	static void init_joylist(void)
+	public static InitDriverPtr init_joylist = new InitDriverPtr() { public void handler() (void)
 	{
 		int mouse, stick, axis, button, pov;
 		char tempname[MAX_PATH];
@@ -1314,7 +1309,7 @@ public class input
 	
 		// terminate array
 		memset(&joylist[joycount], 0, sizeof(joylist[joycount]));
-	}
+	} };
 	
 	
 	
@@ -1478,7 +1473,7 @@ public class input
 	
 	void input_mouse_button_down(int button, int x, int y)
 	{
-		if (!use_lightgun_dual)
+		if (use_lightgun_dual == 0)
 			return;
 	
 		lightgun_dual_player_state[button]=1;
@@ -1490,7 +1485,7 @@ public class input
 	
 	void input_mouse_button_up(int button)
 	{
-		if (!use_lightgun_dual)
+		if (use_lightgun_dual == 0)
 			return;
 	
 		lightgun_dual_player_state[button]=0;
@@ -1971,7 +1966,7 @@ public class input
 				{
 					case IPT_PADDLE:
 					case IPT_PADDLE_V:
-						if (!paddle)
+						if (paddle == 0)
 						{
 							if ((paddle_ini != NULL) && (*paddle_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, paddle_ini);
@@ -1981,7 +1976,7 @@ public class input
 	
 					case IPT_DIAL:
 					case IPT_DIAL_V:
-						if (!dial)
+						if (dial == 0)
 						{
 							if ((dial_ini != NULL) && (*dial_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, dial_ini);
@@ -1991,7 +1986,7 @@ public class input
 	
 					case IPT_TRACKBALL_X:
 					case IPT_TRACKBALL_Y:
-						if (!trackball)
+						if (trackball == 0)
 						{
 							if ((trackball_ini != NULL) && (*trackball_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, trackball_ini);
@@ -2001,7 +1996,7 @@ public class input
 	
 					case IPT_AD_STICK_X:
 					case IPT_AD_STICK_Y:
-						if (!adstick)
+						if (adstick == 0)
 						{
 							if ((ad_stick_ini != NULL) && (*ad_stick_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, ad_stick_ini);
@@ -2011,7 +2006,7 @@ public class input
 	
 					case IPT_LIGHTGUN_X:
 					case IPT_LIGHTGUN_Y:
-						if (!lightgun)
+						if (lightgun == 0)
 						{
 							if ((lightgun_ini != NULL) && (*lightgun_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, lightgun_ini);
@@ -2020,7 +2015,7 @@ public class input
 						break;
 	
 					case IPT_PEDAL:
-						if (!pedal)
+						if (pedal == 0)
 						{
 							if ((pedal_ini != NULL) && (*pedal_ini != 0))
 								process_ctrlr_file (rc, ctrlrtype, pedal_ini);
@@ -2058,7 +2053,7 @@ public class input
 	{
 		int result = 0;
 	
-		if (!use_keyboard_leds)
+		if (use_keyboard_leds == 0)
 			return 0;
 	
 		// if we're on Win9x, use GetKeyboardState
@@ -2105,7 +2100,7 @@ public class input
 	
 	void osd_set_leds(int state)
 	{
-		if (!use_keyboard_leds)
+		if (use_keyboard_leds == 0)
 			return;
 	
 		// if we're on Win9x, use SetKeyboardState
@@ -2157,7 +2152,7 @@ public class input
 	
 	void start_led(void)
 	{
-		if (!use_keyboard_leds)
+		if (use_keyboard_leds == 0)
 			return;
 	
 		// retrive windows version
@@ -2203,7 +2198,7 @@ public class input
 	{
 		int error_number = 0;
 	
-		if (!use_keyboard_leds)
+		if (use_keyboard_leds == 0)
 			return;
 	
 		// restore the initial LED states

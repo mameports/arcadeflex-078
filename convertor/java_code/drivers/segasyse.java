@@ -213,37 +213,45 @@ public class segasyse
 	
 	/*-- Memory --*/
 	
-	static MEMORY_READ_START( segae_readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },				/* Fixed ROM */
-		{ 0x8000, 0xbfff, MRA_BANK1 },				/* Banked ROM */
-		{ 0xc000, 0xffff, MRA_RAM },				/* Main RAM */
-	MEMORY_END
+	public static Memory_ReadAddress segae_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),				/* Fixed ROM */
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK1 ),				/* Banked ROM */
+		new Memory_ReadAddress( 0xc000, 0xffff, MRA_RAM ),				/* Main RAM */
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( segae_writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },				/* Fixed ROM */
-		{ 0x8000, 0xbfff, segae_mem_8000_w },		/* Banked VRAM */
-		{ 0xc000, 0xffff, MWA_RAM },				/* Main RAM */
-	MEMORY_END
+	public static Memory_WriteAddress segae_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),				/* Fixed ROM */
+		new Memory_WriteAddress( 0x8000, 0xbfff, segae_mem_8000_w ),		/* Banked VRAM */
+		new Memory_WriteAddress( 0xc000, 0xffff, MWA_RAM ),				/* Main RAM */
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	/*-- Ports --*/
 	
-	static PORT_READ_START( segae_readport )
-		{ 0x7e, 0x7f, segae_port_7e_7f_r },			/* Vertical / Horizontal Beam Position Read */
-		{ 0xba, 0xbb, segae_port_ba_bb_r },			/* Back Layer VDP */
-		{ 0xbe, 0xbf, segae_port_be_bf_r },			/* Front Layer VDP */
-		{ 0xe0, 0xe0, input_port_2_r }, /* Coins + Starts */
-		{ 0xe1, 0xe1, input_port_3_r }, /* Controls */
-		{ 0xf2, 0xf2, input_port_0_r }, /* DSW0 */
-		{ 0xf3, 0xf3, input_port_1_r }, /* DSW1 */
-	PORT_END
+	public static IO_ReadPort segae_readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x7e, 0x7f, segae_port_7e_7f_r ),			/* Vertical / Horizontal Beam Position Read */
+		new IO_ReadPort( 0xba, 0xbb, segae_port_ba_bb_r ),			/* Back Layer VDP */
+		new IO_ReadPort( 0xbe, 0xbf, segae_port_be_bf_r ),			/* Front Layer VDP */
+		new IO_ReadPort( 0xe0, 0xe0, input_port_2_r ), /* Coins + Starts */
+		new IO_ReadPort( 0xe1, 0xe1, input_port_3_r ), /* Controls */
+		new IO_ReadPort( 0xf2, 0xf2, input_port_0_r ), /* DSW0 */
+		new IO_ReadPort( 0xf3, 0xf3, input_port_1_r ), /* DSW1 */
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_WRITE_START( segae_writeport )
-		{ 0x7b, 0x7b, SN76496_0_w }, /* Not sure which chip each is on */
-		{ 0x7f, 0x7f, SN76496_1_w }, /* Not sure which chip each is on */
-		{ 0xba, 0xbb, segae_port_ba_bb_w },			/* Back Layer VDP */
-		{ 0xbe, 0xbf, segae_port_be_bf_w },			/* Front Layer VDP */
-		{ 0xf7, 0xf7, segae_port_f7_w },			/* Banking Control */
-	PORT_END
+	public static IO_WritePort segae_writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x7b, 0x7b, SN76496_0_w ), /* Not sure which chip each is on */
+		new IO_WritePort( 0x7f, 0x7f, SN76496_1_w ), /* Not sure which chip each is on */
+		new IO_WritePort( 0xba, 0xbb, segae_port_ba_bb_w ),			/* Back Layer VDP */
+		new IO_WritePort( 0xbe, 0xbf, segae_port_be_bf_w ),			/* Front Layer VDP */
+		new IO_WritePort( 0xf7, 0xf7, segae_port_f7_w ),			/* Banking Control */
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	/*******************************************************************************
 	 Read / Write Handlers
@@ -457,214 +465,214 @@ public class segasyse
 		Riddle of Pythagoras) */
 	
 	#define SEGA_COIN_A \
-		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) ) \
-		PORT_DIPSETTING(    0x07, DEF_STR( 4C_1C ) ) \
-		PORT_DIPSETTING(    0x08, DEF_STR( 3C_1C ) ) \
-		PORT_DIPSETTING(    0x09, DEF_STR( 2C_1C ) ) \
-		PORT_DIPSETTING(    0x05, "2 Coins/1 Credit 5/3 6/4" ) \
-		PORT_DIPSETTING(    0x04, "2 Coins/1 Credit, 4/3" ) \
-		PORT_DIPSETTING(    0x0f, DEF_STR( 1C_1C ) ) \
-		PORT_DIPSETTING(    0x03, "1 Coin/1 Credit, 5/6" ) \
-		PORT_DIPSETTING(    0x02, "1 Coin/1 Credit, 4/5" ) \
-		PORT_DIPSETTING(    0x01, "1 Coin/1 Credit, 2/3" ) \
-		PORT_DIPSETTING(    0x06, DEF_STR( 2C_3C ) ) \
-		PORT_DIPSETTING(    0x0e, DEF_STR( 1C_2C ) ) \
-		PORT_DIPSETTING(    0x0d, DEF_STR( 1C_3C ) ) \
-		PORT_DIPSETTING(    0x0c, DEF_STR( 1C_4C ) ) \
-		PORT_DIPSETTING(    0x0b, DEF_STR( 1C_5C ) ) \
-		PORT_DIPSETTING(    0x0a, DEF_STR( 1C_6C ) )
+		PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( "Coin_A") ); \
+		PORT_DIPSETTING(    0x07, DEF_STR( "4C_1C") ); \
+		PORT_DIPSETTING(    0x08, DEF_STR( "3C_1C") ); \
+		PORT_DIPSETTING(    0x09, DEF_STR( "2C_1C") ); \
+		PORT_DIPSETTING(    0x05, "2 Coins/1 Credit 5/3 6/4" );\
+		PORT_DIPSETTING(    0x04, "2 Coins/1 Credit, 4/3" );\
+		PORT_DIPSETTING(    0x0f, DEF_STR( "1C_1C") ); \
+		PORT_DIPSETTING(    0x03, "1 Coin/1 Credit, 5/6" );\
+		PORT_DIPSETTING(    0x02, "1 Coin/1 Credit, 4/5" );\
+		PORT_DIPSETTING(    0x01, "1 Coin/1 Credit, 2/3" );\
+		PORT_DIPSETTING(    0x06, DEF_STR( "2C_3C") ); \
+		PORT_DIPSETTING(    0x0e, DEF_STR( "1C_2C") ); \
+		PORT_DIPSETTING(    0x0d, DEF_STR( "1C_3C") ); \
+		PORT_DIPSETTING(    0x0c, DEF_STR( "1C_4C") ); \
+		PORT_DIPSETTING(    0x0b, DEF_STR( "1C_5C") ); \
+		PORT_DIPSETTING(    0x0a, DEF_STR( "1C_6C") );
 	
 	#define SEGA_COIN_B \
-		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( Coin_B ) ) \
-		PORT_DIPSETTING(    0x70, DEF_STR( 4C_1C ) ) \
-		PORT_DIPSETTING(    0x80, DEF_STR( 3C_1C ) ) \
-		PORT_DIPSETTING(    0x90, DEF_STR( 2C_1C ) ) \
-		PORT_DIPSETTING(    0x50, "2 Coins/1 Credit 5/3 6/4" ) \
-		PORT_DIPSETTING(    0x40, "2 Coins/1 Credit, 4/3" ) \
-		PORT_DIPSETTING(    0xf0, DEF_STR( 1C_1C ) ) \
-		PORT_DIPSETTING(    0x30, "1 Coin/1 Credit, 5/6" ) \
-		PORT_DIPSETTING(    0x20, "1 Coin/1 Credit, 4/5" ) \
-		PORT_DIPSETTING(    0x10, "1 Coin/1 Credit, 2/3" ) \
-		PORT_DIPSETTING(    0x60, DEF_STR( 2C_3C ) ) \
-		PORT_DIPSETTING(    0xe0, DEF_STR( 1C_2C ) ) \
-		PORT_DIPSETTING(    0xd0, DEF_STR( 1C_3C ) ) \
-		PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) ) \
-		PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) ) \
-		PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
+		PORT_DIPNAME( 0xf0, 0xf0, DEF_STR( "Coin_B") ); \
+		PORT_DIPSETTING(    0x70, DEF_STR( "4C_1C") ); \
+		PORT_DIPSETTING(    0x80, DEF_STR( "3C_1C") ); \
+		PORT_DIPSETTING(    0x90, DEF_STR( "2C_1C") ); \
+		PORT_DIPSETTING(    0x50, "2 Coins/1 Credit 5/3 6/4" );\
+		PORT_DIPSETTING(    0x40, "2 Coins/1 Credit, 4/3" );\
+		PORT_DIPSETTING(    0xf0, DEF_STR( "1C_1C") ); \
+		PORT_DIPSETTING(    0x30, "1 Coin/1 Credit, 5/6" );\
+		PORT_DIPSETTING(    0x20, "1 Coin/1 Credit, 4/5" );\
+		PORT_DIPSETTING(    0x10, "1 Coin/1 Credit, 2/3" );\
+		PORT_DIPSETTING(    0x60, DEF_STR( "2C_3C") ); \
+		PORT_DIPSETTING(    0xe0, DEF_STR( "1C_2C") ); \
+		PORT_DIPSETTING(    0xd0, DEF_STR( "1C_3C") ); \
+		PORT_DIPSETTING(    0xc0, DEF_STR( "1C_4C") ); \
+		PORT_DIPSETTING(    0xb0, DEF_STR( "1C_5C") ); \
+		PORT_DIPSETTING(    0xa0, DEF_STR( "1C_6C") );
 	
-	INPUT_PORTS_START( dummy ) /* Used by the Totally Non-Working Games */
-	INPUT_PORTS_END
+	static InputPortPtr input_ports_dummy = new InputPortPtr(){ public void handler() {  /* Used by the Totally Non-Working Games */
+	INPUT_PORTS_END(); }}; 
 	
-	INPUT_PORTS_START( transfrm ) /* Used By Transformer */
-		PORT_START	/* DSW0 Read from Port 0xf2 */
+	static InputPortPtr input_ports_transfrm = new InputPortPtr(){ public void handler() {  /* Used By Transformer */
+		PORT_START(); 	/* DSW0 Read from Port 0xf2 */
 		SEGA_COIN_A
 		SEGA_COIN_B
 	
-		PORT_START	/* DSW1 Read from Port 0xf3 */
-		PORT_DIPNAME( 0x01, 0x00, "1 Player Only" )
-		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x00, DEF_STR( Demo_Sounds ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x0c, "3" )
-		PORT_DIPSETTING(    0x08, "4" )
-		PORT_DIPSETTING(    0x04, "5" )
-		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", 0, 0 )
-		PORT_DIPNAME( 0x30, 0x30, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x20, "10k, 30k, 50k and 70k" )
-		PORT_DIPSETTING(    0x30, "20k, 60k, 100k and 140k"  )
-		PORT_DIPSETTING(    0x10, "30k, 80k, 130k and 180k" )
-		PORT_DIPSETTING(    0x00, "50k, 150k and 250k" )
-		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x40, "Easy" )
-		PORT_DIPSETTING(    0xc0, "Medium" )
-		PORT_DIPSETTING(    0x80, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
+		PORT_START(); 	/* DSW1 Read from Port 0xf3 */
+		PORT_DIPNAME( 0x01, 0x00, "1 Player Only" );
+		PORT_DIPSETTING(    0x00, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x00, DEF_STR( "Demo_Sounds") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x0c, "3" );
+		PORT_DIPSETTING(    0x08, "4" );
+		PORT_DIPSETTING(    0x04, "5" );
+		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", 0, 0 );
+		PORT_DIPNAME( 0x30, 0x30, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x20, "10k, 30k, 50k and 70k" );
+		PORT_DIPSETTING(    0x30, "20k, 60k, 100k and 140k"  );
+		PORT_DIPSETTING(    0x10, "30k, 80k, 130k and 180k" );
+		PORT_DIPSETTING(    0x00, "50k, 150k and 250k" );
+		PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x40, "Easy" );
+		PORT_DIPSETTING(    0xc0, "Medium" );
+		PORT_DIPSETTING(    0x80, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
 	
-		PORT_START	/* Read from Port 0xe0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 )
-		PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_START2 )
+		PORT_START(); 	/* Read from Port 0xe0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 );
+		PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_START2 );
 	
-		PORT_START	/* Read from Port 0xe1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP | IPF_8WAY  )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN | IPF_8WAY )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT | IPF_8WAY )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON2 )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNUSED )
-	INPUT_PORTS_END
+		PORT_START(); 	/* Read from Port 0xe1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP | IPF_8WAY  );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN | IPF_8WAY );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT | IPF_8WAY );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON2 );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNUSED );
+	INPUT_PORTS_END(); }}; 
 	
-	INPUT_PORTS_START( hangonjr ) /* Used By Hang On Jr */
-		PORT_START	/* DSW0 Read from Port 0xf2 */
+	static InputPortPtr input_ports_hangonjr = new InputPortPtr(){ public void handler() {  /* Used By Hang On Jr */
+		PORT_START(); 	/* DSW0 Read from Port 0xf2 */
 		SEGA_COIN_A
 		SEGA_COIN_B
 	
-		PORT_START	/* DSW1 Read from Port 0xf3 */
-		PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x06, 0x06, "Enemies" )
-		PORT_DIPSETTING(    0x06, "Easy" )
-		PORT_DIPSETTING(    0x04, "Medium" )
-		PORT_DIPSETTING(    0x02, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x18, 0x18, DEF_STR( Difficulty ) )
-		PORT_DIPSETTING(    0x18, "Easy" )
-		PORT_DIPSETTING(    0x10, "Medium" )
-		PORT_DIPSETTING(    0x08, "Hard" )
-		PORT_DIPSETTING(    0x00, "Hardest" )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )  // These three dips seems to be unused
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* DSW1 Read from Port 0xf3 */
+		PORT_DIPNAME( 0x01, 0x01, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x06, 0x06, "Enemies" );
+		PORT_DIPSETTING(    0x06, "Easy" );
+		PORT_DIPSETTING(    0x04, "Medium" );
+		PORT_DIPSETTING(    0x02, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x18, 0x18, DEF_STR( "Difficulty") );
+		PORT_DIPSETTING(    0x18, "Easy" );
+		PORT_DIPSETTING(    0x10, "Medium" );
+		PORT_DIPSETTING(    0x08, "Hard" );
+		PORT_DIPSETTING(    0x00, "Hardest" );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );  // These three dips seems to be unused
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Read from Port 0xe0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 )
-		PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_START1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+		PORT_START(); 	/* Read from Port 0xe0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 );
+		PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( "Service_Mode") ); KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_START1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN );
 	
-		PORT_START	/* Read from Port 0xe1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+		PORT_START(); 	/* Read from Port 0xe1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN );
 	
-		PORT_START	/* Read from Port 0xf8 */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER1, 25, 15, 0, 0xff )
+		PORT_START(); 	/* Read from Port 0xf8 */
+		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER1, 25, 15, 0, 0xff );
 	
-		PORT_START  /* Read from Port 0xf8 */
-		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 10, 0, 0xff)
-	INPUT_PORTS_END
+		PORT_START();   /* Read from Port 0xf8 */
+		PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 10, 0, 0xff);
+	INPUT_PORTS_END(); }}; 
 	
-	INPUT_PORTS_START( ridleofp ) /* Used By Riddle Of Pythagoras */
-		PORT_START	/* DSW0 Read from Port 0xf2 */
+	static InputPortPtr input_ports_ridleofp = new InputPortPtr(){ public void handler() {  /* Used By Riddle Of Pythagoras */
+		PORT_START(); 	/* DSW0 Read from Port 0xf2 */
 		SEGA_COIN_A
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
 		SEGA_COIN_B
-		PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
+		PORT_DIPSETTING(    0x00, DEF_STR( "Free_Play") );
 	
-		PORT_START	/* DSW1 Read from Port 0xf3 */
-		PORT_DIPNAME( 0x03, 0x02, DEF_STR( Lives ) )
-		PORT_DIPSETTING(    0x03, "2" )
-		PORT_DIPSETTING(    0x02, "3" )
-		PORT_DIPSETTING(    0x01, "4" )
-		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "98", IP_KEY_NONE, IP_JOY_NONE )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )  // Unknown
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, "Difficulty?" )	// To be tested ! I don't see what else it could do
-		PORT_DIPSETTING(    0x08, "Easy" )
-		PORT_DIPSETTING(    0x00, "Hard" )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )  // Unknown
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x60, 0x60, DEF_STR( Bonus_Life ) )
-		PORT_DIPSETTING(    0x60, "50K 100K 200K 500K 1M 2M 5M 10M" )
-		PORT_DIPSETTING(    0x40, "100K 200K 500K 1M 2M 5M 10M" )
-		PORT_DIPSETTING(    0x20, "200K 500K 1M 2M 5M 10M" )
-		PORT_DIPSETTING(    0x00, "None" )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )  // Unknown
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+		PORT_START(); 	/* DSW1 Read from Port 0xf3 */
+		PORT_DIPNAME( 0x03, 0x02, DEF_STR( "Lives") );
+		PORT_DIPSETTING(    0x03, "2" );
+		PORT_DIPSETTING(    0x02, "3" );
+		PORT_DIPSETTING(    0x01, "4" );
+		PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "98", IP_KEY_NONE, IP_JOY_NONE );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );  // Unknown
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, "Difficulty?" );// To be tested ! I don't see what else it could do
+		PORT_DIPSETTING(    0x08, "Easy" );
+		PORT_DIPSETTING(    0x00, "Hard" );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );  // Unknown
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x60, 0x60, DEF_STR( "Bonus_Life") );
+		PORT_DIPSETTING(    0x60, "50K 100K 200K 500K 1M 2M 5M 10M" );
+		PORT_DIPSETTING(    0x40, "100K 200K 500K 1M 2M 5M 10M" );
+		PORT_DIPSETTING(    0x20, "200K 500K 1M 2M 5M 10M" );
+		PORT_DIPSETTING(    0x00, "None" );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );  // Unknown
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
 	
-		PORT_START	/* Read from Port 0xe0 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN ) // Would Be IPT_START2 but the code doesn't use it
+		PORT_START(); 	/* Read from Port 0xe0 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN );// Would Be IPT_START2 but the code doesn't use it
 	
-		PORT_START	/* Port 0xe1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+		PORT_START(); 	/* Port 0xe1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN );
 	
-		PORT_START	/* Read from Port 0xf8 */
-		PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL, 50, 20, 0, 0 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 )	/* is this used in the game? */
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+		PORT_START(); 	/* Read from Port 0xf8 */
+		PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL, 50, 20, 0, 0 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 );/* is this used in the game? */
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
 	
-		PORT_START	/* Read from Port 0xf8 */
-		PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL | IPF_COCKTAIL, 50, 20, 0, 0 )
-		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_COCKTAIL )
-		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_COCKTAIL )
-		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	INPUT_PORTS_END
+		PORT_START(); 	/* Read from Port 0xf8 */
+		PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL | IPF_COCKTAIL, 50, 20, 0, 0 );
+		PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_COCKTAIL );
+		PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_COCKTAIL );
+		PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN );
+	INPUT_PORTS_END(); }}; 
 	
 	/*******************************************************************************
 	 Interrupt Function
@@ -727,12 +735,12 @@ public class segasyse
 	 custom cpu
 	*******************************************************************************/
 	
-	static struct SN76496interface sn76489_intf =
-	{
+	static SN76496interface sn76489_intf = new SN76496interface
+	(
 		2,		/* 2 chips */
-		{ 4000000, 4000000 },	/* 4 MHz? (guess) */
-		{ 50, 50 }
-	};
+		new int[] { 4000000, 4000000 },	/* 4 MHz? (guess) */
+		new int[] { 50, 50 }
+	);
 	
 	
 	static MACHINE_DRIVER_START( segae )
@@ -819,76 +827,76 @@ public class segasyse
 	 opaopa	  - Opa Opa				   *Roms Encrypted/Bad?*
 	*******************************************************************************/
 	
-	ROM_START( hangonjr )
-		ROM_REGION( 0x30000, REGION_CPU1, 0 )
-		ROM_LOAD( "rom5.ic7",	0x00000, 0x08000, CRC(d63925a7) SHA1(699f222d9712fa42651c753fe75d7b60e016d3ad) ) /* Fixed Code */
+	static RomLoadPtr rom_hangonjr = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x30000, REGION_CPU1, 0 );
+		ROM_LOAD( "rom5.ic7",	0x00000, 0x08000, CRC(d63925a7);SHA1(699f222d9712fa42651c753fe75d7b60e016d3ad) ) /* Fixed Code */
 	
 		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
-		ROM_LOAD( "rom4.ic5",	0x10000, 0x08000, CRC(ee3caab3) SHA1(f583cf92c579d1ca235e8b300e256ba58a04dc90) )
-		ROM_LOAD( "rom3.ic4",	0x18000, 0x08000, CRC(d2ba9bc9) SHA1(85cf2a801883bf69f78134fc4d5075134f47dc03) )
-		ROM_LOAD( "rom2.ic3",	0x20000, 0x08000, CRC(e14da070) SHA1(f8781f65be5246a23c1f492905409775bbf82ea8) )
-		ROM_LOAD( "rom1.ic2",	0x28000, 0x08000, CRC(3810cbf5) SHA1(c8d5032522c0c903ab3d138f62406a66e14a5c69) )
-	ROM_END
+		ROM_LOAD( "rom4.ic5",	0x10000, 0x08000, CRC(ee3caab3);SHA1(f583cf92c579d1ca235e8b300e256ba58a04dc90) )
+		ROM_LOAD( "rom3.ic4",	0x18000, 0x08000, CRC(d2ba9bc9);SHA1(85cf2a801883bf69f78134fc4d5075134f47dc03) )
+		ROM_LOAD( "rom2.ic3",	0x20000, 0x08000, CRC(e14da070);SHA1(f8781f65be5246a23c1f492905409775bbf82ea8) )
+		ROM_LOAD( "rom1.ic2",	0x28000, 0x08000, CRC(3810cbf5);SHA1(c8d5032522c0c903ab3d138f62406a66e14a5c69) )
+	ROM_END(); }}; 
 	
-	ROM_START( ridleofp )
-		ROM_REGION( 0x30000, REGION_CPU1, 0 )
-		ROM_LOAD( "epr10426.bin",	0x00000, 0x08000, CRC(4404c7e7) SHA1(555f44786976a009d96a6395c9173929ad6138a7) ) /* Fixed Code */
-	
-		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
-		ROM_LOAD( "epr10425.bin",	0x10000, 0x08000, CRC(35964109) SHA1(a7bc64a87b23139b0edb9c3512f47dcf73feb854) )
-		ROM_LOAD( "epr10424.bin",	0x18000, 0x08000, CRC(fcda1dfa) SHA1(b8497b04de28fc0d6b7cb0206ad50948cff07840) )
-		ROM_LOAD( "epr10423.bin",	0x20000, 0x08000, CRC(0b87244f) SHA1(c88041614735a9b6cba1edde0a11ed413e115361) )
-		ROM_LOAD( "epr10422.bin",	0x28000, 0x08000, CRC(14781e56) SHA1(f15d9d89e1ebff36c3867cfc8f0bdf7f6b3c96bc) )
-	ROM_END
-	
-	ROM_START( transfrm )
-		ROM_REGION( 0x30000, REGION_CPU1, 0 )
-		ROM_LOAD( "ic7.top",	0x00000, 0x08000, CRC(ccf1d123) SHA1(5ade9b00e2a36d034fafdf1902d47a9a00e96fc4) ) /* Fixed Code */
+	static RomLoadPtr rom_ridleofp = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x30000, REGION_CPU1, 0 );
+		ROM_LOAD( "epr10426.bin",	0x00000, 0x08000, CRC(4404c7e7);SHA1(555f44786976a009d96a6395c9173929ad6138a7) ) /* Fixed Code */
 	
 		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
-		ROM_LOAD( "epr-7347.ic5",	0x10000, 0x08000, CRC(df0f639f) SHA1(a09a9841b66de246a585be63d911b9a42a323503) )
-		ROM_LOAD( "epr-7348.ic4",	0x18000, 0x08000, CRC(0f38ea96) SHA1(d4d421c5d93832e2bc1f22f39dffb6b80f2750bd) )
-		ROM_LOAD( "ic3.top",		0x20000, 0x08000, CRC(9d485df6) SHA1(b25f04803c8f7188021f3039aa13aac80d480823) )
-		ROM_LOAD( "epr-7350.ic2",	0x28000, 0x08000, CRC(0052165d) SHA1(cf4b5dffa54238e513515b3fc90faa7ce0b65d34) )
-	ROM_END
+		ROM_LOAD( "epr10425.bin",	0x10000, 0x08000, CRC(35964109);SHA1(a7bc64a87b23139b0edb9c3512f47dcf73feb854) )
+		ROM_LOAD( "epr10424.bin",	0x18000, 0x08000, CRC(fcda1dfa);SHA1(b8497b04de28fc0d6b7cb0206ad50948cff07840) )
+		ROM_LOAD( "epr10423.bin",	0x20000, 0x08000, CRC(0b87244f);SHA1(c88041614735a9b6cba1edde0a11ed413e115361) )
+		ROM_LOAD( "epr10422.bin",	0x28000, 0x08000, CRC(14781e56);SHA1(f15d9d89e1ebff36c3867cfc8f0bdf7f6b3c96bc) )
+	ROM_END(); }}; 
 	
-	ROM_START( astrofl )
-		ROM_REGION( 2*0x30000, REGION_CPU1, 0 )
-		ROM_LOAD( "epr-7723.ic7",	0x00000, 0x08000, CRC(66061137) SHA1(cb6a2c7864f9f87bbedfd4b1448ad6c2de65d6ca) ) /* encrypted */
-	
-		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
-		ROM_LOAD( "epr-7347.ic5",	0x10000, 0x08000, CRC(df0f639f) SHA1(a09a9841b66de246a585be63d911b9a42a323503) )
-		ROM_LOAD( "epr-7348.ic4",	0x18000, 0x08000, CRC(0f38ea96) SHA1(d4d421c5d93832e2bc1f22f39dffb6b80f2750bd) )
-		ROM_LOAD( "epr-7349.ic3",	0x20000, 0x08000, CRC(f8c352d5) SHA1(e59565ab6928c67706c6f82f6ea9a64cdfc65a21) )
-		ROM_LOAD( "epr-7350.ic2",	0x28000, 0x08000, CRC(0052165d) SHA1(cf4b5dffa54238e513515b3fc90faa7ce0b65d34) )
-	ROM_END
-	
-	ROM_START( fantzn2 )
-		ROM_REGION( 0x50000, REGION_CPU1, 0 )
-		ROM_LOAD( "fz2_ic7.rom",	0x00000, 0x08000, CRC(76db7b7b) SHA1(d60e2961fc893dcb4445aed5f67515cbd25b610f) )
-		ROM_LOAD( "fz2_ic5.rom",	0x10000, 0x10000, CRC(57b45681) SHA1(1ae6d0d58352e246a4ec4e1ce02b0417257d5d20) )
-		ROM_LOAD( "fz2_ic4.rom",	0x20000, 0x10000, CRC(6f7a9f5f) SHA1(b53aa2eded781c80466a79b7d81383b9a875d0be) )
-		ROM_LOAD( "fz2_ic3.rom",	0x30000, 0x10000, CRC(a231dc85) SHA1(45b94fdbde28c02e88546178ef3e8f9f3a96ab86) )
-		ROM_LOAD( "fz2_ic2.rom",	0x40000, 0x10000, CRC(b14db5af) SHA1(04c7fb659385438b3d8f9fb66800eb7b6373bda9) )
-	ROM_END
-	
-	ROM_START( opaopa )
-		ROM_REGION( 0x30000, REGION_USER1, 0 )
-		ROM_LOAD( "epr11224.ic7",	0x00000, 0x08000, CRC(024b1244) SHA1(59a522ac3d98982cc4ddb1c81f9584d3da453649) ) /* Fixed Code */
+	static RomLoadPtr rom_transfrm = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x30000, REGION_CPU1, 0 );
+		ROM_LOAD( "ic7.top",	0x00000, 0x08000, CRC(ccf1d123);SHA1(5ade9b00e2a36d034fafdf1902d47a9a00e96fc4) ) /* Fixed Code */
 	
 		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
-		ROM_LOAD( "epr11223.ic5",	0x10000, 0x08000, CRC(6bc41d6e) SHA1(8997a4ac2a9704f1400d0ec16b259ee496a7efef) )
-		ROM_LOAD( "epr11222.ic4",	0x18000, 0x08000, CRC(395c1d0a) SHA1(1594bad13e78c5fad4db644cd85a6bac1eaddbad) )
-		ROM_LOAD( "epr11221.ic3",	0x20000, 0x08000, CRC(4ca132a2) SHA1(cb4e4c01b6ab070eef37c0603190caafe6236ccd) )
-		ROM_LOAD( "epr11220.ic2",	0x28000, 0x08000, CRC(a165e2ef) SHA1(498ff4c5d3a2658567393378c56be6ed86ac0384) )
-	ROM_END
+		ROM_LOAD( "epr-7347.ic5",	0x10000, 0x08000, CRC(df0f639f);SHA1(a09a9841b66de246a585be63d911b9a42a323503) )
+		ROM_LOAD( "epr-7348.ic4",	0x18000, 0x08000, CRC(0f38ea96);SHA1(d4d421c5d93832e2bc1f22f39dffb6b80f2750bd) )
+		ROM_LOAD( "ic3.top",		0x20000, 0x08000, CRC(9d485df6);SHA1(b25f04803c8f7188021f3039aa13aac80d480823) )
+		ROM_LOAD( "epr-7350.ic2",	0x28000, 0x08000, CRC(0052165d);SHA1(cf4b5dffa54238e513515b3fc90faa7ce0b65d34) )
+	ROM_END(); }}; 
+	
+	static RomLoadPtr rom_astrofl = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 2*0x30000, REGION_CPU1, 0 );
+		ROM_LOAD( "epr-7723.ic7",	0x00000, 0x08000, CRC(66061137);SHA1(cb6a2c7864f9f87bbedfd4b1448ad6c2de65d6ca) ) /* encrypted */
+	
+		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
+		ROM_LOAD( "epr-7347.ic5",	0x10000, 0x08000, CRC(df0f639f);SHA1(a09a9841b66de246a585be63d911b9a42a323503) )
+		ROM_LOAD( "epr-7348.ic4",	0x18000, 0x08000, CRC(0f38ea96);SHA1(d4d421c5d93832e2bc1f22f39dffb6b80f2750bd) )
+		ROM_LOAD( "epr-7349.ic3",	0x20000, 0x08000, CRC(f8c352d5);SHA1(e59565ab6928c67706c6f82f6ea9a64cdfc65a21) )
+		ROM_LOAD( "epr-7350.ic2",	0x28000, 0x08000, CRC(0052165d);SHA1(cf4b5dffa54238e513515b3fc90faa7ce0b65d34) )
+	ROM_END(); }}; 
+	
+	static RomLoadPtr rom_fantzn2 = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x50000, REGION_CPU1, 0 );
+		ROM_LOAD( "fz2_ic7.rom",	0x00000, 0x08000, CRC(76db7b7b);SHA1(d60e2961fc893dcb4445aed5f67515cbd25b610f) )
+		ROM_LOAD( "fz2_ic5.rom",	0x10000, 0x10000, CRC(57b45681);SHA1(1ae6d0d58352e246a4ec4e1ce02b0417257d5d20) )
+		ROM_LOAD( "fz2_ic4.rom",	0x20000, 0x10000, CRC(6f7a9f5f);SHA1(b53aa2eded781c80466a79b7d81383b9a875d0be) )
+		ROM_LOAD( "fz2_ic3.rom",	0x30000, 0x10000, CRC(a231dc85);SHA1(45b94fdbde28c02e88546178ef3e8f9f3a96ab86) )
+		ROM_LOAD( "fz2_ic2.rom",	0x40000, 0x10000, CRC(b14db5af);SHA1(04c7fb659385438b3d8f9fb66800eb7b6373bda9) )
+	ROM_END(); }}; 
+	
+	static RomLoadPtr rom_opaopa = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x30000, REGION_USER1, 0 );
+		ROM_LOAD( "epr11224.ic7",	0x00000, 0x08000, CRC(024b1244);SHA1(59a522ac3d98982cc4ddb1c81f9584d3da453649) ) /* Fixed Code */
+	
+		/* The following are 8 0x4000 banks that get mapped to reads from 0x8000 - 0xbfff */
+		ROM_LOAD( "epr11223.ic5",	0x10000, 0x08000, CRC(6bc41d6e);SHA1(8997a4ac2a9704f1400d0ec16b259ee496a7efef) )
+		ROM_LOAD( "epr11222.ic4",	0x18000, 0x08000, CRC(395c1d0a);SHA1(1594bad13e78c5fad4db644cd85a6bac1eaddbad) )
+		ROM_LOAD( "epr11221.ic3",	0x20000, 0x08000, CRC(4ca132a2);SHA1(cb4e4c01b6ab070eef37c0603190caafe6236ccd) )
+		ROM_LOAD( "epr11220.ic2",	0x28000, 0x08000, CRC(a165e2ef);SHA1(498ff4c5d3a2658567393378c56be6ed86ac0384) )
+	ROM_END(); }}; 
 	
 	/*-- Game Drivers --*/
 	
-	GAME( 1985, hangonjr, 0,        segae, hangonjr, hangonjr, ROT0,  "Sega", "Hang-On Jr." )
-	GAME( 1986, transfrm, 0,        segae, transfrm, segasyse, ROT0,  "Sega", "Transformer" )
-	GAMEX(1986, astrofl,  transfrm, segae, transfrm, astrofl,  ROT0,  "Sega", "Astro Flash (Japan)", GAME_IMPERFECT_GRAPHICS )
-	GAME( 1986, ridleofp, 0,        segae, ridleofp, ridleofp, ROT90, "Sega / Nasco", "Riddle of Pythagoras (Japan)" )
-	GAMEX(198?, fantzn2,  0,        segae, dummy,    segasyse, ROT0,  "????", "Fantasy Zone 2", GAME_NOT_WORKING )	/* encrypted */
-	GAMEX(198?, opaopa,   0,        segae, dummy,    segasyse, ROT0,  "????", "Opa Opa", GAME_NOT_WORKING )	/* either encrypted or bad */
+	public static GameDriver driver_hangonjr	   = new GameDriver("1985"	,"hangonjr"	,"segasyse.java"	,rom_hangonjr,null	,machine_driver_segae	,input_ports_hangonjr	,init_hangonjr	,ROT0	,	"Sega", "Hang-On Jr." )
+	public static GameDriver driver_transfrm	   = new GameDriver("1986"	,"transfrm"	,"segasyse.java"	,rom_transfrm,null	,machine_driver_segae	,input_ports_transfrm	,init_segasyse	,ROT0	,	"Sega", "Transformer" )
+	public static GameDriver driver_astrofl	   = new GameDriver("1986"	,"astrofl"	,"segasyse.java"	,rom_astrofl,driver_transfrm	,machine_driver_segae	,input_ports_transfrm	,init_astrofl	,ROT0	,	"Sega", "Astro Flash (Japan)", GAME_IMPERFECT_GRAPHICS )
+	public static GameDriver driver_ridleofp	   = new GameDriver("1986"	,"ridleofp"	,"segasyse.java"	,rom_ridleofp,null	,machine_driver_segae	,input_ports_ridleofp	,init_ridleofp	,ROT90	,	"Sega / Nasco", "Riddle of Pythagoras (Japan)" )
+	public static GameDriver driver_fantzn2	   = new GameDriver("198?"	,"fantzn2"	,"segasyse.java"	,rom_fantzn2,null	,machine_driver_segae	,input_ports_dummy	,init_segasyse	,ROT0	,	"????", "Fantasy Zone 2", GAME_NOT_WORKING )	/* encrypted */
+	public static GameDriver driver_opaopa	   = new GameDriver("198?"	,"opaopa"	,"segasyse.java"	,rom_opaopa,null	,machine_driver_segae	,input_ports_dummy	,init_segasyse	,ROT0	,	"????", "Opa Opa", GAME_NOT_WORKING )	/* either encrypted or bad */
 }

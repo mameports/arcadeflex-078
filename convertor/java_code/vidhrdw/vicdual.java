@@ -63,25 +63,25 @@ public class vicdual
 	
 	
 			/* background red component */
-			bit = (color_prom[i] >> 3) & 0x01;
+			bit = (color_prom.read(i)>> 3) & 0x01;
 			r = 0xff * bit;
 			/* background green component */
-			bit = (color_prom[i] >> 1) & 0x01;
+			bit = (color_prom.read(i)>> 1) & 0x01;
 			g = 0xff * bit;
 			/* background blue component */
-			bit = (color_prom[i] >> 2) & 0x01;
+			bit = (color_prom.read(i)>> 2) & 0x01;
 			b = 0xff * bit;
 	
 			palette_set_color(2*i,r,g,b);
 	
 			/* foreground red component */
-			bit = (color_prom[i] >> 7) & 0x01;
+			bit = (color_prom.read(i)>> 7) & 0x01;
 			r = 0xff * bit;
 			/* foreground green component */
-			bit = (color_prom[i] >> 5) & 0x01;
+			bit = (color_prom.read(i)>> 5) & 0x01;
 			g = 0xff * bit;
 			/* foreground blue component */
-			bit = (color_prom[i] >> 6) & 0x01;
+			bit = (color_prom.read(i)>> 6) & 0x01;
 			b = 0xff * bit;
 	
 			palette_set_color(2*i+1,r,g,b);
@@ -109,7 +109,7 @@ public class vicdual
 	
 	
 	
-	WRITE_HANDLER( vicdual_characterram_w )
+	public static WriteHandlerPtr vicdual_characterram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (vicdual_characterram[offset] != data)
 		{
@@ -117,21 +117,21 @@ public class vicdual
 	
 			vicdual_characterram[offset] = data;
 		}
-	}
+	} };
 	
-	READ_HANDLER( vicdual_characterram_r )
+	public static ReadHandlerPtr vicdual_characterram_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return vicdual_characterram[offset];
-	}
+	} };
 	
-	WRITE_HANDLER( vicdual_palette_bank_w )
+	public static WriteHandlerPtr vicdual_palette_bank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (palette_bank != (data & 3))
 		{
 			palette_bank = data & 3;
-			memset(dirtybuffer,1,videoram_size);
+			memset(dirtybuffer,1,videoram_size[0]);
 		}
-	}
+	} };
 	
 	
 	
@@ -159,7 +159,7 @@ public class vicdual
 			int charcode;
 	
 	
-			charcode = videoram[offs];
+			charcode = videoram.read(offs);
 	
 			if (dirtybuffer[offs] || dirtycharacter[charcode])
 			{

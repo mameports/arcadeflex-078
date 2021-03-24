@@ -426,19 +426,15 @@ public class artwork
 	
 	***************************************************************************/
 	
-	static int artwork_prep(void);
-	static int artwork_load(const struct GameDriver *gamename, int width, int height, const struct artwork_callbacks *callbacks);
+	static static int artwork_load(const struct GameDriver *gamename, int width, int height, const struct artwork_callbacks *callbacks);
 	static int compute_rgb_components(int depth, UINT32 rgb_components[3], UINT32 rgb32_components[3]);
 	static int load_bitmap(const char *gamename, struct artwork_piece *piece);
 	static int load_alpha_bitmap(const char *gamename, struct artwork_piece *piece, const struct png_info *original);
 	static int scale_bitmap(struct artwork_piece *piece, int newwidth, int newheight);
 	static void trim_bitmap(struct artwork_piece *piece);
 	static int parse_art_file(mame_file *file);
-	static int validate_pieces(void);
-	static void sort_pieces(void);
-	static void update_palette_lookup(struct mame_display *display);
-	static int update_layers(void);
-	static void render_game_bitmap(struct mame_bitmap *bitmap, const rgb_t *palette, struct mame_display *display);
+	static static static void update_palette_lookup(struct mame_display *display);
+	static static void render_game_bitmap(struct mame_bitmap *bitmap, const rgb_t *palette, struct mame_display *display);
 	static void render_game_bitmap_underlay(struct mame_bitmap *bitmap, const rgb_t *palette, struct mame_display *display);
 	static void render_game_bitmap_overlay(struct mame_bitmap *bitmap, const rgb_t *palette, struct mame_display *display);
 	static void render_game_bitmap_underlay_overlay(struct mame_bitmap *bitmap, const rgb_t *palette, struct mame_display *display);
@@ -779,7 +775,7 @@ public class artwork
 			}
 	
 			/* artwork disabled case */
-			if (!global_artwork_enable)
+			if (global_artwork_enable == 0)
 			{
 				fillbitmap(final, MAKE_ARGB(0,0,0,0), NULL);
 				union_rect(&underlay_invalid, &screenrect);
@@ -2027,7 +2023,7 @@ public class artwork
 		{
 			result = parse_art_file(artfile);
 			mame_fclose(artfile);
-			if (!result)
+			if (result == 0)
 				return 0;
 		}
 	
@@ -2080,13 +2076,13 @@ public class artwork
 	
 		/* open the file */
 		file = mame_fopen(gamename, filename, FILETYPE_ARTWORK, 0);
-		if (!file)
+		if (file == 0)
 			return 0;
 	
 		/* read the PNG data */
 		result = png_read_file(file, png);
 		mame_fclose(file);
-		if (!result)
+		if (result == 0)
 			return 0;
 	
 		/* verify we can handle this PNG */
@@ -2602,7 +2598,7 @@ public class artwork
 	{
 		/* allocate a new piece */
 		struct artwork_piece *newpiece = auto_malloc(sizeof(struct artwork_piece));
-		if (!newpiece)
+		if (newpiece == 0)
 			return NULL;
 		num_pieces++;
 	
@@ -2899,7 +2895,7 @@ public class artwork
 		{
 			/* first create a new piece to use */
 			piece = create_new_piece(OVERLAY_TAG);
-			if (!piece)
+			if (piece == 0)
 				return 0;
 	
 			/* fill in the basics */
@@ -3054,7 +3050,7 @@ public class artwork
 	
 				/* create an entry for the new piece */
 				current = create_new_piece(tag);
-				if (!current)
+				if (current == 0)
 					return 0;
 				continue;
 			}
@@ -3121,7 +3117,7 @@ public class artwork
 	
 		/* allocate a palette lookup */
 		palette_lookup = auto_malloc(65536 * sizeof(palette_lookup[0]));
-		if (!palette_lookup)
+		if (palette_lookup == 0)
 			return 1;
 	
 		/* switch off the depth */

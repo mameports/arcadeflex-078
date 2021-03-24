@@ -28,7 +28,7 @@ public class cclimber
 		if (memory_region(REGION_SOUND1))
 		{
 			samplebuf = auto_malloc(2*memory_region_length(REGION_SOUND1));
-			if (!samplebuf)
+			if (samplebuf == 0)
 				return 1;
 		}
 	
@@ -42,7 +42,7 @@ public class cclimber
 		const UINT8 *rom = memory_region(REGION_SOUND1);
 	
 	
-		if (!rom) return;
+		if (rom == 0) return;
 	
 		/* decode the rom samples */
 		len = 0;
@@ -65,57 +65,57 @@ public class cclimber
 	
 	static int sample_num,sample_freq,sample_volume;
 	
-	static WRITE_HANDLER( cclimber_sample_select_w )
+	public static WriteHandlerPtr cclimber_sample_select_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sample_num = data;
-	}
+	} };
 	
-	WRITE_HANDLER( cclimber_sample_rate_w )
+	public static WriteHandlerPtr cclimber_sample_rate_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* calculate the sampling frequency */
 		sample_freq = SND_CLOCK / 4 / (256 - data);
-	}
+	} };
 	
-	WRITE_HANDLER( cclimber_sample_volume_w )
+	public static WriteHandlerPtr cclimber_sample_volume_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		sample_volume = data & 0x1f;	/* range 0-31 */
-	}
+	} };
 	
-	WRITE_HANDLER( cclimber_sample_trigger_w )
+	public static WriteHandlerPtr cclimber_sample_trigger_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (data == 0 || Machine->sample_rate == 0)
 			return;
 	
 		cclimber_play_sample(32 * sample_num,sample_freq,sample_volume);
-	}
+	} };
 	
 	
-	struct AY8910interface cclimber_ay8910_interface =
-	{
+	static AY8910interface cclimber_ay8910_interface = new AY8910interface
+	(
 		1,      /* 1 chip */
 		1536000,	/* 1.536 MHz */
-		{ 50 },
-		{ 0 },
-		{ 0 },
-		{ cclimber_sample_select_w },
-		{ 0 }
-	};
+		new int[] { 50 },
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { cclimber_sample_select_w },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
-	struct AY8910interface swimmer_ay8910_interface =
-	{
+	static AY8910interface swimmer_ay8910_interface = new AY8910interface
+	(
 		2,      /* 2 chips */
 		4000000/2,	/* 2 MHz */
-		{ 25, 25 },
-		{ 0 },
-		{ 0 },
-		{ 0 },
-		{ 0 }
-	};
+		new int[] { 25, 25 },
+		new ReadHandlerPtr[] { 0 },
+		new ReadHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 },
+		new WriteHandlerPtr[] { 0 }
+	);
 	
-	struct CustomSound_interface cclimber_custom_interface =
-	{
+	static CustomSound_interface cclimber_custom_interface = new CustomSound_interface
+	(
 		cclimber_sh_start,
 		0,
 		0
-	};
+	);
 }

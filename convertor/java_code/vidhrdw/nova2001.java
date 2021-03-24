@@ -94,65 +94,65 @@ public class nova2001
 		}
 	}
 	
-	WRITE_HANDLER( nova2001_videoram_w )
+	public static WriteHandlerPtr nova2001_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_colorram_w )
+	public static WriteHandlerPtr nova2001_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_videoram2_w )
+	public static WriteHandlerPtr nova2001_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (nova2001_videoram2[offset] != data)
 		{
 			nova2001_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_colorram2_w )
+	public static WriteHandlerPtr nova2001_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (nova2001_colorram2[offset] != data)
 		{
 			nova2001_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_scroll_x_w )
+	public static WriteHandlerPtr nova2001_scroll_x_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrollx(bg_tilemap, 0, data - (flip_screen ? 0 : 7));
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_scroll_y_w )
+	public static WriteHandlerPtr nova2001_scroll_y_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		tilemap_set_scrolly(bg_tilemap, 0, data);
-	}
+	} };
 	
-	WRITE_HANDLER( nova2001_flipscreen_w )
+	public static WriteHandlerPtr nova2001_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (~data & 0x01))
 		{
 			flip_screen_set(~data & 0x01);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index] & 0x0f;
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index)& 0x0f;
 	
 		SET_TILE_INFO(1, code, color, 0)
 	}
@@ -170,13 +170,13 @@ public class nova2001
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows, 
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -190,10 +190,10 @@ public class nova2001
 	
 		for (offs = 0;offs < spriteram_size;offs += 32)
 		{
-			int flipx = spriteram[offs+3] & 0x10;
-			int flipy = spriteram[offs+3] & 0x20;
-			int sx = spriteram[offs+1];
-			int sy = spriteram[offs+2];
+			int flipx = spriteram.read(offs+3)& 0x10;
+			int flipy = spriteram.read(offs+3)& 0x20;
+			int sx = spriteram.read(offs+1);
+			int sy = spriteram.read(offs+2);
 	
 			if (flip_screen)
 			{
@@ -203,9 +203,9 @@ public class nova2001
 				flipy = !flipy;
 			}
 	
-			drawgfx(bitmap,Machine->gfx[2 + ((spriteram[offs+0] & 0x80) >> 7)],
-				spriteram[offs+0] & 0x7f,
-				spriteram[offs+3] & 0x0f,
+			drawgfx(bitmap,Machine->gfx[2 + ((spriteram.read(offs+0)& 0x80) >> 7)],
+				spriteram.read(offs+0)& 0x7f,
+				spriteram.read(offs+3)& 0x0f,
 				flipx,flipy,
 				sx,sy,
 				&Machine->visible_area,TRANSPARENCY_PEN,0);

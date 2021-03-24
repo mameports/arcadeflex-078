@@ -47,20 +47,20 @@ public class ironhors
 			int bit0,bit1,bit2,bit3,r,g,b;
 	
 	
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
-			bit3 = (color_prom[0] >> 3) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
+			bit3 = (color_prom.read(0)>> 3) & 0x01;
 			r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(Machine->drv->total_colors)>> 3) & 0x01;
 			g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-			bit0 = (color_prom[2*Machine->drv->total_colors] >> 0) & 0x01;
-			bit1 = (color_prom[2*Machine->drv->total_colors] >> 1) & 0x01;
-			bit2 = (color_prom[2*Machine->drv->total_colors] >> 2) & 0x01;
-			bit3 = (color_prom[2*Machine->drv->total_colors] >> 3) & 0x01;
+			bit0 = (color_prom.read(2*Machine->drv->total_colors)>> 0) & 0x01;
+			bit1 = (color_prom.read(2*Machine->drv->total_colors)>> 1) & 0x01;
+			bit2 = (color_prom.read(2*Machine->drv->total_colors)>> 2) & 0x01;
+			bit3 = (color_prom.read(2*Machine->drv->total_colors)>> 3) & 0x01;
 			b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
 	
 			palette_set_color(i,r,g,b);
@@ -96,25 +96,25 @@ public class ironhors
 		}
 	}
 	
-	WRITE_HANDLER( ironhors_videoram_w )
+	public static WriteHandlerPtr ironhors_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ironhors_colorram_w )
+	public static WriteHandlerPtr ironhors_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( ironhors_charbank_w )
+	public static WriteHandlerPtr ironhors_charbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (charbank != (data & 0x03))
 		{
@@ -125,9 +125,9 @@ public class ironhors
 		spriterambank = data & 0x08;
 	
 		/* other bits unknown */
-	}
+	} };
 	
-	WRITE_HANDLER( ironhors_palettebank_w )
+	public static WriteHandlerPtr ironhors_palettebank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (palettebank != (data & 0x07))
 		{
@@ -141,9 +141,9 @@ public class ironhors
 		/* bit 6 unknown - set after game over */
 	
 		if (data & 0x88) usrintf_showmessage("ironhors_palettebank_w %02x",data);
-	}
+	} };
 	
-	WRITE_HANDLER( ironhors_flipscreen_w )
+	public static WriteHandlerPtr ironhors_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != (~data & 0x08))
 		{
@@ -152,15 +152,15 @@ public class ironhors
 		}
 	
 		/* other bits are used too, but unknown */
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index] + ((colorram[tile_index] & 0x40) << 2) +
-			((colorram[tile_index] & 0x20) << 4) + (charbank << 10);
-		int color = (colorram[tile_index] & 0x0f) + 16 * palettebank;
-		int flags = ((colorram[tile_index] & 0x10) ? TILE_FLIPX : 0) |
-			((colorram[tile_index] & 0x20) ? TILE_FLIPY : 0);
+		int code = videoram.read(tile_index)+ ((colorram.read(tile_index)& 0x40) << 2) +
+			((colorram.read(tile_index)& 0x20) << 4) + (charbank << 10);
+		int color = (colorram.read(tile_index)& 0x0f) + 16 * palettebank;
+		int flags = ((colorram.read(tile_index)& 0x10) ? TILE_FLIPX : 0) |
+			((colorram.read(tile_index)& 0x20) ? TILE_FLIPY : 0);
 	
 		SET_TILE_INFO(0, code, color, flags)
 	}
@@ -170,7 +170,7 @@ public class ironhors
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_scroll_rows(bg_tilemap, 32);

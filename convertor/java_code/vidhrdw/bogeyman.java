@@ -22,21 +22,21 @@ public class bogeyman
 			int bit0,bit1,bit2,r,g,b;
 	
 			/* red component */
-			bit0 = (color_prom[0] >> 0) & 0x01;
-			bit1 = (color_prom[0] >> 1) & 0x01;
-			bit2 = (color_prom[0] >> 2) & 0x01;
+			bit0 = (color_prom.read(0)>> 0) & 0x01;
+			bit1 = (color_prom.read(0)>> 1) & 0x01;
+			bit2 = (color_prom.read(0)>> 2) & 0x01;
 			r = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			/* green component */
-			bit0 = (color_prom[0] >> 3) & 0x01;
-			bit1 = (color_prom[256] >> 0) & 0x01;
-			bit2 = (color_prom[256] >> 1) & 0x01;
+			bit0 = (color_prom.read(0)>> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 0) & 0x01;
+			bit2 = (color_prom.read(256)>> 1) & 0x01;
 			g = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			/* blue component */
 			bit0 = 0;
-			bit1 = (color_prom[256] >> 2) & 0x01;
-			bit2 = (color_prom[256] >> 3) & 0x01;
+			bit1 = (color_prom.read(256)>> 2) & 0x01;
+			bit2 = (color_prom.read(256)>> 3) & 0x01;
 			b = 0x21 * bit0 + 0x47 * bit1 + 0x97 * bit2;
 	
 			palette_set_color(i+16,r,g,b);
@@ -44,53 +44,53 @@ public class bogeyman
 		}
 	}
 	
-	WRITE_HANDLER( bogeyman_videoram_w )
+	public static WriteHandlerPtr bogeyman_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bogeyman_colorram_w )
+	public static WriteHandlerPtr bogeyman_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bogeyman_videoram2_w )
+	public static WriteHandlerPtr bogeyman_videoram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bogeyman_videoram2[offset] != data)
 		{
 			bogeyman_videoram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bogeyman_colorram2_w )
+	public static WriteHandlerPtr bogeyman_colorram2_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (bogeyman_colorram2[offset] != data)
 		{
 			bogeyman_colorram2[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( bogeyman_paletteram_w )
+	public static WriteHandlerPtr bogeyman_paletteram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* RGB output is inverted */
 		paletteram_BBGGGRRR_w(offset, ~data);
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int attr = colorram[tile_index];
-		int gfxbank = ((((attr & 0x01) << 8) + videoram[tile_index]) / 0x80) + 3;
-		int code = videoram[tile_index] & 0x7f;
+		int attr = colorram.read(tile_index);
+		int gfxbank = ((((attr & 0x01) << 8) + videoram.read(tile_index)) / 0x80) + 3;
+		int code = videoram.read(tile_index)& 0x7f;
 		int color = (attr >> 1) & 0x07;
 	
 		SET_TILE_INFO(gfxbank, code, color, 0)
@@ -111,13 +111,13 @@ public class bogeyman
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows,
 			TILEMAP_OPAQUE, 16, 16, 16, 16);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		fg_tilemap = tilemap_create(get_fg_tile_info, tilemap_scan_rows,
 			TILEMAP_TRANSPARENT, 8, 8, 32, 32);
 	
-		if ( !fg_tilemap )
+		if (fg_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(fg_tilemap, 0);
@@ -131,16 +131,16 @@ public class bogeyman
 	
 		for (offs = 0; offs < spriteram_size; offs += 4)
 		{
-			int attr = spriteram[offs];
+			int attr = spriteram.read(offs);
 	
 			if (attr & 0x01)
 			{
-				int code = spriteram[offs + 1] + ((attr & 0x40) << 2);
+				int code = spriteram.read(offs + 1)+ ((attr & 0x40) << 2);
 				int color = (attr & 0x08) >> 3;
 				int flipx = !(attr & 0x04);
 				int flipy = attr & 0x02;
-				int sx = spriteram[offs + 3];
-				int sy = (240 - spriteram[offs + 2]) & 0xff;
+				int sx = spriteram.read(offs + 3);
+				int sy = (240 - spriteram.read(offs + 2)) & 0xff;
 				int multi = attr & 0x10;
 	
 				if (multi) sy -= 16;

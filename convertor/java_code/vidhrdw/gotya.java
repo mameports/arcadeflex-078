@@ -73,25 +73,25 @@ public class gotya
 		}
 	}
 	
-	WRITE_HANDLER( gotya_videoram_w )
+	public static WriteHandlerPtr gotya_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gotya_colorram_w )
+	public static WriteHandlerPtr gotya_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( gotya_video_control_w )
+	public static WriteHandlerPtr gotya_video_control_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		/* bit 0 - scroll bit 8
 		   bit 1 - flip screen
@@ -104,12 +104,12 @@ public class gotya
 			flip_screen_set(data & 0x02);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = colorram[tile_index] & 0x0f;
+		int code = videoram.read(tile_index);
+		int color = colorram.read(tile_index)& 0x0f;
 	
 		SET_TILE_INFO(0, code, color, 0)
 	}
@@ -119,7 +119,7 @@ public class gotya
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows_flip_xy,
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -163,10 +163,10 @@ public class gotya
 	
 		for (offs = 2; offs < 0x0e; offs += 2)
 		{
-			int code = spriteram[offs + 0x01] >> 2;
-			int color = spriteram[offs + 0x11] & 0x0f;
-			int sx = 256 - spriteram[offs + 0x10] + (spriteram[offs + 0x01] & 0x01) * 256;
-			int sy = spriteram[offs + 0x00];
+			int code = spriteram.read(offs + 0x01)>> 2;
+			int color = spriteram.read(offs + 0x11)& 0x0f;
+			int sx = 256 - spriteram.read(offs + 0x10)+ (spriteram.read(offs + 0x01)& 0x01) * 256;
+			int sy = spriteram.read(offs + 0x00);
 	
 			if (flip_screen)
 			{

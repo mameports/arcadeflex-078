@@ -528,17 +528,17 @@ public class vlm5030
 	}
 	
 	/* latch contoll data */
-	WRITE_HANDLER( VLM5030_data_w )
+	public static WriteHandlerPtr VLM5030_data_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		latch_data = (UINT8)data;
-	}
+	} };
 	
 	/* set RST pin level : reset / set table address A8-A15 */
 	void VLM5030_RST (int pin )
 	{
 		if( pin_RST )
 		{
-			if( !pin )
+			if (pin == 0)
 			{	/* H -> L : latch parameters */
 				pin_RST = 0;
 				VLM5030_setup_parameter(latch_data);
@@ -573,7 +573,7 @@ public class vlm5030
 		if( pin_ST != pin )
 		{
 			/* pin level is change */
-			if( !pin )
+			if (pin == 0)
 			{	/* H -> L */
 				pin_ST = 0;
 	

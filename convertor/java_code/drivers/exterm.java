@@ -86,14 +86,7 @@ public class exterm
 	void exterm_from_shiftreg_slave(unsigned int address, unsigned short* shiftreg);
 	
 	/* Functions in sndhrdw/gottlieb.c */
-	void gottlieb_sound_init(void);
 	WRITE16_HANDLER( gottlieb_sh_word_w );
-	READ_HANDLER( gottlieb_cause_dac_nmi_r );
-	WRITE_HANDLER( gottlieb_nmi_rate_w );
-	WRITE_HANDLER( exterm_sound_control_w );
-	WRITE_HANDLER( exterm_ym2151_w );
-	WRITE_HANDLER( exterm_dac_vol_w );
-	WRITE_HANDLER( exterm_dac_data_w );
 	
 	
 	static MACHINE_INIT( exterm )
@@ -230,7 +223,7 @@ public class exterm
 		COMBINE_DATA(&exterm_slave_speedup[offset]);
 	}
 	
-	READ_HANDLER( exterm_sound_dac_speedup_r )
+	public static ReadHandlerPtr exterm_sound_dac_speedup_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		UINT8 *RAM = memory_region(REGION_CPU3);
 		int value = RAM[0x0007];
@@ -240,9 +233,9 @@ public class exterm
 			cpu_spinuntil_int();
 	
 		return value;
-	}
+	} };
 	
-	READ_HANDLER( exterm_sound_ym2151_speedup_r )
+	public static ReadHandlerPtr exterm_sound_ym2151_speedup_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		/* Doing this won't flash the LED, but we're not emulating that anyhow, so
 		   it doesn't matter */
@@ -255,7 +248,7 @@ public class exterm
 			cpu_spinuntil_int();
 	
 		return value;
-	}
+	} };
 	
 	
 	
@@ -314,32 +307,40 @@ public class exterm
 	 *
 	 *************************************/
 	
-	static MEMORY_READ_START( sound_dac_readmem )
-		{ 0x0000, 0x07ff, MRA_RAM },
-		{ 0x4000, 0x4000, soundlatch_r },
-		{ 0x8000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress sound_dac_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x07ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x4000, 0x4000, soundlatch_r ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_dac_writemem )
-		{ 0x0000, 0x07ff, MWA_RAM },
-		{ 0x8000, 0x8000, exterm_dac_vol_w },
-		{ 0x8001, 0x8001, exterm_dac_data_w },
-	MEMORY_END
+	public static Memory_WriteAddress sound_dac_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x07ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x8000, 0x8000, exterm_dac_vol_w ),
+		new Memory_WriteAddress( 0x8001, 0x8001, exterm_dac_data_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
-	static MEMORY_READ_START( sound_ym2151_readmem )
-		{ 0x0000, 0x07ff, MRA_RAM },
-		{ 0x6800, 0x6800, soundlatch_r },
-		{ 0x7000, 0x7000, gottlieb_cause_dac_nmi_r },
-		{ 0x8000, 0xffff, MRA_ROM },
-	MEMORY_END
+	public static Memory_ReadAddress sound_ym2151_readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x07ff, MRA_RAM ),
+		new Memory_ReadAddress( 0x6800, 0x6800, soundlatch_r ),
+		new Memory_ReadAddress( 0x7000, 0x7000, gottlieb_cause_dac_nmi_r ),
+		new Memory_ReadAddress( 0x8000, 0xffff, MRA_ROM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( sound_ym2151_writemem )
-		{ 0x0000, 0x07ff, MWA_RAM },
-		{ 0x4000, 0x4000, exterm_ym2151_w },
-		{ 0x6000, 0x6000, gottlieb_nmi_rate_w },
-		{ 0xa000, 0xa000, exterm_sound_control_w },
-	MEMORY_END
+	public static Memory_WriteAddress sound_ym2151_writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x07ff, MWA_RAM ),
+		new Memory_WriteAddress( 0x4000, 0x4000, exterm_ym2151_w ),
+		new Memory_WriteAddress( 0x6000, 0x6000, gottlieb_nmi_rate_w ),
+		new Memory_WriteAddress( 0xa000, 0xa000, exterm_sound_control_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
@@ -349,68 +350,68 @@ public class exterm
 	 *
 	 *************************************/
 	
-	INPUT_PORTS_START( exterm )
-		PORT_START      /* IN0 */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1)
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1)
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1)
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1)
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL) /* trackball data */
-		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED )
-		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
+	static InputPortPtr input_ports_exterm = new InputPortPtr(){ public void handler() { 
+		PORT_START();       /* IN0 */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1);
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1);
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1);
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1);
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL);/* trackball data */
+		PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED );
+		PORT_SERVICE( 0x8000, IP_ACTIVE_LOW );
 	
-		PORT_START      /* IN1 */
-		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2)
-		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2)
-		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2)
-		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2)
-		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL) /* trackball data */
-		PORT_BIT( 0xc000, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_START();       /* IN1 */
+		PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2);
+		PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2);
+		PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2);
+		PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2);
+		PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 );
+		PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL);/* trackball data */
+		PORT_BIT( 0xc000, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START	/* DSW */
-		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Unused ) ) /* According to the test screen */
-		PORT_DIPSETTING(	  0x0001, DEF_STR( Off ) )
-		PORT_DIPSETTING(	  0x0000, DEF_STR( On ) )
+		PORT_START(); 	/* DSW */
+		PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( "Unused") ); /* According to the test screen */
+		PORT_DIPSETTING(	  0x0001, DEF_STR( "Off") );
+		PORT_DIPSETTING(	  0x0000, DEF_STR( "On") );
 		/* Note that the coin settings don't match the setting shown on the test screen,
 		   but instead what the game appears to used. This is either a bug in the game,
 		   or I don't know what else. */
-		PORT_DIPNAME( 0x0006, 0x0006, DEF_STR( Coin_A ) )
-		PORT_DIPSETTING(      0x0006, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0002, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0004, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 1C_4C ) )
-		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( Coin_B ) )
-		PORT_DIPSETTING(      0x0038, DEF_STR( 1C_1C ) )
-		PORT_DIPSETTING(      0x0018, DEF_STR( 1C_2C ) )
-		PORT_DIPSETTING(      0x0028, DEF_STR( 1C_3C ) )
-		PORT_DIPSETTING(      0x0008, DEF_STR( 1C_4C ) )
-		PORT_DIPSETTING(      0x0030, DEF_STR( 1C_5C ) )
-		PORT_DIPSETTING(      0x0010, DEF_STR( 1C_6C ) )
-		PORT_DIPSETTING(      0x0020, DEF_STR( 1C_7C ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( 1C_8C ) )
-		PORT_DIPNAME( 0x0040, 0x0040, "Memory Test" )
-		PORT_DIPSETTING(      0x0040, "Once" )
-		PORT_DIPSETTING(      0x0000, "Continous" )
-		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Free_Play ) )
-		PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
-		PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+		PORT_DIPNAME( 0x0006, 0x0006, DEF_STR( "Coin_A") );
+		PORT_DIPSETTING(      0x0006, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0002, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0004, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "1C_4C") );
+		PORT_DIPNAME( 0x0038, 0x0038, DEF_STR( "Coin_B") );
+		PORT_DIPSETTING(      0x0038, DEF_STR( "1C_1C") );
+		PORT_DIPSETTING(      0x0018, DEF_STR( "1C_2C") );
+		PORT_DIPSETTING(      0x0028, DEF_STR( "1C_3C") );
+		PORT_DIPSETTING(      0x0008, DEF_STR( "1C_4C") );
+		PORT_DIPSETTING(      0x0030, DEF_STR( "1C_5C") );
+		PORT_DIPSETTING(      0x0010, DEF_STR( "1C_6C") );
+		PORT_DIPSETTING(      0x0020, DEF_STR( "1C_7C") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "1C_8C") );
+		PORT_DIPNAME( 0x0040, 0x0040, "Memory Test" );
+		PORT_DIPSETTING(      0x0040, "Once" );
+		PORT_DIPSETTING(      0x0000, "Continous" );
+		PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( "Free_Play") );
+		PORT_DIPSETTING(      0x0080, DEF_STR( "Off") );
+		PORT_DIPSETTING(      0x0000, DEF_STR( "On") );
+		PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED );
 	
-		PORT_START /* IN3, fake trackball input port */
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER1, 50, 10, 0, 0)
+		PORT_START();  /* IN3, fake trackball input port */
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER1, 50, 10, 0, 0);
 	
-		PORT_START /* IN4, fake trackball input port. */
-		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 50, 10, 0, 0)
+		PORT_START();  /* IN4, fake trackball input port. */
+		PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 50, 10, 0, 0);
 	
-	INPUT_PORTS_END
+	INPUT_PORTS_END(); }}; 
 	
 	
 	
@@ -444,11 +445,11 @@ public class exterm
 	 *
 	 *************************************/
 	
-	static struct DACinterface dac_interface =
-	{
+	static DACinterface dac_interface = new DACinterface
+	(
 		2, 			/* 2 channels on 1 chip */
-		{ 40, 40 },
-	};
+		new int[] { 40, 40 },
+	);
 	
 	static struct YM2151interface ym2151_interface =
 	{
@@ -516,39 +517,39 @@ public class exterm
 	 *
 	 *************************************/
 	
-	ROM_START( exterm )
-		ROM_REGION( 0x20000, REGION_CPU1, 0 )		/* dummy region for TMS34010 #1 */
+	static RomLoadPtr rom_exterm = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x20000, REGION_CPU1, 0 );	/* dummy region for TMS34010 #1 */
 	
-		ROM_REGION( 0x20000, REGION_CPU2, 0 )		/* dummy region for TMS34010 #2 */
+		ROM_REGION( 0x20000, REGION_CPU2, 0 );	/* dummy region for TMS34010 #2 */
 	
-		ROM_REGION( 0x10000, REGION_CPU3, 0 )		/* 64k for DAC code */
-		ROM_LOAD( "v101d1", 0x8000, 0x8000, CRC(83268b7d) SHA1(a9139e80e2382122e9919c0555937e120d4414cf) )
+		ROM_REGION( 0x10000, REGION_CPU3, 0 );	/* 64k for DAC code */
+		ROM_LOAD( "v101d1", 0x8000, 0x8000, CRC(83268b7d);SHA1(a9139e80e2382122e9919c0555937e120d4414cf) )
 	
-		ROM_REGION( 0x10000, REGION_CPU4, 0 )		/* 64k for YM2151 code */
-		ROM_LOAD( "v101y1", 0x8000, 0x8000, CRC(cbeaa837) SHA1(87d8a258f059512dbf9bc0e7cfff728ef9e616f1) )
+		ROM_REGION( 0x10000, REGION_CPU4, 0 );	/* 64k for YM2151 code */
+		ROM_LOAD( "v101y1", 0x8000, 0x8000, CRC(cbeaa837);SHA1(87d8a258f059512dbf9bc0e7cfff728ef9e616f1) )
 	
-		ROM_REGION16_LE( 0x200000, REGION_USER1, 0 )	/* 2MB for 34010 code */
-		ROM_LOAD16_BYTE( "v101bg0",  0x000000, 0x10000, CRC(8c8e72cf) SHA1(5e0fa805334f54f7e0293ea400bacb0e3e79ed56) )
-		ROM_LOAD16_BYTE( "v101bg1",  0x000001, 0x10000, CRC(cc2da0d8) SHA1(4ac23048d3ca771e315388603ad3b1b25030d6ff) )
-		ROM_LOAD16_BYTE( "v101bg2",  0x020000, 0x10000, CRC(2dcb3653) SHA1(2d74b58b02ae0587e3789d69feece268f582f226) )
-		ROM_LOAD16_BYTE( "v101bg3",  0x020001, 0x10000, CRC(4aedbba0) SHA1(73b7e4864b1e71103229edd3cae268ab91144ef2) )
-		ROM_LOAD16_BYTE( "v101bg4",  0x040000, 0x10000, CRC(576922d4) SHA1(c8cdfb0727c9f1f6e2d2008611372f386fd35fc4) )
-		ROM_LOAD16_BYTE( "v101bg5",  0x040001, 0x10000, CRC(a54a4bc2) SHA1(e0f3648454cafeee1f3f58af03489d3256f66965) )
-		ROM_LOAD16_BYTE( "v101bg6",  0x060000, 0x10000, CRC(7584a676) SHA1(c9bc651f90ab752f73e735cb80e5bb109e2cac5f) )
-		ROM_LOAD16_BYTE( "v101bg7",  0x060001, 0x10000, CRC(a4f24ff6) SHA1(adabbe1c93beb4fcc6fa2f13e687a866fb54fbdb) )
-		ROM_LOAD16_BYTE( "v101bg8",  0x080000, 0x10000, CRC(fda165d6) SHA1(901bdede00a936c0160d9fea8a2975ff893e52d0) )
-		ROM_LOAD16_BYTE( "v101bg9",  0x080001, 0x10000, CRC(e112a4c4) SHA1(8938d6857b3c5cd3f5560496e087e3b3ff3dab81) )
-		ROM_LOAD16_BYTE( "v101bg10", 0x0a0000, 0x10000, CRC(f1a5cf54) SHA1(749531036a1100e092b7edfba14097d5aaab26aa) )
-		ROM_LOAD16_BYTE( "v101bg11", 0x0a0001, 0x10000, CRC(8677e754) SHA1(dd8135de8819096150914798ab37a17ae396af32) )
-		ROM_LOAD16_BYTE( "v101fg0",  0x180000, 0x10000, CRC(38230d7d) SHA1(edd575192c0376183c415c61a3c3f19555522549) )
-		ROM_LOAD16_BYTE( "v101fg1",  0x180001, 0x10000, CRC(22a2bd61) SHA1(59ed479b8ae8328014be4e2a5575d00105fd83f3) )
-		ROM_LOAD16_BYTE( "v101fg2",  0x1a0000, 0x10000, CRC(9420e718) SHA1(1fd9784d40e496ebc4772baff472eb25b5106725) )
-		ROM_LOAD16_BYTE( "v101fg3",  0x1a0001, 0x10000, CRC(84992aa2) SHA1(7dce2bef695c2a9b5a03d217bbff8fbece459a92) )
-		ROM_LOAD16_BYTE( "v101fg4",  0x1c0000, 0x10000, CRC(38da606b) SHA1(59479ff99b1748ddc36de32b368dd38cb2965868) )
-		ROM_LOAD16_BYTE( "v101fg5",  0x1c0001, 0x10000, CRC(842de63a) SHA1(0b292a8b7f4b86a2d3bd6b5b7ec0287e2bf88263) )
-		ROM_LOAD16_BYTE( "v101p0",   0x1e0000, 0x10000, CRC(6c8ee79a) SHA1(aa051e33e3ed6eed475a37e5dae1be0ac6471b12) )
-		ROM_LOAD16_BYTE( "v101p1",   0x1e0001, 0x10000, CRC(557bfc84) SHA1(8d0f1b40adbf851a85f626663956f3726ca8026d) )
-	ROM_END
+		ROM_REGION16_LE( 0x200000, REGION_USER1, 0 );/* 2MB for 34010 code */
+		ROM_LOAD16_BYTE( "v101bg0",  0x000000, 0x10000, CRC(8c8e72cf);SHA1(5e0fa805334f54f7e0293ea400bacb0e3e79ed56) )
+		ROM_LOAD16_BYTE( "v101bg1",  0x000001, 0x10000, CRC(cc2da0d8);SHA1(4ac23048d3ca771e315388603ad3b1b25030d6ff) )
+		ROM_LOAD16_BYTE( "v101bg2",  0x020000, 0x10000, CRC(2dcb3653);SHA1(2d74b58b02ae0587e3789d69feece268f582f226) )
+		ROM_LOAD16_BYTE( "v101bg3",  0x020001, 0x10000, CRC(4aedbba0);SHA1(73b7e4864b1e71103229edd3cae268ab91144ef2) )
+		ROM_LOAD16_BYTE( "v101bg4",  0x040000, 0x10000, CRC(576922d4);SHA1(c8cdfb0727c9f1f6e2d2008611372f386fd35fc4) )
+		ROM_LOAD16_BYTE( "v101bg5",  0x040001, 0x10000, CRC(a54a4bc2);SHA1(e0f3648454cafeee1f3f58af03489d3256f66965) )
+		ROM_LOAD16_BYTE( "v101bg6",  0x060000, 0x10000, CRC(7584a676);SHA1(c9bc651f90ab752f73e735cb80e5bb109e2cac5f) )
+		ROM_LOAD16_BYTE( "v101bg7",  0x060001, 0x10000, CRC(a4f24ff6);SHA1(adabbe1c93beb4fcc6fa2f13e687a866fb54fbdb) )
+		ROM_LOAD16_BYTE( "v101bg8",  0x080000, 0x10000, CRC(fda165d6);SHA1(901bdede00a936c0160d9fea8a2975ff893e52d0) )
+		ROM_LOAD16_BYTE( "v101bg9",  0x080001, 0x10000, CRC(e112a4c4);SHA1(8938d6857b3c5cd3f5560496e087e3b3ff3dab81) )
+		ROM_LOAD16_BYTE( "v101bg10", 0x0a0000, 0x10000, CRC(f1a5cf54);SHA1(749531036a1100e092b7edfba14097d5aaab26aa) )
+		ROM_LOAD16_BYTE( "v101bg11", 0x0a0001, 0x10000, CRC(8677e754);SHA1(dd8135de8819096150914798ab37a17ae396af32) )
+		ROM_LOAD16_BYTE( "v101fg0",  0x180000, 0x10000, CRC(38230d7d);SHA1(edd575192c0376183c415c61a3c3f19555522549) )
+		ROM_LOAD16_BYTE( "v101fg1",  0x180001, 0x10000, CRC(22a2bd61);SHA1(59ed479b8ae8328014be4e2a5575d00105fd83f3) )
+		ROM_LOAD16_BYTE( "v101fg2",  0x1a0000, 0x10000, CRC(9420e718);SHA1(1fd9784d40e496ebc4772baff472eb25b5106725) )
+		ROM_LOAD16_BYTE( "v101fg3",  0x1a0001, 0x10000, CRC(84992aa2);SHA1(7dce2bef695c2a9b5a03d217bbff8fbece459a92) )
+		ROM_LOAD16_BYTE( "v101fg4",  0x1c0000, 0x10000, CRC(38da606b);SHA1(59479ff99b1748ddc36de32b368dd38cb2965868) )
+		ROM_LOAD16_BYTE( "v101fg5",  0x1c0001, 0x10000, CRC(842de63a);SHA1(0b292a8b7f4b86a2d3bd6b5b7ec0287e2bf88263) )
+		ROM_LOAD16_BYTE( "v101p0",   0x1e0000, 0x10000, CRC(6c8ee79a);SHA1(aa051e33e3ed6eed475a37e5dae1be0ac6471b12) )
+		ROM_LOAD16_BYTE( "v101p1",   0x1e0001, 0x10000, CRC(557bfc84);SHA1(8d0f1b40adbf851a85f626663956f3726ca8026d) )
+	ROM_END(); }}; 
 	
 	
 	
@@ -581,5 +582,5 @@ public class exterm
 	 *
 	 *************************************/
 	
-	GAME( 1989, exterm, 0, exterm, exterm, exterm, ROT0, "Gottlieb / Premier Technology", "Exterminator" )
+	public static GameDriver driver_exterm	   = new GameDriver("1989"	,"exterm"	,"exterm.java"	,rom_exterm,null	,machine_driver_exterm	,input_ports_exterm	,init_exterm	,ROT0	,	"Gottlieb / Premier Technology", "Exterminator" )
 }

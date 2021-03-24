@@ -52,7 +52,7 @@ public class chaknpop
 			int col, r, g, b;
 			int bit0, bit1, bit2;
 	
-			col = (color_prom[i]&0x0f)+((color_prom[i+1024]&0x0f)<<4);
+			col = (color_prom.read(i)&0x0f)+((color_prom.read(i+1024)&0x0f)<<4);
 	
 			/* red component */
 			bit0 = (col >> 0) & 0x01;
@@ -100,12 +100,12 @@ public class chaknpop
 		tilemap_set_flip(tx_tilemap, flip_x | flip_y);
 	}
 	
-	READ_HANDLER( chaknpop_gfxmode_r )
+	public static ReadHandlerPtr chaknpop_gfxmode_r  = new ReadHandlerPtr() { public int handler(int offset)
 	{
 		return gfxmode;
-	}
+	} };
 	
-	WRITE_HANDLER( chaknpop_gfxmode_w )
+	public static WriteHandlerPtr chaknpop_gfxmode_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfxmode != data)
 		{
@@ -129,18 +129,18 @@ public class chaknpop
 			if (all_dirty)
 				tx_tilemap_mark_all_dirty();
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( chaknpop_txram_w )
+	public static WriteHandlerPtr chaknpop_txram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (chaknpop_txram[offset] != data)
 		{
 			chaknpop_txram[offset] = data;
 			tilemap_mark_tile_dirty(tx_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( chaknpop_attrram_w )
+	public static WriteHandlerPtr chaknpop_attrram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (chaknpop_attrram[offset] != data)
 		{
@@ -153,7 +153,7 @@ public class chaknpop
 			tx_tilemap_mark_all_dirty();
 		}
 	}
-	}
+	} };
 	
 	
 	/***************************************************************************
@@ -192,7 +192,7 @@ public class chaknpop
 		/*                          info                       offset             type             w   h  col row */
 		tx_tilemap = tilemap_create(chaknpop_get_tx_tile_info, tilemap_scan_rows, TILEMAP_OPAQUE,  8,  8, 32, 32);
 	
-		if (!tx_tilemap)
+		if (tx_tilemap == 0)
 			return 1;
 	
 		tilemap_set_transparent_pen(tx_tilemap, 0);
@@ -269,10 +269,10 @@ public class chaknpop
 			int x = ((offs & 0x1f) << 3) + 7;
 			int y = offs >> 5;
 	
-			if (!flip_x)
+			if (flip_x == 0)
 				x = 255 - x;
 	
-			if (!flip_y)
+			if (flip_y == 0)
 				y = 255 - y;
 	
 			for (i = 0x80; i > 0; i >>= 1, x += dx)

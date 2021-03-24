@@ -83,46 +83,46 @@ public class champbas
 			COLOR(0,i) = (*(color_prom++) & 0x0f);
 	}
 	
-	WRITE_HANDLER( champbas_videoram_w )
+	public static WriteHandlerPtr champbas_videoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (videoram[offset] != data)
+		if (videoram.read(offset)!= data)
 		{
-			videoram[offset] = data;
+			videoram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( champbas_colorram_w )
+	public static WriteHandlerPtr champbas_colorram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
-		if (colorram[offset] != data)
+		if (colorram.read(offset)!= data)
 		{
-			colorram[offset] = data;
+			colorram.write(offset,data);
 			tilemap_mark_tile_dirty(bg_tilemap, offset);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( champbas_gfxbank_w )
+	public static WriteHandlerPtr champbas_gfxbank_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (gfxbank != (data & 0x01))
 		{
 			gfxbank = data & 0x01;
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( champbas_flipscreen_w )
+	public static WriteHandlerPtr champbas_flipscreen_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (flip_screen != data)
 		{
 			flip_screen_set(data);
 			tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 		}
-	}
+	} };
 	
 	static void get_bg_tile_info(int tile_index)
 	{
-		int code = videoram[tile_index];
-		int color = (colorram[tile_index] & 0x1f) + 32;
+		int code = videoram.read(tile_index);
+		int color = (colorram.read(tile_index)& 0x1f) + 32;
 	
 		SET_TILE_INFO(gfxbank, code, color, 0)
 	}
@@ -132,7 +132,7 @@ public class champbas
 		bg_tilemap = tilemap_create(get_bg_tile_info, tilemap_scan_rows, 
 			TILEMAP_OPAQUE, 8, 8, 32, 32);
 	
-		if ( !bg_tilemap )
+		if (bg_tilemap == 0)
 			return 1;
 	
 		return 0;
@@ -144,12 +144,12 @@ public class champbas
 	
 		for (offs = spriteram_size - 2; offs >= 0; offs -= 2)
 		{
-			int code = spriteram[offs] >> 2;
-			int color = spriteram[offs + 1];
-			int flipx = spriteram[offs] & 0x01;
-			int flipy = spriteram[offs] & 0x02;
-			int sx = ((256 + 16 - spriteram_2[offs + 1]) & 0xff) - 16;
-			int sy = spriteram_2[offs] - 16;
+			int code = spriteram.read(offs)>> 2;
+			int color = spriteram.read(offs + 1);
+			int flipx = spriteram.read(offs)& 0x01;
+			int flipy = spriteram.read(offs)& 0x02;
+			int sx = ((256 + 16 - spriteram_2.read(offs + 1)) & 0xff) - 16;
+			int sy = spriteram_2.read(offs)- 16;
 	
 			drawgfx(bitmap,
 				Machine->gfx[2 + gfxbank],

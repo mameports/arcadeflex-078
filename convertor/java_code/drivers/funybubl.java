@@ -76,182 +76,194 @@ public class funybubl
 		return 0xff;
 	}
 	
-	static MEMORY_READ_START( readmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0xbfff, MRA_BANK2 }, // banked port 1?
-		{ 0xc400, 0xc7ff, MRA_RAM },
-		{ 0xc800, 0xcfff, MRA_RAM },
-		{ 0xd000, 0xdfff, MRA_BANK1 }, // banked port 0?
-		{ 0xe000, 0xffff, MRA_RAM },
-	MEMORY_END
+	public static Memory_ReadAddress readmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0xbfff, MRA_BANK2 ), // banked port 1?
+		new Memory_ReadAddress( 0xc400, 0xc7ff, MRA_RAM ),
+		new Memory_ReadAddress( 0xc800, 0xcfff, MRA_RAM ),
+		new Memory_ReadAddress( 0xd000, 0xdfff, MRA_BANK1 ), // banked port 0?
+		new Memory_ReadAddress( 0xe000, 0xffff, MRA_RAM ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( writemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0xbfff, MWA_ROM },
-		{ 0xc400, 0xcfff, funybubl_paldatawrite, &funybubl_paletteram }, // palette?
-		{ 0xd000, 0xdfff, MWA_BANK1 }, // banked port 0?
-		{ 0xe000, 0xffff, MWA_RAM },
-	MEMORY_END
+	public static Memory_WriteAddress writemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0xbfff, MWA_ROM ),
+		new Memory_WriteAddress( 0xc400, 0xcfff, funybubl_paldatawrite, funybubl_paletteram ), // palette?
+		new Memory_WriteAddress( 0xd000, 0xdfff, MWA_BANK1 ), // banked port 0?
+		new Memory_WriteAddress( 0xe000, 0xffff, MWA_RAM ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static PORT_READ_START( readport )
-		{ 0x00, 0x00, input_port_0_r	},
-		{ 0x01, 0x01, input_port_1_r	},
-		{ 0x02, 0x02, input_port_2_r	},
-		{ 0x03, 0x03, input_port_3_r	},
+	public static IO_ReadPort readport[]={
+		new IO_ReadPort(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_ReadPort( 0x00, 0x00, input_port_0_r	),
+		new IO_ReadPort( 0x01, 0x01, input_port_1_r	),
+		new IO_ReadPort( 0x02, 0x02, input_port_2_r	),
+		new IO_ReadPort( 0x03, 0x03, input_port_3_r	),
 	
-		{ 0x06, 0x06, input_port_4_r	},
-	PORT_END
+		new IO_ReadPort( 0x06, 0x06, input_port_4_r	),
+		new IO_ReadPort(MEMPORT_MARKER, 0)
+	};
 	
-	WRITE_HANDLER( funybubl_soundcommand_w )
+	public static WriteHandlerPtr funybubl_soundcommand_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		soundlatch_w(0,data);
 		cpu_set_irq_line(1,0, PULSE_LINE);
-	}
+	} };
 	
 	
 	
-	static PORT_WRITE_START( writeport )
-		{ 0x00, 0x00, vidram_bank_w	},	// vidram bank
-		{ 0x01, 0x01, bank2_w }, // rom bank?
+	public static IO_WritePort writeport[]={
+		new IO_WritePort(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_IO | MEMPORT_WIDTH_8),
+		new IO_WritePort( 0x00, 0x00, vidram_bank_w	),	// vidram bank
+		new IO_WritePort( 0x01, 0x01, bank2_w ), // rom bank?
 	
-		{ 0x03, 0x03, funybubl_soundcommand_w	},
+		new IO_WritePort( 0x03, 0x03, funybubl_soundcommand_w	),
 	
 	
-	PORT_END
+		new IO_WritePort(MEMPORT_MARKER, 0)
+	};
 	
 	/* sound cpu */
 	
 	
-	static MEMORY_READ_START( soundreadmem )
-		{ 0x0000, 0x7fff, MRA_ROM },
-		{ 0x8000, 0x87ff, MRA_RAM }, // ram?
-		{ 0x9800, 0x9800, OKIM6295_status_0_r },
-		{ 0xa000, 0xa000, soundlatch_r },
-	MEMORY_END
+	public static Memory_ReadAddress soundreadmem[]={
+		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_ReadAddress( 0x0000, 0x7fff, MRA_ROM ),
+		new Memory_ReadAddress( 0x8000, 0x87ff, MRA_RAM ), // ram?
+		new Memory_ReadAddress( 0x9800, 0x9800, OKIM6295_status_0_r ),
+		new Memory_ReadAddress( 0xa000, 0xa000, soundlatch_r ),
+		new Memory_ReadAddress(MEMPORT_MARKER, 0)
+	};
 	
-	static MEMORY_WRITE_START( soundwritemem )
-		{ 0x0000, 0x7fff, MWA_ROM },
-		{ 0x8000, 0x87ff, MWA_RAM }, // ram?
-		{ 0x9800, 0x9800, OKIM6295_data_0_w },
-	MEMORY_END
-	
-	
-	
-	INPUT_PORTS_START( funybubl )
-		PORT_START	/* DSW 1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-	
-		PORT_START	/* DSW 1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER1 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-	
-		PORT_START	/* DSW 1 */
-		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER2 )
-		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
-	
-		PORT_START	/* DSW 1 */
-		PORT_DIPNAME( 0x01, 0x01, "3" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	
-		PORT_START	/* DSW 1 */
-		PORT_DIPNAME( 0x01, 0x01, "6" )
-		PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-		PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
-		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
-		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	INPUT_PORTS_END
+	public static Memory_WriteAddress soundwritemem[]={
+		new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
+		new Memory_WriteAddress( 0x0000, 0x7fff, MWA_ROM ),
+		new Memory_WriteAddress( 0x8000, 0x87ff, MWA_RAM ), // ram?
+		new Memory_WriteAddress( 0x9800, 0x9800, OKIM6295_data_0_w ),
+		new Memory_WriteAddress(MEMPORT_MARKER, 0)
+	};
 	
 	
 	
-	static struct GfxLayout tiles8x8_layout =
-	{
+	static InputPortPtr input_ports_funybubl = new InputPortPtr(){ public void handler() { 
+		PORT_START(); 	/* DSW 1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+	
+		PORT_START(); 	/* DSW 1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER1 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+	
+		PORT_START(); 	/* DSW 1 */
+		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER2 );
+		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 );
+		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+		PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN );/* Maybe unused */
+	
+		PORT_START(); 	/* DSW 1 */
+		PORT_DIPNAME( 0x01, 0x01, "3" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	
+		PORT_START(); 	/* DSW 1 */
+		PORT_DIPNAME( 0x01, 0x01, "6" );
+		PORT_DIPSETTING(    0x01, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x02, 0x02, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x02, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x04, 0x04, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x04, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x08, 0x08, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x08, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x10, 0x10, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x10, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x20, 0x20, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x20, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x40, 0x40, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x40, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+		PORT_DIPNAME( 0x80, 0x80, DEF_STR( "Unknown") );
+		PORT_DIPSETTING(    0x80, DEF_STR( "Off") );
+		PORT_DIPSETTING(    0x00, DEF_STR( "On") );
+	INPUT_PORTS_END(); }}; 
+	
+	
+	
+	static GfxLayout tiles8x8_layout = new GfxLayout
+	(
 		8,8,
 		RGN_FRAC(1,8),
 		8,
-		{ RGN_FRAC(3,8),RGN_FRAC(2,8),RGN_FRAC(1,8),RGN_FRAC(0,8),RGN_FRAC(7,8),RGN_FRAC(6,8),RGN_FRAC(5,8), RGN_FRAC(4,8) },
-		{ 0, 1, 2,  3,  4, 5, 6, 7 },
-		{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
+		new int[] { RGN_FRAC(3,8),RGN_FRAC(2,8),RGN_FRAC(1,8),RGN_FRAC(0,8),RGN_FRAC(7,8),RGN_FRAC(6,8),RGN_FRAC(5,8), RGN_FRAC(4,8) },
+		new int[] { 0, 1, 2,  3,  4, 5, 6, 7 },
+		new int[] { 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 },
 		8*8
-	};
+	);
 	
-	static struct GfxLayout tiles8x8xx_layout =
-	{
+	static GfxLayout tiles8x8xx_layout = new GfxLayout
+	(
 		16,16,
 		RGN_FRAC(1,4),
 		8,
-		{ RGN_FRAC(3,4)+4,RGN_FRAC(3,4)+0, RGN_FRAC(2,4)+4, RGN_FRAC(2,4)+0, RGN_FRAC(1,4)+4, RGN_FRAC(1,4)+0, RGN_FRAC(0,4)+4, RGN_FRAC(0,4)+0  },
-		{ 0, 1,2,3, 8,9,10,11, 256,257,258,259, 264,265,266,267},
-		{ 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		new int[] { RGN_FRAC(3,4)+4,RGN_FRAC(3,4)+0, RGN_FRAC(2,4)+4, RGN_FRAC(2,4)+0, RGN_FRAC(1,4)+4, RGN_FRAC(1,4)+0, RGN_FRAC(0,4)+4, RGN_FRAC(0,4)+0  },
+		new int[] { 0, 1,2,3, 8,9,10,11, 256,257,258,259, 264,265,266,267},
+		new int[] { 0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 		  8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16  },
 		32*16
-	};
+	);
 	
 	
-	static struct GfxDecodeInfo gfxdecodeinfo[] =
+	static GfxDecodeInfo gfxdecodeinfo[] =
 	{
-		{ REGION_GFX1, 0, &tiles8x8_layout, 0, 16 },
-		{ REGION_GFX2, 0, &tiles8x8xx_layout, 0, 16 },
-		{ -1 }
+		new GfxDecodeInfo( REGION_GFX1, 0, tiles8x8_layout, 0, 16 ),
+		new GfxDecodeInfo( REGION_GFX2, 0, tiles8x8xx_layout, 0, 16 ),
+		new GfxDecodeInfo( -1 )
 	};
 	
 	
@@ -394,39 +406,39 @@ public class funybubl
 	
 	
 	
-	ROM_START( funybubl )
-		ROM_REGION( 0x50000, REGION_CPU1, 0 ) /* main z80, lots of banked data */
-		ROM_LOAD( "2.bin", 0x00000, 0x40000, CRC(d684c13f) SHA1(6a58b44dd775f374d6fd476a8fd175c28a83a495)  )
-		ROM_RELOAD ( 0x10000, 0x40000 )
+	static RomLoadPtr rom_funybubl = new RomLoadPtr(){ public void handler(){ 
+		ROM_REGION( 0x50000, REGION_CPU1, 0 );/* main z80, lots of banked data */
+		ROM_LOAD( "2.bin", 0x00000, 0x40000, CRC(d684c13f);SHA1(6a58b44dd775f374d6fd476a8fd175c28a83a495)  )
+		ROM_RELOAD ( 0x10000, 0x40000 );
 	
 	
-		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT  ) // bg gfx 8x8x8
-		ROM_LOAD( "7.bin", 0x000000, 0x40000, CRC(87603d7b) SHA1(21aec4cd011691f8608c3ddab83697bd89634fc8) )
-		ROM_LOAD( "8.bin", 0x040000, 0x40000, CRC(ab6031bd) SHA1(557793817f98c07c82caab4293aed7dffa4dbf7b) )
-		ROM_LOAD( "9.bin", 0x080000, 0x40000, CRC(0e8352ff) SHA1(29679a7ece2585e1a66296439b68bd56c937e313) )
-		ROM_LOAD( "10.bin",0x0c0000, 0x40000, CRC(df7dd356) SHA1(13b9f40714dfa7b8cebc0191dcdde88b51f5e78c) )
-		ROM_LOAD( "13.bin",0x100000, 0x40000, CRC(9f57bdd5) SHA1(6fd60da5f5eee0251e3a08957952ed9f037eeaec) )
-		ROM_LOAD( "14.bin",0x140000, 0x40000, CRC(2ac15ea3) SHA1(de5be6378b4b6eee6faf532c9ef14bd609041cb3) )
-		ROM_LOAD( "15.bin",0x180000, 0x40000, CRC(9a5e66a6) SHA1(cbe727e4f1e9a7072520d2e30eb0047cc67bff1b) )
-		ROM_LOAD( "16.bin",0x1c0000, 0x40000, CRC(218060b3) SHA1(35124afce7f0f998b5c4761bbc888235de4e56ef) )
+		ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT  );// bg gfx 8x8x8
+		ROM_LOAD( "7.bin", 0x000000, 0x40000, CRC(87603d7b);SHA1(21aec4cd011691f8608c3ddab83697bd89634fc8) )
+		ROM_LOAD( "8.bin", 0x040000, 0x40000, CRC(ab6031bd);SHA1(557793817f98c07c82caab4293aed7dffa4dbf7b) )
+		ROM_LOAD( "9.bin", 0x080000, 0x40000, CRC(0e8352ff);SHA1(29679a7ece2585e1a66296439b68bd56c937e313) )
+		ROM_LOAD( "10.bin",0x0c0000, 0x40000, CRC(df7dd356);SHA1(13b9f40714dfa7b8cebc0191dcdde88b51f5e78c) )
+		ROM_LOAD( "13.bin",0x100000, 0x40000, CRC(9f57bdd5);SHA1(6fd60da5f5eee0251e3a08957952ed9f037eeaec) )
+		ROM_LOAD( "14.bin",0x140000, 0x40000, CRC(2ac15ea3);SHA1(de5be6378b4b6eee6faf532c9ef14bd609041cb3) )
+		ROM_LOAD( "15.bin",0x180000, 0x40000, CRC(9a5e66a6);SHA1(cbe727e4f1e9a7072520d2e30eb0047cc67bff1b) )
+		ROM_LOAD( "16.bin",0x1c0000, 0x40000, CRC(218060b3);SHA1(35124afce7f0f998b5c4761bbc888235de4e56ef) )
 	
-		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT )
-		ROM_LOAD( "5.bin", 0x000000, 0x80000, CRC(b7ebbc00) SHA1(92520fda2f8f242b8cd49aeaac21b279f48276bf) )
-		ROM_LOAD( "6.bin", 0x080000, 0x80000, CRC(28afc396) SHA1(555d51948ffb237311112dcfd0516a43f603ff03) )
-		ROM_LOAD( "11.bin",0x100000, 0x80000, CRC(9e8687cd) SHA1(42fcba2532ae5028fcfc1df50750d99ad2586820) )
-		ROM_LOAD( "12.bin",0x180000, 0x80000, CRC(63f0e810) SHA1(5c7ed32ee8dc1d9aabc8d136ec370471096356c2) )
+		ROM_REGION( 0x200000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT );
+		ROM_LOAD( "5.bin", 0x000000, 0x80000, CRC(b7ebbc00);SHA1(92520fda2f8f242b8cd49aeaac21b279f48276bf) )
+		ROM_LOAD( "6.bin", 0x080000, 0x80000, CRC(28afc396);SHA1(555d51948ffb237311112dcfd0516a43f603ff03) )
+		ROM_LOAD( "11.bin",0x100000, 0x80000, CRC(9e8687cd);SHA1(42fcba2532ae5028fcfc1df50750d99ad2586820) )
+		ROM_LOAD( "12.bin",0x180000, 0x80000, CRC(63f0e810);SHA1(5c7ed32ee8dc1d9aabc8d136ec370471096356c2) )
 	
-		ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* sound z80 (not much code here ..) */
-		ROM_LOAD( "1.bin", 0x00000, 0x10000, CRC(b8b5b675) SHA1(0a02ccd09bb2ae20efe49e3ca2006331aea0e2a7)  )
+		ROM_REGION( 0x10000, REGION_CPU2, 0 );/* sound z80 (not much code here ..) */
+		ROM_LOAD( "1.bin", 0x00000, 0x10000, CRC(b8b5b675);SHA1(0a02ccd09bb2ae20efe49e3ca2006331aea0e2a7)  )
 	
-		ROM_REGION( 0x20000, REGION_SOUND1, 0 )
-		ROM_LOAD( "3.bin", 0x00000, 0x20000,  CRC(a2d780f4) SHA1(bebba3db21ab9ddde8c6f19db3b67c869df582eb)  )
+		ROM_REGION( 0x20000, REGION_SOUND1, 0 );
+		ROM_LOAD( "3.bin", 0x00000, 0x20000,  CRC(a2d780f4);SHA1(bebba3db21ab9ddde8c6f19db3b67c869df582eb)  )
 	
-		ROM_REGION( 0x40000, REGION_SOUND2, 0 )
-		ROM_LOAD( "4.bin", 0x00000, 0x40000,  CRC(1f7e9269) SHA1(5c16b49a4e94aec7606d088c2d45a77842ab565b) )
+		ROM_REGION( 0x40000, REGION_SOUND2, 0 );
+		ROM_LOAD( "4.bin", 0x00000, 0x40000,  CRC(1f7e9269);SHA1(5c16b49a4e94aec7606d088c2d45a77842ab565b) )
 	
-	ROM_END
+	ROM_END(); }}; 
 	
 	
-	GAMEX( 1999, funybubl, 0, funybubl, funybubl, funybubl, ROT0, "Comad", "Funny Bubble", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+	public static GameDriver driver_funybubl	   = new GameDriver("1999"	,"funybubl"	,"funybubl.java"	,rom_funybubl,null	,machine_driver_funybubl	,input_ports_funybubl	,init_funybubl	,ROT0	,	"Comad", "Funny Bubble", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 }

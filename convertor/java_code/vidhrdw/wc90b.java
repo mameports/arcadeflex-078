@@ -90,32 +90,32 @@ public class wc90b
 	
 	***************************************************************************/
 	
-	WRITE_HANDLER( wc90b_bgvideoram_w )
+	public static WriteHandlerPtr wc90b_bgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90b_bgvideoram[offset] != data)
 		{
 			wc90b_bgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(bg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wc90b_fgvideoram_w )
+	public static WriteHandlerPtr wc90b_fgvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90b_fgvideoram[offset] != data)
 		{
 			wc90b_fgvideoram[offset] = data;
 			tilemap_mark_tile_dirty(fg_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
-	WRITE_HANDLER( wc90b_txvideoram_w )
+	public static WriteHandlerPtr wc90b_txvideoram_w = new WriteHandlerPtr() {public void handler(int offset, int data)
 	{
 		if (wc90b_txvideoram[offset] != data)
 		{
 			wc90b_txvideoram[offset] = data;
 			tilemap_mark_tile_dirty(tx_tilemap,offset & 0x7ff);
 		}
-	}
+	} };
 	
 	
 	
@@ -131,12 +131,12 @@ public class wc90b
 	  /* draw all visible sprites of specified priority */
 		for ( offs = spriteram_size - 8;offs >= 0;offs -= 8 ){
 	
-			if ( ( ~( spriteram[offs+3] >> 6 ) & 3 ) == priority ) {
+			if ( ( ~( spriteram.read(offs+3)>> 6 ) & 3 ) == priority ) {
 	
-				if ( spriteram[offs+1] > 16 ) { /* visible */
-					int code = ( spriteram[offs+3] & 0x3f ) << 4;
-					int bank = spriteram[offs+0];
-					int flags = spriteram[offs+4];
+				if ( spriteram.read(offs+1)> 16 ) { /* visible */
+					int code = ( spriteram.read(offs+3)& 0x3f ) << 4;
+					int bank = spriteram.read(offs+0);
+					int flags = spriteram.read(offs+4);
 	
 					code += ( bank & 0xf0 ) >> 4;
 					code <<= 2;
@@ -146,8 +146,8 @@ public class wc90b
 							flags >> 4, /* color */
 							bank&1, /* flipx */
 							bank&2, /* flipy */
-							spriteram[offs + 2], /* sx */
-							240 - spriteram[offs + 1], /* sy */
+							spriteram.read(offs + 2), /* sx */
+							240 - spriteram.read(offs + 1), /* sy */
 							cliprect,TRANSPARENCY_PEN,15 );
 				}
 			}
